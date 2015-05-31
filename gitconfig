@@ -8,5 +8,5 @@
 [diff]
   tool = p4merge
 [core]
-  editor = subl
+  editor = vim
   excludesfile = ~/.gitignore_global
