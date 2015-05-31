@@ -19,9 +19,10 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'bronson/vim-trailing-whitespace'
-Plugin 'airblade/vim-gitgutter'
+" Plugin 'airblade/vim-gitgutter' installed with pathogen
 Plugin 'vim-ruby/vim-ruby'
-Plugin 'bling/vim-airline'
+" Plugin 'bling/vim-airline' installed with pathogen
+Plugin 'rizzatti/dash.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
