@@ -1,0 +1,12 @@
+[user]
+  name = Sam McDavid
+  email = mcdavidsa@gmail.com
+[filter "hawser"]
+  clean = git hawser clean %f
+  smudge = git hawser smudge %f
+  required = true
+[diff]
+  tool = p4merge
+[core]
+  editor = subl
+  excludesfile = ~/.gitignore_global
