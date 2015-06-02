@@ -49,7 +49,7 @@ plugins=(git)
 
 # User configuration
 
-export PATH=$PATH:"/Users/Sam/.rvm/gems/ruby-2.2.2/bin:/Users/Sam/.rvm/gems/ruby-2.2.2@global/bin:/Users/Sam/.rvm/rubies/ruby-2.2.2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/git/bin:/Users/Sam/.rvm/bin"
+export PATH=$PATH:"/Users/Sam/.rvm/gems/ruby-2.2.2/bin:/Users/Sam/.rvm/gems/ruby-2.2.2@global/bin:/Users/Sam/.rvm/rubies/ruby-2.2.2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/git/bin:/Users/Sam/.rvm/bin:.git/safe/../../bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
@@ -80,6 +80,10 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+
+export DOCKER_HOST=tcp://192.168.59.103:2376
+export DOCKER_CERT_PATH=/Users/Sam/.boot2docker/certs/boot2docker-vm
+export DOCKER_TLS_VERIFY=1
 
 alias ll="ls -aFgil"
 alias gup="git push origin"
