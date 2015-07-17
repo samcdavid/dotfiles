@@ -95,3 +95,4 @@ alias gr='git rebase -i'
 alias dc='docker-compose'
 alias bd='boot2docker'
 alias pull='git smart-pull'
+alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"

@@ -6,6 +6,8 @@ set expandtab
 set tabstop=2 shiftwidth=2 softtabstop=2
 set autoindent
 set laststatus=2
+set splitbelow
+set splitright
 
 execute pathogen#infect()
 
@@ -39,4 +41,9 @@ filetype plugin indent on    " required
 "
 " see :h vundle for more details or wiki for FAQ
 " Put your non-Plugin stuff after this line
+
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
 
