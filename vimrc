@@ -29,6 +29,7 @@ Plugin 'vim-ruby/vim-ruby'
 " Plugin 'bling/vim-airline' installed with pathogen
 Plugin 'rizzatti/dash.vim'
 Plugin 'slim-template/vim-slim'
+" Plugin 'scroolose/syntastic' installed with pathogen
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
