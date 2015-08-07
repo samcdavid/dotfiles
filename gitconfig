@@ -10,3 +10,5 @@
 [core]
   editor = vim
   excludesfile = ~/.gitignore_global
+[commit]
+  template = ~/.gitmessage
