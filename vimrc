@@ -49,6 +49,7 @@ filetype plugin indent on    " required
 " Make it obvious where 80 characters is
 set textwidth=80
 set colorcolumn=+1
+autocmd Filetype gitcommit setlocal spell textwidth=72
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
