@@ -1,6 +1,7 @@
 set nocompatible              " be iMproved, required
 syntax on
 filetype plugin indent on
+set guifont=Hack\ 12
 set autoindent
 set expandtab
 set laststatus=2
