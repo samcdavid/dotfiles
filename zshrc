@@ -49,7 +49,7 @@ plugins=(git)
 
 # User configuration
 
-export PATH=$PATH:"/Users/Sam/.rvm/gems/ruby-2.2.2/bin:/Users/Sam/.rvm/gems/ruby-2.2.2@global/bin:/Users/Sam/.rvm/rubies/ruby-2.2.2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/git/bin:/Users/Sam/.rvm/bin:~/my_bin:.git/safe/../../bin"
+export PATH=$PATH:"/Users/Sam/.rvm/gems/ruby-2.2.2/bin:/Users/Sam/.rvm/gems/ruby-2.2.2@global/bin:/Users/Sam/.rvm/rubies/ruby-2.2.2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/git/bin:/Users/Sam/.rvm/bin:~/my_bin:.git/safe/../../bin:/path/to/elixir/bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
@@ -94,5 +94,6 @@ alias co='git checkout'
 alias gr='git rebase -i'
 alias dc='docker-compose'
 alias bd='boot2docker'
+alias bu='bundle update'
 alias pull='git smart-pull'
 alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"
