@@ -86,14 +86,17 @@ export DOCKER_CERT_PATH=/Users/Sam/.boot2docker/certs/boot2docker-vm
 export DOCKER_TLS_VERIFY=1
 
 alias ll='ls -aFgil'
-alias gup='git push origin'
+alias gup='git push --tags origin'
 alias gs='git status'
 alias gc='git commit'
-alias gf='git flow'
 alias co='git checkout'
 alias gr='git rebase -i'
 alias dc='docker-compose'
 alias bd='boot2docker'
 alias bu='bundle update'
-alias pull='git smart-pull'
+alias pull='git pull origin'
 alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"
+
+# Setting jdk version
+alias setjdk17='export JAVA_HOME=$(/usr/libexec/java_home -v 1.7)'
+alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)'
