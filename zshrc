@@ -85,14 +85,15 @@ export DOCKER_HOST=tcp://192.168.59.103:2376
 export DOCKER_CERT_PATH=/Users/Sam/.boot2docker/certs/boot2docker-vm
 export DOCKER_TLS_VERIFY=1
 
-alias ll='ls -aFgil'
-alias gup='git push --tags origin'
+alias ll='ls -aFlh'
+alias push='git push --tags origin'
 alias gs='git status'
 alias gc='git commit'
 alias co='git checkout'
 alias gr='git rebase -i'
 alias dc='docker-compose'
 alias bd='boot2docker'
+alias bi='bundle install'
 alias bu='bundle update'
 alias pull='git pull origin'
 alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"
