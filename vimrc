@@ -52,6 +52,10 @@ set textwidth=80
 set colorcolumn=+1
 autocmd Filetype gitcommit setlocal spell textwidth=72
 
+" Pathogen Installed Plugins
+" cd ~/.vim/bundle
+" git clone git://github.com/digitaltoad/vim-jade.git
+
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
