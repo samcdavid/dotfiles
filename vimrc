@@ -1,6 +1,9 @@
+filetype off
+execute pathogen#infect()
+filetype plugin indent on
+
 set nocompatible              " be iMproved, required
 syntax on
-filetype plugin indent on
 set guifont=Hack\ 12
 set autoindent
 set expandtab
@@ -12,8 +15,6 @@ set number
 set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
-
-execute pathogen#infect()
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
