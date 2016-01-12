@@ -55,6 +55,7 @@ autocmd Filetype gitcommit setlocal spell textwidth=72
 " Pathogen Installed Plugins
 " cd ~/.vim/bundle
 " git clone git://github.com/digitaltoad/vim-jade.git
+" git clone git://github.com/tpope/vim-sensible.git
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
