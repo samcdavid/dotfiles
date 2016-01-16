@@ -26,12 +26,10 @@ call vundle#begin()
 Plugin 'gmarik/Vundle.vim'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'bronson/vim-trailing-whitespace'
-" Plugin 'airblade/vim-gitgutter' installed with pathogen
 Plugin 'vim-ruby/vim-ruby'
-" Plugin 'bling/vim-airline' installed with pathogen
 Plugin 'rizzatti/dash.vim'
 Plugin 'slim-template/vim-slim'
-" Plugin 'scroolose/syntastic' installed with pathogen
+Plugin 'tpope/vim-fugitive'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -57,6 +55,10 @@ autocmd Filetype gitcommit setlocal spell textwidth=72
 " cd ~/.vim/bundle
 " git clone git://github.com/digitaltoad/vim-jade.git
 " git clone git://github.com/tpope/vim-sensible.git
+" git clone git://github.com/tpope/vim-fugitive.git
+" git clone git://github.com/airblade/vim-gitgutter.git
+" git clone git://github.com/bling/vim-airline.git
+" git clone git://github.com/scroolose/syntastic.git
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
