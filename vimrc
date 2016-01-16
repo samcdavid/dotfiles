@@ -15,6 +15,7 @@ set number
 set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
+colorscheme SlateDark
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -30,6 +31,9 @@ Plugin 'vim-ruby/vim-ruby'
 Plugin 'rizzatti/dash.vim'
 Plugin 'slim-template/vim-slim'
 Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-surround'
+Plugin 'kien/ctrlp.vim'
+Plugin 'flazz/vim-colorschemes'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -59,6 +63,7 @@ autocmd Filetype gitcommit setlocal spell textwidth=72
 " git clone git://github.com/airblade/vim-gitgutter.git
 " git clone git://github.com/bling/vim-airline.git
 " git clone git://github.com/scroolose/syntastic.git
+" git clone https://github.com/scrooloose/nerdtree.git
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
