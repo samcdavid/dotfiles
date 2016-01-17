@@ -5,7 +5,7 @@ export PATH="/usr/local/bin:$PATH"
 
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 
-source /usr/local/share/zsh/site-functions/_aws
+# source /usr/local/share/zsh/site-functions/_aws
 
 autoload -U compinit promptinit colors select-word-style
 compinit
