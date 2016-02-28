@@ -33,6 +33,7 @@ function my_current_ruby() {
 }
 
 function build_right_prompt() {
+  prompt_segment
   my_current_ruby
   my_current_node
   my_current_elixir
