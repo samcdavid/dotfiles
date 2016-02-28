@@ -1,10 +1,13 @@
 # Path to your oh-my-zsh installation.
 export ZSH=/Users/sam/.oh-my-zsh
+source /usr/local/opt/chruby/share/chruby/chruby.sh
+source /usr/local/opt/chruby/share/chruby/auto.sh
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
+
 ZSH_THEME="agnoster"
 
 # Uncomment the following line to use case-sensitive completion.
@@ -57,6 +60,8 @@ export PATH="/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/Users
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
+RPROMPT="%{%f%b%k%}$(build_right_prompt)"
+setopt promptsubst
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -84,7 +89,6 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # My Aliases
-source /usr/local/opt/chruby/share/chruby/chruby.sh
 # System
 alias ll='ls -aFlh'
 alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
@@ -104,23 +108,3 @@ alias co='git checkout'
 alias gr='git rebase -i'
 alias pull='git pull origin'
 alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"
-
-function _current_node() {
-  local _node
-  _node="node-$(node -v)"
-  echo ${_node}
-}
-
-function _current_elixir() {
-  local _elixir
-  _elixir="$(elixir -v | grep \Elixir)"
-  echo ${_elixir}
-}
-
-function current_node() {
-  echo '$(_current_node)'
-}
-
-function current_node() {
-  echo '$(_current_node)'
-}
