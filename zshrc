@@ -1,23 +1,90 @@
-export PATH="$HOME/.bin:$PATH"
+# Path to your oh-my-zsh installation.
+export ZSH=/Users/sam/.oh-my-zsh
 
-# recommended by brew doctor
-export PATH="/usr/local/bin:$PATH"
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="agnoster"
 
-source /usr/local/opt/chruby/share/chruby/chruby.sh
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
 
-# source /usr/local/share/zsh/site-functions/_aws
+# Uncomment the following line to use hyphen-insensitive completion. Case
+# sensitive completion must be off. _ and - will be interchangeable.
+HYPHEN_INSENSITIVE="true"
 
-autoload -U compinit promptinit colors select-word-style
-compinit
-promptinit
-colors
-select-word-style shell
-setopt completeinword
-setopt auto_cd
-REPORTTIME=10
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+# Uncomment the following line to disable bi-weekly auto-update checks.
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment the following line to change how often to auto-update (in days).
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# HIST_STAMPS="mm/dd/yyyy"
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+plugins=(git bundler osx rake ruby chruby vi-mode node rails)
+
+# User configuration
+
+export PATH="/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/Users/sam/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+# export MANPATH="/usr/local/man:$MANPATH"
+
+source $ZSH/oh-my-zsh.sh
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# ssh
+# export SSH_KEY_PATH="~/.ssh/dsa_id"
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+#
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # My Aliases
+source /usr/local/opt/chruby/share/chruby/chruby.sh
 # System
 alias ll='ls -aFlh'
 alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
@@ -38,17 +105,6 @@ alias gr='git rebase -i'
 alias pull='git pull origin'
 alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"
 
-# Functions
-function _current_ruby() {
-  local _ruby
-  _ruby="$(chruby |grep \* |tr -d '* ')"
-  if [[ $(chruby |grep -c \*) -eq 1 ]]; then
-    echo ${_ruby}
-  else
-    echo "SYSTEM"
-  fi
-}
-
 function _current_node() {
   local _node
   _node="node-$(node -v)"
@@ -61,52 +117,10 @@ function _current_elixir() {
   echo ${_elixir}
 }
 
-function _git_branch() {
-  local ref
-  ref=$(command git symbolic-ref --quiet HEAD 2> /dev/null)
-  echo ${ref#refs/heads/}
-}
-
-function _parse_git_dirty() {
-  local STATUS=''
-  local OUTPUT=''
-  local FLAGS
-  FLAGS=('--porcelain')
-  STATUS=$(command git status ${FLAGS} 2> /dev/null | tail -n1)
-  if [[ -n $STATUS ]]; then
-    OUTPUT=' %F{red}\xE2\x9C\x97%f '
-  elif [[ $(ll .git 2> /dev/null | grep -c \total) -eq 1 ]]; then
-    OUTPUT=' %F{green}\xE2\x9C\x93%f '
-  fi
-  if [[ $(git diff --staged --name-status 2> /dev/null | tail -n1) != "" ]]; then
-    OUTPUT=${OUTPUT}'%F{yellow}\xE2\x98\x85%f '
-  fi
-  echo ${OUTPUT}
-}
-
-function current_ruby() {
-  echo '$(_current_ruby)'
+function current_node() {
+  echo '$(_current_node)'
 }
 
 function current_node() {
   echo '$(_current_node)'
 }
-
-function current_elixir() {
-  echo '$(_current_elixir)'
-}
-
-function git_branch() {
-  echo '$(_git_branch)'
-}
-
-function parse_git_dirty() {
-  if [[ $(_parse_git_dirty) != '' ]]; then
-    echo '$(_parse_git_dirty)'
-  fi
-}
-
-# Prompt
-PROMPT="%B%F{red}$(current_ruby)%f : %F{yellow}$(current_node)%f : %F{green}$(current_elixir)%f : %F{blue}$(git_branch)%f%b$(parse_git_dirty)> "
-RPROMPT="%F{green%}%~%f"
-setopt promptsubst
