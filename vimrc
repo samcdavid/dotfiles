@@ -15,7 +15,6 @@ set number
 set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
-colorscheme SlateDark
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -30,10 +29,17 @@ Plugin 'bronson/vim-trailing-whitespace'
 Plugin 'vim-ruby/vim-ruby'
 Plugin 'rizzatti/dash.vim'
 Plugin 'slim-template/vim-slim'
-Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-vinegar'
 Plugin 'kien/ctrlp.vim'
-Plugin 'flazz/vim-colorschemes'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'bling/vim-airline'
+Plugin 'digitaltoad/vim-jade'
+Plugin 'tpope/vim-sensible'
+Plugin 'mxw/vim-jsx'
+Plugin 'pangloss/vim-javascript'
+Plugin 'jelera/vim-javascript-syntax'
+Plugin 'elixir-lang/vim-elixir'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -57,13 +63,7 @@ autocmd Filetype gitcommit setlocal spell textwidth=72
 
 " Pathogen Installed Plugins
 " cd ~/.vim/bundle
-" git clone git://github.com/digitaltoad/vim-jade.git
-" git clone git://github.com/tpope/vim-sensible.git
-" git clone git://github.com/tpope/vim-fugitive.git
-" git clone git://github.com/airblade/vim-gitgutter.git
-" git clone git://github.com/bling/vim-airline.git
 " git clone git://github.com/scroolose/syntastic.git
-" git clone https://github.com/scrooloose/nerdtree.git
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>

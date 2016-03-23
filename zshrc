@@ -56,7 +56,7 @@ plugins=(git bundler osx rake ruby chruby vi-mode node rails)
 
 # User configuration
 
-export PATH="/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/Users/sam/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/Users/sam/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
