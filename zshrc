@@ -90,13 +90,19 @@ setopt promptsubst
 
 # Set default ruby version
 chruby ruby-2.3
+export EDITOR='vim'
+source ~/.bin/tmuxinator.zsh
 
 # My Aliases
 # System
 alias ll='ls -aFlh'
+alias reload='source ~/.zshrc'
 alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
 alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_hhome -v 1.8)'
 alias reset_chruby='source /usr/local/opt/chruby/share/chruby/chruby.sh'
+alias muxs='tmuxinator start'
+alias muxn='tmuxinator new'
+alias muxc='tmuxinator copy'
 
 # Ruby
 alias bi='bundle install'
