@@ -15,6 +15,7 @@ set number
 set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
+set mouse=a
 
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
