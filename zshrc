@@ -109,6 +109,10 @@ alias bi='bundle install'
 alias be='bundle exec'
 alias bu='bundle update'
 
+# Elixir
+alias hexu='mix local.hex'
+alias phoenixu='mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez'
+
 # Git
 alias push='git push --tags origin'
 alias gs='git status'
