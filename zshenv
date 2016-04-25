@@ -39,3 +39,4 @@ function build_right_prompt() {
   my_current_elixir
   prompt_end
 }
+eval "$(/usr/local/opt/hop/bin/hop init -)"
