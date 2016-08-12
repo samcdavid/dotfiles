@@ -91,6 +91,7 @@ setopt promptsubst
 # Set default ruby version
 chruby ruby-2.3
 export EDITOR='vim'
+export TERM='xterm-256color'
 source ~/.bin/tmuxinator.zsh
 
 # My Aliases

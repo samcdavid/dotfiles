@@ -4,6 +4,7 @@ filetype plugin indent on
 
 set nocompatible              " be iMproved, required
 syntax on
+set t_Co=256
 set guifont=Hack\ 12
 set autoindent
 set expandtab
@@ -35,6 +36,9 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
+
+let g:airline_powerline_fonts = 1
+let g:airline_theme = 'bubblegum'
 
 func! DeleteTrailingWS()
   exe "normal mz"
