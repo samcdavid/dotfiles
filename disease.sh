@@ -9,6 +9,7 @@ git clone https://github.com/bling/vim-airline.git
 git clone https://github.com/bronson/vim-trailing-whitespace.git
 git clone https://github.com/digitaltoad/vim-pug.git
 git clone https://github.com/elixir-lang/vim-elixir.git
+git clone https://github.com/hhsnopek/vim-sugarss.git
 git clone https://github.com/jelera/vim-javascript-syntax.git
 git clone https://github.com/kien/ctrlp.vim.git
 git clone https://github.com/leafgarland/typescript-vim.git
