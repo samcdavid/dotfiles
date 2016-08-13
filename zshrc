@@ -52,7 +52,7 @@ ENABLE_CORRECTION="true"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git bundler osx rake ruby chruby vi-mode node rails)
+plugins=(brew bundler chruby docker gem git node npm osx rails rake ruby tmux tmuxinator vi-mode web-search xcode)
 
 # User configuration
 
@@ -92,7 +92,6 @@ setopt promptsubst
 chruby ruby-2.3
 export EDITOR='vim'
 export TERM='xterm-256color'
-source ~/.bin/tmuxinator.zsh
 
 # My Aliases
 # System
