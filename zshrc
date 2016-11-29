@@ -113,6 +113,9 @@ alias bu='bundle update'
 alias hexu='mix local.hex'
 alias phoenixu='mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez'
 
+# Python
+alias cleanpyc="find . -name '*.pyc' | xargs rm"
+
 # Git
 alias push='git push --tags origin'
 alias gs='git status'
