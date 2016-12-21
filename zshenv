@@ -40,3 +40,8 @@ function build_right_prompt() {
   prompt_end
 }
 eval "$(/usr/local/opt/hop/bin/hop init -)"
+
+function dclean() {
+  docker rm -v $(docker ps -a -q -f status=exited) 2> /dev/null
+  docker rmi $(docker images -f "dangling=true" -q) 2> /dev/null
+}
