@@ -39,10 +39,17 @@ alias bu='bundle update'
 
 # Elixir
 alias hexu='mix local.hex'
+alias iexc='iex -S mix'
 alias phoenixu='mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez'
+alias server='mix phoenix.server'
 
 # Python
 alias cleanpyc="find . -name '*.pyc' | xargs rm"
+
+# JavaScript
+alias chode='node'
+alias cpm='npm'
+alias fix_chode'npm prune ; npm cache clear ; npm install'
 
 # Git
 alias push='git push --tags origin'
