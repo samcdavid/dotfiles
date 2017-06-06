@@ -1,3 +1,5 @@
+eval "$(/usr/local/opt/hop/bin/hop init -)"
+
 function _current_elixir() {
   local _elixir
   _elixir="$(elixir -v | grep \Elixir)"
