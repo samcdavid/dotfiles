@@ -4,3 +4,4 @@
 *.swo
 gh-md-toc
 npm-debug.log
+.mix_tasks
