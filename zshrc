@@ -21,6 +21,9 @@ chruby ruby-2.4
 export EDITOR='vim'
 export TERM='xterm-256color'
 
+# Personal Environment Variables
+export ERL_AFLAGS="-kernel shell_history enabled"
+
 # My Aliases
 # System
 alias ll='ls -aFlh'
