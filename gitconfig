@@ -1,13 +1,11 @@
 [user]
   name = Sam McDavid
-  email = mcdavidsa@gmail.com
+  email = sam@mcdavid.us
 	signingkey = 12A08F46F1CBEEE0
 [filter "hawser"]
   clean = git hawser clean %f
   smudge = git hawser smudge %f
   required = true
-[diff]
-  tool = p4merge
 [core]
   editor = vim
   excludesfile = ~/.gitignore_global
