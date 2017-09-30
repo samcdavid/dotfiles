@@ -1,7 +1,7 @@
 [user]
   name = Sam McDavid
   email = sam@mcdavid.us
-	signingkey = 12A08F46F1CBEEE0
+	signingkey = CDF25474853F3B50
 [filter "hawser"]
   clean = git hawser clean %f
   smudge = git hawser smudge %f

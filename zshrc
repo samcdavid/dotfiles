@@ -1,23 +1,22 @@
 # Path to your oh-my-zsh installation.
 export ZSH=/Users/sam/.oh-my-zsh
-source /usr/local/opt/chruby/share/chruby/chruby.sh
-source /usr/local/opt/chruby/share/chruby/auto.sh
 
 # Oh My Zsh Config
 ZSH_THEME="agnoster"
 HYPHEN_INSENSITIVE="true"
 DISABLE_AUTO_TITLE="true"
 ENABLE_CORRECTION="true"
-plugins=(brew bundler chruby docker gem git node npm osx rails rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
+plugins=(brew bundler docker gem git node npm osx rails rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
 export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
 
 source $ZSH/oh-my-zsh.sh
+source $HOME/.asdf/asdf.sh
+source $HOME/.asdf/completions/asdf.bash
 RPROMPT="%{%f%b%k%}$(build_right_prompt)"
 setopt promptsubst
 
 # Set default ruby version
-chruby ruby-2.4
 export EDITOR='vim'
 export TERM='xterm-256color'
 
@@ -28,7 +27,6 @@ export ERL_AFLAGS="-kernel shell_history enabled"
 # System
 alias ll='ls -aFlh'
 alias reload='source ~/.zshrc'
-alias vim='/Applications/MacVim.app/Contents/MacOS/Vim'
 alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_hhome -v 1.8)'
 alias reset_chruby='source /usr/local/opt/chruby/share/chruby/chruby.sh'
 alias muxs='tmuxinator start'

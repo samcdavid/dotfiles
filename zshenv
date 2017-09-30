@@ -1,25 +1,19 @@
-eval "$(/usr/local/opt/hop/bin/hop init -)"
-
 function _current_elixir() {
   local _elixir
-  _elixir="$(elixir -v | grep \Elixir)"
-  echo -n ${_elixir}
+  _elixir="$(asdf current elixir | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
+  echo -n elixir-v${_elixir}
 }
 
 function _current_node() {
   local _node
-  _node="node-$(node -v)"
-  echo -n ${_node}
+  _node="$(asdf current nodejs | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
+  echo -n node-v${_node}
 }
 
 function _current_ruby() {
   local _ruby
-  _ruby="$(chruby |grep \* |tr -d '* ')"
-  if [[ $(chruby |grep -c \*) -eq 1 ]]; then
-    echo -n ${_ruby}
-  else
-    echo -n "System Ruby"
-  fi
+  _ruby="$(asdf current ruby | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
+  echo -n ruby-v${_ruby}
 }
 
 function my_current_elixir() {
@@ -41,7 +35,6 @@ function build_right_prompt() {
   my_current_elixir
   prompt_end
 }
-eval "$(/usr/local/opt/hop/bin/hop init -)"
 
 function dclean() {
   docker rm -v $(docker ps -a -q -f status=exited) 2> /dev/null
