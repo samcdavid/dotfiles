@@ -44,6 +44,11 @@ alias iexc='iex -S mix'
 alias phoenixu='mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez'
 alias server='mix phoenix.server'
 
+# Postgres (ASDF)
+alias pg_init="createuser -s postgres"
+alias pg_start="pg_ctl -l /dev/null start"
+alias pg_stop="pg_ctl stop"
+
 # Python
 alias cleanpyc="find . -name '*.pyc' | xargs rm"
 
@@ -55,7 +60,7 @@ alias fix_chode'npm prune ; npm cache clear ; npm install'
 # Git
 alias push='git push --tags origin'
 alias gs='git status'
-alias gc='git commit -v'
+alias gc='git commit -S -v'
 alias co='git checkout'
 alias gr='git rebase'
 alias pull='git pull origin'
