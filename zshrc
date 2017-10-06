@@ -17,7 +17,7 @@ RPROMPT="%{%f%b%k%}$(build_right_prompt)"
 setopt promptsubst
 
 # Set default ruby version
-export EDITOR='vim'
+export EDITOR='mvim -v'
 export TERM='xterm-256color'
 
 # Personal Environment Variables
@@ -32,6 +32,7 @@ alias reset_chruby='source /usr/local/opt/chruby/share/chruby/chruby.sh'
 alias muxs='tmuxinator start'
 alias muxn='tmuxinator new'
 alias muxc='tmuxinator copy'
+alias vim='mvim -v'
 
 # Ruby
 alias bi='bundle install'
