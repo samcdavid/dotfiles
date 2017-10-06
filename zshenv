@@ -60,4 +60,12 @@ _tmuxinator() {
   return
 }
 
+function end_feature() {
+  git checkout master ; git branch -d $1 ; git pull origin master ; git remote prune origin
+}
+
+function super_commit() {
+  git add . ; git commit -S -v ; git push origin $1
+}
+
 alias mux="tmuxinator"
