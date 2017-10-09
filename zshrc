@@ -10,6 +10,7 @@ plugins=(brew bundler docker gem git node npm osx rails rake ruby tmux tmuxinato
 
 export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
 
+eval "$(/usr/local/opt/hop/bin/hop init -)"
 source $ZSH/oh-my-zsh.sh
 source $HOME/.asdf/asdf.sh
 source $HOME/.asdf/completions/asdf.bash

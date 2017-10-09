@@ -11,5 +11,6 @@
   excludesfile = ~/.gitignore_global
 [commit]
   template = ~/.gitmessage
+	gpgsign = true
 [credential]
 	helper = osxkeychain
