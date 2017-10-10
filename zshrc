@@ -43,7 +43,7 @@ alias bu='bundle update'
 alias hexu='mix local.hex'
 alias iexc='iex -S mix'
 alias phoenixu='mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez'
-alias server='mix phoenix.server'
+alias server='mix phx.server'
 
 # Postgres (ASDF)
 alias pg_init="createuser -s postgres"
