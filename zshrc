@@ -66,5 +66,6 @@ alias co='git checkout'
 alias gr='git rebase'
 alias pull='git pull origin'
 alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(white) %an, %ar%Creset'"
+alias shove='git push -f --tags origin'
 
 eval "$(direnv hook zsh)"
