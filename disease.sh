@@ -46,11 +46,6 @@ cd ~/.vim/bundle/vim-sugarss
 git pull origin master
 cd ~/.vim/bundle
 
-git clone https://github.com/jelera/vim-javascript-syntax.git
-cd ~/.vim/bundle/vim-javascript-syntax
-git pull origin master
-cd ~/.vim/bundle
-
 git clone https://github.com/kien/ctrlp.vim.git
 cd ~/.vim/bundle/ctrlp
 git pull origin master
