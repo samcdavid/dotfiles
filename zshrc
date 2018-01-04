@@ -18,7 +18,7 @@ RPROMPT="%{%f%b%k%}$(build_right_prompt)"
 setopt promptsubst
 
 # Set default ruby version
-export EDITOR='mvim -v'
+export EDITOR='nvim'
 export TERM='xterm-256color'
 
 # Personal Environment Variables
@@ -32,7 +32,7 @@ alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_hhome -v 1.8)'
 alias muxs='tmuxinator start'
 alias muxn='tmuxinator new'
 alias muxc='tmuxinator copy'
-alias vim='mvim -v'
+alias vim='nvim'
 
 # Ruby
 alias bi='bundle install'

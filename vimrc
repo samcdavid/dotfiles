@@ -12,7 +12,7 @@ set laststatus=2
 set noswapfile
 set nobackup
 set nowb
-set number
+set rnu
 set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
@@ -38,7 +38,6 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
 let g:airline_powerline_fonts = 1
-let g:airline_theme = 'bubblegum'
 
 let g:jsx_ext_required = 0
 

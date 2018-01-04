@@ -6,11 +6,6 @@ cd ~/.vim/bundle/syntastic
 git pull origin master
 cd ~/.vim/bundle
 
-git clone https://github.com/Valloric/YouCompleteMe.git
-cd ~/.vim/bundle/YouCompleteMe
-git pull origin master
-cd ~/.vim/bundle
-
 git clone https://github.com/airblade/vim-gitgutter.git
 cd ~/.vim/bundle/vim-gitgutter
 git pull origin master
