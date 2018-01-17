@@ -12,7 +12,7 @@ set laststatus=2
 set noswapfile
 set nobackup
 set nowb
-set rnu
+set number rnu
 set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
