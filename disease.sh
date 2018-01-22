@@ -6,6 +6,11 @@ cd ~/.vim/bundle/syntastic
 git pull origin master
 cd ~/.vim/bundle
 
+git clone https://github.com/sbdchd/neoformat.git
+cd ~/.vim/bundle/neoformat
+git pull origin master
+cd ~/.vim/bundle
+
 git clone https://github.com/airblade/vim-gitgutter.git
 cd ~/.vim/bundle/vim-gitgutter
 git pull origin master
