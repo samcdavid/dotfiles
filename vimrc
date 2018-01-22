@@ -55,3 +55,7 @@ func! DeleteTrailingWS()
   exe "normal `z"
 endfunc
 autocmd BufWrite * :call DeleteTrailingWS()
+augroup neoformat
+  autocmd!
+  autocmd BufWritePre *.ex,*.exs,*.elm,*.js,*.jsx Neoformat
+augroup END
