@@ -6,11 +6,6 @@ cd ~/.vim/bundle/syntastic
 git pull origin master
 cd ~/.vim/bundle
 
-git clone https://github.com/sbdchd/neoformat.git
-cd ~/.vim/bundle/neoformat
-git pull origin master
-cd ~/.vim/bundle
-
 git clone https://github.com/airblade/vim-gitgutter.git
 cd ~/.vim/bundle/vim-gitgutter
 git pull origin master
@@ -26,11 +21,6 @@ cd ~/.vim/bundle/vim-trailing-whitespace
 git pull origin master
 cd ~/.vim/bundle
 
-git clone https://github.com/digitaltoad/vim-pug.git
-cd ~/.vim/bundle/vim-pug
-git pull origin master
-cd ~/.vim/bundle
-
 git clone https://github.com/editorconfig/editorconfig-vim.git
 cd ~/.vim/bundle/editorconfig-vim
 git pull origin master
@@ -38,16 +28,6 @@ cd ~/.vim/bundle
 
 git clone https://github.com/elixir-lang/vim-elixir.git
 cd ~/.vim/bundle/lang/vim-elixir
-git pull origin master
-cd ~/.vim/bundle
-
-git clone https://github.com/hhsnopek/vim-sugarss.git
-cd ~/.vim/bundle/vim-sugarss
-git pull origin master
-cd ~/.vim/bundle
-
-git clone https://github.com/kien/ctrlp.vim.git
-cd ~/.vim/bundle/ctrlp
 git pull origin master
 cd ~/.vim/bundle
 
@@ -68,11 +48,6 @@ cd ~/.vim/bundle
 
 git clone https://github.com/rizzatti/dash.vim.git
 cd ~/.vim/bundle/dash
-git pull origin master
-cd ~/.vim/bundle
-
-git clone https://github.com/slim-template/vim-slim.git
-cd ~/.vim/bundle/template/vim-slim
 git pull origin master
 cd ~/.vim/bundle
 
@@ -120,8 +95,3 @@ git clone https://github.com/vim-ruby/vim-ruby.git
 cd ~/.vim/bundle/ruby/vim-ruby
 git pull origin master
 cd ~/.vim/bundle
-
-# Plugin specific setup
-cd ~/.vim/bundle/YouCompleteMe
-git submodule update --init --recursive
-./install.py --clang-completer

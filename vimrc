@@ -37,14 +37,6 @@ let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 
-let g:neoformat_elixir_mix_format = {
-  \ 'exe': 'mix',
-  \ 'args': ['format', '-'],
-  \ 'stdin': 1
-  \ }
-
-let g:neoformat_enabled_elixir = ['mix_format']
-
 let g:airline_powerline_fonts = 1
 
 let g:jsx_ext_required = 0
@@ -55,7 +47,3 @@ func! DeleteTrailingWS()
   exe "normal `z"
 endfunc
 autocmd BufWrite * :call DeleteTrailingWS()
-augroup neoformat
-  autocmd!
-  autocmd BufWritePre *.ex,*.exs,*.elm,*.js,*.jsx Neoformat
-augroup END
