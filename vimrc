@@ -18,6 +18,11 @@ set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
 set mouse=a
 
+let mapleader = "_"
+inoremap jj <esc>
+nmap <Leader><Space> :noh<CR>
+nmap <Leader>: :FZF<CR>
+
 " Make it obvious where 80 characters is
 set textwidth=80
 set colorcolumn=+1

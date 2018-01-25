@@ -6,6 +6,12 @@ cd ~/.vim/bundle/syntastic
 git pull origin master
 cd ~/.vim/bundle
 
+git clone https://github.com/junegunn/fzf.vim.git
+cd ~/.vim/bundle/fzf.vim
+git pull origin master
+cd ~/.vim/bundle
+ln -s /usr/local/opt/fzf ~/.vim/bundle/fzf
+
 git clone https://github.com/airblade/vim-gitgutter.git
 cd ~/.vim/bundle/vim-gitgutter
 git pull origin master
