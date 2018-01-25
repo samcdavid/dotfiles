@@ -6,7 +6,7 @@ ZSH_THEME="agnoster"
 HYPHEN_INSENSITIVE="true"
 DISABLE_AUTO_TITLE="true"
 ENABLE_CORRECTION="true"
-plugins=(brew bundler docker gem git node npm osx rails rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
+plugins=(brew bundler docker gem git node npm osx rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
 export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
 
@@ -23,6 +23,7 @@ export TERM='xterm-256color'
 
 # Personal Environment Variables
 export ERL_AFLAGS="-kernel shell_history enabled"
+export FZF_DEFAULT_COMMAND='rg --hidden -l ""'
 
 # My Aliases
 # System
