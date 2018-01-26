@@ -1,16 +1,16 @@
 [user]
   name = Sam McDavid
   email = sam@mcdavid.us
-	signingkey = CDF25474853F3B50
+  signingkey = CDF25474853F3B50
 [filter "hawser"]
   clean = git hawser clean %f
   smudge = git hawser smudge %f
   required = true
 [core]
-  editor = vim
+  editor = nvim
   excludesfile = ~/.gitignore_global
 [commit]
   template = ~/.gitmessage
-	gpgsign = true
+  gpgsign = true
 [credential]
-	helper = osxkeychain
+  helper = osxkeychain
