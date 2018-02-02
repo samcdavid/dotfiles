@@ -2,6 +2,8 @@ filetype off
 execute pathogen#infect()
 filetype plugin indent on
 
+colo seoul256
+
 set nocompatible              " be iMproved, required
 syntax on
 set t_Co=256
@@ -17,25 +19,24 @@ set splitbelow
 set splitright
 set tabstop=2 shiftwidth=2 softtabstop=2
 set mouse=a
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+set background=dark
 
 let mapleader = "_"
 inoremap jj <esc>
 nmap <Leader><Space> :noh<CR>
 nmap <Leader>: :FZF<CR>
-
-" Make it obvious where 80 characters is
-set textwidth=80
-set colorcolumn=+1
-autocmd Filetype gitcommit setlocal spell textwidth=72
-
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+" Make it obvious where 80 characters is
+set textwidth=80
+set colorcolumn=+1
+autocmd Filetype gitcommit setlocal spell textwidth=72
 
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1

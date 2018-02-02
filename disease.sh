@@ -6,6 +6,11 @@ cd ~/.vim/bundle/syntastic
 git pull origin master
 cd ~/.vim/bundle
 
+git clone https://github.com/junegunn/seoul256.vim
+cd ~/.vim/bundle/seoul256.vim
+git pull origin master
+cd ~/.vim/bundle
+
 git clone https://github.com/junegunn/fzf.vim.git
 cd ~/.vim/bundle/fzf.vim
 git pull origin master
