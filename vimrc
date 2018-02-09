@@ -6,6 +6,8 @@ colo seoul256
 let g:airline_powerline_fonts = 1
 let g:airline_theme = 'deus'
 let g:airline_section_c = '%t'
+let g:airline_section_x = ''
+let g:airline_section_y = ''
 
 set nocompatible              " be iMproved, required
 syntax on
