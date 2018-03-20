@@ -43,10 +43,11 @@ set textwidth=80
 set colorcolumn=+1
 autocmd Filetype gitcommit setlocal spell textwidth=72
 
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
+let g:ale_fixers = {
+\ 'typescript': ['tslint'],
+\}
+
+let g:airline#extensions#ale#enabled = 1
 
 let g:jsx_ext_required = 0
 
