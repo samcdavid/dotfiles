@@ -17,6 +17,10 @@ source $HOME/.asdf/completions/asdf.bash
 RPROMPT="%{%f%b%k%}$(build_right_prompt)"
 setopt promptsubst
 
+# gcloud autocompletions
+source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc'
+source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc'
+
 # Set default ruby version
 export EDITOR='nvim'
 export TERM='xterm-256color'
