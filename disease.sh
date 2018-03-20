@@ -1,8 +1,8 @@
 cd ~/.vim/bundle
 
 # Install plugins
-git clone --depth=1 https://github.com/scrooloose/syntastic.git
-cd ~/.vim/bundle/syntastic
+git clone https://github.com/w0rp/ale.git
+cd ~/.vim/bundle/ale
 git pull origin master
 cd ~/.vim/bundle
 
