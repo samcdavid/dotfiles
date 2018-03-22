@@ -33,6 +33,7 @@ let mapleader = "_"
 inoremap jj <esc>
 nmap <Leader><Space> :noh<CR>
 nmap <Leader>: :FZF<CR>
+nmap <Leader>f :ALEFix<CR>
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
