@@ -61,7 +61,7 @@ _tmuxinator() {
 }
 
 function end_feature() {
-  git checkout master ; git branch -d $1 ; git pull origin master ; git remote prune origin
+  git checkout master ; git pull origin master ; git branch -d $1 ; git remote prune origin
 }
 
 function super_commit() {
