@@ -32,16 +32,17 @@ export FZF_DEFAULT_COMMAND='rg --hidden -l ""'
 # My Aliases
 # System
 alias ll='ls -aFlh'
+alias muxc='tmuxinator copy'
+alias muxn='tmuxinator new'
+alias muxs='tmuxinator start'
+alias myip='dig +short myip.opendns.com @resolver1.opendns.com'
 alias reload='source ~/.zshrc'
 alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_hhome -v 1.8)'
-alias muxs='tmuxinator start'
-alias muxn='tmuxinator new'
-alias muxc='tmuxinator copy'
 alias vim='nvim'
 
 # Ruby
-alias bi='bundle install'
 alias be='bundle exec'
+alias bi='bundle install'
 alias bu='bundle update'
 
 # Elixir
