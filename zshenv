@@ -67,6 +67,3 @@ function end_feature() {
 function super_commit() {
   git add . ; git commit -S -v ; git push origin $1
 }
-
-compdef _tmuxinator tmuxinator mux
-alias mux="tmuxinator"

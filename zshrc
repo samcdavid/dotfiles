@@ -75,3 +75,6 @@ alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(w
 alias shove='git push -f --tags origin'
 
 eval "$(direnv hook zsh)"
+
+eval "$(compdef _tmuxinator tmuxinator mux)"
+alias mux="tmuxinator"
