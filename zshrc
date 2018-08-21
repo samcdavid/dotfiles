@@ -76,5 +76,5 @@ alias shove='git push -f --tags origin'
 
 eval "$(direnv hook zsh)"
 
-eval "$(compdef _tmuxinator tmuxinator mux)"
+compdef _tmuxinator tmuxinator mux
 alias mux="tmuxinator"
