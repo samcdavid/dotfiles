@@ -10,6 +10,12 @@ function _current_node() {
   echo -n node-v${_node}
 }
 
+function _current_python() {
+  local _python
+  _python="$(asdf current python | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
+  echo -n python-v${_python}
+}
+
 function _current_ruby() {
   local _ruby
   _ruby="$(asdf current ruby | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
@@ -17,15 +23,19 @@ function _current_ruby() {
 }
 
 function my_current_elixir() {
-  prompt_segment green black '$(_current_elixir)'
+  prompt_segment 098 white '$(_current_elixir)'
 }
 
 function my_current_node() {
-  prompt_segment yellow black '$(_current_node)'
+  prompt_segment green white '$(_current_node)'
+}
+
+function my_current_python() {
+  prompt_segment 025 white '$(_current_python)'
 }
 
 function my_current_ruby() {
-  prompt_segment red black '$(_current_ruby)'
+  prompt_segment red white '$(_current_ruby)'
 }
 
 function build_right_prompt() {
@@ -33,6 +43,7 @@ function build_right_prompt() {
   my_current_ruby
   my_current_node
   my_current_elixir
+  my_current_python
   prompt_end
 }
 
