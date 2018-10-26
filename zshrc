@@ -24,6 +24,13 @@ source '/usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.
 export EDITOR='nvim'
 export TERM='xterm-256color'
 
+# Setup Python Virtual Env BS
+export PYTHON_VERSION="$(python -V | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
+export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$HOME/Developer
+source ~/.asdf/installs/python/$PYTHON_VERSION/bin/virtualenvwrapper.sh
+export PATH="~/.asdf/installs/python/$PYTHON_VERSION/bin:$PATH"
+
 # Personal Environment Variables
 export ERL_AFLAGS="-kernel shell_history enabled"
 export FZF_DEFAULT_COMMAND='rg --hidden -l ""'
