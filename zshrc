@@ -53,8 +53,9 @@ alias bu='bundle update'
 
 # Elixir
 alias hexu='mix local.hex'
+alias rebaru='mix local.rebar --force'
 alias iexc='iex -S mix'
-alias phoenixu='mix archive.install https://github.com/phoenixframework/archives/raw/master/phoenix_new.ez'
+alias phoenixu='mix archive.install hex phx_new'
 alias server='mix phx.server'
 
 # Postgres (ASDF)
