@@ -61,6 +61,7 @@ alias server='mix phx.server'
 alias pg_init="createuser -s postgres"
 alias pg_start="pg_ctl -l /dev/null start"
 alias pg_stop="pg_ctl stop"
+alias pg_user="createuser -s postgres"
 
 # Python
 alias cleanpyc="find . -name '*.pyc' | xargs rm"
