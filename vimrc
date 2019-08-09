@@ -2,13 +2,6 @@ filetype off
 execute pathogen#infect()
 filetype plugin indent on
 
-colo seoul256
-let g:airline_powerline_fonts = 1
-let g:airline_theme = 'deus'
-let g:airline_section_c = '%t'
-let g:airline_section_x = ''
-let g:airline_section_y = ''
-
 set nocompatible              " be iMproved, required
 syntax on
 set t_Co=256
@@ -44,6 +37,13 @@ set textwidth=80
 set colorcolumn=+1
 autocmd Filetype gitcommit setlocal spell textwidth=72
 
+colo seoul256
+let g:airline_powerline_fonts = 1
+let g:airline_theme = 'deus'
+let g:airline_section_c = '%t'
+let g:airline_section_x = ''
+let g:airline_section_y = ''
+
 let g:ale_fixers = {
 \ 'typescript': ['tslint'],
 \}
@@ -51,6 +51,8 @@ let g:ale_fixers = {
 let g:airline#extensions#ale#enabled = 1
 
 let g:jsx_ext_required = 0
+
+let g:deoplete#enable_at_startup = 1
 
 func! DeleteTrailingWS()
   exe "normal mz"

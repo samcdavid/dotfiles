@@ -106,3 +106,8 @@ git clone https://github.com/vim-ruby/vim-ruby.git
 cd ~/.vim/bundle/vim-ruby
 git pull origin master
 cd ~/.vim/bundle
+
+git clone https://github.com/Shougo/deoplete.nvim
+cd ~/.vim/bundle/deoplete.nvim
+git pull origin master
+cd ~/.vim/bundle
