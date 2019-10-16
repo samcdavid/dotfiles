@@ -6,7 +6,7 @@ ZSH_THEME="agnoster"
 HYPHEN_INSENSITIVE="true"
 DISABLE_AUTO_TITLE="true"
 ENABLE_CORRECTION="true"
-plugins=(brew bundler docker gem git node npm osx rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
+plugins=(brew bundler docker docker-compose gem git node npm osx rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
 export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
 
@@ -83,8 +83,8 @@ alias glog="git log --graph --pretty=format':%C(yellow)%h%Cblue%d%Creset %s %C(w
 alias shove='git push -f --tags origin'
 
 # Docker
-alias stop_docker="docker stop $(docker ps -aq)"
-alias rm_docker="docker rm $(docker ps -aq)"
+alias stop_docker='docker stop $(docker ps -aq)'
+alias rm_docker='docker rm $(docker ps -aq)'
 
 eval "$(direnv hook zsh)"
 
