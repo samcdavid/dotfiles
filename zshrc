@@ -43,7 +43,7 @@ alias muxn='tmuxinator new'
 alias muxs='tmuxinator start'
 alias myip='dig +short myip.opendns.com @resolver1.opendns.com'
 alias reload='source ~/.zshrc'
-alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_hhome -v 1.8)'
+alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)'
 alias vim='nvim'
 
 # Ruby
@@ -71,6 +71,9 @@ alias cleanpyc="find . -name '*.pyc' | xargs rm"
 alias chode='node'
 alias cpm='npm'
 alias fix_chode'npm prune ; npm cache clear ; npm install'
+
+# Java
+export JAVA_HOME=/Users/sam/.asdf/installs/java/oracle-8.141
 
 # Git
 alias push='git push --tags origin'
