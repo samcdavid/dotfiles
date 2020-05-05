@@ -6,9 +6,11 @@ ZSH_THEME="agnoster"
 HYPHEN_INSENSITIVE="true"
 DISABLE_AUTO_TITLE="true"
 ENABLE_CORRECTION="true"
-plugins=(brew bundler docker docker-compose gem git node npm osx rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
+ZSH_DISABLE_COMPFIX=true
+plugins=(brew bundler docker docker-compose gem git node npm osx poetry rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
 export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
+fpath+=~/.zfunc
 
 source $ZSH/oh-my-zsh.sh
 source $HOME/.asdf/asdf.sh
