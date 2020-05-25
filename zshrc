@@ -9,7 +9,7 @@ ENABLE_CORRECTION="true"
 ZSH_DISABLE_COMPFIX=true
 plugins=(brew bundler docker docker-compose gem git node npm osx poetry rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
-export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform"
+export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.poetry/bin"
 fpath+=~/.zfunc
 
 source $ZSH/oh-my-zsh.sh
