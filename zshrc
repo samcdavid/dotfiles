@@ -30,6 +30,7 @@ export TERM='xterm-256color'
 export PYTHON_VERSION="$(python -V | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
 export PROJECT_HOME=$HOME/Developer
 export PATH="~/.asdf/installs/python/$PYTHON_VERSION/bin:$PATH"
+export PATH="$HOME/.poetry/bin:$PATH"
 
 # Personal Environment Variables
 export ERL_AFLAGS="-kernel shell_history enabled"
@@ -89,6 +90,7 @@ alias shove='git push -f --tags origin'
 # Docker
 alias stop_docker='docker stop $(docker ps -aq)'
 alias rm_docker='docker rm $(docker ps -aq)'
+alias rmi_docker='docker rmi $(docker images -aq)'
 
 eval "$(direnv hook zsh)"
 
