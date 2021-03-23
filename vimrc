@@ -21,12 +21,16 @@ set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 set background=dark
+set hidden
+set runtimepath+=~/.vim/bundle/LanguageClient-neovim
 
 let mapleader = "_"
 inoremap jj <esc>
 nmap <Leader><Space> :noh<CR>
 nmap <Leader>: :FZF<CR>
 nmap <Leader>f :ALEFix<CR>
+
+" These mappings make it easier to move between splits
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
 nnoremap <C-L> <C-W><C-L>
@@ -53,6 +57,17 @@ let g:airline#extensions#ale#enabled = 1
 let g:jsx_ext_required = 0
 
 let g:deoplete#enable_at_startup = 1
+
+let g:LanguageClient_settingsPath='~/.neovim-languageclient-settings.json'
+let g:LanguageClient_serverCommands = {
+    \ 'elixir': ['~/Developer/elixir-ls/rel/language_server.sh'],
+    \ }
+
+" Mappings for the language client
+nnoremap <Leader>5 :call LanguageClient_contextMenu()<CR>
+nnoremap <silent>K :call LanguageClient#textDocument_hover()<CR>
+nnoremap <silent>gd :call LanguageClient#textDocument_definition<CR>
+nnoremap <Leader>2 :call LanguageClient#textDocument_rename()<CR>
 
 func! DeleteTrailingWS()
   exe "normal mz"

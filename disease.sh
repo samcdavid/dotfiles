@@ -111,3 +111,9 @@ git clone https://github.com/Shougo/deoplete.nvim
 cd ~/.vim/bundle/deoplete.nvim
 git pull origin master
 cd ~/.vim/bundle
+
+git clone --depth 1 https://github.com/autozimu/LanguageClient-neovim.git
+cd ~/.vim/bundle/LanguageClient-neovim
+git pull origin master
+bash install.sh
+cd ~/.vim/bundle
