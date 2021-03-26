@@ -61,6 +61,8 @@ let g:deoplete#enable_at_startup = 1
 let g:LanguageClient_settingsPath='~/.neovim-languageclient-settings.json'
 let g:LanguageClient_serverCommands = {
     \ 'elixir': ['~/Developer/elixir-ls/rel/language_server.sh'],
+    \ 'python': ['~/.asdf/shims/pyls'],
+    \ 'ruby': ['~/.asdf/shims/solargraph', 'stdio'],
     \ }
 
 " Mappings for the language client
