@@ -68,7 +68,7 @@ let g:LanguageClient_serverCommands = {
 " Mappings for the language client
 nnoremap <Leader>5 :call LanguageClient_contextMenu()<CR>
 nnoremap <silent>K :call LanguageClient#textDocument_hover()<CR>
-nnoremap <silent>gd :call LanguageClient#textDocument_definition<CR>
+nnoremap <silent>gd :call LanguageClient#textDocument_definition()<CR>
 nnoremap <Leader>2 :call LanguageClient#textDocument_rename()<CR>
 
 func! DeleteTrailingWS()
