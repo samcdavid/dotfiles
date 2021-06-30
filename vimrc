@@ -65,6 +65,8 @@ let g:LanguageClient_serverCommands = {
     \ 'ruby': ['~/.asdf/shims/solargraph', 'stdio'],
     \ }
 
+let g:terraform_fmt_on_save=1
+
 " Mappings for the language client
 nnoremap <Leader>5 :call LanguageClient_contextMenu()<CR>
 nnoremap <silent>K :call LanguageClient#textDocument_hover()<CR>

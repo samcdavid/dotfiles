@@ -117,3 +117,8 @@ cd ~/.vim/bundle/LanguageClient-neovim
 git pull origin master
 bash install.sh
 cd ~/.vim/bundle
+
+git clone https://github.com/hashivim/vim-terraform.git
+cd ~/.vim/bundle/vim-terraform
+git pull origin master
+cd ~/.vim/bundle
