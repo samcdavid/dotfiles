@@ -46,6 +46,7 @@ alias myip='dig +short myip.opendns.com @resolver1.opendns.com'
 alias reload='source ~/.zshrc'
 alias setjdk18='export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)'
 alias vim='nvim'
+alias tf='terraform'
 
 # Ruby
 alias be='bundle exec'
@@ -117,4 +118,5 @@ alias mux="tmuxinator"
 [[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
 
 autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /usr/local/bin/terraform terraform
+
+complete -o nospace -C /Users/sam/.asdf/installs/terraform/1.0.1/bin/terraform terraform
