@@ -9,11 +9,10 @@ ENABLE_CORRECTION="true"
 ZSH_DISABLE_COMPFIX=true
 plugins=(brew bundler docker docker-compose gem git node npm macos poetry rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
-export PATH="/Users/sam/.bin:/Users/sam/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.poetry/bin"
+export PATH="$HOME/.bin:$HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.poetry/bin:$HOME/.asdf/bin"
 fpath+=~/.zfunc
 
 source $ZSH/oh-my-zsh.sh
-source $HOME/.asdf/asdf.sh
 source $HOME/.asdf/completions/asdf.bash
 RPROMPT="%{%f%b%k%}$(build_right_prompt)"
 setopt promptsubst
@@ -93,30 +92,10 @@ alias stop_docker='docker stop $(docker ps -aq)'
 alias rm_docker='docker rm $(docker ps -aq)'
 alias rmi_docker='docker rmi $(docker images -aq)'
 
-eval "$(direnv hook zsh)"
-
 compdef _tmuxinator tmuxinator mux
 alias mux="tmuxinator"
-
-## >>> conda initialize >>>
-## !! Contents within this block are managed by 'conda init' !!
-#__conda_setup="$('/Users/sam/.asdf/installs/python/anaconda3-2020.11/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-#if [ $? -eq 0 ]; then
-#    eval "$__conda_setup"
-#else
-#    if [ -f "/Users/sam/.asdf/installs/python/anaconda3-2020.11/etc/profile.d/conda.sh" ]; then
-#        . "/Users/sam/.asdf/installs/python/anaconda3-2020.11/etc/profile.d/conda.sh"
-#    else
-#        export PATH="/Users/sam/.asdf/installs/python/anaconda3-2020.11/bin:$PATH"
-#    fi
-#fi
-#unset __conda_setup
-## <<< conda initialize <<<
-
-# tabtab source for packages
-# uninstall by removing these lines
-[[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
 
 autoload -U +X bashcompinit && bashcompinit
 
 complete -o nospace -C /Users/sam/.asdf/installs/terraform/1.0.1/bin/terraform terraform
+source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
