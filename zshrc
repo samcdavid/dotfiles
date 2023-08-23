@@ -9,7 +9,7 @@ ENABLE_CORRECTION="true"
 ZSH_DISABLE_COMPFIX=true
 plugins=(brew bundler docker docker-compose gem git node npm macos poetry rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
-export PATH="$HOME/.bin:$HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.poetry/bin:$HOME/.asdf/bin"
+export PATH="$HOME/.bin:$HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.local/bin:$HOME/.asdf/bin"
 fpath+=~/.zfunc
 
 source $ZSH/oh-my-zsh.sh
@@ -26,10 +26,10 @@ export EDITOR='nvim'
 export TERM='xterm-256color'
 
 # Setup Python Virtual Env BS
-export PYTHON_VERSION="$(python -V | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
+export PYTHON_VERSION="$(asdf current python | grep -o '[0-9]*\.[0-9]*\.[0-9]*')"
 export PROJECT_HOME=$HOME/Developer
 export PATH="~/.asdf/installs/python/$PYTHON_VERSION/bin:$PATH"
-export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # Personal Environment Variables
 export ERL_AFLAGS="-kernel shell_history enabled"
@@ -97,5 +97,6 @@ alias mux="tmuxinator"
 
 autoload -U +X bashcompinit && bashcompinit
 
+eval "$(/usr/local/bin/brew shellenv)"
 complete -o nospace -C /Users/sam/.asdf/installs/terraform/1.0.1/bin/terraform terraform
 source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
