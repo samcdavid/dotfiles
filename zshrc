@@ -58,6 +58,7 @@ alias rebaru='mix local.rebar --force'
 alias iexc='iex -S mix'
 alias phoenixu='mix archive.install hex phx_new'
 alias server='mix phx.server'
+alias update_mix='mix do deps.get, deps.compile, compile && MIX_ENV=test mix do deps.compile, compile'
 
 # Postgres (ASDF)
 alias pg_init="createuser -s postgres"
