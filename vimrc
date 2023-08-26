@@ -73,6 +73,13 @@ nnoremap <silent>K :call LanguageClient#textDocument_hover()<CR>
 nnoremap <silent>gd :call LanguageClient#textDocument_definition()<CR>
 nnoremap <Leader>2 :call LanguageClient#textDocument_rename()<CR>
 
+" Mappings for vim test
+nmap <silent> <leader>t :TestNearest<CR>
+nmap <silent> <leader>T :TestFile<CR>
+nmap <silent> <leader>a :TestSuite<CR>
+nmap <silent> <leader>l :TestLast<CR>
+nmap <silent> <leader>g :TestVisit<CR>
+
 func! DeleteTrailingWS()
   exe "normal mz"
   %s/\s\+$//ge
