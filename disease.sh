@@ -122,3 +122,8 @@ git clone https://github.com/hashivim/vim-terraform.git
 cd ~/.vim/bundle/vim-terraform
 git pull origin master
 cd ~/.vim/bundle
+
+git clone https://github.com/vim-test/vim-test.git
+cd ~/.vim/bundle/vim-test
+git pull origin master
+cd ~/.vim/bundle
