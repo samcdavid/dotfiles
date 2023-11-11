@@ -23,25 +23,25 @@ function _current_ruby() {
 }
 
 function my_current_elixir() {
-  prompt_segment 098 black '$(_current_elixir)'
+  prompt_segment 098 white '$(_current_elixir)'
 }
 
 function my_current_node() {
-  prompt_segment green black '$(_current_node)'
+  prompt_segment green white '$(_current_node)'
 }
 
 function my_current_python() {
-  prompt_segment 025 black '$(_current_python)'
+  prompt_segment 025 white '$(_current_python)'
 }
 
 function my_current_ruby() {
-  prompt_segment red black '$(_current_ruby)'
+  prompt_segment red white '$(_current_ruby)'
 }
 
 function build_right_prompt() {
   prompt_segment
-  my_current_ruby
-  my_current_node
+  # my_current_ruby
+  # my_current_node
   my_current_elixir
   my_current_python
   prompt_end
