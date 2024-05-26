@@ -6,3 +6,4 @@ elixir 1.16.2-otp-26
 python 3.10.2
 terraform 1.0.1
 golang 1.18.1
+postgres 16.3
