@@ -9,7 +9,11 @@ ENABLE_CORRECTION="true"
 ZSH_DISABLE_COMPFIX=true
 plugins=(brew bundler docker docker-compose gem git node npm macos poetry rake ruby tmux tmuxinator vi-mode web-search xcode mix-fast)
 
-export PATH="$HOME/.bin:$HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.local/bin:$HOME/.asdf/bin"
+export PATH="$HOME/.bin:$HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.bin/terraform:$HOME/.local/bin:$HOME/.asdf/bin:/usr/local/opt/icu4c/bin:/usr/local/opt/icu4c/sbin"
+export LDFLAGS="-L/usr/local/opt/icu4c/lib"
+export CPPFLAGS="-I/usr/local/opt/icu4c/include"
+export PKG_CONFIG_PATH="/usr/local/opt/icu4c/lib/pkgconfig"
+
 fpath+=~/.zfunc
 
 source $ZSH/oh-my-zsh.sh
