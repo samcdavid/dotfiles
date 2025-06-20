@@ -1,9 +1,8 @@
-direnv 2.31.0
 ruby 2.7.1
 nodejs 22.2.0
-erlang 26.2.5
-elixir 1.16.2-otp-26
-python 3.10.2
+erlang 28.0.1
+elixir 1.18.4-otp-28
+python 3.13.5
 terraform 1.0.1
 golang 1.18.1
 postgres 16.3
