@@ -17,14 +17,15 @@ This is a personal dotfiles repository that manages development environment conf
 
 - **Primary Shell**: Fish shell with extensive custom functions and completions
 - **Terminal Multiplexer**: tmux with custom key bindings and plugin management
-- **Editor**: Neovim with custom configuration
+- **Editor**: Neovim with LazyVim framework configuration
 - **Version Control**: Git with GPG signing, custom templates, and global ignore patterns
 
 ### Key Components
 
 - `config/` - Contains application-specific configurations
-  - `fish/` - Fish shell configuration with 25+ custom functions
+  - `fish/` - Fish shell configuration with 30+ custom functions
   - `omf/` - Oh My Fish framework configuration
+  - `nvim/` - Neovim configuration using LazyVim framework
 - `tool-versions` - ASDF version manager tool definitions
 - `gitconfig` - Git configuration with GPG signing enabled
 - `tmux.conf` - Tmux configuration with vim-like key bindings
@@ -37,17 +38,42 @@ The repository uses ASDF for managing multiple runtime versions:
 
 - Node.js 22.2.0
 - Ruby 2.7.1
-- Python 3.10.2
-- Erlang 26.2.5 / Elixir 1.16.2
+- Python 3.13.5
+- Erlang 28.0.1 / Elixir 1.18.4-otp-28
 - Go 1.18.1
 - Terraform 1.0.1
 - PostgreSQL 16.3
-- direnv 2.31.0
 
 ### Setup Scripts
 
 - `setup_asdf_node.js` - Configures Node.js GPG keyring for ASDF
 - `setup_neo_vim.sh` - Creates symlinks for Neovim configuration
+
+### Oh My Fish Packages
+
+The configuration includes these OMF packages:
+- `asdf` - ASDF version manager integration
+- `bang-bang` - Command history expansion
+- `colored-man-pages` - Colorized manual pages
+- `config` - Configuration management
+- `direnv` - Directory-based environment variables
+- `fzf` - Fuzzy finder integration
+- `iex` - Elixir IEx shell enhancements
+- `mix` - Elixir Mix build tool integration
+- `neovim` - Neovim editor integration
+- `pbcopy` - macOS clipboard utilities
+- `python` - Python development tools
+- `rustup` - Rust toolchain manager
+- `vi-mode` - Vi-style key bindings
+
+### Neovim Configuration
+
+Neovim is configured using the LazyVim framework with custom plugins:
+- **Plugin Manager**: lazy.nvim
+- **Base Framework**: LazyVim
+- **Language Support**: Enhanced Elixir support via elixir-tools/elixir-ls
+- **Editor Enhancements**: Telescope, Treesitter, todo-comments
+- **Configuration Structure**: Modular Lua configuration in `config/nvim/lua/`
 
 ## Fish Shell Functions
 
@@ -62,6 +88,7 @@ The repository includes extensive Fish shell automation organized into categorie
 - `pull`/`push` - git pull/push shortcuts
 - `shove` - force push with lease protection
 - `end_feature` - automated feature branch cleanup (switches to main, pulls, deletes branch, prunes origin)
+- `gr` - git rebase shortcut
 
 ### Development Environment Functions
 
@@ -69,7 +96,11 @@ The repository includes extensive Fish shell automation organized into categorie
 - `update_mix` - comprehensive Mix dependency update for dev/test environments
 - `iexc` - Elixir interactive console
 - `phoenixu` - Phoenix installer update
+- `hexu` - Hex package manager update
+- `rebaru` - Rebar3 update
 - `cleanpyc` - removes Python compiled files
+- `pap` - package management shortcut
+- `vim` - Neovim alias
 
 ### Database Management Functions
 
@@ -81,6 +112,7 @@ The repository includes extensive Fish shell automation organized into categorie
 - `rm_docker`, `rmi_docker`, `stop_docker` - Docker container/image management
 - `myip` - retrieve external IP address
 - `tf` - Terraform shortcut
+- `ll` - enhanced directory listing
 
 ## Development Focus Areas
 
