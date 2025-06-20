@@ -1,6 +1,6 @@
 direnv 2.31.0
 ruby 2.7.1
-nodejs 15.11.0
+nodejs 22.2.0
 erlang 26.2.5
 elixir 1.16.2-otp-26
 python 3.10.2
