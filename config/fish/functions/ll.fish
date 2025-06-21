@@ -1,3 +1,3 @@
 function ll
-    ls -aLop $argv
+    ls -aFhlop $argv
 end
