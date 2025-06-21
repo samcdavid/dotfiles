@@ -20,3 +20,13 @@ vim.opt.swapfile = false
 vim.opt.showtabline = 0
 vim.opt.bufhidden = "wipe"
 vim.opt.buflisted = false
+
+-- Set colorcolumn based on editorconfig max_line_length
+vim.api.nvim_create_autocmd({ "BufEnter", "BufNewFile" }, {
+  callback = function()
+    local max_line_length = vim.b.editorconfig and vim.b.editorconfig.max_line_length
+    if max_line_length and max_line_length ~= "off" then
+      vim.opt_local.colorcolumn = tostring(max_line_length)
+    end
+  end,
+})

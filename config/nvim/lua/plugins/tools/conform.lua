@@ -1,0 +1,1 @@
+/Users/sam/.dotfiles/dotfiles/config/nvim/lua/plugins/tools/conform.lua
