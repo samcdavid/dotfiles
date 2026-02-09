@@ -1,7 +1,7 @@
 [user]
   name = Sam McDavid
   email = sam@mcdavid.us
-  signingkey = CE48C5D6DE751207
+  signingkey = ED12FA079CD7B57D
 [filter "hawser"]
   clean = git hawser clean %f
   smudge = git hawser smudge %f
@@ -21,3 +21,9 @@
   required = true
 [init]
   defaultBranch = main
+[pager]
+  branch = false
+[includeIf "gitdir:~/Developer/work/"]
+  path = ~/.gitconfig-work
+[includeIf "gitdir:~/Developer/personal/"]
+  path = ~/.gitconfig-personal
