@@ -1,0 +1,2 @@
+-- AI assistant plugins
+return {}

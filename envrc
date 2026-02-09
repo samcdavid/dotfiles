@@ -1,0 +1,2 @@
+export OPENAI_BASE_URL="https://us.api.openai.com/v1"
+

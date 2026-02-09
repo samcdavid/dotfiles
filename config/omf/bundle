@@ -1,4 +1,3 @@
-package asdf
 package bang-bang
 package colored-man-pages
 package config
@@ -7,7 +6,6 @@ package fzf
 package iex
 package mix
 package neovim
-package pbcopy
 package python
 package rustup
 package vi-mode
