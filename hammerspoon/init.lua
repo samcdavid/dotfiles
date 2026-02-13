@@ -2,14 +2,19 @@
 -- Toggles system input device mute, works across all apps.
 
 local micMenubar = hs.menubar.new()
+local savedVolumes = {}
+local micMuted = false
+
+local function getInputDevices()
+    local devices = {}
+    for _, dev in ipairs(hs.audiodevice.allInputDevices()) do
+        table.insert(devices, dev)
+    end
+    return devices
+end
 
 local function updateMicStatus()
-    local device = hs.audiodevice.defaultInputDevice()
-    if not device then
-        micMenubar:setTitle("⚠")
-        return
-    end
-    if device:inputMuted() then
+    if micMuted then
         micMenubar:setTitle("🔇")
         micMenubar:setTooltip("Microphone is MUTED (F6 to toggle)")
     else
@@ -19,16 +24,33 @@ local function updateMicStatus()
 end
 
 local function toggleMicMute()
-    local device = hs.audiodevice.defaultInputDevice()
-    if not device then
+    local devices = getInputDevices()
+    if #devices == 0 then
         hs.alert.show("No input device found")
         return
     end
-    local muted = device:inputMuted()
-    device:setInputMuted(not muted)
-    if muted then
+    if micMuted then
+        -- Unmute all input devices
+        for _, dev in ipairs(devices) do
+            local uid = dev:uid()
+            local vol = savedVolumes[uid] or 100
+            dev:setInputMuted(false)
+            dev:setInputVolume(vol)
+        end
+        savedVolumes = {}
+        micMuted = false
         hs.alert.show("🎤 Mic ON", nil, 0.75)
     else
+        -- Mute all input devices
+        savedVolumes = {}
+        for _, dev in ipairs(devices) do
+            local uid = dev:uid()
+            local vol = dev:inputVolume()
+            savedVolumes[uid] = (vol and vol > 0) and vol or 100
+            dev:setInputVolume(0)
+            dev:setInputMuted(true)
+        end
+        micMuted = true
         hs.alert.show("🔇 Mic MUTED", nil, 0.75)
     end
     updateMicStatus()
