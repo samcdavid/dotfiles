@@ -1,7 +1,7 @@
 [user]
   name = Sam McDavid
   email = sam@mcdavid.us
-  signingkey = 57404A5ADE09CC43
+	signingkey = 57404A5ADE09CC43
 [filter "hawser"]
   clean = git hawser clean %f
   smudge = git hawser smudge %f
@@ -27,3 +27,9 @@
   path = ~/.gitconfig-work
 [includeIf "gitdir:~/Developer/personal/"]
   path = ~/.gitconfig-personal
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
