@@ -8,4 +8,4 @@ SETUVAR FZF_PREVIEW_DIR_CMD:ls
 SETUVAR FZF_PREVIEW_FILE_CMD:head\x20\x2dn\x2010
 SETUVAR FZF_TMUX_HEIGHT:40\x25
 SETUVAR __fish_initialized:4300
-SETUVAR fish_user_paths:/Users/sam/\x2easdf/shims\x1e/usr/local/sbin
+SETUVAR fish_user_paths:/opt/homebrew/opt/postgresql\x4017/bin\x1e/Users/sam/\x2easdf/shims\x1e/usr/local/sbin
