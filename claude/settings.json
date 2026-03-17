@@ -158,5 +158,6 @@
       "mcp__tidewave__project_eval"
     ],
     "deny": []
-  }
+  },
+  "model": "opus[1m]"
 }
