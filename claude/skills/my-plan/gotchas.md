@@ -25,3 +25,19 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Before finalizing, enumerate each requirement from the spec/ticket and confirm each has a corresponding phase or is explicitly scoped out with rationale
 - **Why:** Partial spec completion is a recurring review finding — plans that seem complete but miss 1-2 acceptance criteria
 - **Source:** Recurring pattern in PR reviews
+
+### Boy scout rule — don't defer adjacent fixes
+- **Category:** convention
+- **Context:** Discovering inconsistencies, missing instrumentation, or small bugs in files you're already touching
+- **Wrong:** Listing adjacent fixes in "What We're NOT Doing" or deferring to follow-up tickets. Example: finding an inconsistent tag name while adding tracing to the same module, and scoping it out as "not this ticket"
+- **Right:** If you find something wrong or inconsistent in code you're already working in, bring it into scope. Only defer things genuinely unrelated to the current files and task. Challenge every item in the "NOT Doing" list — if it's in the same files or directly related, it belongs in the plan.
+- **Why:** Deferring small fixes creates tech debt that never gets prioritized. The context is freshest now, and the cost of fixing it is lowest when you're already in the code.
+- **Source:** Recurring pattern — adjacent improvements incorrectly scoped out during planning
+
+### Plans and tickets are not verified facts
+- **Category:** failure-mode
+- **Context:** When a plan references another ticket's work as already done, or when scoping out changes based on reasoning about what another component does
+- **Wrong:** Treating plan checkboxes, ticket descriptions, or your own prior claims as ground truth. Example: "CNVS-451 establishes Logger in the dispatcher" was stated confidently because the plan said it was done — but the dispatcher had zero Logger/tracing code. Similarly, scoping out `edit_screening_questions` because "it accepts dot notation" sounded right but the actual code lacked the validation that reasoning implied.
+- **Right:** Before referencing another ticket's infrastructure or excluding something from scope, read the actual code. A plan saying `[x]` doesn't mean the code exists. A tool "accepting" a parameter doesn't mean it enforces coherence. Verify the mechanism, not just the interface.
+- **Why:** Plans describe intent, not state. Code in other branches may not be merged. Claims compound — one unverified assumption becomes the basis for the next conclusion, and by the time /prove-it catches it, multiple decisions are built on sand.
+- **Source:** CNVS-446 session, 2026-03-18. Observability plan assumed CNVS-451 dispatcher infrastructure existed (it didn't). Scoping decision assumed edit_screening_questions was safe based on surface reasoning (it had the same validation gap).
