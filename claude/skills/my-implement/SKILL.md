@@ -91,3 +91,11 @@ When all phases are complete:
 - Commit meaningful chunks of work as you go (don't wait until everything is done)
 - If you discover something important the plan missed, note it — but stay focused on execution
 - The plan is the WHAT. You decide the HOW based on current codebase state.
+
+## References
+
+This skill has reference files in `references/` — consult them during implementation:
+- `references/verification-commands.md` — common verification commands by stack
+
+## Gotchas
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.

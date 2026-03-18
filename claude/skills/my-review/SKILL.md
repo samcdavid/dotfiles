@@ -121,6 +121,17 @@ Review the changes against these categories, ordered by priority.
 - Guards scoped to known types rather than catch-all else clauses
 - Naming only when genuinely ambiguous
 
+### Security Deep-Dive (Auto-triggered)
+If the diff touches ANY of the following, run `/security-audit` on the affected files before completing the review:
+- Authentication or authorization logic (auth, session, token, permission, policy)
+- Input parsing or validation (params, body, query, headers, deserialization)
+- Database queries constructed with user input
+- File upload/download handling
+- External API credential usage
+- CORS, CSP, or security header configuration
+
+Incorporate the security audit findings into the review under a dedicated "Security" subsection in Blocking Issues.
+
 ## Step 6 — Format the Review
 
 Structure the review as follows:
@@ -174,3 +185,11 @@ Before presenting the review:
 - Cross-service boundaries deserve extra scrutiny — this is where subtle bugs hide
 - Tests should test what they claim to test — vacuously passing tests are worse than no tests
 - NEVER re-raise an issue that already exists in the PR conversation — add to it or skip it
+
+## References
+
+This skill has reference files in `references/` — consult them during review:
+- `references/cross-service-contracts.md` — checklist for cross-service changes
+
+## Gotchas
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.

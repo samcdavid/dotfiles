@@ -158,3 +158,12 @@ Present the plan. Incorporate user feedback. Update the saved plan file with cha
 - Success criteria must be MECHANICAL — if a human has to subjectively judge it, rewrite it as something runnable
 - Be skeptical of your own assumptions — verify against actual code
 - Track all decisions and their rationale
+
+## References
+
+This skill has reference files in `references/` — consult them during planning:
+- `references/stack-checklists.md` — per-stack planning considerations
+- `references/plan-template.md` — copy-paste plan template
+
+## Gotchas
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
