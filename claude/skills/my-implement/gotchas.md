@@ -25,3 +25,19 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Verify cross-service changes in a staging environment before merge. Interaction bugs between services don't surface in isolated test suites.
 - **Why:** Each service's CI only tests its own code. Integration failures (contract mismatches, timing issues, deployment order problems) only appear when services interact
 - **Source:** Recurring pattern in polyglot monorepos
+
+### No lazy imports — imports belong at module top level
+- **Category:** convention
+- **Context:** Writing Python code that needs to import a module
+- **Wrong:** Using `import X` inside a function body to "avoid circular imports" or "defer loading." Example: `def my_func(): import yaml; yaml.dump(...)`
+- **Right:** All imports at the top of the file. If a circular import occurs, fix the module architecture (extract shared types, use a registry pattern, restructure dependencies). The only valid exception is genuinely expensive imports (e.g., SpaCy model loading) where startup cost matters.
+- **Why:** Lazy imports hide dependency relationships, bypass import-time error detection, and paper over architecture problems. They make it impossible to see a module's dependencies at a glance.
+- **Source:** ENA-184 — wrote `import yaml` inside `_cmd_list_versions` when yaml was already loaded transitively
+
+### Functions should be declared at module scope, not nested inside other functions
+- **Category:** convention
+- **Context:** Writing Python business logic
+- **Wrong:** Defining helper functions inside other functions when they don't need closure state. Example: `def process(): def helper(): ...; helper()`
+- **Right:** Declare functions at module scope as first-class citizens. Pass any needed context as parameters. Exceptions: decorator implementations, factory functions that genuinely need closure state, pytest fixtures.
+- **Why:** Nested functions are untestable in isolation, invisible to the module's public surface, and harder to read. They're a code smell indicating the function is doing too much or the module needs better organization.
+- **Source:** ENA-184 code conventions discussion

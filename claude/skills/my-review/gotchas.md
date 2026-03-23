@@ -25,3 +25,27 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Verify there's a corresponding eval or test that validates the change doesn't regress AI behavior. Flag missing eval coverage as a blocking issue.
 - **Why:** Prompt changes without eval coverage are high-risk — small wording changes can cause significant behavior regressions that aren't caught by traditional tests
 - **Source:** Recurring pattern in AI-powered applications
+
+### Reviews are read-only — never edit code
+- **Category:** failure-mode
+- **Context:** Review finds a concrete issue with an obvious fix
+- **Wrong:** Editing the source file to fix the issue during the review (e.g., adding missing data formatting to a node)
+- **Right:** Report the finding in the review output with a concrete code suggestion. Let the author decide whether and how to fix it. NEVER call Edit/Write tools during a review.
+- **Why:** The review skill's job is to REPORT, not to ACT. Editing code during review conflates two distinct roles, bypasses the author's judgment, and can introduce changes the author didn't ask for — especially dangerous when the working tree has uncommitted changes that can't be cleanly reverted.
+- **Source:** Review session where a node file was edited during review, had to manually revert
+
+### Lazy imports are a code smell — flag them
+- **Category:** convention
+- **Context:** Any Python code that uses `import X` inside a function body
+- **Wrong:** Accepting function-level imports as normal, or writing them yourself without question. Common excuse: "avoids circular imports."
+- **Right:** Flag lazy imports as a blocking issue unless the import is genuinely expensive at startup (e.g., SpaCy model loading, heavy ML libraries). Circular import workarounds via lazy imports are masking an architecture problem — the fix is better module organization, not deferred imports.
+- **Why:** Lazy imports hide dependency relationships, make code harder to trace, and paper over circular dependencies that should be resolved structurally. They also bypass import-time error detection.
+- **Source:** ENA-184 review — `import yaml` inside `_cmd_list_versions` was missed in initial review despite yaml already being loaded transitively
+
+### Functions defined inside functions are a code smell — flag them
+- **Category:** convention
+- **Context:** Any Python code that defines a function inside another function (excluding decorators and factory patterns)
+- **Wrong:** Accepting nested function definitions in business logic as normal. Writing closures when a module-level function would work.
+- **Right:** Flag nested function definitions as a non-blocking suggestion. Functions should be first-class citizens declared at module scope. Exceptions: decorator implementations, factory functions that genuinely need closure state, and pytest fixtures.
+- **Why:** Nested functions are harder to read, harder to test independently, and harder to discover in the codebase. They obscure code organization and make it difficult to understand the module's public surface.
+- **Source:** ENA-184 code conventions discussion
