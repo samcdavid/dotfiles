@@ -49,3 +49,11 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Flag nested function definitions as a non-blocking suggestion. Functions should be first-class citizens declared at module scope. Exceptions: decorator implementations, factory functions that genuinely need closure state, and pytest fixtures.
 - **Why:** Nested functions are harder to read, harder to test independently, and harder to discover in the codebase. They obscure code organization and make it difficult to understand the module's public surface.
 - **Source:** ENA-184 code conventions discussion
+
+### Re-review means full re-review — don't coast on prior approval
+- **Category:** failure-mode
+- **Context:** User asks to review a PR that was previously reviewed (re-review request, re-requested review on GitHub, or author says "re-requesting your review")
+- **Wrong:** Assuming the diff hasn't changed, skipping the full review process, or saying "my previous approval stands" without re-reading the diff and all comments. This misses: rebase conflict resolutions that changed your code, new comments from the author requesting specific attention, or fixes that addressed (or broke) your prior feedback.
+- **Right:** Treat every re-review as a fresh review. Re-read the full diff, re-read ALL comments (including issue-level comments where authors often explain what changed), and check if your prior findings are still valid or have been addressed. Look specifically for: author comments mentioning conflicts, edits to your changes, or requests for specific attention.
+- **Why:** PRs evolve between reviews — rebases resolve conflicts (sometimes incorrectly), authors address feedback (sometimes introducing new issues), and new comments add context. Coasting on a prior approval can miss rebase errors (as happened with #24481 where the author edited the reviewer's code during conflict resolution) or leave stale bug comments that should be retracted (as happened with #24470 where both flagged bugs were fixed but the comments were still open).
+- **Source:** PR #24481 (CNVS-429) re-review — author rebased and edited reviewer's code; PR #24470 (ENA-172) re-review — prior bugs were fixed but comments not retracted until re-review
