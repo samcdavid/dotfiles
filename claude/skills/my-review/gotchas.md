@@ -34,13 +34,13 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** The review skill's job is to REPORT, not to ACT. Editing code during review conflates two distinct roles, bypasses the author's judgment, and can introduce changes the author didn't ask for — especially dangerous when the working tree has uncommitted changes that can't be cleanly reverted.
 - **Source:** Review session where a node file was edited during review, had to manually revert
 
-### Lazy imports are a code smell — flag them
+### Lazy imports are a blocking issue — not just a code smell
 - **Category:** convention
-- **Context:** Any Python code that uses `import X` inside a function body
-- **Wrong:** Accepting function-level imports as normal, or writing them yourself without question. Common excuse: "avoids circular imports."
-- **Right:** Flag lazy imports as a blocking issue unless the import is genuinely expensive at startup (e.g., SpaCy model loading, heavy ML libraries). Circular import workarounds via lazy imports are masking an architecture problem — the fix is better module organization, not deferred imports.
-- **Why:** Lazy imports hide dependency relationships, make code harder to trace, and paper over circular dependencies that should be resolved structurally. They also bypass import-time error detection.
-- **Source:** ENA-184 review — `import yaml` inside `_cmd_list_versions` was missed in initial review despite yaml already being loaded transitively
+- **Context:** Any Python code that uses `import X` inside a function body. Applies to both new code in PRs and existing lazy imports in files being touched.
+- **Wrong:** Accepting function-level imports as normal, downgrading them to "non-blocking suggestion," or writing them yourself. Common excuses: "avoids circular imports," "the file has a comment about circular imports," "nearby code does it this way." A common failure mode: new lazy imports are written AND the review only flags them as a non-blocking suggestion — when in fact the circular dependency doesn't even exist.
+- **Right:** Flag lazy imports as a **blocking issue**. Before accepting any lazy import, verify the circular dependency actually exists by testing the module-level import. If it does exist, the fix is better module architecture — not a lazy import. The only valid exception is genuinely expensive imports (SpaCy model loading, heavy ML libraries) where startup cost measurably matters.
+- **Why:** Lazy imports hide dependency relationships, create per-call overhead, bypass import-time error detection, and paper over architecture problems that get worse over time. They are NEVER an acceptable workaround for circular dependencies.
+- **Source:** Recurring pattern — most recently, lazy imports were both written and reviewed without being flagged as blocking. The assumed circular import turned out not to exist at all.
 
 ### Functions defined inside functions are a code smell — flag them
 - **Category:** convention

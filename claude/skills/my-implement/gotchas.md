@@ -26,13 +26,13 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Each service's CI only tests its own code. Integration failures (contract mismatches, timing issues, deployment order problems) only appear when services interact
 - **Source:** Recurring pattern in polyglot monorepos
 
-### No lazy imports — imports belong at module top level
+### No lazy imports — circular dependency avoidance is NEVER an acceptable reason
 - **Category:** convention
-- **Context:** Writing Python code that needs to import a module
-- **Wrong:** Using `import X` inside a function body to "avoid circular imports" or "defer loading." Example: `def my_func(): import yaml; yaml.dump(...)`
-- **Right:** All imports at the top of the file. If a circular import occurs, fix the module architecture (extract shared types, use a registry pattern, restructure dependencies). The only valid exception is genuinely expensive imports (e.g., SpaCy model loading) where startup cost matters.
-- **Why:** Lazy imports hide dependency relationships, bypass import-time error detection, and paper over architecture problems. They make it impossible to see a module's dependencies at a glance.
-- **Source:** ENA-184 — wrote `import yaml` inside `_cmd_list_versions` when yaml was already loaded transitively
+- **Context:** Writing or modifying any Python code. This applies when writing new functions, refactoring existing code, or moving code between modules.
+- **Wrong:** Using `import X` inside a function body to "avoid circular imports" or "defer loading." This includes: (1) writing new lazy imports, (2) copying the pattern from nearby code that already does it, (3) treating lazy imports as a "pragmatic" solution to ship faster. A common failure: a file has a comment like "no imports from X to avoid circular dependencies," so you cargo-cult the pattern for ALL imports — even ones that have zero circular dependency risk.
+- **Right:** All imports at the top of the file. ALWAYS. If a circular import occurs, that is an architecture problem — fix it by extracting shared types, using a registry pattern, or restructuring dependencies. Before writing a lazy import, first verify the circular import actually exists by testing the module-level import. Do not assume it will fail just because nearby code uses lazy imports or the file has a comment about circular imports.
+- **Why:** Lazy imports hide dependency relationships, bypass import-time error detection, paper over architecture problems, and create per-call overhead. They are a code smell that indicates poorly organized modules. The cost of fixing the architecture is always worth it — lazy imports accumulate and make the real dependency graph invisible.
+- **Source:** Recurring pattern. Most recently: wrote lazy imports in a utility function because the host file "avoids cross-module imports" — but the imports in question were to entirely separate packages with no circular dependency risk. The lazy import was cargo-culted without verification.
 
 ### Functions should be declared at module scope, not nested inside other functions
 - **Category:** convention
