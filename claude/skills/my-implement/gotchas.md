@@ -10,13 +10,13 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Fixture pollution causes flaky tests that pass individually but fail when run as a suite, or fail in CI but pass locally due to different test ordering
 - **Source:** Recurring pattern in test suites
 
-### Ecto.Multi key uniqueness
+### Unique keys in batch/multi operations
 - **Category:** edge-case
-- **Context:** Generating Ecto.Multi operations from collections (e.g., bulk inserts/updates)
-- **Wrong:** Using a static key or only the item type as the Multi key when iterating over a collection
-- **Right:** Ensure Multi keys are unique across all items — include the item ID or index in the key (e.g., `{:update_record, record.id}`)
-- **Why:** Duplicate Multi keys silently overwrite earlier operations, causing data loss or runtime crashes that are hard to debug
-- **Source:** Recurring pattern in Elixir codebases
+- **Context:** Building a sequence of keyed operations from a collection (e.g., database multi/transaction builders, bulk inserts, pipeline steps)
+- **Wrong:** Using a static key or only the item type as the operation key when iterating over a collection
+- **Right:** Ensure operation keys are unique across all items — include the item ID or index in the key (e.g., `("update_record", record.id)`)
+- **Why:** Duplicate keys silently overwrite earlier operations, causing data loss or runtime errors that are hard to debug
+- **Source:** Recurring pattern in batch operation APIs across languages
 
 ### Stage complex cross-service changes
 - **Category:** convention
@@ -40,4 +40,4 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Wrong:** Defining helper functions inside other functions when they don't need closure state. Example: `def process(): def helper(): ...; helper()`
 - **Right:** Declare functions at module scope as first-class citizens. Pass any needed context as parameters. Exceptions: decorator implementations, factory functions that genuinely need closure state, pytest fixtures.
 - **Why:** Nested functions are untestable in isolation, invisible to the module's public surface, and harder to read. They're a code smell indicating the function is doing too much or the module needs better organization.
-- **Source:** ENA-184 code conventions discussion
+- **Source:** Recurring pattern in Python codebases

@@ -43,7 +43,7 @@ Then append the entry:
 - **Wrong:** [What Claude did or what seems right but isn't]
 - **Right:** [Correct approach]
 - **Why:** [Root cause / reasoning]
-- **Source:** [PR #, conversation, or discovery date]
+- **Source:** [Generic description of where the pattern was observed — NOT project-specific ticket IDs, PR numbers, or branch names]
 ```
 
 ## Rules
@@ -52,3 +52,4 @@ Then append the entry:
 - **Be specific** — vague gotchas ("be careful with X") are useless. Include concrete wrong/right examples.
 - **One gotcha per entry** — if multiple things went wrong, create multiple entries
 - **De-duplicate** — read the existing gotchas.md first. Don't add something already captured. Update an existing entry if the new instance adds nuance.
+- **Keep gotchas generic** — gotchas must apply across any project. Never include project-specific ticket IDs (e.g., `ENA-184`, `CNVS-429`), PR numbers (e.g., `#24481`), branch names, or project-specific code paths/namespaces. Generalize language-specific patterns to the underlying principle (e.g., "unique keys in batch operations" not "Ecto.Multi key uniqueness"). Use the language or framework name for context but keep the lesson transferable.
