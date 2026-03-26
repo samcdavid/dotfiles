@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$lod$$</string>
+        <key>with</key><string>ಠ_ಠ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$gophers$$</string>
+        <key>with</key><string>ʕ•̫͡•ʕ̫͡ʕ•͓͡•ʔ-̫͡-ʕ•̫͡•ʔ̫͡ʔ-̫͡-ʔ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$yeah$$</string>
+        <key>with</key><string>☜(ຈل͜ຈ☜)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$facepalm$$</string>
+        <key>with</key><string>(－‸ლ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$indifferent-lenny$$</string>
+        <key>with</key><string>( ͡° _ʖ ͡°)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$lenny-stare$$</string>
+        <key>with</key><string>( ͡o ͜ʖ ͡o)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$crying$$</string>
+        <key>with</key><string>(ˊ̥̥̥̥̥ ³ ˋ̥̥̥̥̥)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$sad$$</string>
+        <key>with</key><string>ʘ︵ʘ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$disapproving-lenny$$</string>
+        <key>with</key><string>( ͡ಠ ʖ̯ ͡ಠ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$lenny-wink$$</string>
+        <key>with</key><string>( ͡~ ͜ʖ ͡°)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$happy-girl$$</string>
+        <key>with</key><string>(◕‿◕✿)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$tears-of-joy$$</string>
+        <key>with</key><string>ಥ‿ಥ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$upset$$</string>
+        <key>with</key><string>(*｀へ´*)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$angry-cat$$</string>
+        <key>with</key><string>(^._.^)ﾉ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$kisses$$</string>
+        <key>with</key><string>( ˘ ³˘)♥</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$shy-lenny$$</string>
+        <key>with</key><string>( ͡~ ͜ʖ ͡~)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$jackpot$$</string>
+        <key>with</key><string>(ง ͡ʘ ͜ʖ ͡ʘ)ง</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$mean-lenny$$</string>
+        <key>with</key><string>( ͠° ͟ʖ ͡°)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$strongest$$</string>
+        <key>with</key><string>ᕙ(◕ل͜◕)ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$derp$$</string>
+        <key>with</key><string>¯\(◉◡◔)/¯</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$cant-even$$</string>
+        <key>with</key><string>乁( ◔ ౪◔)ㄏ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$me$$</string>
+        <key>with</key><string>☞(ﾟヮﾟ)☜</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$strong$$</string>
+        <key>with</key><string>ᕦ(ຈل͜ຈ)ᕤ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$silly-lenny$$</string>
+        <key>with</key><string>( ͡^ ͜ʖ ͡^ )</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$dollar-face$$</string>
+        <key>with</key><string>[̲̅$̲̅(̲̅ ͡° ͜ʖ ͡°̲̅)̲̅$̲̅]</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$unsure$$</string>
+        <key>with</key><string>⊜_⊜</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$serious$$</string>
+        <key>with</key><string>(•_•)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$squinting$$</string>
+        <key>with</key><string>-`д´-</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$facepalmed$$</string>
+        <key>with</key><string>(>ლ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$sly$$</string>
+        <key>with</key><string>（；¬＿¬)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$punch$$</string>
+        <key>with</key><string>o(-`д´- ｡)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flip-table$$</string>
+        <key>with</key><string>(╯°□°)╯︵ ┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$rage$$</string>
+        <key>with</key><string>ヽ( ಠ益ಠ )ﾉ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$owl$$</string>
+        <key>with</key><string>◎▼◎</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$bowing$$</string>
+        <key>with</key><string>m(_ _)m</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$why$$</string>
+        <key>with</key><string>ლ(ಠ_ಠლ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flex-biceps$$</string>
+        <key>with</key><string>ᕦ(ò_óˇ)ᕤ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$worried$$</string>
+        <key>with</key><string>(´･_･`)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$success$$</string>
+        <key>with</key><string>(•̀ᴗ•́)و</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$happy-blind$$</string>
+        <key>with</key><string>ರ◡ರ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$stoned-lenny$$</string>
+        <key>with</key><string>( ͡ຈ ͜ʖ ͡ຈ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$sad-lenny$$</string>
+        <key>with</key><string>( ͡° ʖ̯ ͡°)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$no-eyes$$</string>
+        <key>with</key><string>( ͡ ͜ʖ ͡ )</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$doubtful$$</string>
+        <key>with</key><string>ಠಿ_ಠ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$writing-letter$$</string>
+        <key>with</key><string>φ(._.)  </string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$for-real$$</string>
+        <key>with</key><string>눈_눈</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$gimme$$</string>
+        <key>with</key><string>( つ ◕_◕ )つ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$cute$$</string>
+        <key>with</key><string>ლ(◕ω◕ლ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$rub$$</string>
+        <key>with</key><string>ヽ( ͝° ͜ʖ͡°)ﾉ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$dong-or-die$$</string>
+        <key>with</key><string>(ง'̀-'́)ง</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$lower-it$$</string>
+        <key>with</key><string>ノ(ಠ_ಠノ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flex$$</string>
+        <key>with</key><string>ᕙ(ຈل͜ຈ)ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$twerk$$</string>
+        <key>with</key><string>(ง ͠° ͟ل͜ ͡°)ง</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$raise$$</string>
+        <key>with</key><string>ヽ(ຈل͜ຈ)ﾉ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$lower$$</string>
+        <key>with</key><string>┌(ຈل͜ຈ)┐</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$punching-fury$$</string>
+        <key>with</key><string>(ง •̀_•́)ง</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$of-disapproval$$</string>
+        <key>with</key><string>( ಠل͟ಠ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$donger-flip$$</string>
+        <key>with</key><string>ヽ(ຈل͜ຈ)ﾉ︵ ┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$sparkling$$</string>
+        <key>with</key><string>(⁎⚈᷀᷁ᴗ⚈᷀᷁⁎)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$puppy-eyes$$</string>
+        <key>with</key><string>◕ᴥ◕</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$table-back$$</string>
+        <key>with</key><string>┳━┳ ヽ(ಠل͜ಠ)ﾉ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$cat$$</string>
+        <key>with</key><string>｡＾･ｪ･＾｡</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$yelling$$</string>
+        <key>with</key><string>(　ﾟДﾟ)＜!!</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$monocle$$</string>
+        <key>with</key><string>ಠ_ರೃ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$creepy-wink$$</string>
+        <key>with</key><string>ಠ‿↼</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$plain-lenny$$</string>
+        <key>with</key><string>͡° ͜ʖ ͡°</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$not-sure$$</string>
+        <key>with</key><string>(；一_一)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$sorry$$</string>
+        <key>with</key><string>(ಥ﹏ಥ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$table-down$$</string>
+        <key>with</key><string>┬─┬ノ( º _ ºノ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$wink$$</string>
+        <key>with</key><string>◕‿↼</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flex-dont-mess$$</string>
+        <key>with</key><string>ᕙ(⇀‸↼‶)ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$happy-dog$$</string>
+        <key>with</key><string>(ᵔᴥᵔ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$bear$$</string>
+        <key>with</key><string>ʕ•ᴥ•ʔ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$shrug$$</string>
+        <key>with</key><string>¯\_(ツ)_/¯</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$fists$$</string>
+        <key>with</key><string>୧( ͡◉ل͜ ͡◉)୨</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$beer-buddies$$</string>
+        <key>with</key><string>（ ^_^）o自自o（^_^ ）</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$writing$$</string>
+        <key>with</key><string>φ(．．;)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$kissing$$</string>
+        <key>with</key><string>(っ˘з(˘⌣˘ )</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flexing$$</string>
+        <key>with</key><string>ᕙ( ͡° ͜ʖ ͡°)ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$creepy-lod$$</string>
+        <key>with</key><string>ಠ‿ಠ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$tears-of-sadness$$</string>
+        <key>with</key><string>ಥ╭╮ಥ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flip-you$$</string>
+        <key>with</key><string>(ノಠ ∩ಠ)ノ彡( \o°o)\</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$what-do-you-want$$</string>
+        <key>with</key><string>ლ(ಠ益ಠლ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flip-upside-down$$</string>
+        <key>with</key><string>(╯°Д°)╯︵/(.□ . \)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$shark$$</string>
+        <key>with</key><string>⊙︿⊙</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$running-lenny$$</string>
+        <key>with</key><string>ᕕ( ͡° ͜ʖ ͡° )ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$puppy-lod$$</string>
+        <key>with</key><string>ಠᴥಠ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$peace$$</string>
+        <key>with</key><string>(✌ﾟ∀ﾟ)☞</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$running-lod$$</string>
+        <key>with</key><string>ᕕ(ಠ_ಠ)ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$zen-fingers$$</string>
+        <key>with</key><string>╭∩╮(︶︿︶)╭∩╮</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$happy-running$$</string>
+        <key>with</key><string>ᕕ(ᐛ)ᕗ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$dismay$$</string>
+        <key>with</key><string>ಠ ∩ ಠ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$glasses$$</string>
+        <key>with</key><string>(-■_■)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$mckayla$$</string>
+        <key>with</key><string>̯๏๏</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$happy-look$$</string>
+        <key>with</key><string>ʘ‿ʘ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$puss-in-boots$$</string>
+        <key>with</key><string>◕ ◡ ◕</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$stoned$$</string>
+        <key>with</key><string>◙‿◙</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$angry-flip$$</string>
+        <key>with</key><string>(ノಠ益ಠ)ノ彡┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$lod-alt$$</string>
+        <key>with</key><string>סּ_סּ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$bear-look$$</string>
+        <key>with</key><string>(`･ω･´)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$doggy$$</string>
+        <key>with</key><string>•ᴥ•</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$alarmed-flip$$</string>
+        <key>with</key><string>(┛◉Д◉)┛彡┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$zoidberg$$</string>
+        <key>with</key><string>(V) (ಠ,,,ಠ) (V)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$prawn$$</string>
+        <key>with</key><string>(ಠ,,,ಠ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$zoidberg-look$$</string>
+        <key>with</key><string>(\/) (°,,°) (\/)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$whatever$$</string>
+        <key>with</key><string>◔_◔</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$kidding$$</string>
+        <key>with</key><string>●_●</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$awe$$</string>
+        <key>with</key><string>{´◕ ◡ ◕`}</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$disbelief$$</string>
+        <key>with</key><string>☉_☉</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$mustache$$</string>
+        <key>with</key><string>ಠ෴ಠ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flip-table-look$$</string>
+        <key>with</key><string>(┛ಠ_ಠ)┛彡┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$suave$$</string>
+        <key>with</key><string>〜(￣△￣〜)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$noble$$</string>
+        <key>with</key><string>ಠ_ృ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$dude$$</string>
+        <key>with</key><string>☜(ﾟヮﾟ☜)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$sweet$$</string>
+        <key>with</key><string>(☞ﾟヮﾟ)☞</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$ray-charles$$</string>
+        <key>with</key><string>(⌐■_■)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$glasses-look$$</string>
+        <key>with</key><string>(⌐▨_▨)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$egyptian$$</string>
+        <key>with</key><string>ƪ(‾.‾")┐</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flip-all-tables$$</string>
+        <key>with</key><string>┻━┻︵ \(°□°)/ ︵ ┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$epic-flip$$</string>
+        <key>with</key><string>(˚Õ˚)ر ~~~~╚╩╝</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$tables-back$$</string>
+        <key>with</key><string>┏━┓┏━┓┏━┓ ︵ /(^.^/)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$ko$$</string>
+        <key>with</key><string>O=('-'Q)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$right-back$$</string>
+        <key>with</key><string>(☞ﾟ∀ﾟ)☞</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$serious-look$$</string>
+        <key>with</key><string>(ಠ_ಠ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$angry$$</string>
+        <key>with</key><string>(⋟﹏⋞)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$happy-square$$</string>
+        <key>with</key><string>【ツ】</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$so-sorry$$</string>
+        <key>with</key><string>（ﾉ´д｀）</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$meh$$</string>
+        <key>with</key><string>ヽ(。_°)ノ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$goofy$$</string>
+        <key>with</key><string>(•̪●)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$unimpressed$$</string>
+        <key>with</key><string>(॓॔)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$nyancat$$</string>
+        <key>with</key><string>≋≋≋≋≋̯̫⌧̯̫(ˆ•̮ ̮•ˆ)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$wizard$$</string>
+        <key>with</key><string>(∩ ` -´)⊃━━☆ﾟ.*･｡ﾟ</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$pointing-flip$$</string>
+        <key>with</key><string>(☞ﾟヮﾟ)☞ ┻━┻</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$tired$$</string>
+        <key>with</key><string>/___\</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$shy$$</string>
+        <key>with</key><string>␦●•●'?</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$flip-left$$</string>
+        <key>with</key><string>┻━┻ ︵╰(°□°╰)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$roll-eyes$$</string>
+        <key>with</key><string>(◔_◔)</string>
+    </dict>
+    <dict>
+        <key>on</key><integer>1</integer>
+        <key>replace</key><string>$$tophat-lod$$</string>
+        <key>with</key><string>┌─┐ ┴─┴ ಠ_ರೃ</string>
+    </dict>
+</array>
+</plist>
