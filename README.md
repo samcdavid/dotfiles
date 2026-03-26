@@ -1,13 +1,31 @@
 # Dotfiles
 
-Personal dotfiles managed with the [rcm suite](https://github.com/thoughtbot/rcm). Works on both Intel and Apple Silicon Macs.
+Personal dotfiles and machine setup, managed with the [rcm suite](https://github.com/thoughtbot/rcm). Works on both Intel and Apple Silicon Macs.
 
-## Setup
+## New Machine Setup
 
 ```bash
-git clone git@github.com:samcdavid/dotfiles.git ~/.dotfiles
-rcup
+git clone https://github.com/samcdavid/dotfiles.git ~/.dotfiles && ~/.dotfiles/setup/mac
 ```
+
+This single command will:
+
+1. Install Homebrew and all packages/casks
+2. Symlink dotfiles via rcm
+3. Authenticate with GitHub
+4. Generate SSH and GPG keys
+5. Set Fish as default shell
+6. Install asdf plugins and language runtimes
+7. Install Oh My Fish packages
+8. Install Neovim plugins
+9. Install tmux plugins
+10. Configure macOS preferences and text replacements
+
+Each run is logged to `~/laptop.log` (auto-numbered on re-runs: `laptop1.log`, `laptop2.log`, etc.).
+
+### Manual Steps
+
+- Set up 1Password before running the script
 
 ## Environment
 
@@ -15,11 +33,16 @@ rcup
 - **Editor**: Neovim with LazyVim framework
 - **Terminal**: Ghostty + tmux with vim-like bindings and TPM
 - **Version Manager**: asdf (Ruby, Node.js, Erlang, Elixir, Python, Go)
-- **VCS**: Git with GPG signing
+- **VCS**: Git with GPG and SSH key signing
 
 ## Structure
 
 ```
+setup/
+├── mac                     # Bootstrap script
+├── macos                   # macOS preferences (Dock, Finder, cursor, text replacements)
+├── Brewfile                # Homebrew packages and casks
+└── text-replacements.plist # Looks of disapproval text replacements
 config/
 ├── fish/         # Fish shell config + 32 custom functions
 ├── ghostty/      # Ghostty terminal config
@@ -48,10 +71,12 @@ tool-versions     # asdf runtime versions
 | Tmux | `mux`, `muxc`, `muxn`, `muxs` |
 | System | `ll`, `myip`, `vim`, `tf`, `cleanpyc` |
 
-## Post-Setup
+## Updating Dotfiles
 
-After running `rcup`:
-
-1. Install asdf runtimes: `asdf install`
-2. Install TPM plugins: `<prefix> + I` inside tmux
-3. Install OMF packages: `omf install` inside fish
+```bash
+rcup        # Re-symlink after pulling changes
+rcup -v     # Verbose output
+mkrc <file> # Add a new dotfile to the repo
+lsrc        # List all managed symlinks
+rcdn        # Remove symlinks
+```
