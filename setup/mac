@@ -1,0 +1,260 @@
+#!/bin/bash
+
+# Laptop setup script
+# Be prepared to turn your laptop (or desktop, no haters here)
+# into an awesome development machine.
+
+# Manual Steps
+# ============
+# * Setup 1password
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Auto-numbered log file: laptop.log, laptop1.log, laptop2.log, ...
+LOG_FILE="$HOME/laptop.log"
+if [ -f "$LOG_FILE" ]; then
+  n=1
+  while [ -f "$HOME/laptop${n}.log" ]; do
+    n=$((n + 1))
+  done
+  LOG_FILE="$HOME/laptop${n}.log"
+fi
+exec > >(tee "$LOG_FILE") 2>&1
+echo "Logging to $LOG_FILE"
+
+fancy_echo() {
+  local fmt="$1"; shift
+
+  # shellcheck disable=SC2059
+  printf "\n$fmt\n" "$@"
+}
+
+if [ ! -d "$HOME/.bin/" ]; then
+  mkdir "$HOME/.bin"
+fi
+
+# Determine Homebrew prefix based on architecture
+ARCH="$(uname -m)"
+if [ "$ARCH" = "arm64" ]; then
+  HOMEBREW_PREFIX="/opt/homebrew"
+else
+  HOMEBREW_PREFIX="/usr/local"
+fi
+
+if ! command -v brew >/dev/null; then
+  fancy_echo "Installing Homebrew ..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  if [ $? -ne 0 ]; then
+    printf "Homebrew installation failed. Exiting.\n" >&2
+    exit 1
+  fi
+
+  # Add Homebrew to PATH for this session
+  eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
+fi
+
+fancy_echo "Updating Homebrew formulae ..."
+brew update --force
+
+# Allow brew bundle to report failures without aborting the script.
+# Individual formula/cask failures are logged but won't prevent the
+# rest of the setup from completing.
+brew bundle --file="$SCRIPT_DIR/Brewfile"
+
+if [ $? -ne 0 ]; then
+  fancy_echo "Warning: Some formulae or casks failed to install. Check the output above."
+  fancy_echo "Continuing with the rest of the setup..."
+fi
+
+# Refresh PATH so newly installed binaries are discoverable
+eval "$($HOMEBREW_PREFIX/bin/brew shellenv)"
+hash -r 2>/dev/null || true
+
+# Verify critical dependencies before proceeding
+for cmd in rcup fish gh asdf; do
+  if ! command -v "$cmd" >/dev/null; then
+    fancy_echo "Error: '$cmd' is required but was not installed by Homebrew."
+    fancy_echo "Please check the brew bundle output above and install it manually."
+    exit 1
+  fi
+done
+
+# From here on, abort on errors — these steps depend on each other
+set -e
+
+# Set up git-lfs hooks
+if command -v git-lfs >/dev/null; then
+  git lfs install
+else
+  fancy_echo "Warning: git-lfs not found. Skipping git lfs setup."
+fi
+
+# Create dotfiles symlinks
+fancy_echo "Setting up dotfiles symlinks..."
+rcup -f
+
+# Authenticate with GitHub (after rcup so dotfiles gitconfig is in place first)
+if ! gh auth status >/dev/null 2>&1; then
+  fancy_echo "Authenticating with GitHub..."
+  fancy_echo "A browser window will open for you to sign in."
+  if gh auth login --web --git-protocol https -h github.com; then
+    fancy_echo "GitHub authentication successful."
+  else
+    fancy_echo "Warning: GitHub authentication failed or was skipped."
+    fancy_echo "You can authenticate later with: gh auth login"
+  fi
+fi
+# Ensure git is configured to use gh as credential helper
+gh auth setup-git
+
+# Generate SSH key and add to GitHub
+SSH_KEY="$HOME/.ssh/id_ed25519"
+if [ ! -f "$SSH_KEY" ]; then
+  fancy_echo "Generating SSH key..."
+  ssh-keygen -t ed25519 -C "sam@mcdavid.us" -f "$SSH_KEY"
+fi
+
+# Add key to macOS Keychain
+ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null
+
+# Upload public key to GitHub
+if gh auth status >/dev/null 2>&1; then
+  printf "\nEnter a name for this SSH key on GitHub (e.g. 'Work MacBook Pro'): "
+  read -r SSH_KEY_TITLE
+  if [ -n "$SSH_KEY_TITLE" ] && gh ssh-key add "${SSH_KEY}.pub" --title "$SSH_KEY_TITLE" 2>/dev/null; then
+    fancy_echo "SSH key added to GitHub as '$SSH_KEY_TITLE'."
+  else
+    fancy_echo "Warning: Could not add SSH key to GitHub (may already exist or no title given)."
+  fi
+else
+  fancy_echo "SSH key generated. Add to GitHub manually:"
+  fancy_echo "  gh ssh-key add ${SSH_KEY}.pub --title 'Your Key Name'"
+fi
+
+# Set fish as default shell
+update_shell() {
+  local shell_path;
+  shell_path="$(which fish)"
+
+  fancy_echo "Changing your shell to fish ..."
+  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
+    fancy_echo "Adding '$shell_path' to /etc/shells"
+    sudo sh -c "echo $shell_path >> /etc/shells"
+  fi
+  chsh -s "$shell_path"
+}
+
+case "$SHELL" in
+  */fish)
+    fancy_echo "Already using fish shell."
+    ;;
+  *)
+    update_shell
+    ;;
+esac
+
+# Configure asdf version manager (installed via Homebrew)
+fancy_echo "Configuring asdf version manager..."
+
+install_asdf_plugin() {
+  local name="$1"
+  local url="${2:-}"
+
+  if ! asdf plugin list 2>/dev/null | grep -Fq "$name"; then
+    if [ -n "$url" ]; then
+      asdf plugin add "$name" "$url" || {
+        fancy_echo "Warning: Failed to add asdf plugin '$name'. Retrying..."
+        asdf plugin add "$name" "$url"
+      }
+    else
+      asdf plugin add "$name" || {
+        fancy_echo "Warning: Failed to add asdf plugin '$name'. Retrying..."
+        asdf plugin add "$name"
+      }
+    fi
+  fi
+}
+
+# Source asdf for this session
+# shellcheck disable=SC1091
+. "$(brew --prefix asdf)/libexec/asdf.sh"
+
+install_asdf_plugin "ruby"
+install_asdf_plugin "nodejs"
+install_asdf_plugin "erlang"
+install_asdf_plugin "elixir"
+install_asdf_plugin "python"
+install_asdf_plugin "golang"
+install_asdf_plugin "terraform" "https://github.com/asdf-community/asdf-hashicorp"
+install_asdf_plugin "superdb" "https://github.com/chrismo/asdf-superdb.git"
+
+fancy_echo "Installing languages from ~/.tool-versions..."
+(cd "$HOME" && asdf install)
+
+if [ -f "$HOME/.laptop.local" ]; then
+  fancy_echo "Running your customizations from ~/.laptop.local ..."
+  # shellcheck disable=SC1090
+  . "$HOME/.laptop.local"
+fi
+
+# Install Oh My Fish
+if [ ! -d "$HOME/.local/share/omf" ]; then
+  fancy_echo "Installing Oh My Fish..."
+  curl -L https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > /tmp/omf-install
+  fish /tmp/omf-install --noninteractive
+  rm /tmp/omf-install
+fi
+
+# Install Oh My Fish packages from bundle
+fancy_echo "Installing Oh My Fish packages..."
+fish -c "omf install"
+
+# Install Neovim plugins via Lazy
+fancy_echo "Installing Neovim plugins..."
+nvim --headless "+Lazy! sync" +qa
+
+# Install tmux plugins via TPM
+fancy_echo "Installing tmux plugins..."
+"$HOMEBREW_PREFIX/opt/tpm/share/tpm/bin/install_plugins"
+
+# Generate GPG key for commit signing
+GPG_EMAIL="sam@mcdavid.us"
+if ! gpg --list-secret-keys "$GPG_EMAIL" >/dev/null 2>&1; then
+  fancy_echo "Generating GPG key for commit signing..."
+  fancy_echo "You will be prompted to set a passphrase for the key."
+  if gpg --quick-generate-key "Sam McDavid <$GPG_EMAIL>" rsa4096 default 0; then
+    fancy_echo "GPG key generated successfully."
+  else
+    fancy_echo "Warning: GPG key generation failed. Set up manually later."
+  fi
+fi
+
+# Configure GPG signing in git and add key to GitHub
+GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long "$GPG_EMAIL" 2>/dev/null \
+  | awk '/^sec/{print $2}' | cut -d'/' -f2 | head -1)
+
+if [ -n "$GPG_KEY_ID" ]; then
+  git config --global user.signingkey "$GPG_KEY_ID"
+  git config --file "$HOME/.gitconfig-work" user.signingkey "$GPG_KEY_ID"
+  git config --file "$HOME/.gitconfig-personal" user.signingkey "$GPG_KEY_ID"
+
+  if gh auth status >/dev/null 2>&1; then
+    if gpg --armor --export "$GPG_KEY_ID" | gh gpg-key add - 2>/dev/null; then
+      fancy_echo "GPG key $GPG_KEY_ID added to GitHub."
+    else
+      fancy_echo "Warning: Could not add GPG key to GitHub (may already exist)."
+    fi
+  else
+    fancy_echo "GPG key configured locally. Add to GitHub manually:"
+    fancy_echo "  gpg --armor --export $GPG_KEY_ID | gh gpg-key add -"
+  fi
+
+  fancy_echo "GPG signing configured with key $GPG_KEY_ID"
+else
+  fancy_echo "Warning: No GPG key found. Commit signing will need manual setup."
+fi
+
+# Configure macOS preferences and text replacements
+fancy_echo "Configuring macOS preferences..."
+"$SCRIPT_DIR/macos"

@@ -1,0 +1,97 @@
+tap "brimdata/tap"
+
+# Unix
+brew "git"
+brew "git-lfs"
+brew "openssl@3"
+brew "rcm"
+brew "tmux"
+brew "tmuxinator"
+brew "tpm"
+brew "watchman"
+brew "zsh"
+brew "fish"
+
+# GitHub
+brew "gh"
+
+# Image manipulation / processing
+brew "imagemagick"
+brew "jasper"
+brew "vips"
+
+# Programming language prerequisites and package managers
+brew "asdf"
+brew "yarn"
+
+# Databases
+brew "postgresql@17"
+brew "redis"
+
+# Cloud / infrastructure
+brew "awscli"
+brew "circleci"
+
+# Dev tools
+brew "chroma"
+brew "cmake"
+brew "cmake-docs"
+brew "colordiff"
+brew "direnv"
+brew "ffmpeg@6"
+brew "fswatch"
+brew "fzf"
+brew "jq"
+brew "libiconv"
+brew "libxslt"
+brew "llvm"
+brew "miller"
+brew "mkcert"
+brew "neovim"
+brew "pipx"
+brew "ripgrep"
+brew "shellcheck"
+brew "htop"
+brew "tree"
+brew "unixodbc"
+brew "websocat"
+brew "wget"
+brew "wxwidgets"
+brew "yt-dlp"
+brew "brimdata/tap/zq"
+
+# Fun
+brew "cowsay"
+brew "figlet"
+brew "fortune"
+brew "lolcat"
+
+# Casks
+cask "1password"
+cask "altair-graphql-client"
+cask "chromedriver"
+cask "claude"
+cask "claude-code"
+cask "codex"
+cask "docker-desktop"
+cask "font-hack"
+cask "font-jetbrains-mono"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-menlo-for-powerline"
+cask "font-sf-mono-for-powerline"
+cask "gcloud-cli"
+cask "ghostty"
+cask "gpg-suite"
+cask "hammerspoon"
+cask "insomnia"
+cask "linear-linear"
+cask "loom"
+cask "macdown"
+cask "muzzle"
+cask "ngrok"
+cask "notion"
+cask "protonvpn"
+cask "rectangle"
+cask "session-manager-plugin"
+cask "tuple"
+cask "visual-studio-code"

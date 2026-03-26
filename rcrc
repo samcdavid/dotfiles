@@ -1,1 +1,2 @@
 SYMLINK_DIRS="claude/agents"
+EXCLUDES="setup"
