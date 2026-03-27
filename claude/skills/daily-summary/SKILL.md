@@ -1,6 +1,6 @@
 ---
 name: daily-summary
-description: Daily workflow that summarizes yesterday's work in Notion, generates a standup for clipboard, and builds today's prioritized checklist from Linear and Google Calendar.
+description: Daily workflow that summarizes yesterday's work in Notion, generates a standup for clipboard, and builds today's prioritized checklist from Linear, Google Calendar, and Gmail.
 disable-model-invocation: true
 ---
 
@@ -15,6 +15,7 @@ Fetch all of the following in parallel:
 1. **Notion**: Search Notion for my yearly ToDo doc (titled with the current year, e.g., "2026 ToDo"). Fetch yesterday's entry from it. "Yesterday" means the most recent workday (skip weekends/holidays). Read all activities, actions, decisions, and general notes for that day.
 2. **Linear**: List issues assigned to me. Also list the Linear projects I am a member of.
 3. **Google Calendar**: Use Google Calendar to review my calendar for today — meetings, events, and time blocks.
+4. **Gmail**: Search Gmail for messages in my inbox. Focus on unread and recent messages that are work-related and require action — replies needed, requests, approvals, follow-ups, or deadlines. Ignore marketing emails, newsletters, promotional content, and automated notifications that don't require a response.
 
 ## Phase 2 — Enrich
 
@@ -50,4 +51,4 @@ Copy the standup to my clipboard using `pbcopy`.
 
 ## Phase 5 — Build Today's Checklist
 
-Using the gathered context from Linear (assigned issues, project priorities) and Google Calendar (today's meetings), add a checklist to **Today's** entry in the Notion doc. Order items from highest to lowest priority. Include meetings at the appropriate priority level based on their importance and timing.
+Using the gathered context from Linear (assigned issues, project priorities), Google Calendar (today's meetings), and Gmail (actionable emails), add a checklist to **Today's** entry in the Notion doc. Order items from highest to lowest priority. Include meetings at the appropriate priority level based on their importance and timing. For email-sourced items, include enough context to act on them (sender, subject, what's needed) without needing to re-read the email.
