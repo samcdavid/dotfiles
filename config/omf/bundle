@@ -8,6 +8,5 @@ package mix
 package neovim
 package python
 package rustup
-package vi-mode
 theme agnoster
 theme default

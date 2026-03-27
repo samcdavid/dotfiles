@@ -98,7 +98,7 @@ rcup -f
 if ! gh auth status >/dev/null 2>&1; then
   fancy_echo "Authenticating with GitHub..."
   fancy_echo "A browser window will open for you to sign in."
-  if gh auth login --web --git-protocol https -h github.com; then
+  if gh auth login --web --git-protocol https -h github.com --scopes admin:public_key,admin:gpg_key; then
     fancy_echo "GitHub authentication successful."
   else
     fancy_echo "Warning: GitHub authentication failed or was skipped."
@@ -120,12 +120,11 @@ ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null
 
 # Upload public key to GitHub
 if gh auth status >/dev/null 2>&1; then
-  printf "\nEnter a name for this SSH key on GitHub (e.g. 'Work MacBook Pro'): "
-  read -r SSH_KEY_TITLE
-  if [ -n "$SSH_KEY_TITLE" ] && gh ssh-key add "${SSH_KEY}.pub" --title "$SSH_KEY_TITLE" 2>/dev/null; then
+  SSH_KEY_TITLE="$(scutil --get ComputerName 2>/dev/null || hostname -s)"
+  if gh ssh-key add "${SSH_KEY}.pub" --title "$SSH_KEY_TITLE"; then
     fancy_echo "SSH key added to GitHub as '$SSH_KEY_TITLE'."
   else
-    fancy_echo "Warning: Could not add SSH key to GitHub (may already exist or no title given)."
+    fancy_echo "Warning: Could not add SSH key to GitHub (may already exist)."
   fi
 else
   fancy_echo "SSH key generated. Add to GitHub manually:"

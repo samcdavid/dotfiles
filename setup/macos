@@ -25,44 +25,60 @@ fancy_echo "Configuring trackpad..."
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 
-# Cursor size (larger for 4K monitors, default is 1.0)
-fancy_echo "Configuring cursor size..."
-defaults write com.apple.universalaccess mouseDriverCursorSize -float 2.0
-
 # Text replacements (looks of disapproval)
+# macOS stores these in a SQLite database, not defaults
 fancy_echo "Setting up text replacements..."
 SCRIPT_DIR="$SCRIPT_DIR" python3 << 'PYEOF'
-import plistlib, subprocess, tempfile, os
+import plistlib, sqlite3, os, uuid, time
 
 replacements_path = os.path.join(os.environ["SCRIPT_DIR"], "text-replacements.plist")
 with open(replacements_path, 'rb') as f:
     replacements = plistlib.load(f)
 
-# Export current global domain
-with tempfile.NamedTemporaryFile(suffix='.plist', delete=False) as tf:
-    current_path = tf.name
+db_path = os.path.expanduser("~/Library/KeyboardServices/TextReplacements.db")
+conn = sqlite3.connect(db_path)
+c = conn.cursor()
 
-subprocess.run(['defaults', 'export', '-g', current_path], check=True)
+# Get the current max primary key and Z_MAX for the entity
+c.execute("SELECT COALESCE(MAX(Z_PK), 0) FROM ZTEXTREPLACEMENTENTRY")
+max_pk = c.fetchone()[0]
 
-with open(current_path, 'rb') as f:
-    prefs = plistlib.load(f)
+# Core Data epoch: 2001-01-01T00:00:00Z
+cd_epoch = 978307200
+timestamp = time.time() - cd_epoch
 
-# Keep any manually added replacements (not using $$ pattern), merge ours in
-existing = prefs.get('NSUserDictionaryReplacementItems', [])
-manual = [r for r in existing if not r.get('replace', '').startswith('$$')]
-prefs['NSUserDictionaryReplacementItems'] = manual + replacements
+added = 0
+for r in replacements:
+    shortcut = r.get("replace", "")
+    phrase = r.get("with", "")
+    if not shortcut or not phrase:
+        continue
 
-with open(current_path, 'wb') as f:
-    plistlib.dump(prefs, f)
+    # Skip if this shortcut already exists and isn't deleted
+    c.execute("SELECT Z_PK FROM ZTEXTREPLACEMENTENTRY WHERE ZSHORTCUT = ? AND ZWASDELETED = 0", (shortcut,))
+    if c.fetchone():
+        continue
 
-subprocess.run(['defaults', 'import', '-g', current_path], check=True)
-os.unlink(current_path)
+    max_pk += 1
+    unique_name = str(uuid.uuid4()).upper()
+    c.execute("""
+        INSERT INTO ZTEXTREPLACEMENTENTRY
+        (Z_PK, Z_ENT, Z_OPT, ZNEEDSSAVETOCLOUD, ZWASDELETED, ZTIMESTAMP, ZPHRASE, ZSHORTCUT, ZUNIQUENAME)
+        VALUES (?, 1, 1, 1, 0, ?, ?, ?, ?)
+    """, (max_pk, timestamp, phrase, shortcut, unique_name))
+    added += 1
 
-print(f"  Imported {len(replacements)} text replacements.")
+# Update Z_PRIMARYKEY so Core Data stays consistent
+c.execute("UPDATE Z_PRIMARYKEY SET Z_MAX = ? WHERE Z_ENT = 1", (max_pk,))
+
+conn.commit()
+conn.close()
+print(f"  Imported {added} text replacements.")
 PYEOF
 
-# Apply Dock and Finder changes
+# Apply changes
 killall Dock 2>/dev/null
 killall Finder 2>/dev/null
+killall cfprefsd 2>/dev/null
 
 fancy_echo "macOS preferences configured. Some changes may require logout/restart."

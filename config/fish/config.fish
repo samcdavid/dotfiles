@@ -1,5 +1,6 @@
 if status is-interactive
-    # Commands to run in interactive sessions can go here
+    # Use Fish's built-in vi mode
+    set -g fish_key_bindings fish_vi_key_bindings
     # ASDF configuration code
     if test -z $ASDF_DATA_DIR
         set _asdf_shims "$HOME/.asdf/shims"
