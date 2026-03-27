@@ -15,3 +15,5 @@ if status is-interactive
     set --erase _asdf_shims
 end
 
+fish_add_path /opt/homebrew/opt/ffmpeg@6/bin
+fish_add_path $HOME/.local/bin
