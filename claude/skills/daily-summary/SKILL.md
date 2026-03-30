@@ -14,7 +14,7 @@ Fetch all of the following in parallel:
 
 1. **Notion**: Search Notion for my yearly ToDo doc (titled with the current year, e.g., "2026 ToDo"). Fetch yesterday's entry from it. "Yesterday" means the most recent workday (skip weekends/holidays). Read all activities, actions, decisions, and general notes for that day.
 2. **Linear**: List issues assigned to me. Also list the Linear projects I am a member of.
-3. **Google Calendar**: Use Google Calendar to review my calendar for today — meetings, events, and time blocks.
+3. **Google Calendar**: Use Google Calendar to review my calendar for today — meetings, events, and time blocks. Also fetch the next 7 calendar days and look for **PTO / time-off**: any all-day events whose title contains words like "PTO", "OOO", "Vacation", "Off", "Out of Office", "Holiday", or similar. Include company-wide holidays (they will appear as all-day events on my calendar). If I have consecutive days off, extend the lookup until you find the first day I'm back in office.
 4. **Gmail**: Search Gmail for messages in my inbox. Focus on unread and recent messages that are work-related and require action — replies needed, requests, approvals, follow-ups, or deadlines. Ignore marketing emails, newsletters, promotional content, and automated notifications that don't require a response.
 
 ## Phase 2 — Enrich
@@ -44,6 +44,8 @@ T:
 - ABC-123: verify in staging
 - ABC-789: continue work, target ready for review
 ```
+
+**Out of Office** — if any PTO days, vacation, or company holidays were found in the next 7 days (or beyond, if consecutive days off extend further), add an `OOO:` section after the `T:` section. List the dates and reason (e.g., "PTO", "Company Holiday — Good Friday"). If I'm out for a block of consecutive days, show the range and note when I'll be back (e.g., "OOO Mon 3/30 – Wed 4/1, back Thu 4/2"). If no upcoming time off was found, omit the section entirely.
 
 **Parking Lot** — only include a `PL:` section if there is something that genuinely needs to be discussed with the entire team. If nothing qualifies, omit the section entirely.
 
