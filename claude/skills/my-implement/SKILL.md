@@ -1,6 +1,6 @@
 ---
 name: my-implement
-description: Execute an approved implementation plan phase-by-phase with continuous verification. Uses reasoning sandwich (think-act-verify) and loop detection to maintain quality and forward momentum.
+description: Execute an approved implementation plan phase-by-phase using mandatory red/green/refactor TDD. Writes failing tests first, then minimum production code to pass, with loop detection to maintain forward momentum.
 disable-model-invocation: true
 ---
 
@@ -18,28 +18,48 @@ Read ALL files mentioned in the plan FULLY (no limit/offset).
 
 Create a todo list (TodoWrite) to track implementation progress.
 
-## Implementation Loop
+## Implementation Loop — Red/Green/Refactor
 
-For each phase, for each change:
+TDD is mandatory. For each phase, follow this cycle strictly:
 
-### 1. THINK (Reasoning Sandwich — Before)
-Before making any code change, state:
-- What you're about to change and why
-- What the expected outcome is
-- What could go wrong
+### 1. RED — Write the Failing Test
 
-### 2. ACT
-Make the change. Follow the plan's intent while adapting to codebase reality — the plan is a guide, not a straitjacket. If the code has evolved since planning, adapt intelligently.
+Before writing ANY production code for this phase:
 
-### 3. VERIFY (Reasoning Sandwich — After)
-After each change:
-- Run the relevant success criteria for this phase
-- Check that nothing unrelated broke
-- Verify the change matches your stated intent from step 1
+1. **State intent**: What behavior are you testing and why?
+2. **Write the test(s)** defined in the plan's "Tests First (RED)" section
+3. **Run the test(s)** — they MUST FAIL
+   - If the test passes immediately, it's not testing new behavior. Rewrite it or investigate why.
+   - If the test errors (won't compile/import), fix the test scaffolding only — do NOT write production code yet.
+4. **Confirm RED**: You now have a failing test that describes the desired behavior.
 
-If verification passes: update the plan checkbox to `[x]`, update todos, continue.
+Update the plan's RED checkboxes to `[x]`.
 
-If verification fails: attempt to fix (max 2 attempts on the same issue). If still failing, see Loop Detection below.
+**HARD RULE**: Do not proceed to GREEN until you have a test that fails for the RIGHT reason (missing behavior, not a syntax error).
+
+### 2. GREEN — Make It Pass
+
+1. **Write the minimum production code** to make the failing test(s) pass
+2. Follow the plan's "Changes Required (GREEN)" section as a guide, adapting to codebase reality
+3. **Run the test(s)** — they MUST PASS
+4. **Run the full phase test suite** — nothing unrelated should break
+
+If tests pass: update the plan's GREEN checkboxes to `[x]`, update todos.
+
+If tests fail: attempt to fix (max 2 attempts on the same issue). If still failing, see Loop Detection below.
+
+### 3. REFACTOR (Optional)
+
+If the plan identifies refactor opportunities, or you see clear structural improvements:
+
+1. **Refactor** — improve code structure without changing behavior
+2. **Run tests again** — they must still pass. If any test fails after refactoring, you changed behavior — revert and try again.
+
+Skip this step if there's nothing to clean up. Don't gold-plate.
+
+### Repeat
+
+Move to the next set of tests/changes within the phase, or to the next phase.
 
 ## Loop Detection
 
@@ -57,10 +77,12 @@ Do NOT keep retrying the same approach. Escalation is not failure — it's effic
 ## Phase Transitions
 
 Before moving to the next phase:
-1. Run ALL success criteria for the completed phase
-2. Verify no architectural constraints were violated
-3. Update the plan file — mark phase checkboxes as `[x]`
-4. Update todos
+1. Confirm ALL RED checkboxes are marked — every planned test was written and failed first
+2. Confirm ALL GREEN checkboxes are marked — every test now passes
+3. Run ALL success criteria for the completed phase
+4. Verify no architectural constraints were violated
+5. Update the plan file — mark phase checkboxes as `[x]`
+6. Update todos
 
 Only proceed when the current phase is fully verified.
 
@@ -86,11 +108,13 @@ When all phases are complete:
 
 ## Guidelines
 
+- **Tests before code — always.** Never write production code without a failing test. This is not negotiable.
 - Maintain FORWARD MOMENTUM — don't gold-plate or refactor beyond the plan
 - Keep the end goal in mind, not just the current step
 - Commit meaningful chunks of work as you go (don't wait until everything is done)
 - If you discover something important the plan missed, note it — but stay focused on execution
 - The plan is the WHAT. You decide the HOW based on current codebase state.
+- If a plan phase lacks a "Tests First (RED)" section, stop and ask the user — the plan needs updating before implementation can proceed.
 
 ## References
 
