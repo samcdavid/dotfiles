@@ -131,14 +131,25 @@ Think beyond the immediate change:
 - [Architectural decisions done well — reinforce good structure]
 ```
 
-## Step 6 — Verification Gate
+## Step 6 — Adversarial Challenge
 
-Before presenting:
-- [ ] Architectural conventions were learned from the ACTUAL codebase, not assumed
-- [ ] Every concern references specific files and dependency paths
-- [ ] Desirable vs. undesirable deviations are clearly distinguished with rationale
+Before presenting, spawn the **adversarial-debate** agent to challenge your architectural assessments.
+
+Format your concerns, deviation judgments, and coupling/cohesion claims as structured findings and pass them to the agent along with:
+- The file paths and dependency traces supporting each claim
+- Your understanding of the established conventions
+- The diff or artifact being reviewed
+
+The agent will:
+- Verify that claimed conventions actually exist in the codebase (not assumed from other projects)
+- Steel-man architectural choices — "you say this coupling is bad, but what if it's intentional for performance or simplicity?"
+- Challenge deviation judgments — is something flagged as "undesirable" actually the established pattern?
+- Check for contradictions — praising a pattern in one place but flagging it in another
+- Verify that dependency direction claims match actual import graphs
+
+Apply the agent's verdicts, then confirm:
 - [ ] Suggestions are concrete and respect the existing architecture's intent
-- [ ] You didn't flag something as a violation when it's actually the established pattern
+- [ ] Desirable vs. undesirable deviations are clearly distinguished with rationale
 
 ## Guidelines
 

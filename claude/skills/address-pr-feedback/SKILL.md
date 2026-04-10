@@ -83,17 +83,22 @@ The feedback was already fixed in a subsequent commit but the reviewer wasn't no
 
 ### Adversarial Challenge
 
-Before presenting your triage, challenge every classification. For each item:
+Before presenting your triage, spawn the **adversarial-debate** agent to challenge your classifications.
 
-1. **If you classified as "Confirmed Fix"** — steel-man the current code. Is there a valid reason the author wrote it this way? Could the reviewer be wrong about the edge case actually being reachable? If your confidence drops below "I can demonstrate this fails", downgrade to "Question" and ask the author.
+Format each classification as a finding and pass it to the agent along with:
+- The original reviewer comment (full text)
+- Your investigation evidence
+- Your classification and planned action
+- The referenced code (file paths)
 
-2. **If you classified as "Push Back"** — steel-man the reviewer. Assume they have context you don't. Re-read their comment charitably. Is there an interpretation where they're right and you're wrong? If so, reclassify or add a caveat.
+The agent will challenge:
+- **Confirmed Fixes**: steel-man the current code — is acceptance actually justified?
+- **Push Backs**: steel-man the reviewer — could they be right and you wrong?
+- **Deferrals**: is this genuinely out of scope, or avoiding a hard fix? (Under 20 lines = not a deferral)
+- **Partially Correct**: does your alternative actually address the reviewer's concern, or sidestep it?
+- **Contradictions**: accepting a pattern in one fix but pushing back on the same pattern elsewhere?
 
-3. **If you classified as "Deferral"** — is it genuinely out of scope, or are you avoiding a hard fix? Would the reviewer accept "this is a separate PR" or would they see it as dodging? If the fix is under 20 lines, it's not a deferral — just do it.
-
-4. **If you classified as "Partially Correct"** — does your alternative fix actually address the reviewer's concern, or does it subtly sidestep it? Re-read the original comment and confirm your fix would satisfy the reviewer, not just you.
-
-5. **Check for contradictions** — are you accepting a pattern in one fix but pushing back on the same pattern elsewhere? Are you deferring something that a confirmed fix depends on?
+Apply the agent's verdicts — reclassify items as needed before presenting.
 
 Present the triage to the user **with your investigation findings**:
 ```
@@ -311,15 +316,21 @@ Read the my-review skill (`~/.claude/skills/my-review/SKILL.md`) Step 5 categori
 
 ### Output Validation
 
-Validate that everything you're about to present is grounded in reality — not hallucinated or stale:
+Spawn the **adversarial-debate** agent to validate your response drafts and fix claims.
 
-- [ ] **File:line references** — re-read every file and line number you reference in responses and the summary table. If the line shifted due to your fixes, update it.
-- [ ] **Quoted identifiers** — every function name, variable, module, or class you reference in a response must exist in the codebase. Grep for it. If it doesn't exist, you hallucinated it — fix the response.
-- [ ] **Commit SHAs** — every SHA you reference in a response must be a real commit. Run `git log --oneline -20` and verify.
-- [ ] **Fix suggestions in responses** — if you wrote code in a response (e.g. showing the reviewer what you changed), re-read the actual committed code and confirm they match. Don't describe a fix you didn't actually make.
-- [ ] **Investigation claims** — if a response says "traced the code path and X can be nil here", re-read the code path and confirm X can actually be nil. If you can't re-confirm, weaken the claim or re-investigate.
+Format your responses and fix summaries as findings and pass them to the agent along with:
+- The committed code (post-fix state)
+- The commit SHAs you're referencing
+- The investigation claims you're making in responses
 
-If any reference fails validation, fix it. If a fix or response can't be salvaged after 2 attempts, drop it and note it as a "Dropped item" in the summary with an explanation.
+The agent will verify:
+- File:line references are accurate (lines may have shifted from fixes)
+- Quoted identifiers exist in the codebase
+- Commit SHAs are real
+- Code shown in responses matches actual committed code
+- Investigation claims still hold (e.g., "X can be nil here" — is that still true?)
+
+Apply verdicts — fix invalid references, weaken unverifiable claims, drop items that can't be salvaged after 2 attempts.
 
 ### Requirements Re-check
 

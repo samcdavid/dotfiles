@@ -38,18 +38,33 @@ Wait for ALL sub-agents to complete before proceeding.
 
 Combine sub-agent results into a coherent picture. Resolve any contradictions — if agents report conflicting information, investigate until resolved.
 
-## Step 5 — Verification Gate (MANDATORY)
+## Step 5 — Adversarial Challenge (MANDATORY)
 
-Before finalizing, verify EVERY finding against this checklist:
+Before finalizing, spawn the **adversarial-debate** agent to challenge your findings.
 
-- [ ] Every file path referenced actually exists (glob to confirm)
-- [ ] Every code snippet quoted matches current code (read to confirm)
-- [ ] Every architectural claim is supported by code evidence
-- [ ] No contradictory findings left unresolved
+Format your detailed findings as structured claims and pass them to the agent along with:
+- The file paths and code references supporting each finding
+- Any architectural claims or interpretations
+- The original research question
+
+The agent will:
+- Verify every file path and code snippet against current code
+- Challenge interpretations — "you found X calls Y, but does that mean what you think it means?"
+- Check for contradictions between findings
+- Steel-man alternative interpretations of the code
+- Flag conclusions that go beyond what the evidence supports
+
+Apply the agent's verdicts:
+- **KEEP**: finding is well-grounded, present as-is
+- **REVISE**: adjust the claim to match what the evidence actually shows
+- **DROP**: remove findings that couldn't be verified or were based on misread code
+
+After applying verdicts, confirm:
 - [ ] The research question is fully addressed
 - [ ] Open questions are explicitly noted (not silently skipped)
+- [ ] No contradictory findings remain unresolved
 
-If any check fails, correct the finding before proceeding. Do NOT present unverified claims.
+Do NOT present unverified claims.
 
 ## Step 6 — Save Research Document
 

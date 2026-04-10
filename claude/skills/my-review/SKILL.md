@@ -239,25 +239,29 @@ Structure the review as follows:
 - [Findings that failed adversarial self-review — what was considered and why it was dropped]
 ```
 
-## Step 7 — Adversarial Self-Review
+## Step 7 — Adversarial Challenge
 
-Before presenting the review, challenge every finding. For each blocking issue and non-blocking suggestion:
+Before presenting the review, spawn the **adversarial-debate** agent to challenge every finding.
 
-1. **Re-read the referenced file and line** — does the code actually do what you claim? If the file or line doesn't exist, drop the finding.
-2. **Verify quoted identifiers** — every function name, variable, class, or method you reference must exist in the codebase. Grep for it. If it doesn't exist, you hallucinated it — fix or drop the finding.
-3. **Steel-man the author** — assume the author had a reason for this code. Can you construct a valid justification? If yes and it's plausible, downgrade from blocking to question.
-4. **Check for self-contradictions** — does any finding contradict another finding in your review?
-5. **Verify fix suggestions** — re-read surrounding code and confirm your suggested fix is syntactically valid and wouldn't break callers.
+Format all blocking issues and non-blocking suggestions as structured findings and pass them to the agent along with:
+- The PR diff
+- The file paths referenced in findings
+- The requirements checklist (if built in Step 2)
 
-If a finding fails validation, retry the fix up to 2 times with specific feedback about what was wrong. If it still fails, drop the finding entirely rather than presenting something incorrect. Note dropped findings at the end of the review under a "Dropped findings" section so the author knows what was considered and rejected.
+The agent will return a verdict for each finding: KEEP, DOWNGRADE, REVISE, or DROP — with evidence.
 
-### Verification Checklist
+Apply the agent's verdicts:
+- **KEEP**: present as-is
+- **DOWNGRADE**: move from blocking to non-blocking, or from finding to question
+- **REVISE**: update the claim or fix based on the agent's feedback
+- **DROP**: remove entirely and note in the "Dropped Findings" section
 
-After the adversarial pass, confirm:
-- [ ] Every file path and line number referenced has been re-read and confirmed accurate
-- [ ] Every quoted identifier (function, variable, class) has been grep-verified as real
-- [ ] Every "fix" suggestion is syntactically valid in context
-- [ ] Blocking vs. non-blocking classification is accurate (don't over-block)
+If a finding is revised, retry the adversarial challenge on the revision (max 2 retries). If it still fails, drop it.
+
+### Post-Challenge Checklist
+
+After applying verdicts, confirm:
+- [ ] Blocking vs. non-blocking classification reflects the agent's severity calibration
 - [ ] Dependency docs were checked for any non-obvious API usage
 - [ ] No comment duplicates anything already raised in existing review threads
 - [ ] Findings are grounded in the codebase research from Step 3, not assumptions
