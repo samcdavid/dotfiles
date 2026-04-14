@@ -15,6 +15,34 @@ Determine what to review:
 - If `$ARGUMENTS` is empty or `local` → **Local Mode** (review working tree changes via `git diff`)
 - If `$ARGUMENTS` contains a branch name → review diff against that branch
 
+## Step 0 — Choose Review Persona
+
+Ask me which persona I want the review performed as. The persona determines what you prioritize, what you scrutinize most deeply, and what you're willing to let slide.
+
+**Common personas** (not exhaustive — I can request any lens):
+
+| Persona | Focus | Deep Review Behavior |
+|---------|-------|---------------------|
+| **Backend** | Data integrity, query performance, idempotency, error handling, transaction design, race conditions, job safety | Trace every database write for idempotency. Verify Oban job uniqueness and transaction boundaries. Check that reads hit the correct replica. Evaluate error handling strategy (retry vs. fail-fast vs. dead-letter) for each failure mode. Profile N+1 queries and missing indexes. |
+| **Frontend** | Accessibility, responsive behavior, state management, render performance, UX consistency, design system adherence | Audit every interactive element for ARIA attributes and keyboard navigation. Check for unnecessary re-renders and state management anti-patterns. Verify design system token usage vs. raw values. Test responsive breakpoint logic. Evaluate loading/error/empty states for every async operation. |
+| **Security** | Auth/authz, input validation, injection vectors, secrets exposure, CORS/CSP, token handling, OWASP top 10 | Trace every user input from entry point through processing to storage and output. Verify auth checks exist at the data layer, not just UI. Check for IDOR vectors. Audit token exposure in logs, URLs, and error messages. Validate CORS and CSP configuration. |
+| **Architect** | System boundaries, coupling, abstraction quality, scalability implications, API contract design, migration paths | Map dependency directions between changed modules. Evaluate whether new code follows or breaks established layering. Check for hidden coupling (shared mutable state, temporal coupling, implicit contracts). Assess whether the pattern scales if repeated 10x. |
+| **PM** | Requirements coverage, acceptance criteria traceability, scope creep, user-facing behavior changes, feature completeness | Fetch the linked Linear ticket and build a requirements checklist. Map every acceptance criterion to specific code changes. Flag requirements with no corresponding code (missing) and code with no corresponding requirement (scope creep). Verify user-facing behavior matches the spec — not just that code runs, but that it does what was asked. |
+| **Ops** | Deployment safety, observability, failure modes, rollback paths, resource usage, configuration management | Check for missing health checks, readiness probes, and graceful shutdown handling. Verify logging captures enough context for debugging without leaking sensitive data. Evaluate feature flags and rollback paths. Check for unbounded resource consumption (memory leaks, connection pool exhaustion, disk usage). Assess migration rollback safety. Verify environment-specific configuration is externalized. |
+| **Quality** | Test fidelity, coverage gaps, assertion quality, flakiness risk, test architecture, regression safety | Verify tests actually catch what they claim — not vacuously passing. Check both sides of every conditional are tested. Evaluate assertion specificity (exact values vs. shape checks). Flag flakiness risk (time-dependent, order-dependent, async race conditions). Assess test pyramid balance and placement. Identify high-risk code with disproportionately low coverage. |
+
+If I provide a custom persona not listed above, adapt the review priorities to match what that role would care about most. Use the same depth pattern: identify the domain-specific concerns, trace them through the code, and verify they're handled correctly.
+
+If I say "all" or "full", run the review without a specific lens (current default behavior).
+
+**Apply the persona throughout the entire review** — it should influence:
+- Which categories in Step 5 get the deepest scrutiny
+- What counts as blocking vs. non-blocking
+- What questions get asked
+- What gets called out as good
+
+Do NOT proceed until I've chosen a persona.
+
 ## Step 1 — Gather the Diff and Existing Feedback
 
 **PR Mode:**
@@ -186,8 +214,12 @@ Review the changes against these categories, ordered by priority.
 - Will this structure make known upcoming refactors harder? If the code reinforces associations or patterns that are slated to change, flag it as a question.
 - Could data be structured differently now to avoid a future migration? (not speculative — only flag when there's a known initiative)
 
-### Security Deep-Dive (Auto-triggered)
-If the diff touches ANY of the following, run `/security-audit` on the affected files before completing the review:
+### Escalation to Dedicated Skills (Auto-triggered)
+
+After completing the Step 5 review, evaluate whether the changes warrant escalation to a dedicated skill for deeper analysis. **Recommend escalation — do not silently skip it.** Present the recommendation and let me confirm or decline before running.
+
+#### → `/security-audit`
+Escalate when the diff touches ANY of:
 - Authentication or authorization logic (auth, session, token, permission, policy)
 - Input parsing or validation (params, body, query, headers, deserialization)
 - Database queries constructed with user input
@@ -195,7 +227,69 @@ If the diff touches ANY of the following, run `/security-audit` on the affected 
 - External API credential usage
 - CORS, CSP, or security header configuration
 
-Incorporate the security audit findings into the review under a dedicated "Security" subsection in Blocking Issues.
+Incorporate findings into the review under a dedicated "Security Deep-Dive" subsection.
+
+#### → `/my-arch-review`
+Escalate when the diff includes ANY of:
+- New modules, services, or top-level directories
+- Changes to module boundaries, public interfaces, or cross-module imports
+- New dependency directions (module A now imports module B for the first time)
+- Significant refactors that move code between layers or modules
+- New infrastructure patterns (new queue consumers, new API gateways, new caching layers)
+
+Incorporate findings into the review under a dedicated "Architecture Assessment" subsection.
+
+#### → `/perf-review`
+Escalate when the diff touches ANY of:
+- Database queries on known large tables or with missing/mismatched indexes
+- Hot request paths (high-traffic endpoints, real-time features)
+- Background job scheduling, concurrency, or queue configuration
+- Caching logic (cache reads, writes, invalidation, TTL changes)
+- Loops or iterations over potentially unbounded data sets
+- Connection pool configuration or external service call patterns
+
+Incorporate findings into the review under a dedicated "Performance Deep-Dive" subsection.
+
+#### → `/requirements-audit`
+Escalate when ANY of:
+- The PR links to a Linear ticket with detailed acceptance criteria (>3 criteria)
+- The PR description references a spec, RFC, or design doc
+- The change introduces new user-facing behavior (new endpoints, UI changes, notification logic)
+- The PM persona is selected (always recommend — the dedicated audit goes deeper)
+- Multiple requirements-related questions arise during the review
+
+Incorporate findings into the review under a dedicated "Requirements Traceability" subsection.
+
+#### → `/quality-audit`
+Escalate when ANY of:
+- Tests are added or significantly modified in the PR
+- New modules or services are added without corresponding test files
+- Test assertions look vacuous (shape checks only, `assert true`, broad pattern matches)
+- Mocks or stubs are used extensively — fidelity risk warrants dedicated analysis
+- The quality persona is selected (always recommend — the dedicated audit goes deeper)
+- The change touches high-risk code (payments, auth, data mutations) and test coverage looks thin
+
+Incorporate findings into the review under a dedicated "Quality Deep-Dive" subsection.
+
+#### General escalation signals
+Beyond the specific triggers above, recommend escalation whenever you notice:
+- The change is large enough (>500 lines, >10 files) that a single-pass review may miss systemic issues
+- The persona selected doesn't cover a concern you spotted (e.g. reviewing as "backend" but you noticed auth changes — recommend security escalation)
+- Multiple review categories are raising related concerns that suggest a deeper structural problem
+
+**Format the escalation recommendation:**
+```
+### Recommended Escalations
+- `/security-audit` — [reason: what triggered it, which files]
+- `/my-arch-review` — [reason: what triggered it, which files]
+- `/perf-review` — [reason: what triggered it, which files]
+- `/requirements-audit` — [reason: what triggered it, which files]
+- `/quality-audit` — [reason: what triggered it, which files]
+
+Run these? (y/n/select)
+```
+
+If I decline, continue with the review as-is. If I select specific ones, run only those.
 
 ## Step 6 — Format the Review
 
