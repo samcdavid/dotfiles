@@ -43,6 +43,22 @@ If I say "all" or "full", run the review without a specific lens (current defaul
 
 Do NOT proceed until I've chosen a persona.
 
+### Author Skill Level (PR Mode only)
+
+When reviewing a GitHub PR (not local changes), ask me about the skill level of the PR author. This calibrates the tone, detail level, and what you flag:
+
+| Level | Review Calibration |
+|-------|-------------------|
+| **Junior** | Be thorough and educational. Explain *why* something is an issue, not just that it is. Include links to docs or examples. Flag patterns they may not know about yet. Be encouraging about what's done well. |
+| **Mid** | Standard review. Explain non-obvious issues but don't over-explain fundamentals. Trust they can implement a fix given a clear description of the problem. |
+| **Senior** | Be concise and direct. Focus on subtle bugs, architectural concerns, and things that are easy to miss. Skip explanations of well-known patterns. Trust their judgment on style and approach — only flag things that are objectively wrong or risky. |
+| **Lead** | Concise and strategic. Focus on maintainability, team-wide impact, and whether the change sets a good precedent for others to follow. Flag patterns that could become problematic if adopted broadly. Assume strong technical skills — frame feedback around team and codebase health. |
+| **Staff+** | Peer review. Focus on systemic impact, cross-team implications, and design tradeoffs. Assume deep expertise. Frame feedback as discussion, not instruction. |
+
+If I say "skip" or don't want to specify, default to **Lead** calibration.
+
+Skip this step entirely for Local Mode reviews.
+
 ## Step 1 — Gather the Diff and Existing Feedback
 
 **PR Mode:**
