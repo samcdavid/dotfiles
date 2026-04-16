@@ -56,8 +56,8 @@ Use `mcp__circleci-mcp-server__get_latest_pipeline_status` to get the current st
 ### Wait Strategy
 
 When jobs are still running:
-- Wait 60 seconds between checks
-- Give a brief status update every 3 checks (~3 minutes): which jobs are running, how long they've been going
+- Wait 90 seconds between checks — never exceed 2 minutes between checks
+- Give a brief status update every 2 checks (~3 minutes): which jobs are running, how long they've been going
 - If a job has been running for an unusually long time (>30 minutes without progress), flag it but keep waiting
 
 ### Approval Gates
