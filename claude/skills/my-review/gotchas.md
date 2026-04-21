@@ -50,6 +50,22 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Nested functions are harder to read, harder to test independently, and harder to discover in the codebase. They obscure code organization and make it difficult to understand the module's public surface.
 - **Source:** Recurring pattern in Python codebases
 
+### Research agents read the working tree, not the PR branch
+- **Category:** failure-mode
+- **Context:** Spawning codebase-analyzer or codebase-pattern-finder agents during a PR review to verify claims about changed files
+- **Wrong:** Spawning research agents that read on-disk files (the current local branch, usually `main`) and treating their findings as ground truth about the PR's code. This produces false alarms — e.g., reporting a field is missing from a list when the PR adds it.
+- **Right:** Before spawning research agents, check out the PR branch (`gh pr checkout <number>`) or explicitly tell agents they're reading `main` and to cross-reference against the diff. For any agent finding about a file the PR modifies, verify the claim against the actual diff before including it in the review. The diff is the source of truth for PR reviews, not the working tree.
+- **Why:** The PR diff and the local working tree are different codebases. Research agents have no awareness of the PR context — they read whatever is on disk. Any finding about a file that the PR changes must be validated against the diff, or you risk publishing false alarms that waste the author's time and undermine review credibility.
+- **Source:** Review where a codebase-analyzer agent reported a field was missing from a schema's allowed params list, when the PR diff clearly added it — the agent was reading the pre-PR version of the file
+
+### Don't publish reviews until explicitly told — build iteratively across personas
+- **Category:** convention
+- **Context:** User requests reviews of the same PR from multiple personas (e.g., architect then backend, or backend then security)
+- **Wrong:** Treating each persona pass as a standalone review and offering to publish after each one. Asking "want me to post this?" after every pass. Publishing a partial review before the user has seen all perspectives.
+- **Right:** Build up findings iteratively across persona passes. Each pass adds to a combined review document. Only publish to the PR when the user explicitly says to post/publish. Between passes, present the findings and wait for the next instruction — the user may want another persona pass, want to edit the review, or want to combine and post.
+- **Why:** Reviews from multiple personas are complementary — a backend finding might be dropped after the architect pass reveals it's consistent with convention, or vice versa. Publishing prematurely means the author sees incomplete or contradictory feedback. The user controls when the review is ready.
+- **Source:** Multi-persona review session where the reviewer offered to post after the first persona pass, then had to combine findings from a second pass into a single coherent review
+
 ### Re-review means full re-review — don't coast on prior approval
 - **Category:** failure-mode
 - **Context:** User asks to review a PR that was previously reviewed (re-review request, re-requested review on GitHub, or author says "re-requesting your review")
