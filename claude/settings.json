@@ -180,5 +180,6 @@
         ]
       }
     ]
-  }
+  },
+  "skipAutoPermissionPrompt": true
 }

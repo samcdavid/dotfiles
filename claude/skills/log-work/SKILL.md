@@ -5,7 +5,9 @@ description: Log what was accomplished in the current session to the daily Notio
 
 # Log Work
 
-Append a brief record of what was accomplished in this session to today's entry in my yearly ToDo doc on Notion. Search Notion for the doc titled with the current year (e.g., "2026 ToDo").
+Append a brief record of what was accomplished in this session to today's entry in the Daily ToDo Notion database.
+
+`$ARGUMENTS` should contain a **Notion database URL** for the Daily ToDo database. If missing, ask the user before proceeding. Fetch the database URL to discover its data source ID (look for the `<data-source url="collection://...">` tag). Use this data source ID for all subsequent queries and page creation.
 
 ## Step 1 — Review the Session
 
@@ -24,7 +26,11 @@ git diff --stat HEAD~5..HEAD  # recent changes for context
 
 ## Step 2 — Fetch Today's Entry
 
-Fetch today's entry from the Notion doc. Read what's already there so you don't duplicate anything.
+Query the Daily ToDo database (using the data source ID resolved above) for today's page:
+```
+SELECT * FROM "<data_source_id>" WHERE "date:Date:start" = '<today YYYY-MM-DD>'
+```
+If found, fetch the page content to see what's already logged. If not found, create today's page first using `notion-create-pages` with the resolved data source ID (properties: `Day` = "<DayOfWeek>, <Month> <Day>, <Year>", `date:Date:start` = "<YYYY-MM-DD>", `Status` = "Active", `Day Type` = "Workday") with empty sections (## Checklist, ## Actions and decisions, ## Notes, ## Summary).
 
 ## Step 3 — Append Actions
 
