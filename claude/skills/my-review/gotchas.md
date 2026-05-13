@@ -3,6 +3,7 @@
 Known failure patterns and lessons learned. Read before starting work with this skill.
 
 ### Check all spec requirements, not just the code
+
 - **Category:** failure-mode
 - **Context:** Reviewing a PR linked to a ticket or spec
 - **Wrong:** Reviewing only the code diff for correctness without checking whether all acceptance criteria are addressed
@@ -11,6 +12,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Recurring pattern in PR reviews
 
 ### Cross-service data structure contracts
+
 - **Category:** failure-mode
 - **Context:** PR changes how data is stored, extracted, or passed between services
 - **Wrong:** Reviewing the change in isolation, assuming other services will adapt
@@ -19,6 +21,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Recurring pattern in polyglot monorepo PRs
 
 ### LLM prompt/tool docstring changes need eval
+
 - **Category:** convention
 - **Context:** PR changes LLM prompts, system messages, or tool docstrings
 - **Wrong:** Reviewing prompt changes for readability and intent without checking for eval coverage
@@ -27,6 +30,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Recurring pattern in AI-powered applications
 
 ### Reviews are read-only — never edit code
+
 - **Category:** failure-mode
 - **Context:** Review finds a concrete issue with an obvious fix
 - **Wrong:** Editing the source file to fix the issue during the review (e.g., adding missing data formatting to a node)
@@ -35,6 +39,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Review session where a node file was edited during review, had to manually revert
 
 ### Lazy imports are a blocking issue — not just a code smell
+
 - **Category:** convention
 - **Context:** Any Python code that uses `import X` inside a function body. Applies to both new code in PRs and existing lazy imports in files being touched.
 - **Wrong:** Accepting function-level imports as normal, downgrading them to "non-blocking suggestion," or writing them yourself. Common excuses: "avoids circular imports," "the file has a comment about circular imports," "nearby code does it this way." A common failure mode: new lazy imports are written AND the review only flags them as a non-blocking suggestion — when in fact the circular dependency doesn't even exist.
@@ -43,6 +48,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Recurring pattern — most recently, lazy imports were both written and reviewed without being flagged as blocking. The assumed circular import turned out not to exist at all.
 
 ### Functions defined inside functions are a code smell — flag them
+
 - **Category:** convention
 - **Context:** Any Python code that defines a function inside another function (excluding decorators and factory patterns)
 - **Wrong:** Accepting nested function definitions in business logic as normal. Writing closures when a module-level function would work.
@@ -51,6 +57,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Recurring pattern in Python codebases
 
 ### Research agents read the working tree, not the PR branch — and never use `gh pr checkout`
+
 - **Category:** failure-mode
 - **Context:** Spawning codebase-analyzer or codebase-pattern-finder agents during a PR review to verify claims about changed files
 - **Wrong:** Spawning research agents that read on-disk files (the current local branch, usually `main`) and treating their findings as ground truth about the PR's code. Also wrong: using `gh pr checkout <number>` to "fix" this — it leaves the repo on the PR branch after the review, and relies on local `main` being current (it may not be).
@@ -59,6 +66,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Review where `gh pr checkout` was used — correctly read PR files but left repo on PR branch; also earlier case where a codebase-analyzer reported a field was missing when the PR diff clearly added it
 
 ### Don't publish reviews until explicitly told — build iteratively across personas
+
 - **Category:** convention
 - **Context:** User requests reviews of the same PR from multiple personas (e.g., architect then backend, or backend then security)
 - **Wrong:** Treating each persona pass as a standalone review and offering to publish after each one. Asking "want me to post this?" after every pass. Publishing a partial review before the user has seen all perspectives.
@@ -67,6 +75,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Multi-persona review session where the reviewer offered to post after the first persona pass, then had to combine findings from a second pass into a single coherent review
 
 ### Never auto-publish a review — always pause for explicit direction
+
 - **Category:** failure-mode
 - **Context:** Any point in a review session where findings are complete and ready to post
 - **Wrong:** Finishing the review analysis and immediately calling `/publish-review` (or invoking publish logic directly) without the user saying to post it. This applies to first reviews, re-reviews, and single-persona passes alike.
@@ -75,9 +84,19 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Source:** Re-review session where findings were complete and correct, but the review was published without the user directing it
 
 ### Re-review means full re-review — don't coast on prior approval
+
 - **Category:** failure-mode
 - **Context:** User asks to review a PR that was previously reviewed (re-review request, re-requested review on GitHub, or author says "re-requesting your review")
 - **Wrong:** Assuming the diff hasn't changed, skipping the full review process, or saying "my previous approval stands" without re-reading the diff and all comments. This misses: rebase conflict resolutions that changed your code, new comments from the author requesting specific attention, or fixes that addressed (or broke) your prior feedback.
 - **Right:** Treat every re-review as a fresh review. Re-read the full diff, re-read ALL comments (including issue-level comments where authors often explain what changed), and check if your prior findings are still valid or have been addressed. Look specifically for: author comments mentioning conflicts, edits to your changes, or requests for specific attention.
 - **Why:** PRs evolve between reviews — rebases resolve conflicts (sometimes incorrectly), authors address feedback (sometimes introducing new issues), and new comments add context. Coasting on a prior approval can miss rebase errors (e.g., author edits reviewer's code during conflict resolution) or leave stale bug comments that should be retracted (e.g., flagged bugs were fixed but comments still open).
 - **Source:** Recurring pattern in PR re-reviews — rebase conflict resolution and stale comment accumulation
+
+### Adversarial agent reads the working tree too — verify DROP verdicts against the diff
+
+- **Category:** failure-mode
+- **Context:** Running the adversarial-debate agent to challenge review findings on a PR
+- **Wrong:** Accepting an adversarial DROP or REVISE verdict when the agent's stated evidence is that a file "doesn't exist," an identifier is "fabricated," or a function "cannot be found." The adversarial agent reads the local file system (current branch, usually main) — for PRs that add new files, those files don't exist locally.
+- **Right:** When the adversarial agent DROPs a finding because something allegedly doesn't exist, verify the claim directly against the PR diff before applying the verdict. If the diff shows the file or identifier is present, override the DROP and KEEP the finding. The diff is the source of truth — not `git ls-tree`, `grep`, or any tool that operates on the local working tree.
+- **Why:** The adversarial-debate agent uses the same filesystem tools as research agents. It has no awareness of the PR branch context. New files added by a PR are real — they just haven't been checked out locally. An agent that reports "no such file" is reading the wrong codebase and will incorrectly conclude that valid diff-based findings were fabricated.
+- **Source:** Adversarial challenge where new files clearly present in the PR diff were reported as non-existent, causing valid non-blocking findings to be dropped

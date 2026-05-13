@@ -86,6 +86,8 @@
       "Bash(uv run ruff:*)",
       "Bash(uv sync:*)",
       "Bash(xargs:*)",
+      "Edit(/Users/sammcdavid/.claude/skills/**)",
+      "Edit(/Users/sammcdavid/.dotfiles/**)",
       "Read(//Users/sam/Downloads/**)",
       "Read(//tmp/**)",
       "Skill(git:review_my_changes)",
@@ -165,7 +167,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '\\a' > /dev/tty 2>/dev/null || true"
+            "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
           }
         ]
       }
@@ -175,7 +177,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "printf '\\a' > /dev/tty 2>/dev/null || true"
+            "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
           }
         ]
       }
