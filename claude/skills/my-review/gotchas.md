@@ -92,6 +92,14 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** PRs evolve between reviews — rebases resolve conflicts (sometimes incorrectly), authors address feedback (sometimes introducing new issues), and new comments add context. Coasting on a prior approval can miss rebase errors (e.g., author edits reviewer's code during conflict resolution) or leave stale bug comments that should be retracted (e.g., flagged bugs were fixed but comments still open).
 - **Source:** Recurring pattern in PR re-reviews — rebase conflict resolution and stale comment accumulation
 
+### Brand/product name capitalisation in user-visible copy
+- **Category:** convention
+- **Context:** Reviewing templates, error messages, labels, button copy, scope descriptions, or alt text
+- **Wrong:** Accepting lowercase or inconsistent capitalisation of a brand name in user-visible copy without flagging it
+- **Right:** Check that every occurrence of a brand name in user-facing strings uses the correct capitalisation. Grep for existing uses in the codebase if unsure — the established form is usually visible in nearby alt text or existing copy
+- **Why:** Brand names have prescribed capitalisation that differs from standard English rules. Inconsistency across strings in the same file (e.g. correct in alt text, wrong in body copy) is a common failure mode
+- **Source:** Consent page template where brand name was written lowercase in body copy while alt text in the same file used the correct capitalised form
+
 ### Adversarial agent reads the working tree too — verify DROP verdicts against the diff
 
 - **Category:** failure-mode

@@ -41,3 +41,27 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Declare functions at module scope as first-class citizens. Pass any needed context as parameters. Exceptions: decorator implementations, factory functions that genuinely need closure state, pytest fixtures.
 - **Why:** Nested functions are untestable in isolation, invisible to the module's public surface, and harder to read. They're a code smell indicating the function is doing too much or the module needs better organization.
 - **Source:** Recurring pattern in Python codebases
+
+### Ecto concurrent index migrations: use DSL, not raw SQL
+- **Category:** anti-pattern
+- **Context:** Writing Ecto migrations that drop or create indexes concurrently (requires `@disable_ddl_transaction true`)
+- **Wrong:** `execute "DROP INDEX CONCURRENTLY IF EXISTS my_index_name"` — triggers credo's `Raw sql executed` check
+- **Right:** `drop_if_exists index(:table_name, [:col1, :col2], concurrently: true)` — uses the Ecto migration DSL, passes credo
+- **Why:** Credo enforces no raw SQL in migrations. The Ecto DSL has full support for concurrent index operations and resolves the index name automatically from column list, or accepts an explicit `name:` option for named indexes
+- **Source:** Migration that replaced a raw `execute "DROP INDEX CONCURRENTLY..."` to fix credo CI failure
+
+### Brand/product name capitalisation in user-visible copy
+- **Category:** convention
+- **Context:** Writing or editing user-visible strings in templates — error messages, labels, button copy, scope descriptions, alt text
+- **Wrong:** Using a guessed or lowercase form of a brand name (e.g. writing `dscout` when the correct form is `Dscout`)
+- **Right:** Grep for existing uses of the brand name in the codebase before writing copy. Use the established capitalisation consistently across all strings in the file
+- **Why:** Brand names have prescribed capitalisation that differs from standard English rules. Getting it wrong in user-facing copy requires a follow-up fix and an extra review round
+- **Source:** Consent page template where brand name was written lowercase in body copy while alt text in the same file used the correct capitalised form
+
+### Ecto concurrent index migrations: both `up` and `down` need `concurrently: true`
+- **Category:** edge-case
+- **Context:** Writing `up`/`down` for a migration that uses `@disable_ddl_transaction true` for concurrent index operations
+- **Wrong:** Only adding `concurrently: true` to index operations in `up`, leaving `down` without it
+- **Right:** Every `drop_if_exists`, `create_if_not_exists`, `create`, and `drop` for indexes in BOTH `up` and `down` must include `concurrently: true` when `@disable_ddl_transaction true` is set
+- **Why:** Credo's `Credo.Check.Readability.Specs` and migration checks scan all clauses, not just `up`. A non-concurrent index op in `down` while the module declares `@disable_ddl_transaction true` triggers `Index not concurrently` warnings
+- **Source:** Migration `down` function that was missing `concurrently: true` on its `drop_if_exists` call, caught by credo CI

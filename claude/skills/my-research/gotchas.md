@@ -10,6 +10,14 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Datadog indexes structured attributes separately from log message text. Free-text search only matches the `message` field. IDs stored as structured attributes (session_id, user_id, trace_id, etc.) must be queried with the `@attribute:value` syntax.
 - **Source:** Observability investigation where free-text search for a session ID returned nothing, but attribute search found 12+ matching logs immediately.
 
+### Don't stop at external context — resolve the open questions too
+- **Category:** failure-mode
+- **Context:** When researching a ticket that cites open questions or references existing code the implementation will extend
+- **Wrong:** Gathering the issue spec, related tickets, and project docs from Linear, then saving the research and presenting it as complete — even though the spec itself flags unresolved questions and points at specific code to verify against
+- **Right:** After gathering external context (Linear, Notion, etc.), identify every unresolved question and every "verify against code" reference in the spec, then actually read the codebase to answer them. The research is not done until the open questions are answered or explicitly confirmed as unanswerable without a running system.
+- **Why:** The deliverable of a research session is actionable knowledge, not a summary of what the ticket says. A spec's open questions are signals that the research phase isn't finished — surfacing them back to the user as "things that still need research" is restating the problem, not solving it.
+- **Source:** Research session where Linear data was gathered and filed, but the spec's open questions and codebase verification steps were left unresolved and listed back to the user as "remaining research."
+
 ### Braintrust: List projects before querying logs
 - **Category:** failure-mode
 - **Context:** When querying Braintrust project logs for traces related to a specific feature or service
