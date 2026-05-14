@@ -67,6 +67,7 @@ If `$ARGUMENTS` is empty or "list":
 |-------|-------------|-------------|
 | `prove-it` | Fact-checks the conversation — verified vs unverified claims | Findings feel uncertain |
 | `you-sure` | Adversarial confidence challenge with independent agent verification | Before acting on recommendations |
+| `this-important` | Importance filter on findings from a previous response — drops noise so only items worth raising/addressing survive | After a review, audit, or list of recommendations; auto-invoked by `my-review` and `address-pr-feedback` |
 
 ### Workflow & Productivity
 | Skill | What it does | When to use |

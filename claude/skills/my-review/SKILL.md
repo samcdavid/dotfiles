@@ -368,13 +368,30 @@ Apply the agent's verdicts:
 
 If a finding is revised, retry the adversarial challenge on the revision (max 2 retries). If it still fails, drop it.
 
+### Importance Filter — `/this-important`
+
+After applying the adversarial-debate verdicts, run the surviving findings through `/this-important` to filter for importance before raising them. Correctness/verification is not the same as importance — a finding can be technically accurate but not worth the noise.
+
+Invoke `/this-important strict` by default (override to `moderate` if the persona is Quality, PM, or Architect, where more clarity/maintainability findings are warranted; override to `loose` only if I explicitly ask for a thorough sweep).
+
+Pass the full set of blocking issues, non-blocking suggestions, and questions as the target findings. Apply the returned verdicts:
+
+- **KEEP** → present as-is in the chosen severity tier
+- **DOWNGRADE** → move from blocking to non-blocking, or from finding to question
+- **DEFER** → move to a follow-up note rather than a review comment
+- **DROP** → remove entirely and add a one-line entry to "Dropped Findings" with the reason
+
+The point: every issue raised should clear an explicit importance bar. Reviewers should not have to wade through noise to find the items that matter.
+
 ### Post-Challenge Checklist
 
 After applying verdicts, confirm:
 - [ ] Blocking vs. non-blocking classification reflects the agent's severity calibration
+- [ ] Every surviving finding passed the `/this-important` filter
 - [ ] Dependency docs were checked for any non-obvious API usage
 - [ ] No comment duplicates anything already raised in existing review threads
 - [ ] Findings are grounded in the codebase research from Step 3, not assumptions
+- [ ] Dropped Findings section captures what `/this-important` filtered out, with reasons
 
 ## Guidelines
 

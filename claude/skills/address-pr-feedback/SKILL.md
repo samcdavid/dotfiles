@@ -100,6 +100,21 @@ The agent will challenge:
 
 Apply the agent's verdicts — reclassify items as needed before presenting.
 
+### Importance Filter — `/this-important`
+
+After the adversarial challenge, run the post-investigation classifications through `/this-important` to filter for importance. Investigation tells you whether a reviewer's concern is valid; importance filtering tells you whether it's worth a fix-and-commit cycle right now versus a deferral or a brief reply.
+
+Invoke `/this-important strict` by default. Use `moderate` if I've signaled this is a high-polish PR (release branch, external-facing API, customer-reported regression). Use `loose` only if I explicitly ask.
+
+Pass every classified comment as a finding. Apply the returned verdicts:
+
+- **KEEP** → stays as Confirmed Fix / Partially Correct (proceed to fix in Step 4)
+- **DOWNGRADE** → move from Confirmed Fix to Question Requiring Response (reply with investigation findings, no code change)
+- **DEFER** → move to Valid Deferral (must have a follow-up plan)
+- **DROP** → only valid for items already in the Question or Push Back classifications where investigation showed no real concern; never drop a verified reviewer-flagged bug, security issue, or data-loss risk
+
+Hard rule: never downgrade or drop a finding from a reviewer whose review was marked as blocking ("Request changes") without surfacing the change to the user explicitly. The reviewer's gate stands until they remove it; importance filtering is for your own action prioritization, not for overriding their blocking review.
+
 Present the triage to the user **with your investigation findings**:
 ```
 ## Pending Feedback — [N] items
@@ -343,6 +358,7 @@ If a requirements map was built in Step 1:
 - [ ] Every response includes evidence of investigation, not just "done"
 - [ ] No fixes introduced that weren't requested (scope creep on the fix round)
 - [ ] Contradictions between your fixes and your push-backs? (e.g. fixing a pattern in one place but defending it in another)
+- [ ] Importance bar from `/this-important` applied consistently — fixes match the items that survived filtering; dropped/deferred items were not silently fixed anyway
 
 ## Step 8 — Summary
 
