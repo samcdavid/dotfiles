@@ -108,3 +108,12 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** When the adversarial agent DROPs a finding because something allegedly doesn't exist, verify the claim directly against the PR diff before applying the verdict. If the diff shows the file or identifier is present, override the DROP and KEEP the finding. The diff is the source of truth — not `git ls-tree`, `grep`, or any tool that operates on the local working tree.
 - **Why:** The adversarial-debate agent uses the same filesystem tools as research agents. It has no awareness of the PR branch context. New files added by a PR are real — they just haven't been checked out locally. An agent that reports "no such file" is reading the wrong codebase and will incorrectly conclude that valid diff-based findings were fabricated.
 - **Source:** Adversarial challenge where new files clearly present in the PR diff were reported as non-existent, causing valid non-blocking findings to be dropped
+
+### Don't create local branch refs from PR heads — use `gh pr diff` + `gh api` instead
+
+- **Category:** anti-pattern
+- **Context:** Reading PR-only files during a review (files added by the PR that don't exist on main)
+- **Wrong:** Running `git fetch origin pull/N/head:pr-N` to create a local branch ref, then using `git show pr-N:<path>` to read files. This pollutes the local repo with refs that aren't yours, requires `--force` on rebased stacked PRs, and accumulates stale `pr-*` refs over time.
+- **Right:** Use `gh pr diff <number>` for the full diff. For full file contents at PR HEAD, use `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` (where sha is from `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'`). If you genuinely need git-tool access (e.g. `git log`, `git show` for context), use `git fetch origin pull/N/head` (no `:branch` suffix) and reference `FETCH_HEAD` — it's overwritten on next fetch, no cleanup needed.
+- **Why:** Creating named local refs from PRs is a permanent side effect on the user's repo for a one-shot read. It's surprising behavior (the user didn't ask for those branches), and stacked/rebased PRs cause "non-fast-forward" errors that tempt the use of `--force` to clean up Claude's own mess. `gh pr diff` and `gh api .../contents?ref=` are the lighter-weight alternatives that leave no trace.
+- **Source:** PR review session where three local `pr-*` branches were created across three separate review invocations; the user pointed out this shouldn't happen.
