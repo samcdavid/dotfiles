@@ -47,11 +47,35 @@ Format:
 - Investigated staging error in Figma integration, added error handling
 ```
 
+### PR Review Sessions
+
+When the session was a PR review (e.g. via `/my-review` or `/review`), log:
+- Which PR was reviewed (number + link)
+- Findings that **made it into the published review** — the ones the author will actually see
+- "Almost-findings" — issues you suspected but dropped after verification — reframed as a single bullet like:
+  > "Thought I had found an issue with X, but upon further inspection it was not an issue."
+
+Do NOT log the mechanics of how findings were filtered. The reader doesn't need to know that `/you-sure`, `/this-important`, adversarial-debate, or any other gate dropped a finding — just that on further inspection, it wasn't an issue. Treat those skills as internal scaffolding, not log content.
+
+Example (good):
+```
+- Reviewed PR #1234 — flagged missing idempotency check on the webhook handler and a cross-service contract drift on `user_id` nullability
+- Reviewed PR #1234 — thought I had found a race condition in the cache write path, but upon further inspection it was not an issue
+```
+
+Example (bad — do not log like this):
+```
+- Reviewed PR #1234 — /this-important dropped 3 findings as not worth raising
+- Reviewed PR #1234 — /you-sure verified my confidence on the idempotency claim before posting
+- Reviewed PR #1234 — adversarial-debate agent voted DROP on the race condition finding
+```
+
 Do NOT:
 - Duplicate actions already recorded in today's entry
 - Include trivial actions (typo fixes, import reordering)
 - Write more than one line per action
 - Include implementation details — just the outcome
+- Log the operation of meta-skills (`/you-sure`, `/this-important`, adversarial-debate, `/prove-it`) — only their net effect on what shipped
 
 ## Step 4 — Confirm
 
