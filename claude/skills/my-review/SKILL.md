@@ -61,11 +61,24 @@ Skip this step entirely for Local Mode reviews.
 
 ## Step 1 — Gather the Diff and Existing Feedback
 
-**PR Mode:**
+**PR Mode — read-only via `gh`, never check out the branch.**
+
+The PR diff is the source of truth. The local working tree is NOT — `main` is often behind remote, and other PR branches may not exist locally. Do not try to reach the PR's code through the filesystem.
+
+**HARD CONSTRAINTS (PR Mode):**
+- NEVER run `git checkout <branch>`, `git switch <branch>`, `gh pr checkout`, `git fetch origin pull/N/head:<name>`, or any command that changes the working tree, creates a local branch ref, or attempts to "get on" the PR branch.
+- NEVER read PR-changed files from the local filesystem (`Read`, `cat`, `grep` on disk paths) and treat the result as the PR's code — that reads `main` (or whatever is checked out), not the PR.
+- NEVER compare the PR against local `main` as a substitute for the PR diff. Local `main` is not authoritative; it may lag remote by days.
+- The ONLY ways to read PR code are: `gh pr diff <number>` for the diff, and `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` for full file contents at PR HEAD (sha from `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'`).
+
 ```bash
 gh pr diff <number>
 gh pr view <number>
 gh pr view <number> --json files --jq '.files[].path'
+
+# Full file contents at PR HEAD (when the diff alone isn't enough context):
+sha=$(gh api repos/{owner}/{repo}/pulls/<number> --jq '.head.sha')
+gh api repos/{owner}/{repo}/contents/<path>?ref=$sha --jq '.content' | base64 -d
 ```
 
 Also fetch ALL existing review comments and conversation threads:
@@ -113,6 +126,12 @@ Spawn parallel agents to build a grounded understanding of the code being change
 - **codebase-pattern-finder**: Find how similar changes were made elsewhere in the codebase. Identify conventions that this change should follow. **Specifically check whether the codebase already has a utility, function, or module that does what any new code is adding.** Duplicating existing functionality is a common review finding — flag it.
 
 This step ensures your review is based on ACTUAL CODE, not assumptions. Do not skip it.
+
+**PR Mode — pass these constraints into every spawned agent prompt.** Research agents read the local filesystem by default; they have no awareness of the PR branch and will silently read `main` (or whatever is checked out) instead of the PR's code:
+
+> You are reviewing PR #<number>. You MUST NOT check out the PR branch, run `gh pr checkout`, `git checkout`, `git switch`, or `git fetch origin pull/N/head:<name>`. You MUST NOT treat the local working tree as the PR's code, and you MUST NOT compare against local `main` (it may be out of date with remote). For the PR diff, use `gh pr diff <number>`. For full file contents at PR HEAD, use `gh api repos/{owner}/{repo}/contents/{path}?ref=<sha>` where `<sha>` comes from `gh api repos/{owner}/{repo}/pulls/<number> --jq '.head.sha'`. For unchanged files (callers, consumers, conventions), the local working tree is fine — but any claim about a PR-modified file must come from the diff or `gh api`.
+
+If an agent's findings reference a PR-changed file, verify the claim against the diff or `gh api` content before incorporating it into the review.
 
 ## Step 4 — Research Dependencies
 

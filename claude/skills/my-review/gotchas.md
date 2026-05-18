@@ -56,14 +56,14 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Nested functions are harder to read, harder to test independently, and harder to discover in the codebase. They obscure code organization and make it difficult to understand the module's public surface.
 - **Source:** Recurring pattern in Python codebases
 
-### Research agents read the working tree, not the PR branch — and never use `gh pr checkout`
+### Never check out the PR branch — review is read-only via `gh`
 
 - **Category:** failure-mode
-- **Context:** Spawning codebase-analyzer or codebase-pattern-finder agents during a PR review to verify claims about changed files
-- **Wrong:** Spawning research agents that read on-disk files (the current local branch, usually `main`) and treating their findings as ground truth about the PR's code. Also wrong: using `gh pr checkout <number>` to "fix" this — it leaves the repo on the PR branch after the review, and relies on local `main` being current (it may not be).
-- **Right:** The diff is the source of truth. Use `gh pr diff <number>` to get the full diff and work from that. For full file contents at PR HEAD, use the GitHub API without checking out: `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` where sha comes from `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'`. For any agent finding about a file the PR modifies, verify the claim against the actual diff before including it in the review.
-- **Why:** The PR diff and the local working tree are different codebases. Research agents have no awareness of the PR context — they read whatever is on disk. `gh pr checkout` is tempting but wrong for reviews: it leaves the repo in a non-main state, and local `main` is often behind remote, so neither the checkout nor the working tree is a reliable reference.
-- **Source:** Review where `gh pr checkout` was used — correctly read PR files but left repo on PR branch; also earlier case where a codebase-analyzer reported a field was missing when the PR diff clearly added it
+- **Context:** Any PR review — both the orchestrator and any spawned research agent (codebase-analyzer, codebase-pattern-finder, adversarial-debate)
+- **Wrong:** Reaching the PR's code by changing the local working tree. Examples: `gh pr checkout <number>`, `git checkout <branch>`, `git switch <branch>`, `git fetch origin pull/N/head:pr-N` (creates a named local ref), or reading on-disk files and treating them as the PR's code. Equally wrong: falling back to "compare against local `main`" — local `main` is often days behind remote and is not authoritative.
+- **Right:** The diff is the source of truth. `gh pr diff <number>` for the diff. `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` for full file contents at PR HEAD (sha from `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'`). For agent prompts, pass the constraint in explicitly — agents have no awareness of PR context and will read on-disk files unless told not to. If you genuinely need git-tool access (e.g. `git log`, `git show` for context only), `git fetch origin pull/N/head` (no `:branch` suffix) leaves only `FETCH_HEAD`, which is overwritten on next fetch.
+- **Why:** The PR branch and the local working tree are different codebases. Checking out the PR pollutes the repo with state the user didn't ask for, leaves the working tree in a non-main state after the review, requires `--force` on rebased/stacked PRs, and accumulates stale refs. Comparing against local `main` produces wrong findings whenever `main` is behind remote — the review will flag fixes that were already merged, or miss conflicts the PR author resolved against newer code.
+- **Source:** Multiple review sessions: `gh pr checkout` leaving repo on PR branch; three `pr-*` local branches created across review invocations; research agents reporting fields as missing when the PR diff clearly added them.
 
 ### Don't publish reviews until explicitly told — build iteratively across personas
 
@@ -108,12 +108,3 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** When the adversarial agent DROPs a finding because something allegedly doesn't exist, verify the claim directly against the PR diff before applying the verdict. If the diff shows the file or identifier is present, override the DROP and KEEP the finding. The diff is the source of truth — not `git ls-tree`, `grep`, or any tool that operates on the local working tree.
 - **Why:** The adversarial-debate agent uses the same filesystem tools as research agents. It has no awareness of the PR branch context. New files added by a PR are real — they just haven't been checked out locally. An agent that reports "no such file" is reading the wrong codebase and will incorrectly conclude that valid diff-based findings were fabricated.
 - **Source:** Adversarial challenge where new files clearly present in the PR diff were reported as non-existent, causing valid non-blocking findings to be dropped
-
-### Don't create local branch refs from PR heads — use `gh pr diff` + `gh api` instead
-
-- **Category:** anti-pattern
-- **Context:** Reading PR-only files during a review (files added by the PR that don't exist on main)
-- **Wrong:** Running `git fetch origin pull/N/head:pr-N` to create a local branch ref, then using `git show pr-N:<path>` to read files. This pollutes the local repo with refs that aren't yours, requires `--force` on rebased stacked PRs, and accumulates stale `pr-*` refs over time.
-- **Right:** Use `gh pr diff <number>` for the full diff. For full file contents at PR HEAD, use `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` (where sha is from `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'`). If you genuinely need git-tool access (e.g. `git log`, `git show` for context), use `git fetch origin pull/N/head` (no `:branch` suffix) and reference `FETCH_HEAD` — it's overwritten on next fetch, no cleanup needed.
-- **Why:** Creating named local refs from PRs is a permanent side effect on the user's repo for a one-shot read. It's surprising behavior (the user didn't ask for those branches), and stacked/rebased PRs cause "non-fast-forward" errors that tempt the use of `--force` to clean up Claude's own mess. `gh pr diff` and `gh api .../contents?ref=` are the lighter-weight alternatives that leave no trace.
-- **Source:** PR review session where three local `pr-*` branches were created across three separate review invocations; the user pointed out this shouldn't happen.
