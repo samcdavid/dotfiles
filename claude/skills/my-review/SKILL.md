@@ -371,6 +371,9 @@ Structure the review as follows:
 ```markdown
 ## Review: [Brief description of what the change does]
 
+### Verdict
+**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 8]
+
 ### Summary
 [1-2 sentences demonstrating you understood the change and its purpose]
 
@@ -465,6 +468,45 @@ After applying verdicts, confirm:
 - [ ] No comment duplicates anything already raised in existing review threads
 - [ ] Findings are grounded in the codebase research from Step 3, not assumptions
 - [ ] Dropped Findings section captures what `/this-important` filtered out, with reasons
+
+## Step 8 — Adversarial Verdict Challenge
+
+Once findings are finalized in Step 7, choose a verdict for the published review and adversarially challenge it. **Always** run this step — even when the verdict feels obvious.
+
+### Propose a verdict
+
+Pick one based on the surviving findings:
+
+- **APPROVE** — no blocking issues; non-blocking suggestions are minor or absent; nothing the author needs to fix before merge
+- **COMMENT** — non-blocking suggestions or open questions worth raising, but nothing must-fix; also the right choice when context was insufficient to fully verify the change (e.g. PR already merged before review, dependency on another PR)
+- **REQUEST_CHANGES** — at least one blocking issue: correctness bug, data risk, security risk, contract break, or missing requirement that should land before merge
+
+### Challenge the proposed verdict
+
+Spawn the **adversarial-debate** agent with:
+- The proposed verdict
+- The final surviving findings (blocking, non-blocking, questions, deep-dive subsections)
+- The triage from Step 2 (lenses, intent, escalations, author calibration)
+
+The agent challenges in **both directions** and returns a verdict on the verdict:
+
+- **KEEP** — proposed verdict stands
+- **ESCALATE** — proposed verdict is too soft (e.g. a finding labeled non-blocking actually is a blocker, or APPROVE is masking a real concern). Bump up with reason: APPROVE → COMMENT/REQUEST_CHANGES, or COMMENT → REQUEST_CHANGES.
+- **DE-ESCALATE** — proposed verdict is too harsh (e.g. REQUEST_CHANGES is over-blocking on preference, or the author's calibration says they'd catch this on a re-read). Bump down with reason: REQUEST_CHANGES → COMMENT/APPROVE, or COMMENT → APPROVE.
+
+Prompts the agent should consider:
+- Is this verdict too soft? Did you miss a blocker hiding in the non-blocking suggestions or deep-dive subsections?
+- Is this verdict too harsh? Are the blocking issues actually blocking, or are you over-blocking on preference / style / "I'd write it differently"?
+- Does the verdict match the author calibration? Senior+ authors shouldn't get REQUEST_CHANGES for things they'd fix on a re-read.
+- If the verdict is APPROVE: does every blocking-class category (correctness, security, contracts, migrations, requirements) have at least one piece of evidence it was actually checked?
+- If the verdict is REQUEST_CHANGES: is the worst finding genuinely "must-fix-before-merge" or just "should-fix-someday"?
+
+### Apply the verdict on the verdict
+
+- **KEEP** → write the verdict at the top of the Step 6 output as proposed
+- **ESCALATE** / **DE-ESCALATE** → adopt the agent's recommended verdict and write a one-sentence rationale that names what tipped it
+
+Record the final verdict in the **Verdict** field at the top of the formatted review (Step 6 template).
 
 ## Guidelines
 
