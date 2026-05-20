@@ -15,50 +15,6 @@ Determine what to review:
 - If `$ARGUMENTS` is empty or `local` → **Local Mode** (review working tree changes via `git diff`)
 - If `$ARGUMENTS` contains a branch name → review diff against that branch
 
-## Step 0 — Choose Review Persona
-
-Ask me which persona I want the review performed as. The persona determines what you prioritize, what you scrutinize most deeply, and what you're willing to let slide.
-
-**Common personas** (not exhaustive — I can request any lens):
-
-| Persona | Focus | Deep Review Behavior |
-|---------|-------|---------------------|
-| **Backend** | Data integrity, query performance, idempotency, error handling, transaction design, race conditions, job safety | Trace every database write for idempotency. Verify Oban job uniqueness and transaction boundaries. Check that reads hit the correct replica. Evaluate error handling strategy (retry vs. fail-fast vs. dead-letter) for each failure mode. Profile N+1 queries and missing indexes. |
-| **Frontend** | Accessibility, responsive behavior, state management, render performance, UX consistency, design system adherence | Audit every interactive element for ARIA attributes and keyboard navigation. Check for unnecessary re-renders and state management anti-patterns. Verify design system token usage vs. raw values. Test responsive breakpoint logic. Evaluate loading/error/empty states for every async operation. |
-| **Security** | Auth/authz, input validation, injection vectors, secrets exposure, CORS/CSP, token handling, OWASP top 10 | Trace every user input from entry point through processing to storage and output. Verify auth checks exist at the data layer, not just UI. Check for IDOR vectors. Audit token exposure in logs, URLs, and error messages. Validate CORS and CSP configuration. |
-| **Architect** | System boundaries, coupling, abstraction quality, scalability implications, API contract design, migration paths | Map dependency directions between changed modules. Evaluate whether new code follows or breaks established layering. Check for hidden coupling (shared mutable state, temporal coupling, implicit contracts). Assess whether the pattern scales if repeated 10x. |
-| **PM** | Requirements coverage, acceptance criteria traceability, scope creep, user-facing behavior changes, feature completeness | Fetch the linked Linear ticket and build a requirements checklist. Map every acceptance criterion to specific code changes. Flag requirements with no corresponding code (missing) and code with no corresponding requirement (scope creep). Verify user-facing behavior matches the spec — not just that code runs, but that it does what was asked. |
-| **Ops** | Deployment safety, observability, failure modes, rollback paths, resource usage, configuration management | Check for missing health checks, readiness probes, and graceful shutdown handling. Verify logging captures enough context for debugging without leaking sensitive data. Evaluate feature flags and rollback paths. Check for unbounded resource consumption (memory leaks, connection pool exhaustion, disk usage). Assess migration rollback safety. Verify environment-specific configuration is externalized. |
-| **Quality** | Test fidelity, coverage gaps, assertion quality, flakiness risk, test architecture, regression safety | Verify tests actually catch what they claim — not vacuously passing. Check both sides of every conditional are tested. Evaluate assertion specificity (exact values vs. shape checks). Flag flakiness risk (time-dependent, order-dependent, async race conditions). Assess test pyramid balance and placement. Identify high-risk code with disproportionately low coverage. |
-
-If I provide a custom persona not listed above, adapt the review priorities to match what that role would care about most. Use the same depth pattern: identify the domain-specific concerns, trace them through the code, and verify they're handled correctly.
-
-If I say "all" or "full", run the review without a specific lens (current default behavior).
-
-**Apply the persona throughout the entire review** — it should influence:
-- Which categories in Step 5 get the deepest scrutiny
-- What counts as blocking vs. non-blocking
-- What questions get asked
-- What gets called out as good
-
-Do NOT proceed until I've chosen a persona.
-
-### Author Skill Level (PR Mode only)
-
-When reviewing a GitHub PR (not local changes), ask me about the skill level of the PR author. This calibrates the tone, detail level, and what you flag:
-
-| Level | Review Calibration |
-|-------|-------------------|
-| **Junior** | Be thorough and educational. Explain *why* something is an issue, not just that it is. Include links to docs or examples. Flag patterns they may not know about yet. Be encouraging about what's done well. |
-| **Mid** | Standard review. Explain non-obvious issues but don't over-explain fundamentals. Trust they can implement a fix given a clear description of the problem. |
-| **Senior** | Be concise and direct. Focus on subtle bugs, architectural concerns, and things that are easy to miss. Skip explanations of well-known patterns. Trust their judgment on style and approach — only flag things that are objectively wrong or risky. |
-| **Lead** | Concise and strategic. Focus on maintainability, team-wide impact, and whether the change sets a good precedent for others to follow. Flag patterns that could become problematic if adopted broadly. Assume strong technical skills — frame feedback around team and codebase health. |
-| **Staff+** | Peer review. Focus on systemic impact, cross-team implications, and design tradeoffs. Assume deep expertise. Frame feedback as discussion, not instruction. |
-
-If I say "skip" or don't want to specify, default to **Lead** calibration.
-
-Skip this step entirely for Local Mode reviews.
-
 ## Step 1 — Gather the Diff and Existing Feedback
 
 **PR Mode — read-only via `gh`, never check out the branch.**
@@ -99,48 +55,207 @@ git log --oneline -5        # recent commits for context
 
 Read EVERY changed file fully — not just the diff hunks. You need surrounding context to review properly.
 
-## Step 2 — Understand Intent and Requirements
+## Step 2 — Cursory Pass: Identify Review Lenses
 
-Before reviewing code, understand WHAT the change is trying to accomplish:
-- PR description, commit messages, or linked issues
-- Ask the user if intent is unclear — don't guess
+Before going deep, do a quick triage to pick which review **lenses** apply. Lenses determine which agents get spawned in Step 3, with what prompts, and which categories get the deepest scrutiny in Step 5.
 
-**Requirements traceability (PR Mode):** If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it:
-```bash
-# Use the Linear MCP tools to fetch the ticket
-# Extract: title, description, acceptance criteria, sub-issues
+### Inputs
+
+- PR description, commit messages
+- Linked Linear issue(s), referenced specs / RFCs / design docs (fetch them — don't infer)
+- File-level scan of the diff: which areas changed? (backend / frontend / migrations / config / infra / tests / docs / dependency manifests)
+- Existing reviewer assignments or labels on the PR (a hint about what others already think is in scope)
+
+### Lens catalog
+
+Pick lenses that fit. Multiple lenses normally apply.
+
+| Lens | Scrutinizes | Trigger signals |
+|---|---|---|
+| **Backend** | Data integrity, query performance, idempotency, error handling, transactions, race conditions, job safety | Server-side code, contexts, schemas, queries, jobs, workers |
+| **Frontend** | Accessibility, responsive behavior, state management, render performance, UX consistency, design system adherence | UI components, hooks, stores, CSS, design tokens |
+| **Full-stack** | Backend + Frontend with cross-layer wiring scrutiny | Both areas touched in one change |
+| **Security** | Auth/authz, input validation, injection vectors, secrets, CORS/CSP, token handling | Auth code, input handlers, queries with user input, file upload, external API creds, security headers |
+| **Architecture** | System boundaries, coupling, abstraction quality, scalability, contract design, migration paths | New modules/services, changes to module boundaries, new dependency directions, new infra patterns |
+| **Ops** | Deployment safety, observability, failure modes, rollback paths, resource usage, configuration | Health checks, logging, feature flags, config files, deploy manifests, env vars, resource limits |
+| **QA** | Test fidelity, coverage gaps, assertion quality, flakiness, test architecture | Test files added/modified, mocks/stubs, new modules without tests |
+| **PM** | Requirements coverage, acceptance criteria traceability, scope creep, user-facing behavior | Linked ticket with detailed acceptance criteria, new user-facing behavior |
+| **Performance** | Hot-path queries, N+1, caching, indexes, unbounded loops, large-table queries | Queries on large tables, hot endpoints, queue/concurrency changes, caching logic |
+| **Migration safety** | Lock risk, down-migration safety, column types, advisory locks, backfillers | Migration files in the diff |
+| **Dependency** | License, maintenance, attack surface of new packages | Lockfile changes, new dependency manifests |
+
+If the change has no obvious lens fit, default to **Backend + Security + QA**.
+
+### Requirements checklist (if a ticket is linked)
+
+If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it via the Linear MCP and build a **requirements checklist**: title, description, acceptance criteria, sub-issues. This feeds the PM lens in Step 3 and the requirements-traceability check in Step 5.
+
+If no ticket is linked, note as an observation and proceed with intent from the PR description alone.
+
+### Triage output
+
+Produce a short triage block and show it to me before going deep:
+
 ```
-Build a **requirements checklist** from the ticket. You will use this in Step 5 to verify every requirement is addressed and flag any code changes that don't trace back to a requirement (scope creep).
+### Review Triage
+- **Intent:** <1–2 sentences in your words — what this change does and why>
+- **Lenses identified:**
+  - <Lens> — <one-line rationale grounded in the diff>
+  - <Lens> — <one-line rationale grounded in the diff>
+- **Auto-escalations queued:**
+  - `/security-audit` — <which trigger matched>
+  - `/my-arch-review` — <which trigger matched>
+  - (or: "none — no triggers matched")
+- **Requirements checklist:** built from <ticket ID> | none linked
+- **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
+```
 
-If no ticket is linked, note this as an observation (not a blocking issue) and proceed with intent from the PR description alone.
+Proceed automatically unless I override. Auto-escalation triggers are listed under Step 3.
 
-State your understanding of the intent back to the user before proceeding:
-> "Here's what I understand this change does and why — is this correct?"
+### Author Skill Level (PR Mode only)
 
-This catches misunderstandings before they become incorrect review comments.
+Ask which skill level to calibrate against. Skip for Local Mode.
 
-## Step 3 — Research the Codebase
+| Level | Calibration |
+|---|---|
+| **Junior** | Thorough and educational. Explain *why*. Encouraging on good work. |
+| **Mid** | Standard. Explain non-obvious issues. Trust they can implement fixes given a clear problem description. |
+| **Senior** | Concise and direct. Focus on subtle bugs and architecture. Skip explanations of well-known patterns. |
+| **Lead** | Concise and strategic. Maintainability, team-wide impact, precedent. |
+| **Staff+** | Peer review. Systemic impact, cross-team implications, design tradeoffs. Frame as discussion. |
 
-Spawn parallel agents to build a grounded understanding of the code being changed:
-- **codebase-analyzer**: Deep-read the changed files AND their callers/consumers. Understand how the changed code fits into the larger system — call chains, data flow, dependencies.
-- **codebase-pattern-finder**: Find how similar changes were made elsewhere in the codebase. Identify conventions that this change should follow. **Specifically check whether the codebase already has a utility, function, or module that does what any new code is adding.** Duplicating existing functionality is a common review finding — flag it.
+Default: **Lead** if I skip.
 
-This step ensures your review is based on ACTUAL CODE, not assumptions. Do not skip it.
+## Step 3 — Deep Investigation
 
-**PR Mode — pass these constraints into every spawned agent prompt.** Research agents read the local filesystem by default; they have no awareness of the PR branch and will silently read `main` (or whatever is checked out) instead of the PR's code:
+Spawn parallel agents driven by the lenses from Step 2. Each lens determines what its agent looks at and what prompt it gets. If multiple lenses share an agent type, prompt one agent with the union of concerns — do not spawn N copies.
+
+### Agents
+
+- **codebase-analyzer** — deep-read the changed files AND their callers/consumers. Map call chains, data flow, dependencies.
+- **codebase-pattern-finder** — find how similar changes were made elsewhere. **Specifically check whether the codebase already has a utility, function, or module that does what new code is adding.** Duplication is a common review finding.
+- **docs-researcher** — for new dependencies, APIs/libraries used in ways you're not 100% certain are correct, or framework patterns with version-specific behavior. Do NOT review library usage without checking the actual docs.
+
+### Lens-specific prompting
+
+Prompt each agent with the concerns implied by the active lenses:
+
+- **Backend** → "Trace every database write for idempotency. Map transaction boundaries. Identify N+1 risks and missing indexes. Check job uniqueness configs."
+- **Frontend** → "Audit interactive elements for ARIA and keyboard nav. Check for unnecessary re-renders. Verify design system token usage. Audit async-state coverage (loading/error/empty)."
+- **Security** → "Trace every user input from entry through processing to storage and output. Verify auth checks at the data layer. Audit token exposure in logs, URLs, error messages."
+- **Architecture** → "Map dependency directions between changed modules. Evaluate layering. Identify hidden coupling (shared mutable state, temporal coupling, implicit contracts)."
+- **Ops** → "Audit observability for the new code paths. Verify config externalization. Identify unbounded resource consumption. Assess rollback paths and migration safety."
+- **QA** → "Identify functions that lack unit tests despite branching logic. Flag tests that look vacuously passing. Audit mock/stub fidelity."
+- **PM** → "Map every acceptance criterion to specific code changes. Flag missing requirements and out-of-scope changes."
+- **Performance** → "Identify queries on large tables, hot-path computation, unbounded iteration. Verify index usage matches operator semantics."
+- **Migration safety** → "Audit lock risk on large tables. Verify down-migrations. Check column types match domain semantics."
+- **Dependency** → "Check new packages for maintenance status, license, and known security advisories. Identify what existing functionality, if any, this duplicates."
+
+### Auto-escalate to dedicated skills
+
+In parallel with the agents above, automatically invoke dedicated review skills for every matching trigger. **Do not ask.** Their findings get incorporated as subsections in Step 6's output ("Security Deep-Dive", "Architecture Assessment", "Performance Deep-Dive", "Requirements Traceability", "Quality Deep-Dive").
+
+#### `/security-audit`
+Auto-run when the diff touches ANY of:
+- Authentication or authorization logic (auth, session, token, permission, policy)
+- Input parsing or validation (params, body, query, headers, deserialization)
+- Database queries constructed with user input
+- File upload/download handling
+- External API credential usage
+- CORS, CSP, or security header configuration
+
+#### `/my-arch-review`
+Auto-run when the diff includes ANY of:
+- New modules, services, or top-level directories
+- Changes to module boundaries, public interfaces, or cross-module imports
+- New dependency directions (module A now imports module B for the first time)
+- Significant refactors that move code between layers or modules
+- New infrastructure patterns (new queue consumers, new API gateways, new caching layers)
+
+#### `/perf-review`
+Auto-run when the diff touches ANY of:
+- Database queries on known large tables or with missing/mismatched indexes
+- Hot request paths (high-traffic endpoints, real-time features)
+- Background job scheduling, concurrency, or queue configuration
+- Caching logic (cache reads, writes, invalidation, TTL changes)
+- Loops or iterations over potentially unbounded data sets
+- Connection pool configuration or external service call patterns
+
+#### `/requirements-audit`
+Auto-run when ANY of:
+- The PR links to a Linear ticket with detailed acceptance criteria (>3 criteria)
+- The PR description references a spec, RFC, or design doc
+- The change introduces new user-facing behavior (new endpoints, UI changes, notification logic)
+- The PM lens is active
+- Multiple requirements-related questions surface during the cursory pass
+
+#### `/quality-audit`
+Auto-run when ANY of:
+- Tests are added or significantly modified in the PR
+- New modules or services are added without corresponding test files
+- Test assertions look vacuous (shape checks only, `assert true`, broad pattern matches)
+- Mocks or stubs are used extensively — fidelity risk warrants dedicated analysis
+- The QA lens is active
+- The change touches high-risk code (payments, auth, data mutations) and test coverage looks thin
+
+#### General triggers
+Beyond the specific triggers above, also auto-run a relevant escalation when:
+- The change is large enough (>500 lines, >10 files) that a single-pass review may miss systemic issues
+- The lenses you triaged don't cover a concern you spotted (e.g. Backend lens active but you noticed auth changes → auto-run `/security-audit`)
+
+### PR Mode constraints (pass into every agent and escalation prompt)
+
+Research agents and escalation skills read the local filesystem by default and will silently read `main` (or whatever is checked out) instead of the PR's code:
 
 > You are reviewing PR #<number>. You MUST NOT check out the PR branch, run `gh pr checkout`, `git checkout`, `git switch`, or `git fetch origin pull/N/head:<name>`. You MUST NOT treat the local working tree as the PR's code, and you MUST NOT compare against local `main` (it may be out of date with remote). For the PR diff, use `gh pr diff <number>`. For full file contents at PR HEAD, use `gh api repos/{owner}/{repo}/contents/{path}?ref=<sha>` where `<sha>` comes from `gh api repos/{owner}/{repo}/pulls/<number> --jq '.head.sha'`. For unchanged files (callers, consumers, conventions), the local working tree is fine — but any claim about a PR-modified file must come from the diff or `gh api`.
 
-If an agent's findings reference a PR-changed file, verify the claim against the diff or `gh api` content before incorporating it into the review.
+If an agent or escalation finding references a PR-modified file, verify the claim against the diff or `gh api` content before incorporating it.
 
-## Step 4 — Research Dependencies
+## Step 4 — Targeted Questions
 
-Spawn a **docs-researcher** agent for any:
-- New dependencies added
-- APIs or library functions used in ways you're not 100% certain are correct
-- Framework patterns that might have version-specific behavior
+After deep investigation, surface specific concerns that need my context before you finalize. The point is to catch things where the situation depends on context only I have.
 
-Do NOT review library usage without checking the actual docs. Incorrect API usage that "looks right" is a common source of bugs.
+### Ask about
+
+- **New architecture pattern** — first time this team/codebase is doing X. Is there an RFC or precedent? Should this set the precedent?
+- **New ops pattern** — custom retry semantics, new alerting, new deploy gate, new infra dependency. Was this discussed with on-call?
+- **New dependency** — what does it replace? Was maintenance / license / security vetting done? Is there an internal alternative?
+- **Cross-team contract change** — new field, removed field, semantic change to an existing field. Has the consumer team been told?
+- **Novel security surface** — first time exposing X publicly, accepting Y from a user, storing Z.
+- **Ambiguous intent** — the PR description / ticket / docs left a question unresolved.
+
+### Format
+
+```
+### Targeted Questions
+1. <Concern in one phrase> — <one-line context from the investigation>
+   <The specific question>
+2. ...
+```
+
+### After I answer — challenge my answers
+
+Once I respond, spawn the **adversarial-debate** agent to challenge *my* answers. This is a separate pass from the Step 7 finding challenge — the target here is my context, not the assistant's findings. Always run it when I've answered questions.
+
+Pass to the agent:
+- The original question + the investigation context that surfaced it (diff, relevant files, agent/escalation findings)
+- My answer
+
+The agent returns a verdict per answer:
+- **ACCEPT** — answer holds up; move on
+- **PROBE_FURTHER** — answer has gaps, unverified claims, or optimism bias; the agent supplies a follow-up question to ask me
+- **FLAG** — answer reveals a real risk (e.g., "we didn't actually check that", "no, that team wasn't told") that should become a finding for Step 5
+
+Apply the verdicts:
+- ACCEPT → record the answer and proceed
+- PROBE_FURTHER → ask me the follow-up question; re-run adversarial debate on the new answer (max 2 cycles, then accept or flag)
+- FLAG → record as a structured finding for Step 5 (it will get its own adversarial pass in Step 7 along with every other finding)
+
+### When to skip
+
+If nothing surfaced, skip this step entirely. Do not manufacture questions to fill the section.
+
+If I've authorized auto-mode (or said "no questions, just review"), log these as a **Questions** section in the final review output (Step 6) instead of pausing. The post-answer adversarial pass is also skipped in this mode — there are no answers to challenge.
 
 ## Step 5 — Systematic Review
 
@@ -249,83 +364,6 @@ Review the changes against these categories, ordered by priority.
 - Will this structure make known upcoming refactors harder? If the code reinforces associations or patterns that are slated to change, flag it as a question.
 - Could data be structured differently now to avoid a future migration? (not speculative — only flag when there's a known initiative)
 
-### Escalation to Dedicated Skills (Auto-triggered)
-
-After completing the Step 5 review, evaluate whether the changes warrant escalation to a dedicated skill for deeper analysis. **Recommend escalation — do not silently skip it.** Present the recommendation and let me confirm or decline before running.
-
-#### → `/security-audit`
-Escalate when the diff touches ANY of:
-- Authentication or authorization logic (auth, session, token, permission, policy)
-- Input parsing or validation (params, body, query, headers, deserialization)
-- Database queries constructed with user input
-- File upload/download handling
-- External API credential usage
-- CORS, CSP, or security header configuration
-
-Incorporate findings into the review under a dedicated "Security Deep-Dive" subsection.
-
-#### → `/my-arch-review`
-Escalate when the diff includes ANY of:
-- New modules, services, or top-level directories
-- Changes to module boundaries, public interfaces, or cross-module imports
-- New dependency directions (module A now imports module B for the first time)
-- Significant refactors that move code between layers or modules
-- New infrastructure patterns (new queue consumers, new API gateways, new caching layers)
-
-Incorporate findings into the review under a dedicated "Architecture Assessment" subsection.
-
-#### → `/perf-review`
-Escalate when the diff touches ANY of:
-- Database queries on known large tables or with missing/mismatched indexes
-- Hot request paths (high-traffic endpoints, real-time features)
-- Background job scheduling, concurrency, or queue configuration
-- Caching logic (cache reads, writes, invalidation, TTL changes)
-- Loops or iterations over potentially unbounded data sets
-- Connection pool configuration or external service call patterns
-
-Incorporate findings into the review under a dedicated "Performance Deep-Dive" subsection.
-
-#### → `/requirements-audit`
-Escalate when ANY of:
-- The PR links to a Linear ticket with detailed acceptance criteria (>3 criteria)
-- The PR description references a spec, RFC, or design doc
-- The change introduces new user-facing behavior (new endpoints, UI changes, notification logic)
-- The PM persona is selected (always recommend — the dedicated audit goes deeper)
-- Multiple requirements-related questions arise during the review
-
-Incorporate findings into the review under a dedicated "Requirements Traceability" subsection.
-
-#### → `/quality-audit`
-Escalate when ANY of:
-- Tests are added or significantly modified in the PR
-- New modules or services are added without corresponding test files
-- Test assertions look vacuous (shape checks only, `assert true`, broad pattern matches)
-- Mocks or stubs are used extensively — fidelity risk warrants dedicated analysis
-- The quality persona is selected (always recommend — the dedicated audit goes deeper)
-- The change touches high-risk code (payments, auth, data mutations) and test coverage looks thin
-
-Incorporate findings into the review under a dedicated "Quality Deep-Dive" subsection.
-
-#### General escalation signals
-Beyond the specific triggers above, recommend escalation whenever you notice:
-- The change is large enough (>500 lines, >10 files) that a single-pass review may miss systemic issues
-- The persona selected doesn't cover a concern you spotted (e.g. reviewing as "backend" but you noticed auth changes — recommend security escalation)
-- Multiple review categories are raising related concerns that suggest a deeper structural problem
-
-**Format the escalation recommendation:**
-```
-### Recommended Escalations
-- `/security-audit` — [reason: what triggered it, which files]
-- `/my-arch-review` — [reason: what triggered it, which files]
-- `/perf-review` — [reason: what triggered it, which files]
-- `/requirements-audit` — [reason: what triggered it, which files]
-- `/quality-audit` — [reason: what triggered it, which files]
-
-Run these? (y/n/select)
-```
-
-If I decline, continue with the review as-is. If I select specific ones, run only those.
-
 ## Step 6 — Format the Review
 
 Structure the review as follows:
@@ -352,8 +390,24 @@ Structure the review as follows:
 **Example:**
 [Code snippet if helpful]
 
+### Security Deep-Dive
+[Only if `/security-audit` was auto-run in Step 3 — skip otherwise]
+[Findings from the dedicated security audit]
+
+### Architecture Assessment
+[Only if `/my-arch-review` was auto-run in Step 3 — skip otherwise]
+[Findings from the dedicated architecture review]
+
+### Performance Deep-Dive
+[Only if `/perf-review` was auto-run in Step 3 — skip otherwise]
+[Findings from the dedicated performance review]
+
+### Quality Deep-Dive
+[Only if `/quality-audit` was auto-run in Step 3 — skip otherwise]
+[Findings from the dedicated quality audit]
+
 ### Requirements Traceability
-[Only if a Linear ticket was linked — skip this section otherwise]
+[Only if a Linear ticket was linked OR `/requirements-audit` was auto-run — skip otherwise]
 | Requirement | Status | File(s) |
 |---|---|---|
 | [Acceptance criterion] | Covered / Missing / Partial | `path:line` |
@@ -370,7 +424,7 @@ Structure the review as follows:
 
 ## Step 7 — Adversarial Challenge
 
-Before presenting the review, spawn the **adversarial-debate** agent to challenge every finding.
+**Always** spawn the **adversarial-debate** agent to challenge every finding before presenting the review. Never skip this step — even on small diffs, even when findings look obvious. This is distinct from the Step 4 challenge (which targets *my* answers); this one targets *your* findings.
 
 Format all blocking issues and non-blocking suggestions as structured findings and pass them to the agent along with:
 - The PR diff
@@ -391,7 +445,7 @@ If a finding is revised, retry the adversarial challenge on the revision (max 2 
 
 After applying the adversarial-debate verdicts, run the surviving findings through `/this-important` to filter for importance before raising them. Correctness/verification is not the same as importance — a finding can be technically accurate but not worth the noise.
 
-Invoke `/this-important strict` by default (override to `moderate` if the persona is Quality, PM, or Architect, where more clarity/maintainability findings are warranted; override to `loose` only if I explicitly ask for a thorough sweep).
+Invoke `/this-important strict` by default (override to `moderate` if QA, PM, or Architecture lenses are active, where more clarity/maintainability findings are warranted; override to `loose` only if I explicitly ask for a thorough sweep).
 
 Pass the full set of blocking issues, non-blocking suggestions, and questions as the target findings. Apply the returned verdicts:
 
