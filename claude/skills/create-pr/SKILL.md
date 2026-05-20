@@ -55,12 +55,22 @@ Parse the linked ticket from:
 2. Commit messages (look for `ENG-123`, `Closes #N`, Linear URLs, "Related Cards" trailers)
 3. Existing PR body (if updating)
 
-## Step 3 — Sequential-Thinking Analysis
+## Step 3 — Sequential-Thinking Analysis with RISC Scoring
 
 Run a single `mcp__sequential-thinking__sequentialthinking` pass over the diff + commit messages. Use `references/review-categories.md` as the rubric. Produce:
 
-1. **Verdict:** major or minor (criteria in the rubric).
-2. **Primary lens:** Backend / Frontend / Full-stack / Quality / Security / Architect / PM / Ops — matched to the `/my-review` persona vocabulary.
+1. **RISC scores** for the change overall (each 1–10):
+   - **R**each — how much code does this touch? (1=single function, 10=cross-cutting)
+   - **I**rreversibility — how hard to undo? (1=trivial revert, 10=data migration)
+   - **S**ubtlety — how easy to misunderstand? (1=obvious, 10=hidden gotcha)
+   - **C**onsequence — what breaks if wrong? (1=cosmetic, 10=data loss / security)
+
+   **Verdict thresholds:**
+   - Any component ≥9 → **High**
+   - Any component ≥7 → **Medium**
+   - Otherwise → **Low** (omit Risk Assessment from the body)
+
+2. **Primary lens:** Backend / Frontend / Full-stack / Quality / Security / Architect / PM / Ops — matched to the `/my-review` lens vocabulary.
 3. **Secondary lens:** only when both halves of the PR have non-trivial work in different lenses.
 4. **Triggered specialty reviews:** any of `/security-review`, `/my-arch-review`, `/perf-review`, eval-coverage call-out — only when the rubric signals actually fire. Each trigger names the specific file(s) that set it off.
 5. **Focus areas:** up to 5 `path:line` entries, each with a one-line "why". Prefer places where business-logic intent matters more than code correctness, where the diff is dense, or where boundaries are crossed.
@@ -68,9 +78,20 @@ Run a single `mcp__sequential-thinking__sequentialthinking` pass over the diff +
 
 Reason from the diff. The rubric is a checklist for the model, not a regex matcher.
 
-## Step 4 — Compose the Description
+## Step 4 — Ground Focus Areas in Tests
 
-Render `references/pr-template.md`, filling each section from Step 3. The **Review Guidance** section is required on every PR. The **Risk Assessment** block is included only for **major** changes.
+For each focus area from Step 3, grep the relevant test root for the function or behavior being claimed:
+
+```bash
+# Pick the test root that matches the focus area's language/framework
+grep -rn "<function_or_behavior>" <test-root>
+```
+
+Any focus area whose claimed behavior has **no matching test** becomes a candidate for the **"Where I'm Uncertain"** section. Cap at 3 entries. Be specific — name the file and the claim that no test verifies, not just "this might be wrong." If every focus area has test coverage, omit the section entirely.
+
+## Step 5 — Compose the Description
+
+Render `references/pr-template.md`, filling each section from Steps 3 and 4. The **Review Guidance** section is required on every PR. The **Risk Assessment** block is included only when the RISC verdict is **Medium** or **High**. The **Where I'm Uncertain** section is included only when Step 4 produced entries.
 
 Title:
 - Inspired by branch name + commit subjects
@@ -80,17 +101,17 @@ Title:
 
 Save the rendered body to a tempfile (`mktemp`) so `gh` can read it via `--body-file`.
 
-## Step 5 — Show Me
+## Step 6 — Show Me
 
 Print the title and full body to the terminal. Wait for explicit direction:
 
 - "create it" / "looks good" / "ship it" → Step 6
-- "edit X" / "rephrase Y" / "drop the Security trigger" / "downgrade to minor" → revise and re-show
+- "edit X" / "rephrase Y" / "drop the Security trigger" / "downgrade to Low" → revise and re-show
 - "draft" → Step 6 with `--draft`
 
 **Do not** call `gh pr create` or `gh pr edit` before I approve. Publishing the PR is a visible action and hard to retract cleanly.
 
-## Step 6 — Create or Update
+## Step 7 — Create or Update
 
 **Create mode:**
 ```bash
@@ -106,9 +127,12 @@ Show me the PR URL after.
 
 ## Guidelines
 
-- The Review Guidance section is the point of this skill — don't skip it, even on minor PRs.
+- **Do not fabricate.** Describe only what the diff shows. If you didn't read it, don't claim it. RISC scores must come from the actual change, not pattern-match against the diff size.
+- The Review Guidance section is the point of this skill — don't skip it, even on Low-verdict PRs.
 - Triggered specialty reviews must be **specific**: name the file(s) and the reason. "Auth might be affected" is not specific.
 - Focus areas should be things a human is more likely to catch than a reviewer skill — UX edge cases, business-logic intent, unusual integrations, subtle invariants (idempotency, ordering, timing).
+- **Where I'm Uncertain is honest, not exhaustive.** Only call out spots where a test would have verified your claim and didn't exist. Don't pad.
+- **Risk Assessment surfaces RISC component scores in the body only when a component is ≥7.** Otherwise the verdict + failure mode + rollback is enough. Don't dump the full RISC table for a Low-verdict PR.
 - Documentation alignment: only include when integration points actually changed. Don't pad.
 - Don't write findings here that `/my-review` would catch. This skill routes review; it does not perform review.
 - Title format: honor repo conventions if detectable, otherwise stay plain. Don't invent a convention.
@@ -117,7 +141,7 @@ Show me the PR URL after.
 ## References
 
 - `references/pr-template.md` — output template
-- `references/review-categories.md` — major/minor and lens/trigger rubric
+- `references/review-categories.md` — RISC scoring and lens/trigger rubric
 
 ## Gotchas
 

@@ -2,31 +2,48 @@
 
 Used by Step 3 of `/create-pr`. These are guidance for the sequential-thinking analysis — not rigid regex matchers. Reason from the diff and commit messages using these as a checklist.
 
-## Major vs. Minor
+## RISC Scoring
 
-### Major — full template, includes Risk Assessment
+For the change overall, estimate four components on a 1–10 scale:
 
+- **Reach** — How much code does this touch? 1 = single function. 10 = cross-cutting (touches many modules / apps / interfaces).
+- **Irreversibility** — How hard to undo? 1 = trivial revert with no side effects. 10 = data migration, schema change, or an irrecoverable state transition.
+- **Subtlety** — How easy to misunderstand? 1 = obvious mechanical change. 10 = hidden invariant, race condition, async/sync coupling, or domain logic that won't look wrong on first reading.
+- **Consequence** — What breaks if this is wrong? 1 = cosmetic. 10 = data loss, security incident, billing impact, or production outage.
+
+### Verdict thresholds
+
+- Any component **≥9** → **High** verdict. Render the Risk Assessment block. Surface every component ≥7 in the body.
+- Any component **≥7** → **Medium** verdict. Render the Risk Assessment block. Surface every component ≥7 in the body.
+- Otherwise → **Low** verdict. Omit the Risk Assessment block entirely.
+
+### Signals that typically drive each component high
+
+**Reach ≥7**
+- Touches multiple top-level apps or services simultaneously
+- Changes a shared library used by many consumers
+- Refactor that moves code across module boundaries
+
+**Irreversibility ≥7**
 - Database migrations or schema changes (any framework)
-- New third-party service integrations
-- Infrastructure changes (Docker, CI/CD config, deployment manifests, runtime configuration)
-- New dependencies in `mix.exs`, `package.json`, `pyproject.toml`, `Gemfile`, `go.mod`, etc.
-- Security / authentication / authorization changes
-- Changes affecting multiple top-level apps or services simultaneously
-- New background job types, queue configuration, or scheduler changes
-- New top-level modules or new dependency directions between modules
-- Public API contract changes (OpenAPI, GraphQL schema, RPC interfaces, webhook payloads)
 - Changes to data serialization formats persisted in storage, queues, or caches
+- New background job types where in-flight jobs would be stranded by a revert
+- Public API contract changes (OpenAPI, GraphQL, RPC, webhook payloads)
+- New third-party service integrations (revert leaves dangling external state)
 
-### Minor — concise template, no Risk Assessment
+**Subtlety ≥7**
+- Idempotency, ordering, timing, or retry semantics in async/job code
+- Auth / session / token / permission / policy code
+- LLM prompts, system messages, or tool docstrings (behavioral drift hard to spot in review)
+- Changes to caching invariants
 
-- Bug fixes in a single module or function
-- UI/UX improvements without backend impact
-- Test additions or fixes
-- Documentation-only updates
-- Code refactoring without functional changes
-- Non-infrastructure configuration tweaks
+**Consequence ≥7**
+- Auth / authn / authz changes
+- Anything affecting billing, payments, or compliance surfaces
+- Background job changes that could duplicate user-visible work
+- Migration on a large table where lock duration matters
 
-When in doubt: if a rollback would require coordinating with anyone outside the author, it's major.
+When in doubt: if a rollback would require coordinating with anyone outside the author, at least one component is probably ≥7.
 
 ## Primary Lens Recommendation
 
@@ -41,7 +58,7 @@ When in doubt: if a rollback would require coordinating with anyone outside the 
 | Module boundaries / new dependency directions / new top-level structure | Architect |
 | Auth / session / token / permission / policy code | Security (as primary, not just triggered, when auth IS the change) |
 
-Lens vocabulary matches `/my-review` personas so the PR routes cleanly to that skill.
+Lens vocabulary matches `/my-review` lenses so the PR routes cleanly to that skill.
 
 **Picking among multiple candidates:** primary lens lives where the riskiest reasoning lives. Add a Secondary lens only when both sides of the PR carry non-trivial work in different lenses.
 
