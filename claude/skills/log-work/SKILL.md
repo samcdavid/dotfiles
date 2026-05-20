@@ -11,17 +11,10 @@ Append a brief record of what was accomplished in this session to today's entry 
 
 ## Step 1 — Review the Session
 
-Look at what happened in this conversation:
-- Code changes made (files edited, features implemented, bugs fixed)
-- PRs created, reviewed, or updated
-- Issues investigated or resolved
-- Plans created or validated
-- Anything else substantive
+Skim git and the conversation for substantive outcomes: code shipped, PRs reviewed, investigations resolved, decisions made.
 
-Also check git for concrete evidence:
 ```bash
 git log --oneline --since="today" --author="sam"
-git diff --stat HEAD~5..HEAD  # recent changes for context
 ```
 
 ## Step 2 — Fetch Today's Entry
@@ -34,49 +27,58 @@ If found, fetch the page content to see what's already logged. If not found, cre
 
 ## Step 3 — Append Actions
 
-Add brief action items to today's entry. Each action should be one line:
-- Include the Linear issue ID if applicable
-- Include a PR link if one was created or updated
-- Describe WHAT was done, not HOW — keep it brief
+The reader is future-Sam scanning a week of entries. Each bullet must be readable in 2 seconds.
 
-Format:
+### Hard caps
+
+- **One sentence per bullet.** If you need two, you have two entries — or you're explaining HOW instead of WHAT.
+- **≤ 30 words before refs.** Count them.
+- Refs go in parens at the end: `(PR #25649)`, `(commit 71d3c47f305 on PR #25649)`. Never embed mid-sentence.
+
+### Do not include
+
+- File paths, line numbers, function names, regex, config keys, framework internals — the PR/commit link carries that detail.
+- Test counts, CI status, "all green", file/test counts.
+- Enumerations of ruled-out hypotheses — collapse to one phrase: *"ruled out X and Y in favor of Z"* or omit entirely.
+- Restated PR titles or commit messages — assume the link suffices.
+- The mechanics of meta-skills (`/you-sure`, `/this-important`, adversarial-debate, `/prove-it`) — only their net effect.
+
+### Shape
+
 ```
-- Fixed failing test suite for ABC-123 (PR: <link>)
-- Implemented webhook retry logic for ABC-456
-- Reviewed PR #1234 — flagged cross-service contract issue
-- Investigated staging error in Figma integration, added error handling
+- <ticket>: <outcome in one sentence> (refs)
+- Reviewed PR <#> (<ticket>, <one-phrase summary>) — <verdict>, <findings or "no blockers">
 ```
+
+### Good
+
+```
+- ABC-123: added structured rejection logging to the auth middleware so failures distinguish header-stripping from bad client tokens (commit abc1234 on PR #1234)
+- ABC-123: fixed staging post-OAuth failures — slash-redirect dropped auth and the server ignored the proxy's forwarded-proto header (commit def5678 on PR #1234)
+- ABC-123: rejected the one-line metadata-side bandaid in favor of fixing the underlying redirect, removing the bug class app-wide
+- Reviewed PR #2345 (XYZ-456, schema enrichment + scroll fix) — COMMENT, no blockers; flagged a pre-existing a11y gap as a follow-up
+- Reviewed PR #2346 (XYZ-457, supervisor silent-fallback) — concurred APPROVE post-merge, for the record
+```
+
+### Bad — do not write entries like this
+
+```
+- ABC-123: added missing logger.info("auth_rejected", ...) calls on the middleware's token_missing and token_invalid paths (commit abc1234 on PR #1234) — these were the two most common rejection paths but logged nothing, so the prior investigation had to fall back on direct curl probes. Refactored _extract_token to return (token, sub_reason) with sub_reason ∈ {"no_auth_header", "wrong_scheme", ...}; 401 body stays token_missing so adversarial clients aren't telegraphed internal state.
+```
+
+That's one entry, four sentences, ~120 words, with quoted code. Split or cut.
 
 ### PR Review Sessions
 
-When the session was a PR review (e.g. via `/my-review` or `/review`), log:
-- Which PR was reviewed (number + link)
-- Findings that **made it into the published review** — the ones the author will actually see
-- "Almost-findings" — issues you suspected but dropped after verification — reframed as a single bullet like:
-  > "Thought I had found an issue with X, but upon further inspection it was not an issue."
+When the session was a PR review, log:
+- PR (number + ticket + one-phrase summary)
+- Verdict (APPROVE / COMMENT / REQUEST CHANGES) and the findings the author will actually see in the published review
+- "Almost-findings" — issues suspected but dropped after verification — as one bullet: *"thought I had found X, but upon further inspection it was not an issue."*
 
-Do NOT log the mechanics of how findings were filtered. The reader doesn't need to know that `/you-sure`, `/this-important`, adversarial-debate, or any other gate dropped a finding — just that on further inspection, it wasn't an issue. Treat those skills as internal scaffolding, not log content.
+Forward-watch / follow-up observations from a review are fine to log IF they survived into the published review. If they didn't, they don't belong here either.
 
-Example (good):
-```
-- Reviewed PR #1234 — flagged missing idempotency check on the webhook handler and a cross-service contract drift on `user_id` nullability
-- Reviewed PR #1234 — thought I had found a race condition in the cache write path, but upon further inspection it was not an issue
-```
-
-Example (bad — do not log like this):
-```
-- Reviewed PR #1234 — /this-important dropped 3 findings as not worth raising
-- Reviewed PR #1234 — /you-sure verified my confidence on the idempotency claim before posting
-- Reviewed PR #1234 — adversarial-debate agent voted DROP on the race condition finding
-```
-
-Do NOT:
-- Duplicate actions already recorded in today's entry
-- Include trivial actions (typo fixes, import reordering)
-- Write more than one line per action
-- Include implementation details — just the outcome
-- Log the operation of meta-skills (`/you-sure`, `/this-important`, adversarial-debate, `/prove-it`) — only their net effect on what shipped
+Do NOT log how findings were filtered (which gate dropped what). Internal scaffolding, not log content.
 
 ## Step 4 — Confirm
 
-Tell me what was logged.
+Tell the user what was logged in one line.
