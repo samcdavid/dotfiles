@@ -73,12 +73,6 @@ The fenced block below is the literal body Markdown — copy its structure when 
 
 - <The claim — where it lives — what test would have verified it>
 
-## Documentation Alignment
-
-<!-- Omit this section entirely when no integration points moved. -->
-
-- <Which docs/consumers need to be updated and confirmed>
-
 ## QA Instructions
 
 <2–6 user-facing steps to exercise the change. Do NOT include test commands, lint commands, build commands, or CI checks — CI handles those. QA is about exercising the feature as a real user (or calling client) would.>
@@ -87,9 +81,19 @@ The fenced block below is the literal body Markdown — copy its structure when 
 2. <Concrete step with expected observable result>
 3. ...
 
-## Risk Assessment
+<details>
+<summary><b>Documentation Alignment</b></summary>
 
-<!-- Omit this whole section when the RISC verdict is Low. -->
+<!-- Omit this entire <details> block when no integration points moved. -->
+
+- <Which docs/consumers need to be updated and confirmed>
+
+</details>
+
+<details>
+<summary><b>Risk Assessment</b></summary>
+
+<!-- Omit this entire <details> block when the RISC verdict is Low. -->
 
 - **Verdict:** Medium / High
 - **Failure mode:** <what specifically breaks if this goes wrong>
@@ -98,6 +102,8 @@ The fenced block below is the literal body Markdown — copy its structure when 
 - **Recovery time:** <immediate via revert / minutes via rollback / hours if data reconciliation needed>
 - **Monitoring:** <what the on-call should watch during/after deploy>
 - **RISC components ≥7:** Subtlety=8 (timing coupling between sync and async paths), Consequence=7 (data drift if retried)
+
+</details>
 ````
 
 ## Authoring notes
@@ -107,7 +113,7 @@ The fenced block below is the literal body Markdown — copy its structure when 
 - **Review Guidance** top half is two short lines — the lens names and the triggered-review names. Save the *why* for the details block.
 - **Focus Areas** top half is paths + one-phrase whats. The deeper explanation (invariants, boundaries, test coverage) goes in the details.
 - **Where I'm Uncertain** is a humility signal, not a confessional. Name the claim, where it lives, and the test that *would* have verified it. Omit the section when every focus area is grounded.
-- **Documentation Alignment** is opt-in by signal. If no integration points moved, omit it — empty doc sections train reviewers to skim past.
 - **QA Instructions are user-facing.** No `mix test`, no `pytest`, no lint commands, no `bundle exec`. CI runs those. QA is: click-paths and observable UI changes; curl / MCP / API calls and the expected response shape; reproduction steps for bug fixes; trigger + side-effect-location for async work.
+- **Documentation Alignment** and **Risk Assessment** live in collapsed `<details>` blocks at the very end of the PR body. They're deploy-time and follow-up context — not what a reviewer scans the body for. Omit either block entirely when it doesn't apply (no integration points moved, or RISC verdict is Low).
 - **Risk Assessment** is gated by the RISC verdict. Render only when a component ≥7. Surface the specific component scores ≥7 in the body so the reviewer sees *which dimension* is risky.
 - **Density gradient:** every section should read top-to-bottom from scannable → detailed. If a reviewer can't tell what to do from the top half alone, the top half is too dense or the details block is in the wrong place.
