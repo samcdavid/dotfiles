@@ -2,14 +2,28 @@
 
 This is the output structure for `/create-pr`. Render this template with values from Steps 3 and 4, save to a tempfile, and pass to `gh pr create --body-file` or `gh pr edit --body-file`.
 
+## Design principle
+
+Every section is **two-level**: a terse top half a reviewer can read at a glance, and a collapsed `<details>` block for the deep context. Bullets at the top half are one-phrase. The `<details>` block carries the implementation detail, file paths, rationale, and anything else a careful reviewer wants on demand.
+
+The PR body is a scanning surface, not a design doc. If a reviewer has to expand `<details>` to see what the PR is about, the top half is doing the wrong job.
+
+## Body Markdown
+
 The fenced block below is the literal body Markdown — copy its structure when composing.
 
 ````markdown
 ## Summary
 
-<1 paragraph: what changed and why. Reviewers can dig into commits for detail.>
+<1–2 sentences in plain language: what this PR adds or changes. Frame from a user-visible angle when possible. Don't restate the diff, don't list files, don't name internals.>
 
-- <Up to 5 bullets on the key changes>
+<details>
+<summary><b>What changed</b></summary>
+
+- <Up to 5 bullets on the key implementation moves>
+- <File paths, modules, internals are fine here — this is the detail layer>
+
+</details>
 
 <details>
 <summary><b>Resources</b></summary>
@@ -19,54 +33,63 @@ The fenced block below is the literal body Markdown — copy its structure when 
 
 </details>
 
-<!-- Omit the entire <details> block when no ticket is linked and no other resources are found. Omit individual lines for any missing resource. -->
+<!-- Omit the entire Resources <details> block when no ticket is linked and no other resources are found. -->
 
 ## Review Guidance
 
-### Recommended Review Lens
+**Lens:** <Primary>[, <Secondary>]
+**Triggered specialty reviews:** <Security>, <Architecture>, <Performance>, <Ops>, <Eval coverage>
 
-- **Primary:** <Backend | Frontend | Full-stack | Quality | Security | Architect | PM | Ops> — run `/my-review <lens>`
-- **Secondary:** <only when both halves of the PR have non-trivial work in different lenses>
+<!-- Triggered line: comma-separated names only; list only triggered. Omit the line entirely if nothing triggered. -->
 
-### Triggered Specialty Reviews
+<details>
+<summary><b>Lens and trigger rationale</b></summary>
 
-Include only the triggered ones. Omit this subsection entirely if nothing triggered.
-
+- **Primary lens — <Backend | Frontend | Full-stack | Quality | Security | Architect | PM | Ops>:** <one-line why> — run `/my-review <lens>`
+- **Secondary lens — <…>:** <one-line why; omit subsection when none>
 - **Security:** <one-line reason + affected files> — run `/security-review`
 - **Architecture:** <one-line reason + affected files> — run `/my-arch-review`
 - **Performance / Migration:** <one-line reason + affected files> — run `/perf-review`
-- **LLM Eval Coverage:** <one-line reason> — verify the prompt/tool-docstring change has eval coverage before merge
+- **LLM Eval Coverage:** <one-line reason> — verify eval coverage before merge
 
-### Focus Areas for Reviewers
+</details>
 
-Up to 5 specific places to look closely. Each entry is `path:line` + one-line "why."
+## Focus Areas for Reviewers
 
-- `path/to/file.ext:LINE` — <what to verify or scrutinize>
+- `path/to/file.ext:LINE` — <one-phrase what to verify>
+- `path/to/other.ext:LINE` — <one-phrase what to verify>
 
-### Where I'm Uncertain
+<details>
+<summary><b>Why these focus areas matter</b></summary>
 
-Omit this subsection entirely when Step 4 found test coverage for every focus area. Cap at 3 entries.
+- `path/to/file.ext:LINE` — <fuller explanation: the subtle invariant, the boundary, the magic value, the business intent that matters more than code correctness, the test that proves or doesn't prove the claim>
+- ...
 
-- I assumed <X> preserves <Y> semantics; no test in `<test-path>` covers this path.
+</details>
 
-### Documentation Alignment
+## Where I'm Uncertain
 
-Include only when integration points (APIs, schemas, webhooks, public interfaces, env vars, CLI flags) changed. Omit otherwise.
+<!-- Omit this section entirely when Step 4 found test coverage for every focus area. Cap at 3 entries. -->
+
+- <The claim — where it lives — what test would have verified it>
+
+## Documentation Alignment
+
+<!-- Omit this section entirely when no integration points moved. -->
 
 - <Which docs/consumers need to be updated and confirmed>
 
 ## QA Instructions
 
-How to verify locally. Tailor to the change:
+<2–6 user-facing steps to exercise the change. Do NOT include test commands, lint commands, build commands, or CI checks — CI handles those. QA is about exercising the feature as a real user (or calling client) would.>
 
-- **Frontend:** user-facing steps to exercise the changed UI
-- **Backend / API:** curl / GraphQL query / SQL with expected output
-- **Bug fix:** reproduction on the base branch, then verification that the fix resolves it
-- **Always:** the success criterion — what does "it works" look like?
+1. <Concrete step>
+2. <Concrete step with expected observable result>
+3. ...
 
 ## Risk Assessment
 
-Omit the entire section when the RISC verdict is **Low** (see `review-categories.md`).
+<!-- Omit this whole section when the RISC verdict is Low. -->
 
 - **Verdict:** Medium / High
 - **Failure mode:** <what specifically breaks if this goes wrong>
@@ -77,13 +100,14 @@ Omit the entire section when the RISC verdict is **Low** (see `review-categories
 - **RISC components ≥7:** Subtlety=8 (timing coupling between sync and async paths), Consequence=7 (data drift if retried)
 ````
 
-## Authoring Notes
+## Authoring notes
 
-- Keep the **Summary** terse — one paragraph and ≤5 bullets. Reviewers can read commits for the rest.
-- **Resources** is collapsed by default so the body reads cleanly. Always include the Linear link when a ticket was detected; add other URLs only when they surfaced in commits or the diff.
-- The **Review Guidance** subsections are the value-add. Don't pad them; don't omit them either.
-- **Triggered Specialty Reviews** entries should be sharp enough that a reviewer reading only that line knows what to look at.
-- **Focus Areas** beat full coverage: three sharp entries are better than five vague ones.
+- **Summary** is 1–2 sentences of plain language. Frame from a user-visible angle. The implementation tour goes inside the `What changed` details block, not in the Summary.
+- **Resources** stays collapsed by default. Always include the Linear link when a ticket was detected; add other URLs only when they surfaced in commits or the diff. Omit the block when there's truly nothing to link.
+- **Review Guidance** top half is two short lines — the lens names and the triggered-review names. Save the *why* for the details block.
+- **Focus Areas** top half is paths + one-phrase whats. The deeper explanation (invariants, boundaries, test coverage) goes in the details.
 - **Where I'm Uncertain** is a humility signal, not a confessional. Name the claim, where it lives, and the test that *would* have verified it. Omit the section when every focus area is grounded.
 - **Documentation Alignment** is opt-in by signal. If no integration points moved, omit it — empty doc sections train reviewers to skim past.
+- **QA Instructions are user-facing.** No `mix test`, no `pytest`, no lint commands, no `bundle exec`. CI runs those. QA is: click-paths and observable UI changes; curl / MCP / API calls and the expected response shape; reproduction steps for bug fixes; trigger + side-effect-location for async work.
 - **Risk Assessment** is gated by the RISC verdict. Render only when a component ≥7. Surface the specific component scores ≥7 in the body so the reviewer sees *which dimension* is risky.
+- **Density gradient:** every section should read top-to-bottom from scannable → detailed. If a reviewer can't tell what to do from the top half alone, the top half is too dense or the details block is in the wrong place.

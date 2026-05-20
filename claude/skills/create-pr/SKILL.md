@@ -91,7 +91,16 @@ Any focus area whose claimed behavior has **no matching test** becomes a candida
 
 ## Step 5 — Compose the Description
 
-Render `references/pr-template.md`, filling each section from Steps 3 and 4. The **Review Guidance** section is required on every PR. The **Risk Assessment** block is included only when the RISC verdict is **Medium** or **High**. The **Where I'm Uncertain** section is included only when Step 4 produced entries.
+Render `references/pr-template.md`, filling each section from Steps 3 and 4.
+
+The template is **two-level by design**: every section is a terse scannable top half (one-phrase bullets, lens names, paths) plus a collapsed `<details>` block carrying the deeper rationale. When composing:
+
+- **Summary top half:** 1–2 sentences of plain language. Frame from a user-visible angle. No file paths, no module names, no implementation detail — those go inside the `What changed` details block.
+- **Review Guidance top half:** two lines — `Lens: …` and `Triggered specialty reviews: …`. Names only, comma-separated. Rationale goes in the details block.
+- **Focus Areas top half:** `path:line` + one-phrase what to verify. The longer "why this matters" goes in the details block.
+- **QA Instructions:** user-facing actions only — clicks, URLs, curl calls, MCP tool invocations, reproduction steps. **Never** include `mix test`, `pytest`, `npm test`, lint, or build commands. CI runs those.
+
+The **Review Guidance** section is required on every PR. The **Risk Assessment** block renders only when the RISC verdict is **Medium** or **High**. The **Where I'm Uncertain** section renders only when Step 4 produced entries.
 
 Title:
 - Inspired by branch name + commit subjects
@@ -105,9 +114,9 @@ Save the rendered body to a tempfile (`mktemp`) so `gh` can read it via `--body-
 
 Print the title and full body to the terminal. Wait for explicit direction:
 
-- "create it" / "looks good" / "ship it" → Step 6
+- "create it" / "looks good" / "ship it" → Step 7
 - "edit X" / "rephrase Y" / "drop the Security trigger" / "downgrade to Low" → revise and re-show
-- "draft" → Step 6 with `--draft`
+- "draft" → Step 7 with `--draft`
 
 **Do not** call `gh pr create` or `gh pr edit` before I approve. Publishing the PR is a visible action and hard to retract cleanly.
 
@@ -128,6 +137,9 @@ Show me the PR URL after.
 ## Guidelines
 
 - **Do not fabricate.** Describe only what the diff shows. If you didn't read it, don't claim it. RISC scores must come from the actual change, not pattern-match against the diff size.
+- **Two-level density.** Every section is a terse scannable top half plus a collapsed `<details>` block for the deep context. Top halves are one-phrase bullets or comma-separated names. File paths, internals, and rationale live inside `<details>`. If a reviewer has to expand `<details>` to know what the PR is about, the top half is doing the wrong job.
+- **Summary is plain language.** 1–2 sentences. Frame from a user-visible angle. No file paths, no module names, no implementation detail in the Summary itself — those go inside the `What changed` details block.
+- **QA Instructions are user-facing.** No `mix test` / `pytest` / `npm test`, no lint, no build commands — CI handles those. QA is click-paths and UI observations, curl / MCP / API calls and expected response shapes, reproduction steps for bug fixes, or trigger + observable side-effect for async work.
 - The Review Guidance section is the point of this skill — don't skip it, even on Low-verdict PRs.
 - Triggered specialty reviews must be **specific**: name the file(s) and the reason. "Auth might be affected" is not specific.
 - Focus areas should be things a human is more likely to catch than a reviewer skill — UX edge cases, business-logic intent, unusual integrations, subtle invariants (idempotency, ordering, timing).
