@@ -11,9 +11,13 @@ Perform a thorough, high-quality code review. Works on local changes (unstaged/s
 ## Getting Started
 
 Determine what to review:
+- If `$ARGUMENTS` is `capture` → **Capture Mode** — queue a Learned Miss (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
+- If `$ARGUMENTS` is `promote` → **Promote Mode** — walk the pending queue (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
 - If `$ARGUMENTS` contains a PR number or URL → **PR Mode** (fetch the PR diff via `gh`)
 - If `$ARGUMENTS` is empty or `local` → **Local Mode** (review working tree changes via `git diff`)
 - If `$ARGUMENTS` contains a branch name → review diff against that branch
+
+Subcommand keywords (`capture`, `promote`) take precedence over branch-name interpretation.
 
 ## Step 1 — Gather the Diff and Existing Feedback
 
@@ -108,7 +112,15 @@ Produce a short triage block and show it to me before going deep:
   - (or: "none — no triggers matched")
 - **Requirements checklist:** built from <ticket ID> | none linked
 - **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
+- **Auto-promoted since last review:** <count> · <target file(s) + Shape one-liner(s)> (or "none")
+- **Pending learned misses:** <count> (run `/my-review promote` to triage early)
 ```
+
+To populate the last two lines, scan `references/learned-misses.md`:
+- Pending count = entries with `status: pending` or `status: ready` under `## Pending`.
+- Auto-promoted-since-last-review = entries under `## Promoted` whose `status: promoted (<date>)` is newer than the last completed review. If you can't determine the prior review timestamp, list any promotion dated within the last 14 days.
+
+If `status: ready` entries exist (auto-promote blocked on ambiguous target), call them out by name — these need your input.
 
 Proceed automatically unless I override. Auto-escalation triggers are listed under Step 3.
 
@@ -135,6 +147,25 @@ Spawn parallel agents driven by the lenses from Step 2. Each lens determines wha
 - **codebase-analyzer** — deep-read the changed files AND their callers/consumers. Map call chains, data flow, dependencies.
 - **codebase-pattern-finder** — find how similar changes were made elsewhere. **Specifically check whether the codebase already has a utility, function, or module that does what new code is adding.** Duplication is a common review finding.
 - **docs-researcher** — for new dependencies, APIs/libraries used in ways you're not 100% certain are correct, or framework patterns with version-specific behavior. Do NOT review library usage without checking the actual docs.
+- **requirements-tracer** (conditional — see triggers below) — map blast radius for the diff, discover related Linear issues, evaluate regression risk on shipped features, assess test coverage. Pass `mode: review`, `scope: wide`, the primary Linear issue ID, and the PR number.
+
+### When to spawn `requirements-tracer`
+
+Spawn it (in parallel with the other agents) when **any** of these conditions hold:
+
+1. **PM lens active** (from Step 2 triage)
+2. **Linear ticket linked** in the PR description (Linear URL or issue ID regex match — e.g., `ENG-\d+`)
+3. **`/requirements-audit` is auto-escalated** in Step 3
+4. **Git-log heuristic — recently-shipped neighbors:** run `git log --since=60.days --name-only --pretty=format:'%H %s'` and check whether any of the diff's changed files appear in commits whose messages reference a closed Linear issue. If yes, spawn the tracer even when conditions 1–3 don't apply — it means this PR is editing code that recently shipped a feature.
+
+If none of the four conditions hold, skip the tracer.
+
+### Read prior plan, if one exists
+
+Before spawning the tracer, check `~/.claude/thoughts/shared/plans/` for a plan file matching the linked Linear ticket (filename or `feature:` frontmatter). If found:
+- Read the plan's surfaces (Phase sections, "Changes Required" lists) and "What We're NOT Doing".
+- Pass the plan's predicted surfaces to the tracer as an additional input alongside the diff.
+- The tracer will diff predicted-vs-actual surfaces and only re-run related-issue discovery if they differ meaningfully. This avoids redoing plan-stage analysis when the implementation tracked the plan.
 
 ### Lens-specific prompting
 
@@ -150,6 +181,7 @@ Prompt each agent with the concerns implied by the active lenses:
 - **Performance** → "Identify queries on large tables, hot-path computation, unbounded iteration. Verify index usage matches operator semantics."
 - **Migration safety** → "Audit lock risk on large tables. Verify down-migrations. Check column types match domain semantics."
 - **Dependency** → "Check new packages for maintenance status, license, and known security advisories. Identify what existing functionality, if any, this duplicates."
+- **requirements-tracer** → "Map blast radius for every changed surface in the diff. Discover related Linear issues at `scope: wide`. Evaluate regression risk on each related issue's shipped behavior. Assess whether existing tests would catch the regression. Filter findings through internal `/this-important` strict calibration before reporting."
 
 ### Auto-escalate to dedicated skills
 
@@ -330,6 +362,12 @@ Review the changes against these categories, ordered by priority.
 - For each requirement/acceptance criterion, identify which file(s) and change(s) address it. Flag any requirement with no corresponding code change as a **blocking issue** (missing requirement).
 - For each code change that doesn't trace back to any requirement, flag it as a **question** (unplanned scope — may be intentional, but the author should confirm).
 
+**Related-Issue Regression** (if `requirements-tracer` was spawned in Step 3)
+- For each `At-risk` finding from the tracer where the regression is `Likely-breakage`, flag as a **blocking issue** — name the related Linear issue, the surface, and the call chain (`file:line`).
+- For `At-risk` findings classified `Behavior-shift-unverified` (tracer couldn't fully verify the contract is preserved), flag as a **non-blocking question** asking the author to confirm.
+- For `At-risk` findings where the tracer's Test Coverage verdict is `No-test-found` or `Unlikely`, additionally flag a **non-blocking suggestion** to add a regression test, naming the specific behavior to cover.
+- Do NOT re-raise tracer findings already in the existing-comments index (Step 1 dedupe still applies).
+
 ### Non-blocking Suggestions (improvements, not blockers)
 
 **Performance**
@@ -415,6 +453,12 @@ Structure the review as follows:
 |---|---|---|
 | [Acceptance criterion] | Covered / Missing / Partial | `path:line` |
 
+### Related-Issue Regression Risks
+[Only if `requirements-tracer` was spawned in Step 3 AND surfaced At-risk findings — skip otherwise]
+| Linear Issue | Surface | Concern | Test Coverage | Severity |
+|---|---|---|---|---|
+| [ID — title] | `file:line` | [what could break] | Likely / Unlikely / No-test-found | Blocking / Question / Suggestion |
+
 ### Questions
 - [Genuine clarifying questions — things where the author has context you don't]
 
@@ -469,6 +513,19 @@ After applying verdicts, confirm:
 - [ ] Findings are grounded in the codebase research from Step 3, not assumptions
 - [ ] Dropped Findings section captures what `/this-important` filtered out, with reasons
 
+### In-review pattern capture
+
+Once findings are final, ask one batched question before moving to Step 8:
+
+> "Queue any of these as patterns to track? [numbers, 'none', or 'all']"
+
+For each selected finding:
+1. Check `references/learned-misses.md` for an existing matching Shape. If found, append a new Evidence entry (`type: caught`, today's date, `ref` = PR# or session) to the existing entry rather than creating a duplicate.
+2. Otherwise, draft a Shape (one or two sentences — the *general* pattern, not the specific bug) plus Trigger signals. Confirm the Shape with me before writing.
+3. Append the new entry under `## Pending` with `status: pending`.
+
+If I say "none," move on silently. Do not nag, do not list "all" by default — surface the question once.
+
 ## Step 8 — Adversarial Verdict Challenge
 
 Once findings are finalized in Step 7, choose a verdict for the published review and adversarially challenge it. **Always** run this step — even when the verdict feels obvious.
@@ -508,6 +565,84 @@ Prompts the agent should consider:
 
 Record the final verdict in the **Verdict** field at the top of the formatted review (Step 6 template).
 
+## Step 9 — Re-review Pattern Capture
+
+Only fires when Step 1 detected existing review comments from your prior review pass on this PR. Skip entirely otherwise.
+
+After the verdict is finalized, look at any PR comments (from other reviewers or the author) that surfaced since your last pass:
+1. Classify each: `Already-flagged-by-you` / `Out-of-scope` / `Worth-considering`.
+2. For the `Worth-considering` set, ask one batched question:
+   > "Do any of these point to a pattern the skill should have caught? [numbers or 'none']"
+3. For each selected comment:
+   - Check `references/learned-misses.md` for an existing matching Shape; append a new Evidence entry (`type: missed`, today's date, `ref` = comment link) if found.
+   - Otherwise, draft a Shape and Trigger signals, confirm with me, then append a new entry under `## Pending` with `status: pending`.
+
+If no `Worth-considering` items, skip the prompt entirely.
+
+## Subcommands — `capture`, `promote`
+
+### `/my-review capture`
+
+Direct, source-agnostic entry into the pattern queue. Use when a pattern surfaces outside the natural prompts in Step 7 and Step 9 — a bug report, a post-mortem, a Slack thread, a hunch.
+
+Flow:
+1. Ask: what pattern are we capturing? Collect Shape (one or two sentences, the *general* pattern), Trigger signals, and the source `ref`.
+2. Check `references/learned-misses.md` for an existing matching Shape. If found, append Evidence (`type: noted`, today's date, the source `ref`) to the existing entry.
+3. Otherwise, draft the entry and confirm with me before writing under `## Pending` with `status: pending`.
+
+Default Evidence type is `noted` (the user is calling it out — neither a clean catch nor a clean miss).
+
+Do **not** run any review flow in this mode. No Step 1–8. Just capture and exit.
+
+### `/my-review promote`
+
+Walk the pending queue one entry at a time (use the `walk-through` skill). For each entry with `status: pending` or `status: ready`:
+
+1. Show the Shape, Trigger signals, and Evidence summary.
+2. Reaffirm the Shape — is the generalization right, too narrow, or too broad? Offer to rewrite.
+3. Confirm the **target file**:
+   - Lens reference (e.g., `references/cross-service-contracts.md`) for a positive check ("review should affirmatively check for X").
+   - `gotchas.md` for a failure-mode lesson ("skill itself does the wrong thing").
+4. Confirm the exact wording — show what will be written, let me edit.
+5. On approval: write to target file under the appropriate section, mark entry `status: promoted (<today's date>)`, move entry to `## Promoted` section. Entry stays in the file for audit.
+6. On reject: mark `status: discarded (<today's date>, <one-line reason>)`, move to `## Discarded`.
+
+Use this to promote early (before threshold) or to discard entries that turn out to be one-offs.
+
+Do **not** run any review flow in this mode.
+
+## Queue lifecycle and auto-promotion
+
+The queue at `references/learned-misses.md` is the single source of truth for patterns the skill is learning. The lifecycle:
+
+1. **Capture** — entry appended with `status: pending`. Shape is the key; matching new captures against existing Shapes appends Evidence rather than creating duplicates.
+2. **Accumulate** — Evidence accrues across reviews. Both `type: caught` and `type: missed` (and `type: noted` from `capture` mode) count toward the threshold.
+3. **Auto-promote** — when `len(evidence) >= 3`, the skill:
+   - Drafts promotion wording (from the entry's `Proposed promotion: wording` field if set; otherwise generated from Shape + Evidence summary).
+   - Picks the target file (from `Proposed promotion: target` if set; otherwise inferred — see below).
+   - Writes to the target file under the appropriate section.
+   - Marks entry `status: promoted (<today's date>)` and moves it to the `## Promoted` section of the queue. Entry is preserved for audit.
+4. **Surface** — at the next `/my-review` invocation, Step 2's triage block reports the auto-promotion so I know what changed and can revert or rewrite via git.
+
+### When does the auto-promote check run?
+
+At the top of every `/my-review` invocation (after mode detection, before Step 1). Scan `## Pending` for entries whose Evidence length has crossed threshold; auto-promote them before producing the triage block, so the triage block can report what was promoted.
+
+### Target inference (when `Proposed promotion: target` is absent)
+
+- Shape describes "review should affirmatively check for X" → matching lens reference. Use `references/cross-service-contracts.md` for cross-service patterns. If no existing lens reference fits, transition to `status: ready` and surface in next review's triage block — do not invent new reference files automatically.
+- Shape describes "skill itself does the wrong thing" → `gotchas.md`, using the existing **Category / Context / Wrong / Right / Why / Source** structure.
+- Ambiguous → transition to `status: ready` (not auto-promoted) and surface loudly in next `/my-review` triage block for me to resolve via `/my-review promote`.
+
+### Threshold
+
+Currently **3**. Tune by editing this section. Lower = snappier learning, more noise; higher = more conservative.
+
+### Manual overrides
+
+- `/my-review promote` — promote pending entries early or discard one-offs.
+- `git revert` — undo an auto-promotion entirely. The queue entry stays as `promoted`; if you don't also discard it via `/my-review promote`, additional Evidence accruing later won't re-trigger auto-promote (the entry is already marked promoted). To permanently reject, run `/my-review promote` and mark `discarded`.
+
 ## Guidelines
 
 - Every blocking issue MUST include a concrete fix — write the actual replacement code, not a vague description of what to change
@@ -524,6 +659,7 @@ Record the final verdict in the **Verdict** field at the top of the formatted re
 
 This skill has reference files in `references/` — consult them during review:
 - `references/cross-service-contracts.md` — checklist for cross-service changes
+- `references/learned-misses.md` — pattern queue. Read at the top of every `/my-review` invocation to (a) auto-promote any pending entries whose Evidence has crossed threshold, and (b) populate the Step 2 triage block.
 
 ## Gotchas
 If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
