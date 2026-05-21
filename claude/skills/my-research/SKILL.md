@@ -32,6 +32,18 @@ Spawn parallel sub-agent tasks to explore the codebase:
 - **codebase-analyzer**: Deep-read key implementations
 - **codebase-pattern-finder**: Find related patterns and conventions
 
+### Available but situational: `requirements-tracer`
+
+The **requirements-tracer** agent is available for spawning here, but is NOT a default. Spawn it ONLY when the research question is explicitly about **change impact or regression risk** — for example:
+
+- "If I change `function_X`, what shipped features depend on it?"
+- "What would break if we deprecated this endpoint?"
+- "Which Linear issues touch the same code as ENG-1234?"
+
+Do NOT spawn it for general "how does X work" questions. Research is question-driven, not change-driven — the tracer's blast-radius mapping produces noise when there's no change to evaluate.
+
+When spawning, pass `mode: plan` (no diff exists during research), `scope: tight | medium | wide` based on how broad the user's impact question is, and either a Linear issue ID or an `intended_surfaces` list derived from the question.
+
 Wait for ALL sub-agents to complete before proceeding.
 
 ## Step 4 — Synthesize Findings

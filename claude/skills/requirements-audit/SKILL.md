@@ -67,6 +67,7 @@ For each requirement in the map:
 Spawn parallel agents:
 - **codebase-analyzer**: Read every changed file fully. For each requirement, identify the specific file(s), function(s), and line(s) that implement it.
 - **codebase-pattern-finder**: Check how similar requirements were implemented elsewhere — is this implementation consistent with precedent?
+- **requirements-tracer** (`mode: review`, `scope: wide`): Map blast radius for the diff, discover related Linear issues, evaluate regression risk on shipped features, and assess test coverage on at-risk surfaces. Pass the primary Linear issue ID and the PR number. Its output feeds Step 3 (Related-Issue Regression) and Step 4 (Regression Test Coverage).
 
 Build a traceability matrix:
 
@@ -120,6 +121,14 @@ Identify every change visible to end users:
 
 For each, verify it was intentional (traces to a requirement) and not a side effect.
 
+### Related-Issue Regression
+Take the **requirements-tracer**'s `Related Issues` and `Regression Risks` tables. For each `At-risk` related issue:
+- Confirm the surface and the call chain from the tracer are real (spot-check `file:line` against the diff or `gh api` content).
+- Classify the regression as: `Likely-breakage` / `Behavior-shift-unverified` / `Cosmetic-only`.
+- For `Likely-breakage` and `Behavior-shift-unverified`, surface as a finding in Step 6's "Missing or Incomplete Requirements" section (framed as "shipped requirement RN from issue X at risk").
+
+`Verified-still-working` and `Unaffected` verdicts from the tracer are not reported as findings — list them in Step 6's "Considered and Dismissed" with one-line notes.
+
 ## Step 4 — Gap Analysis
 
 ### Missing Requirements
@@ -140,15 +149,21 @@ For each requirement:
 - Are API changes reflected in API docs or schemas?
 - Are configuration changes documented?
 
+### Regression Test Coverage
+Pulled from the **requirements-tracer**'s Test Coverage column. For each `At-risk` finding that survived Step 3:
+- If the tracer found `No-test-found` or `Unlikely` → flag as a **Missing test** in Step 6, naming the related issue and the surface that needs coverage.
+- If `Likely` → record under "Positive Findings" so it's clear the safety net exists.
+
 ## Step 5 — Adversarial Challenge
 
 Before presenting, spawn the **adversarial-debate** agent to challenge your audit findings. A requirements audit that raises false gaps wastes PM and engineering time — precision matters.
 
-Format all findings (missing requirements, scope creep, edge case gaps, behavior drift) as structured claims and pass them to the agent along with:
+Format all findings (missing requirements, scope creep, edge case gaps, behavior drift, related-issue regression risks) as structured claims and pass them to the agent along with:
 - The requirements map from Step 1
 - The traceability matrix from Step 2
 - The PR diff and full file contents for referenced code
 - The Linear ticket and any Notion docs
+- The **requirements-tracer** report (Blast Radius, Related Issues, Regression Risks tables)
 
 The agent will:
 - Verify that "Missing" requirements aren't actually covered by code you didn't trace — re-read the diff and grep for related identifiers

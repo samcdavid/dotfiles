@@ -21,8 +21,20 @@ Wait for the user's input before proceeding.
    - **codebase-locator**: Find all files related to the task
    - **codebase-analyzer**: Analyze current implementation of affected components
    - **codebase-pattern-finder**: Find similar implementations to model after
+   - **requirements-tracer** (conditional — see triggers below): Map blast radius for intended surfaces, discover related Linear issues, evaluate regression risk on shipped features. Pass `mode: plan`, `scope: wide`, the primary Linear issue ID, and `intended_surfaces` derived from the user's task description.
 3. Check for existing research in `~/.claude/thoughts/shared/research/` that's relevant
 4. Wait for all sub-agents to complete
+
+### When to spawn `requirements-tracer`
+
+Spawn it (in parallel with the other sub-agents) when **either**:
+
+1. **Linear ticket linked** in the task description (Linear URL or issue ID regex match).
+2. **User named intended surfaces** in the task description (specific function/module/endpoint/column names — anything concrete enough to grep).
+
+If neither applies (the task is exploratory or the user hasn't named what they'll touch), skip the tracer for this pass and reconsider after Step 2 when intended surfaces are clearer.
+
+In `mode: plan`, the tracer reports test surface presence only — it cannot assess whether tests would catch the regression because the regression form isn't known yet. The git-log heuristic is also skipped (no commits yet).
 
 Present your informed understanding. Ask focused questions — only things that require HUMAN JUDGMENT (architectural direction, product intent, priorities). Do not ask questions answerable by reading code.
 
@@ -41,6 +53,11 @@ Propose a phasing structure:
 - What each phase accomplishes
 - Dependencies between phases
 - What's explicitly OUT OF SCOPE
+
+If the **requirements-tracer** ran in Step 1 and surfaced `At-risk` related issues, factor them in:
+- Related-issue regression risks shape the `What We're NOT Doing` boundary (e.g., "do NOT alter the return shape of `X` — issue ENG-1234 depends on the current shape").
+- Each `At-risk` finding becomes a candidate entry in the relevant phase's `What Could Go Wrong` section.
+- Surfaces the tracer flagged as having thin test coverage become candidate entries in the phase's `Tests First (RED)` list — write regression tests for the existing behavior before changing the surface.
 
 Confirm alignment before writing the full plan.
 
@@ -73,6 +90,10 @@ status: approved
 
 ## Architectural Constraints
 [Boundaries that must NOT be violated — dependency directions, module boundaries, naming conventions. These should be mechanically enforceable.]
+
+## Related-Issue Regression Constraints
+[Only if requirements-tracer ran in Step 1 — skip otherwise]
+[Contracts and behaviors from shipped issues that this plan must NOT break. Each entry: Linear ID, surface, contract that must be preserved, how to verify.]
 
 ## Phase 1: [Descriptive Name]
 
