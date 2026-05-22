@@ -25,13 +25,16 @@ Read the entire document. Do NOT skim. Absorb the problem statement, requirement
 
 If the document references other artifacts (a research doc, a spec, a Linear issue), read those too — cross-document inconsistencies are a primary target.
 
-## Step 2 — Codebase Grounding (If Applicable)
+## Step 2 — Codebase + Cross-Doc Grounding
 
-If the document makes claims about existing code behavior, spawn agents to verify:
-- **codebase-analyzer**: Trace the actual behavior described
-- **codebase-locator**: Confirm referenced files and boundaries exist
+Before you list ambiguities, **resolve everything you can resolve yourself.** Most candidate "blocking issues" turn out to be answerable from the code, the linked tickets, or an adjacent document — finding that out *before* presenting them to the user is the whole point of this step.
 
-Flag any claim that doesn't match reality — these are the most dangerous ambiguities because they look precise.
+Spawn in parallel (skip whichever doesn't apply):
+- **codebase-analyzer**: trace the actual behavior of any claim the document makes about existing code
+- **codebase-locator**: confirm referenced files, modules, and boundaries exist as described
+- Fetch referenced Linear issues, linked PRs, prior research/specs, and any doc the source points at
+
+Flag any claim that doesn't match reality — those are the most dangerous ambiguities because they look precise. But also: every claim the codebase *confirms* is a candidate question you no longer need to ask the user.
 
 ## Step 3 — Ambiguity Analysis
 
@@ -84,9 +87,23 @@ Work through the document systematically. For each section, ask:
 - Does the research consider how the investigated component interacts with its neighbors?
 - Are there data flow paths that were only partially traced?
 
-## Step 4 — Categorize Issues
+## Step 4 — Adversarial Filter (Before Categorizing)
 
-Group findings into three categories:
+You now have a long candidate list. **Most of it should not reach the user.** Run every candidate through this filter:
+
+1. **Already answered in the source?** Re-read the surrounding section. Authors often answer the question two paragraphs later. If answered → drop.
+2. **Answered in the codebase or a linked doc?** If your Step 2 grounding resolved it → drop, and note the answer for the user as confirmed (not as a question).
+3. **Inferable with reasonable confidence?** Could a competent engineer make a defensible default call? If yes → drop as a question, optionally note as an assumption to confirm.
+4. **Would the answer change planning or implementation?** If both answers lead to the same downstream work → drop. Decorative ambiguity is not blocking.
+5. **Truly independent?** If issue B's resolution depends on issue A's, collapse them into A.
+
+When in doubt, run a quick adversarial pass on your draft list: spawn an `adversarial-debate` agent (or do it yourself, fresh-eyed) — "for each of these, steel-man why it's NOT actually blocking." Anything that can be steel-manned away should be downgraded or dropped.
+
+The goal: a short list of high-signal issues. A report with 30 "blocking" issues is as useless as no report.
+
+## Step 5 — Categorize Issues
+
+Group what survived the filter into three categories:
 
 ### Blocking — Must resolve before planning/implementation
 Issues that would cause incorrect implementation, wasted work, or scope ambiguity if left unresolved.
@@ -97,7 +114,7 @@ Issues that narrow scope or reduce risk but don't fundamentally change the direc
 ### Informational — Worth noting, safe to defer
 Observations that improve the document but don't affect downstream work.
 
-## Step 5 — Present the Clarification Report
+## Step 6 — Present the Clarification Report
 
 ```markdown
 ## Clarification Report: [Document Name]
@@ -140,7 +157,7 @@ Observations that improve the document but don't affect downstream work.
 
 After presenting, ask: **"Which of the blocking issues should we resolve now?"**
 
-## Step 6 — Iterate
+## Step 7 — Iterate
 
 Work through each issue the user wants to resolve. For each:
 1. Discuss until the answer is clear
@@ -154,6 +171,7 @@ When all blocking issues are resolved, confirm: **"Blocking issues resolved. Thi
 - You are a CRITIC, not an editor. Your job is to find problems, not rewrite the document.
 - Be specific. "This is vague" is useless. "Requirement #3 says 'handle errors gracefully' — what should the user see when the API returns a 429?" is useful.
 - Don't invent problems. If something is genuinely clear, don't manufacture ambiguity for thoroughness theater.
+- **Resolve before raising.** If an ambiguity can be answered from the code, a linked doc, or two paragraphs further down in the source — answer it yourself and present it as confirmed context, not as a question. The user's attention is the budget you're spending.
 - Respect the author's intent. Challenge unclear expressions of intent, not the intent itself.
 - Prioritize ruthlessly. A report with 30 "blocking" issues is as useless as no report. Reserve blocking for things that would actually cause incorrect work.
 - When analyzing research, focus on whether the findings are RELIABLE enough to build on — not whether the research is academically complete.
