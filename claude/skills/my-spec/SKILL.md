@@ -13,7 +13,7 @@ Determine what we're refining:
 - If `$ARGUMENTS` contains a Linear issue ID → fetch the issue and all its context (description, comments, linked issues, project)
 - If `$ARGUMENTS` contains a description or idea → use that as the starting point
 - If `$ARGUMENTS` contains a URL → fetch and extract the relevant context
-- If empty → ask the user what they want to define
+- If empty → **read the conversation context first** before asking. Per the "Don't ask a blank intake question" gotcha, when `/my-spec` is invoked mid-conversation it's almost always a continuation. Identify the most likely subject (a ticket just researched, a feature just discussed) and open with a concrete proposal — "Based on our work on [X], I'll use that as the starting point — is that right?" — rather than a blank "What do you want to spec out?"
 
 ## Step 2 — Ask, Don't Assume
 
@@ -105,3 +105,6 @@ Do NOT create or update issues without explicit approval.
 - The user knows their domain better than you. When they push back on your questions, listen.
 - A good spec is one that a different engineer could pick up and know exactly what to build (and what NOT to build) without further clarification.
 - Scope creep is the enemy. Every "while we're at it..." should be scrutinized.
+
+## Gotchas
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
