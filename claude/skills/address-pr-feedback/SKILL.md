@@ -175,6 +175,7 @@ Before committing each fix, verify against the review categories that reviewers 
 - [ ] Bang vs. non-bang: appropriate for the error context?
 - [ ] No lazy imports introduced (all imports at module level)
 - [ ] If Oban jobs are involved: uniqueness config still correct? Jobs inside transactions?
+- [ ] When adding a clause to a multi-clause Elixir function, all clauses of the same name/arity stay grouped — never interleave a helper between them (per the **"Elixir multi-clause function grouping"** gotcha; `--warnings-as-errors` fails the build otherwise).
 
 **Layer Boundaries**
 - [ ] No API/resolver concerns leaked into contexts (or vice versa) as part of the fix
@@ -184,6 +185,7 @@ Before committing each fix, verify against the review categories that reviewers 
 - [ ] NOT NULL constraints safe on the table size?
 - [ ] Column types correct (money = `numeric(16,2)`, JSONB has defaults)?
 - [ ] Down migration present and safe?
+- [ ] Concurrent index ops use the **Ecto DSL, not raw SQL** (per gotcha), and `concurrently: true` is on **both `up` and `down`** when `@disable_ddl_transaction true` is set — credo scans both clauses, not just `up`.
 
 **Tests**
 - [ ] If you changed behavior, tests are updated
