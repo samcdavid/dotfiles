@@ -28,7 +28,7 @@ Stop and report if:
 - Working tree has uncommitted changes
 - Branch is the base branch itself (no PR to make)
 - No commits ahead of base
-- Branch hasn't been pushed (`git rev-parse --abbrev-ref --symbolic-full-name @{u}` fails)
+- Branch hasn't been pushed (`git rev-parse --abbrev-ref --symbolic-full-name @{u}` fails) — **but see the "Unpushed branch is not a hard stop" gotcha**: a brand-new feature branch on its first PR is the normal case, not misuse. Continue through Steps 2–6 and push as part of Step 7, not as a separate decision.
 
 Detect existing PR for the branch:
 
@@ -121,6 +121,11 @@ Print the title and full body to the terminal. Wait for explicit direction:
 **Do not** call `gh pr create` or `gh pr edit` before I approve. Publishing the PR is a visible action and hard to retract cleanly.
 
 ## Step 7 — Create or Update
+
+If the branch has no upstream (preflight noted this), push it first as part of the publish action — not as a separate prompt:
+```bash
+git push -u origin <branch>
+```
 
 **Create mode:**
 ```bash
