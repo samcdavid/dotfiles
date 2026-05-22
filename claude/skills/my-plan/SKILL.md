@@ -25,6 +25,8 @@ Wait for the user's input before proceeding.
 3. Check for existing research in `~/.claude/thoughts/shared/research/` that's relevant
 4. Wait for all sub-agents to complete
 
+Per the **"Plans and tickets are not verified facts"** gotcha: when this step or later phases reference another ticket's work as already shipped, or reason about what a component does based on its interface alone, **read the actual code**. A `[x]` in another plan does not mean the code exists. A function "accepting" a parameter does not mean it enforces coherence. Verify mechanism, not just interface — unverified claims compound.
+
 ### When to spawn `requirements-tracer`
 
 Spawn it (in parallel with the other sub-agents) when **either**:
@@ -86,7 +88,7 @@ status: approved
 [What the system looks like when done]
 
 ## What We're NOT Doing
-[Explicit scope boundaries — constraints that channel the work]
+[Explicit scope boundaries — constraints that channel the work. Apply the **"Boy scout rule"** gotcha: if a small fix or inconsistency lives in a file the plan already touches, bring it into scope rather than deferring. Challenge every item here — only genuinely unrelated work belongs on this list.]
 
 ## Architectural Constraints
 [Boundaries that must NOT be violated — dependency directions, module boundaries, naming conventions. These should be mechanically enforceable.]
