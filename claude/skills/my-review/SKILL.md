@@ -50,6 +50,8 @@ gh api repos/{owner}/{repo}/issues/{number}/comments --paginate
 
 Build an index of every issue already raised — file path, line range, and substance of the comment. You will use this to DE-DUPLICATE your review. Do not re-raise anything that has already been flagged, discussed, or resolved in an existing thread.
 
+If existing comments include any from **your own prior review pass** on this PR, treat this as a re-review and apply the **"Re-review means full re-review"** gotcha: re-read the full diff, re-read every comment (including issue-level threads where authors often explain what changed), and check whether prior findings are still valid or have been addressed. Do not coast on a prior approval — rebases can edit your code, fixes can introduce new issues, and stale comments may need retraction.
+
 **Local Mode:**
 ```bash
 git diff                    # unstaged
@@ -479,6 +481,8 @@ Format all blocking issues and non-blocking suggestions as structured findings a
 - The requirements checklist (if built in Step 2)
 
 The agent will return a verdict for each finding: KEEP, DOWNGRADE, REVISE, or DROP — with evidence.
+
+**PR Mode caveat — apply the "Adversarial agent reads the working tree too" gotcha.** The adversarial agent reads the local filesystem (current branch, usually `main`), so for PRs that add new files, those files don't exist locally. When the agent DROPs or REVISEs a finding because something allegedly "doesn't exist," "is fabricated," or "cannot be found," verify the claim against the PR diff before applying the verdict. The diff is the source of truth; if the diff shows the file or identifier is present, override the DROP and KEEP the finding.
 
 Apply the agent's verdicts:
 - **KEEP**: present as-is
