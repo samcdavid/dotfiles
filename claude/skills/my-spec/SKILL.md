@@ -15,32 +15,46 @@ Determine what we're refining:
 - If `$ARGUMENTS` contains a URL → fetch and extract the relevant context
 - If empty → **read the conversation context first** before asking. Per the "Don't ask a blank intake question" gotcha, when `/my-spec` is invoked mid-conversation it's almost always a continuation. Identify the most likely subject (a ticket just researched, a feature just discussed) and open with a concrete proposal — "Based on our work on [X], I'll use that as the starting point — is that right?" — rather than a blank "What do you want to spec out?"
 
-## Step 2 — Ask, Don't Assume
+## Step 2 — Research First, Then Reason
 
-Before writing anything, interview the user. Your goal is to surface hidden assumptions, missing context, and ambiguity. Ask questions like:
+**Do not ask the user anything yet.** Most of what you'd ask is answerable from the artifacts already in front of you. Burn that research budget before you spend the user's attention.
 
-- **Who is this for?** Who benefits? Who's affected? Is there a specific user type, persona, or internal team?
-- **What's the actual problem?** Not the solution they described — the underlying problem. Why does this matter now?
-- **What does success look like?** How would someone know this is working? What changes for the user?
-- **What's the current workaround?** If people are already solving this somehow, understand how and why that's insufficient.
-- **What are the constraints?** Timeline pressure, backward compatibility, other in-flight work, team capacity, technical limitations.
-- **What's explicitly out of scope?** What adjacent things should we resist doing?
+Gather in parallel where possible:
+- **Linked artifacts**: linked Linear issues, referenced docs/PRs/URLs, prior comments on the source ticket
+- **Codebase** (if the spec touches existing code): spawn `codebase-locator` (relevant modules/boundaries) and `codebase-analyzer` (current behavior, data flow, surrounding constraints) in parallel
+- **Prior conversation context**: if `/my-spec` was invoked mid-session, re-read what's already been said — don't make the user re-state it
+- **Adjacent specs/research**: check `~/.claude/thoughts/shared/research/` and `~/.claude/thoughts/shared/plans/` for related artifacts
 
-Do NOT dump all questions at once. Have a conversation — ask 2-3 at a time based on what you've learned so far. Respond to answers with follow-ups that dig deeper.
+For each candidate question you might ask, try to answer it from research first. Note which are genuinely unanswerable.
 
-## Step 3 — Codebase Research (If Relevant)
+## Step 3 — Adversarial Question Filter
 
-If the spec involves changes to an existing codebase, spawn agents to ground the conversation in reality:
+Before presenting any question to the user, run it through this filter. The bar is high: every surviving question must clear all four.
 
-- **codebase-locator**: Find the relevant modules and boundaries
-- **codebase-analyzer**: Understand the current behavior and data flow
+1. **Already answered?** Is the answer sitting in the ticket, the code, the linked docs, or earlier in this conversation? If yes — drop the question, state your inferred answer as an assumption.
+2. **Inferable with reasonable confidence?** Could a competent TPM make a defensible default call? If yes — make the call, flag it as an assumption to confirm.
+3. **Does the answer change scope or direction?** If the spec looks the same either way, the question is decorative — drop it.
+4. **Independent of other open questions?** If question B's answer is contingent on question A, ask A alone first.
 
-Share what you learn with the user — it often surfaces constraints or complexity they hadn't considered:
-> "I looked at how this currently works, and [finding]. Does that change how you're thinking about scope?"
+When in doubt, run a quick adversarial pass: spawn an `adversarial-debate` agent (or do it yourself, fresh-eyed) on your draft question list — "which of these are actually load-bearing vs. thoroughness theater?" Keep only the load-bearing ones.
 
-Skip this step if the spec is for a greenfield project or doesn't involve code changes.
+## Step 4 — Ask the Survivors (Sparingly)
 
-## Step 4 — Challenge the Scope
+Now interview the user — but only on what survived the filter. Lead with what you already know:
+
+> "From the ticket and the code I've read: [3-5 bullets of what's clear]. Assumptions I'm making: [list]. The decisions I actually need from you: [the surviving questions]."
+
+Ask 2-3 at a time, not all at once. Respond to answers with follow-ups that dig deeper when something new is surfaced — but re-apply the filter to those follow-ups too.
+
+Useful framings if questions are still warranted:
+- **Who is this for?** Who benefits? Who's affected?
+- **What's the actual underlying problem** (not the solution they described)?
+- **What does success look like** — observable, not implementational?
+- **What's the current workaround**, and why is it insufficient?
+- **What are the constraints** — timeline, backward compat, in-flight work?
+- **What's explicitly out of scope?**
+
+## Step 5 — Challenge the Scope
 
 Push back constructively. A good TPM doesn't just write down what people ask for — they refine it:
 
@@ -52,7 +66,7 @@ Push back constructively. A good TPM doesn't just write down what people ask for
 
 Be direct but collaborative. The goal is a better spec, not winning an argument.
 
-## Step 5 — Write the Spec
+## Step 6 — Write the Spec
 
 Once the scope is clear through conversation, write the spec:
 
@@ -87,7 +101,7 @@ Present the spec and ask: **"What's wrong with this? What did I miss?"**
 
 Iterate. The first draft is never the final draft.
 
-## Step 6 — Finalize
+## Step 7 — Finalize
 
 When the user is satisfied with the spec:
 
@@ -100,7 +114,7 @@ Do NOT create or update issues without explicit approval.
 ## Guidelines
 
 - You are a THINKING PARTNER, not a scribe. Challenge, question, and refine.
-- Prefer conversation over documentation — the spec is the output of good discussion, not a substitute for it.
+- **Research before asking.** The user's attention is the scarcest resource here. Every question you ask should be one you genuinely could not answer from the ticket, the code, the linked docs, or the conversation. Default to making a reasonable call and flagging the assumption — not to asking.
 - Stay at the problem/requirements level. Do not drift into implementation details, architecture, or technical design — that's what `/my-plan` is for.
 - The user knows their domain better than you. When they push back on your questions, listen.
 - A good spec is one that a different engineer could pick up and know exactly what to build (and what NOT to build) without further clarification.
