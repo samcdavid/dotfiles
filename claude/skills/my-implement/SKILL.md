@@ -106,6 +106,8 @@ When all phases are complete:
 3. Present a summary: what was done, any deviations from plan, any remaining concerns
 4. Suggest running `/validate` for a thorough post-implementation check
 
+**Before declaring "tests pass locally" on any Python change involving a dependency pin, lockfile change, or fresh-install behavior — and you're running inside a git worktree — apply the "Worktree `.venv/bin/*` shebangs" gotcha.** A `uv run pytest` from worktree A can silently execute via a sibling worktree's interpreter if the entry-point shebang snapshotted that interpreter at venv creation. Check `head -1 .venv/bin/pytest` (or the relevant entry point) — the shebang must point at *this* worktree's `.venv/bin/python`. If it doesn't, `rm -rf .venv && uv sync` and re-run, or use `uv run --no-active python -m pytest ...` to bypass the shebang. Otherwise CI will catch a regression that "passed locally."
+
 ## Guidelines
 
 - **Tests before code — always.** Never write production code without a failing test. This is not negotiable.
