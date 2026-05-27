@@ -1,85 +1,76 @@
 ---
 name: my-investigate
-description: Investigate production or runtime issues by exploring logs, metrics, traces, and dashboards. Product-agnostic — works with any observability stack. Follows the evidence to root cause.
+description: Investigate production or runtime issues by exploring logs, metrics, traces, and dashboards. Product-agnostic — works with any observability stack. Delegates evidence-gathering and hypothesis-testing to the `runtime-investigator` agent; keeps interactive context-gathering and decision-making in the main conversation.
 disable-model-invocation: true
 ---
 
 # Investigate Issue
 
-Systematically investigate a production or runtime issue. Follow the evidence — don't guess.
+Systematically investigate a production or runtime issue. The main window stays interactive (gather context, confirm hypotheses, decide on mitigations); evidence-gathering and hypothesis-testing run inside the `runtime-investigator` agent so logs/traces/metric data don't pollute the conversation.
 
-## Getting Started
+## Step 1 — Gather initial context (interactive)
 
-Gather initial context from the user:
-1. **What's the symptom?** (errors, latency, data inconsistency, user reports, alert firing)
-2. **When did it start?** (timestamp, "after deploy X", "this morning")
-3. **What's the blast radius?** (all users, specific tenant, one endpoint, one region)
-4. **What observability tools are available?** (Datadog, Grafana, CloudWatch, Honeycomb, app logs, etc.)
-5. **How do we access them?** (MCP tools, CLI, URLs, API keys)
+Collect from the user:
 
-If the user provides an alert or error message, start there. If they provide a URL to a dashboard or trace, access it.
+1. **Symptom** — errors, latency, data inconsistency, user reports, alert text
+2. **When did it start?** — timestamp, "after deploy X", "this morning"
+3. **Blast radius (suspected)** — all users, one tenant, one endpoint, one region. Verify later via the agent — do not trust the hint blindly.
+4. **Observability tools** — Datadog, Grafana, CloudWatch, Honeycomb, app logs, custom dashboards. For each, capture how to access (MCP tool name, CLI, URL).
+5. **Anything else** — relevant service/endpoint, suspect code paths, alert URLs, trace IDs, dashboard URLs, ticket URLs, error messages.
 
-Do NOT proceed without knowing how to access at least one data source. If unclear, ask.
+If the user provides an alert or error message, start there. If they provide a URL to a dashboard or trace, capture it for the agent to follow up on.
 
-## Step 1 — Establish Timeline
+**Do NOT proceed without knowing how to access at least one observability source.** If no tools are accessible, ask. Investigating blind produces guesses, not evidence.
 
-Build a timeline of events. Spawn parallel exploration:
-- **ops-data-explorer**: Query logs/metrics for the affected time range
-- **codebase-analyzer**: Read the relevant code paths (if the affected service/endpoint is known)
+## Step 2 — Spawn the investigator
 
-Key questions for the timeline:
-- When exactly did the issue start? (first error, first metric deviation)
-- Was there a deploy, config change, or dependency update around that time?
-- Is the issue ongoing, intermittent, or resolved?
-- Is there a pattern? (time of day, traffic volume, specific inputs)
-
-## Step 2 — Narrow the Blast Radius
-
-Determine what's affected and what ISN'T:
-- Which endpoints/services/jobs are impacted?
-- Which are healthy? (healthy neighbors help isolate the cause)
-- Is it correlated with specific users, tenants, regions, or input types?
-- Are downstream services affected? (cascading failure vs. isolated issue)
-
-## Step 3 — Follow the Request Path
-
-Trace a failing request end-to-end:
-
-1. **Entry point**: Load balancer, API gateway, or queue consumer — is the request arriving?
-2. **Application layer**: Is the code executing? Where does it fail? (check logs for stack traces, error messages)
-3. **Data layer**: Database queries succeeding? Correct data returned? Connection pool healthy?
-4. **External dependencies**: Third-party APIs responding? Timeouts? Changed behavior?
-5. **Infrastructure**: Container health, memory, CPU, disk, network
-
-At each layer, gather SPECIFIC evidence:
-- Exact error messages and stack traces
-- Trace IDs that can be followed across services
-- Metric values with timestamps
-- Log lines with request identifiers
-
-## Step 4 — Hypothesize and Test
-
-Based on evidence, form hypotheses:
+Invoke the `runtime-investigator` agent with the bundle:
 
 ```
-Hypothesis: [What you think is happening]
-Evidence For: [What supports this]
-Evidence Against: [What contradicts this]
-Test: [How to confirm or rule out — a query, a log search, a code read]
+- symptom
+- started_at
+- blast_radius_hint
+- observability_tools: list of {name, access_method}
+- relevant_service (or null)
+- relevant_code_paths (or null)
+- linked_artifacts: alert URLs, trace IDs, dashboards, tickets, error messages
 ```
 
-Test the MOST LIKELY hypothesis first. If it doesn't hold, move to the next. Don't get attached to a theory — follow the data.
+The agent builds a timeline (via `ops-data-explorer` + `codebase-analyzer` in parallel), narrows the blast radius against actual data, traces the request path, tests hypotheses, and returns structured evidence + a ranked hypothesis list + targeted questions for you.
 
-## Step 5 — Root Cause Analysis
+If the agent returns an `## Error` block (e.g. missing observability access), surface it and stop.
 
-Once the root cause is identified:
+## Step 3 — Review findings with the user
 
-1. **What broke?** (specific code path, configuration, data issue, infrastructure failure)
-2. **Why did it break?** (what changed — deploy, data, traffic, dependency)
-3. **Why wasn't it caught?** (missing test, missing monitor, edge case not considered)
-4. **What's the fix?** (immediate mitigation AND long-term correction)
+Present the agent's output. Specifically draw attention to:
+
+- **Blast radius (verified)** — especially if it disagrees with the user's hint
+- **Ranked hypotheses** — present 1-3 with their evidence-for / evidence-against
+- **Targeted questions** — ask each one; the user has context the agent can't retrieve
+
+## Step 4 — Confirm root cause
+
+Based on the ranked hypotheses + user answers:
+
+1. Ask the user which hypothesis they want to confirm first.
+2. If the agent's evidence is sufficient, confirm it together. If not, the agent's `Suggested Next Steps` section names what to investigate further — re-invoke the agent with the additional context if needed (max 2 follow-up rounds; if still inconclusive, escalate to a human investigator).
+3. Once a root cause is confirmed:
+   - **What broke?** specific code path, configuration, data issue, infrastructure failure
+   - **Why did it break?** what changed — deploy, data, traffic, dependency
+   - **Why wasn't it caught?** missing test, missing monitor, edge case not considered
+
+## Step 5 — Mitigation and fix (user-driven)
+
+Separate MITIGATION (stop the bleeding) from FIX (prevent recurrence). Both are the user's call — surface options, do not take them.
+
+- **Mitigation options** — rollback, feature flag toggle, config change, scale-up. List the options the user can choose from. Do NOT execute any of them yourself.
+- **Long-term fix** — code change, architecture improvement, process change. Surface the candidate; the user decides whether to implement now or schedule it.
+
+If the user asks you to implement the long-term fix, switch to the appropriate skill (`my-implement`, `my-plan`) — do not implement from inside this investigation flow.
 
 ## Step 6 — Report
+
+After confirmation, produce the investigation report:
 
 ```markdown
 ## Investigation: [Issue Title]
@@ -88,9 +79,8 @@ Status: [active | mitigated | resolved]
 Severity: [critical | high | medium | low]
 
 ### Timeline
+- [Timestamp] — [Event grounded in evidence]
 - [Timestamp] — [Event]
-- [Timestamp] — [Event]
-...
 
 ### Blast Radius
 - Affected: [services, endpoints, users]
@@ -104,7 +94,7 @@ Severity: [critical | high | medium | low]
 - [Source]: [specific data point]
 
 ### Immediate Mitigation
-[What to do right now to stop the bleeding — rollback, feature flag, config change]
+[What was done or what's available — note who decided to apply each option]
 
 ### Long-term Fix
 [Code change, architecture improvement, process change needed]
@@ -120,17 +110,14 @@ Severity: [critical | high | medium | low]
 
 ## Step 7 — Verification
 
-After a fix is applied:
-- Confirm the symptom is resolved (check the same metrics/logs that showed the problem)
+After a mitigation or fix is applied:
+- Confirm the symptom is resolved (re-spawn the agent with the same observability scope to check the same metrics/logs that showed the problem)
 - Verify no new issues introduced
 - Watch for recurrence over a defined window
 
-## Guidelines
+## Constraints
 
-- Follow the EVIDENCE, not intuition — every conclusion needs supporting data
-- Start broad, narrow progressively — don't tunnel-vision on the first theory
-- Collect specific data points (timestamps, trace IDs, error messages) — "the logs looked bad" is not evidence
-- If you can't access a data source, tell the user what you need and why
-- Separate MITIGATION (stop the bleeding now) from FIX (prevent recurrence)
-- Be platform-agnostic in analysis — use whatever tools are available
-- If the issue is actively impacting users, prioritize mitigation over perfect root cause analysis
+- **Read-only investigation.** The skill and the agent are both forbidden from applying mitigations, modifying configuration, restarting services, paging anyone, or editing code in the affected codebase. Surface options; the user decides.
+- **Follow evidence, not intuition.** Every conclusion needs a data point.
+- **Specific over vague.** Quote log lines, list trace IDs, name exact metric values. "The logs looked bad" is not evidence.
+- **User-paced.** Ask before moving from investigation → mitigation → fix → verification. Each transition is a decision point.
