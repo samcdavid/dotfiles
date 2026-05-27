@@ -52,12 +52,14 @@ Build a **requirements map**: for each acceptance criterion, which file(s) and c
 
 **Every comment requires investigation before deciding how to respond.** Do not accept feedback blindly, and do not reject it without evidence. The standard of rigor is the same regardless of whether you end up agreeing or disagreeing.
 
+Before starting, read `references/pushback-patterns.md`. It documents the shapes that well-calibrated pushback takes across senior Elixir-ecosystem developers. The "When to push back vs. when to accept" decision table near the end is the load-bearing piece — use it to map each comment's category to a response pattern.
+
 For each pending comment:
 
 1. **Reproduce the concern.** Read the referenced code. Does the reviewer's claim hold? If they say there's a bug, can you construct the failing case? If they suggest an alternative, does it actually work in context? If they flag a missing edge case, trace the code path — does the value they're worried about actually reach this point?
 2. **Check the codebase.** If the reviewer suggests using an existing utility or pattern, verify it exists and does what they think it does. If they suggest a refactor, check whether it would break callers. If they flag a naming issue, check how the term is used elsewhere in the domain.
 3. **Check the docs.** If the feedback involves a library API, framework behavior, or Oban/Ecto pattern, verify against actual documentation — not memory.
-4. **Form a judgment with evidence.** You now know whether the reviewer is right, partially right, or mistaken. Classify accordingly.
+4. **Form a judgment with evidence.** You now know whether the reviewer is right, partially right, or mistaken. Classify accordingly — and consult `references/pushback-patterns.md` to pick the response shape that fits (e.g. Pattern 3 "evidence-backed pushback" for falsifiable bot claims, Pattern 1 "out-of-scope defer" for adjacent cleanup, Pattern 4 "acknowledge-and-fix" for clear bugs).
 
 ### Classification
 
@@ -452,6 +454,10 @@ Response text"
 - **Don't fix what wasn't flagged.** Resist the urge to refactor surrounding code while you're in the file. Address the feedback, nothing more.
 - **Verify against the review checklist.** Your fixes will be re-reviewed. Run them through the same `/my-review` categories the reviewers use. Creating new findings while addressing old ones wastes everyone's time.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
+
+## References
+
+- `references/pushback-patterns.md` — 12 pushback shapes distilled from a 24-developer PR mining pass. Used during Step 2 (investigate) to pick a response shape; includes a "When to push back vs. when to accept" decision table and per-person pushback fingerprints.
 
 ## Gotchas
 If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
