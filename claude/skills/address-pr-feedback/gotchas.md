@@ -13,7 +13,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 ### Brand/product name capitalisation in user-visible copy
 - **Category:** convention
 - **Context:** Writing or editing user-visible strings in templates — error messages, labels, button copy, scope descriptions, alt text
-- **Wrong:** Using lowercase product name (e.g. `dscout`) in body copy when the correct brand form is capitalised (`Dscout`)
+- **Wrong:** Using lowercase product name (e.g. `brandname`) in body copy when the correct brand form is capitalised (`BrandName`)
 - **Right:** Check the correct capitalisation for any product or brand name appearing in copy before writing it. When in doubt, grep for existing uses in the codebase rather than guessing
 - **Why:** Brand names have prescribed capitalisation that differs from standard English title case. Getting it wrong in user-facing copy requires a follow-up fix and a re-review round
 - **Source:** Observed when writing scope description and account copy in an OAuth consent page template

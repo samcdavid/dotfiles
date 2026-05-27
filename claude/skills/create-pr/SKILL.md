@@ -8,8 +8,6 @@ disable-model-invocation: true
 
 Create a pull request with a description that does more than restate the diff. The point is to **route the review** — tell the human which lens to apply, which specialty reviews to run, and where to look closely.
 
-Inspired by the dscout/dscout `git-create-pr` skill but generic and personal.
-
 ## Getting Started
 
 `$ARGUMENTS` is optional. If present, treat it as override notes for the PR body (e.g., "emphasize the migration risk", "frame this as a refactor", "draft").
