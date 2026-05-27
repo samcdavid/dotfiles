@@ -445,7 +445,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - `references/general-checklist.md` — cross-cutting blocking/non-blocking categories. Read by the orchestrator on every invocation.
 - `references/cross-service-contracts.md` — checklist for cross-service changes. Read by the orchestrator on every invocation.
 - `references/learned-misses.md` — pattern queue. Auto-promote check runs at the top of every invocation; triage block reports promotions.
-- `references/dscout-team-conventions.md` — team-specific conventions distilled from prior reviews. Created by a separate mining pass; the orchestrator reads it when present.
+- `references/team-review-patterns.md` — team-and-community review patterns distilled from a multi-developer PR mining pass. Created by a separate mining pass; the orchestrator reads it when present.
 - `gotchas.md` — known failure patterns. Both this skill and the orchestrator agent read it.
 
 ## Gotchas

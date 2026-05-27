@@ -63,7 +63,7 @@ Always read these, in this order:
 1. `~/.claude/skills/my-review/gotchas.md` — known failure patterns. Internalize before producing findings.
 2. `~/.claude/skills/my-review/references/general-checklist.md` — cross-cutting blocking/non-blocking categories.
 3. `~/.claude/skills/my-review/references/cross-service-contracts.md` — checklist when the diff touches service boundaries.
-4. `~/.claude/skills/my-review/references/dscout-team-conventions.md` — team-specific conventions distilled from prior reviews. Skip silently if the file does not exist (mining pass is deferred).
+4. `~/.claude/skills/my-review/references/team-review-patterns.md` — team-and-community review patterns distilled from a multi-developer PR mining pass. The "High-confidence patterns" section is ready-to-flag (6+ reviewers reinforce each); the "Medium-confidence" section needs to be weighed against the diff specifics. The "Reviewer archetypes" section helps pick a stance based on the lens(es) active. Skip silently if the file does not exist.
 
 For each active lens that has a dedicated skill, also read the skill file and integrate its evaluation criteria. The dedicated skill is the **single source of truth** for that lens's checklist — do not duplicate it here.
 
