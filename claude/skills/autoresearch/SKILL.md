@@ -1,16 +1,14 @@
 ---
 name: autoresearch
-description: Autonomous goal-directed iteration loop. Modify, verify mechanically, keep or rollback, repeat. Runs until interrupted or iteration limit reached. Invoke manually when you want to iterate on a measurable goal (tests, benchmarks, coverage, build size, etc). Optional iteration limit as argument (e.g. /autoresearch 100).
+description: Autonomous goal-directed iteration loop. Modify, verify mechanically, keep or rollback, repeat. Runs until interrupted or iteration limit reached. Invoke manually when you want to iterate on a measurable goal (tests, benchmarks, coverage, build size, etc). Optional iteration limit as argument (e.g. /autoresearch 100). Delegates each iteration's work to the `autoresearch-iteration` agent so the main loop holds only structured results.
 disable-model-invocation: true
 ---
 
 # Autoresearch — Autonomous Goal-Directed Iteration
 
-Inspired by Karpathy's autoresearch. Constraint-driven autonomous iteration: modify, verify, keep/discard, repeat forever.
+Inspired by Karpathy's autoresearch. Constraint-driven autonomous iteration: modify, verify, keep/discard, repeat. The main loop owns control, the results log, and limit checking; each iteration's read-modify-verify work runs inside the `autoresearch-iteration` agent so the main window stays small even across long runs.
 
-## Getting Started
-
-### Parse Arguments
+## Step 1 — Parse arguments
 
 `$ARGUMENTS` may contain an optional iteration limit and/or a goal description.
 
@@ -20,82 +18,92 @@ Inspired by Karpathy's autoresearch. Constraint-driven autonomous iteration: mod
 
 Examples: `/autoresearch 100` = 100 iterations, goal from context. `/autoresearch 50 improve test coverage` = 50 iterations, goal is "improve test coverage". `/autoresearch reduce bundle size` = no limit, goal is "reduce bundle size".
 
-### Determine Goal
+## Step 2 — Determine the goal
 
-1. **If `$ARGUMENTS` specifies a goal**: use that as the iteration target.
-2. **If the session has active context** (a plan in progress, recent conversation about a problem, failing tests, a performance issue): propose an iteration target derived from that context. State your understanding and get confirmation before starting.
-3. **Otherwise**: ask the user what they want to iterate on. Don't guess.
+1. If `$ARGUMENTS` specifies a goal, use it.
+2. Otherwise, if the session has active context (a plan in progress, recent conversation about a problem, failing tests, a performance issue), propose a target derived from that context. State your understanding and get confirmation before starting.
+3. Otherwise, ask the user what to iterate on. Don't guess.
 
-Once you have a target, run the Setup Phase. Do NOT begin the loop until setup is confirmed.
+## Step 3 — Setup phase
 
-## Setup Phase
+Before any iteration runs:
 
-1. **Read all in-scope files** for full context before any modification.
-2. **Define the goal and metric** — What does "better" mean? Extract or agree on a single mechanical metric:
+1. **Define the metric** — what does "better" mean? A single mechanical metric verifiable by a command. Examples:
    - Tests pass + coverage %
    - Benchmark time (ms)
    - Build succeeds + warnings eliminated
    - File/bundle size reduced
-   - Lighthouse/accessibility score
+   - Lighthouse / accessibility score
    - Lines of code reduced (while tests pass)
-   - If no metric exists, define one with the user. It MUST be verifiable by a command.
-3. **Define the verify command** — The exact shell command that produces the metric. Write it down.
-4. **Define scope constraints** — Which files can you modify? Which are read-only?
-5. **Define metric direction** — Higher is better or lower is better?
-6. **Create the results log** — See `references/results-logging.md`.
-7. **Establish baseline** — Run verification on current state. Record as iteration 0.
-8. **Present setup to user** — Show: goal, metric, verify command, scope, direction, baseline value, and iteration limit (or "unlimited"). Get confirmation before starting the loop.
+   If no metric exists, define one with the user. It MUST be extractable from command output.
+2. **Define the verify command** — the exact shell command that produces the metric. Write it down. The agent uses it verbatim.
+3. **Define the metric extractor** — regex or one-line instruction for pulling the numeric metric from the verify command's output.
+4. **Define scope constraints** — `in_scope_paths` (modifiable) and `read_only_paths` (off-limits).
+5. **Define metric direction** — `higher_is_better` or `lower_is_better`.
+6. **Create the results log** — see `references/results-logging.md`.
+7. **Establish baseline** — run the verify command on the current state. Record as iteration 0.
+8. **Present setup to user** — show: goal, metric, verify command, metric extractor, scope, direction, baseline value, iteration limit (or "unlimited"). Get confirmation before starting the loop.
 
-## The Loop
-
-Read `references/autonomous-loop-protocol.md` for full protocol details.
+## Step 4 — The loop
 
 ```
 LOOP (until iteration limit reached, or forever if no limit):
-  1. Review: Read current state + git history + results log
-  2. Ideate: Pick next change based on goal, past results, what hasn't been tried
-  3. Modify: Make ONE focused change to in-scope files
-  4. Commit: Git commit the change (before verification)
-  5. Verify: Run the mechanical metric
-  6. Decide:
-     - IMPROVED -> Keep commit, log "keep"
-     - SAME/WORSE -> Git revert, log "discard"
-     - CRASHED -> Try to fix (max 3 attempts), else log "crash" and revert
-  7. Log: Record result in results log
-  8. Check: If iteration limit set and reached, print final summary and stop.
-  9. Repeat: Go to step 1. If no limit, NEVER STOP. NEVER ASK "should I continue?"
+
+  1. Build iteration inputs from current state:
+     - iteration: next integer
+     - goal, metric_name, metric_direction, verify_command, metric_extractor
+     - in_scope_paths, read_only_paths
+     - recent_log_entries: last 10-20 entries from the results log (read from disk)
+     - recent_commits: `git log --oneline -20` output
+     - baseline_metric: iteration 0's value
+     - current_metric: the latest kept iteration's value (or baseline if no keeps yet)
+
+  2. Spawn the `autoresearch-iteration` agent with the bundle.
+
+  3. The agent returns one Iteration Result block (status: keep | discard | crash | blocked, plus metric, delta, commit, description, notes).
+
+  4. Append the result to the results log (in the format defined in references/results-logging.md).
+
+  5. Handle the status:
+     - keep: do nothing (the agent's commit stays); update current_metric
+     - discard: do nothing (the agent already reverted)
+     - crash: do nothing (the agent already reverted)
+     - blocked: STOP the loop. Surface the agent's notes to the user. Wait for direction.
+
+  6. Print a one-line status every 5 iterations: "iter N — metric M — keeps:K discards:D crashes:C".
+
+  7. If iteration limit set and reached: print the final summary and STOP.
+
+  8. Otherwise repeat from step 1. NEVER ASK "should I continue?".
 ```
 
-## Critical Rules
+## Step 5 — Final summary
 
-1. **NEVER STOP** (unless iteration limit reached) — Loop until manually interrupted or the limit is hit. The user may be away.
-2. **Read before write** — Always understand full context before modifying.
-3. **One change per iteration** — Atomic changes. If it breaks, you know exactly why.
-4. **Mechanical verification only** — No subjective "looks good". Use the metric.
-5. **Automatic rollback** — Failed changes revert instantly. No debates.
-6. **Simplicity wins** — Equal results + less code = KEEP. Tiny improvement + ugly complexity = DISCARD.
-7. **Git is memory** — Every kept change committed. Read history to learn patterns.
-8. **When stuck, think harder** — Re-read files, re-read goal, combine near-misses, try radical changes. Don't ask for help unless truly blocked by missing access/permissions.
-9. **Brief status every 5 iterations** — One line: iteration number, current metric, keeps/discards count.
+When the loop ends (limit reached or blocked or user-interrupted), produce:
 
-## Minimal-Change Strategies
+```
+## Autoresearch Final Summary
 
-| Strategy | When to use |
-|---------|-------------|
-| **Extract helper** | Shared logic causes a cycle or duplication; extract to a new module |
-| **Move code down** | Move a function to break a dependency direction |
-| **Invert dependency** | Replace direct call with callback, option, or data structure |
-| **Simplify** | Remove code while maintaining metric — simpler is always better |
-| **Combine near-misses** | Two individually-failed changes might work together |
-| **Radical experiment** | When incremental changes stall, try something dramatically different |
+- Goal: <goal>
+- Metric: <metric_name> (<metric_direction>)
+- Baseline: <baseline_metric>
+- Final: <current_metric>
+- Delta: <final − baseline>
+- Iterations: <total> (keeps: K, discards: D, crashes: C)
+- Best iteration: #<iter> — <description>
+- Worst pattern: <if any pattern stood out — e.g. "5 consecutive discards triggered Stuck Protocol on iter 42">
+- Recommendations: <1-2 lines on what to try next manually, if applicable>
+```
 
-## Stuck Protocol
+## Constraints
 
-If >5 consecutive discards:
+- **NEVER STOP** (unless iteration limit reached, agent returns `blocked`, or user interrupts) — the user may be away.
+- **NEVER ASK** the user mid-loop. If genuinely stuck, the agent returns `blocked` and the loop halts.
+- **Git is memory** — every kept change is committed. The agent reads `git log` to learn patterns.
+- **Mechanical only** — the verify command is the only judge. Subjective "looks good" is not used.
+- **Read-only paths are absolute.** If the agent reports it touched one, the iteration was already auto-discarded.
 
-1. Re-read ALL in-scope files from scratch
-2. Re-read the original goal
-3. Review entire results log for patterns
-4. Try combining 2-3 previously successful changes
-5. Try the OPPOSITE of what hasn't been working
-6. Try a radical architectural change
+## References
+
+- `references/autonomous-loop-protocol.md` — detailed per-phase protocol (the agent reads this when needed).
+- `references/results-logging.md` — results log format and location.
