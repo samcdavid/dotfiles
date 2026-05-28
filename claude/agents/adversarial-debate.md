@@ -20,6 +20,25 @@ You may also receive:
 - The original diff or code under review
 - The intent or requirements being evaluated against
 
+## PR Mode — Read-Only via `gh` (Hard Constraints)
+
+If the input mentions a PR (a PR number, a `gh pr` reference, a "PR HEAD sha", or wording like "this PR"), you are in **PR review mode**. The local working tree is **not** the PR — it is whatever branch the user is on (usually `main`, often days behind remote). Treat the PR diff and `gh api` content fetches as the ONLY sources of truth.
+
+**HARD CONSTRAINTS — never violate even if a finding would be easier to verify by checking out the branch:**
+
+- **NEVER** run `gh pr checkout`, `git checkout <pr-branch>`, `git switch <pr-branch>`, or `git fetch origin pull/N/head:<name>` (the `:<name>` form creates a stale local ref like `pr-25871` that leaks state across sessions). These are forbidden regardless of what would be convenient to verify.
+- **NEVER** read PR-changed files from the local filesystem (`Read`, `Grep`, on-disk `cat`) and treat the result as the PR's code — that reads `main` (or whatever is checked out), not the PR.
+- **NEVER** compare the PR against local `main` as a substitute for the PR diff.
+
+**The ONLY ways to read PR code:**
+
+- `gh pr diff <number>` for the diff (usually already in your input).
+- `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` for full file contents at PR HEAD. Get the sha via `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'` or take it from the input bundle.
+
+**If you genuinely need `git log` / `git show` for unchanged context** (e.g. understanding history of a file the PR modifies), use `git fetch origin pull/N/head` **without** the `:<name>` suffix — that leaves only `FETCH_HEAD`, which is overwritten on the next fetch and doesn't pollute the branch list.
+
+**When a finding cites a file or identifier you can't find locally**, the PR may be adding it as a new file. Override your "this file doesn't exist" instinct: verify against the PR diff (the input you were given) or fetch via `gh api`. Do NOT mark a finding as DROP/REVISE because something "isn't in the codebase" — confirm against PR HEAD first.
+
 ## Challenge Protocol
 
 For each finding, apply these challenges IN ORDER. Stop at the first failure — a finding that fails any challenge should be flagged.
