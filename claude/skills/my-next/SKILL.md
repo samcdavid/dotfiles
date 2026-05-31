@@ -1,7 +1,6 @@
 ---
 name: my-next
 description: Synthesize the current session state into a clear, prioritized action plan. Use after prove-it, after a research or investigation phase, or whenever the conversation has diverged enough that the path forward is unclear.
-disable-model-invocation: true
 ---
 
 # What's Next

@@ -1,7 +1,6 @@
 ---
 name: my-observe
 description: Design observability and monitoring for code changes. Identifies metrics, traces, and spans to capture, and recommends pragmatic monitors/alerts that clearly indicate real problems worth waking someone up for. Product-agnostic.
-disable-model-invocation: true
 ---
 
 # Observability & Monitoring Design

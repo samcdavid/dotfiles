@@ -1,7 +1,6 @@
 ---
 name: quality-audit
 description: Deep test quality and QA audit of code changes or a codebase area. Evaluates test coverage, test fidelity, assertion quality, test architecture, flakiness risk, and whether the test suite actually catches the bugs it claims to prevent. Goes deeper than test checks in a code review.
-disable-model-invocation: true
 ---
 
 # Quality Audit

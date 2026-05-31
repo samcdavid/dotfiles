@@ -1,7 +1,6 @@
 ---
 name: security-audit
 description: Deep security audit of code changes or a codebase area. Checks OWASP top 10, auth/authz patterns, data exposure, injection vectors, dependency CVEs, and secrets. Goes deeper than a code review.
-disable-model-invocation: true
 ---
 
 # Security Audit

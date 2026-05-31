@@ -1,7 +1,6 @@
 ---
 name: my-review
 description: Rigorous code review modeled on OSS standards. Reviews local changes or GitHub PRs for correctness, cross-service contracts, idempotency, test fidelity, and performance. De-duplicates against existing review comments. Delegates deep investigation and systematic review to the `review-orchestrator` agent; keeps interactive triage, targeted questions, and verdict in the main conversation.
-disable-model-invocation: true
 ---
 
 # Code Review
