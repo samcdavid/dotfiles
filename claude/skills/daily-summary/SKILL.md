@@ -1,6 +1,6 @@
 ---
 name: daily-summary
-description: Daily workflow that summarizes yesterday's work in Notion, generates a standup for clipboard, and builds today's prioritized checklist from Linear, Google Calendar, and Gmail.
+description: Daily workflow that summarizes the previous workday (plus any off-hours On Call days) in Notion, generates a standup for clipboard, and builds today's prioritized checklist from Linear, Google Calendar, and Gmail.
 disable-model-invocation: true
 ---
 
@@ -22,25 +22,35 @@ If either is missing, ask the user before proceeding. Once you have both:
 
 Fetch all of the following in parallel:
 
-1. **Notion**: Query the Daily ToDo database (using the data source ID resolved in Phase 0) for yesterday's entry. "Yesterday" means the most recent workday (skip weekends/holidays). Query with: `SELECT * FROM "<data_source_id>" WHERE "date:Date:start" = '<YYYY-MM-DD>'`. If no result, try the previous workday. Fetch the page to read all activities, actions, decisions, and general notes for that day.
+1. **Notion**: Fetch the Daily ToDo database in **view mode** (sorted descending by Date, `page_size: 10` — per the `Notion SQL date-filter` gotcha; do not use SQL mode). From the returned entries, identify **every day that needs reviewing**:
+   - **The previous workday** — the most recent entry before today whose `Day Type` is a normal working day (`Workday`). This is **always** reviewed, even if on-call days sit between it and today.
+   - **On-call days since then** — every entry dated *after* that previous workday and *before* today whose `Day Type` is `On Call`. These are off-hours incident days (e.g., a weekend page) logged by the `log-on-call` skill, and must be reviewed too. There may be zero, one, or several.
+   Fetch each identified page (the previous workday **plus** any on-call days) in full to read all activities, actions, decisions, and notes. If `page_size: 10` does not reach back far enough to include the previous workday (e.g., a long holiday/PTO gap), increase it until it does.
 2. **Linear**: List issues assigned to me. List the Linear projects I am a member of, and for each project with an active milestone, also list its **open issues regardless of assignee** (`state.type` in `unstarted` or `started`) — not just mine. This gives the project-wide priority view (what the team is gating on, what's grabbable) rather than only my queue. Scope each query per the `list_issues` gotcha to keep results bounded.
 3. **Google Calendar**: Use Google Calendar to review my calendar for today — meetings, events, and time blocks. Also fetch the next 7 calendar days and look for **PTO / time-off**: any all-day events whose title contains words like "PTO", "OOO", "Vacation", "Off", "Out of Office", "Holiday", or similar. Include company-wide holidays (they will appear as all-day events on my calendar). If I have consecutive days off, extend the lookup until you find the first day I'm back in office.
 4. **Gmail**: Search Gmail for messages in my inbox. Focus on unread and recent messages that are work-related and require action — replies needed, requests, approvals, follow-ups, or deadlines. Ignore marketing emails, newsletters, promotional content, and automated notifications that don't require a response.
 
 ## Phase 2 — Enrich
 
-For every Linear issue referenced in yesterday's Notion entry:
+For every Linear issue referenced in the reviewed Notion entries (the previous workday **and** any on-call days):
 - Get the full issue details from Linear (status, description, comments, PR links).
 
-This context is needed for writing the summary and standup.
+This context is needed for writing the summaries and standup.
 
-## Phase 3 — Write Yesterday's Summary
+## Phase 3 — Write Summaries
 
-In yesterday's database page, write a summary under the **## Summary** section using `notion-update-page` with `update_content`. Write it in a way that would be useful for a future performance review:
+Write a **## Summary** for **each** reviewed page — the previous workday and every on-call day — using `notion-update-page` with `update_content`. After writing each summary, set that page's Status property to "Complete".
+
+**Previous workday.** Write it in a way that would be useful for a future performance review:
 - Emphasize impact, decisions made, and problems solved.
 - Note meaningful collaboration or unblocking others.
 - Keep it concise but substantive — a few sentences, not a task list.
-- After writing the summary, update the page's Status property to "Complete".
+
+**On-call days.** Write an incident-flavored summary that will be useful for a post-mortem and a performance review:
+- Lead with what triggered the page and the impact (what was broken, who/what was affected).
+- State the resolution and how it was reached — root cause if known, mitigation applied.
+- Note follow-ups created (tickets to file, fixes deferred to business hours).
+- Keep it concise; the page's Actions and decisions already hold the timeline detail.
 
 ## Phase 4 — Generate Standup
 
@@ -51,10 +61,15 @@ Y:
 - ABC-123: moved to code review (PR: <link>)
 - ABC-789: still in progress, debugging test failures
 
+On-call:
+- Sat 5/30: paged for API 5xx spike on X, mitigated by Y (incident <link or ticket>)
+
 T:
 - ABC-123: verify in staging
 - ABC-789: continue work, target ready for review
 ```
+
+**On-call** — if any on-call days were reviewed in Phase 1, add an `On-call:` section between `Y:` and `T:`. One bullet per incident day: the date, what triggered the page, and how it was resolved, with an incident/ticket reference if one exists. If no on-call days were reviewed, omit the section entirely. Do not invent on-call items — only days that have an actual `On Call` page from Phase 1 qualify.
 
 **Out of Office** — if any PTO days, vacation, or company holidays were found in the next 7 days (or beyond, if consecutive days off extend further), add an `OOO:` section after the `T:` section. List the dates and reason (e.g., "PTO", "Company Holiday — Good Friday"). If I'm out for a block of consecutive days, show the range and note when I'll be back (e.g., "OOO Mon 3/30 – Wed 4/1, back Thu 4/2"). If no upcoming time off was found, omit the section entirely.
 
@@ -65,6 +80,7 @@ T:
 - Every PR link — does it resolve, and is it actually linked to the cited ticket?
 - Every T: item — is the ticket still open (`state.type` not `completed` or `canceled`)?
 - Any OOO claim — does it match a real calendar event found in Phase 1?
+- Every On-call: bullet — does it trace to a real `On Call` page reviewed in Phase 1, and does its date and resolution match that page's content (no invented incidents, no misattributed dates)?
 
 Apply every correction the agent surfaces before continuing. Do not publish a draft the agent has open contradictions on.
 
