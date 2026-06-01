@@ -1,0 +1,49 @@
+approvals_reviewer = "user"
+[projects."/Users/sammcdavid/.dotfiles"]
+trust_level = "trusted"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[[hooks.Stop]]
+
+[[hooks.Stop.hooks]]
+type = "command"
+command = '[ -n "$TMUX_PANE" ] && printf "\a" > "$(tmux display-message -t "$TMUX_PANE" -p "#{pane_tty}")" 2>/dev/null; true'
+timeout = 5
+
+[[hooks.PermissionRequest]]
+
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = '[ -n "$TMUX_PANE" ] && printf "\a" > "$(tmux display-message -t "$TMUX_PANE" -p "#{pane_tty}")" 2>/dev/null; true'
+timeout = 5
+
+[hooks.state]
+
+[hooks.state."/Users/sammcdavid/.codex/config.toml:permission_request:0:0"]
+trusted_hash = "sha256:f479122a4828c21a8129d5b893cf964e98d397bac4785d095773834f5ac91c5a"
+
+[hooks.state."/Users/sammcdavid/.codex/config.toml:stop:0:0"]
+trusted_hash = "sha256:130ad365c54bf60571de9efd557c86b1bc986ec6c851a96c8fd3f896041b36ba"
+
+[mcp_servers.braintrust]
+url = "https://api.braintrust.dev/mcp"
+
+[mcp_servers.notion]
+url = "https://mcp.notion.com/mcp"
+
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.datadog-mcp]
+url = "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp"
+
+[mcp_servers.circleci-mcp-server]
+command = "npx"
+args = ["-y", "@circleci/mcp-server-circleci@latest"]
+env_vars = ["CIRCLECI_TOKEN"]
+
+[mcp_servers.linear-server]
+url = "https://mcp.linear.app/mcp"
