@@ -18,6 +18,24 @@ Each entry is a markdown subsection with:
 
 <!-- Entries with status: pending or ready live here. Order: most recently updated first. -->
 
+### Verify library-API claims against the LOCKED version's source, not current docs
+
+- **Shape** — Before asserting (or DROPping) a finding that a code path calls a non-existent / wrong / renamed library method, verify the method against the **source of the version actually locked** (`uv.lock` / `package-lock` / `Gemfile.lock`), not against current online docs or memory. Major-version renames and package restructures make docs and intuition stale — the locked version is what runs. A method that "doesn't exist" in the docs may be the canonical one at the pinned version (or vice-versa).
+- **Trigger signals** — a review finding hinges on a library method name/signature existing or not; the claim is grounded in web docs, a different version's source, or memory rather than the pinned version; the dependency has had a recent major version bump or known API rename; the symptom would be an AttributeError/NoMethodError at runtime that no test covers.
+- **Evidence**
+  - `- {type: caught, ref: PR #25913, date: 2026-06-01}` — review drafted a blocking "calls non-existent `get_embedding_dimension()`; correct API is `get_sentence_embedding_dimension()`" finding from sbert.net docs. Checking `uv.lock` (sentence-transformers 5.5.1) showed the package was restructured: `get_embedding_dimension()` is now canonical and `get_sentence_embedding_dimension()` is the `@deprecated` alias. The locked-source check converted a false blocker into a correct DROP.
+- **Proposed promotion** — `target: gotchas.md`; `wording:` "**Category:** failure-mode. **Context:** a finding (or a DROP of one) turns on whether a library method/signature exists. **Wrong:** asserting it from current online docs, a different version, or memory. **Right:** read the source of the version pinned in the lockfile (uv.lock / package-lock / Gemfile.lock) — major-version renames and restructures make docs stale; the locked version is what runs. **Why:** both false blockers and false DROPs come from version-skewed API knowledge; the lockfile is the only authoritative reference for what the code actually calls."
+- **Status** — pending
+
+### Unbounded prefix match/delete without a delimiter boundary over-matches sibling keys
+
+- **Shape** — When a query matches or deletes rows by a string **prefix** (`col.startswith(x)`, `LIKE 'x%'`, `key LIKE prefix||'%'`), check that the prefix is anchored on a structural delimiter and that LIKE wildcards in the prefix are escaped. Without a boundary, a prefix that is a substring-prefix of a longer sibling key (variable-width IDs, path-like keys) matches/deletes the sibling too — silent over-deletion / data loss on delete paths, false positives on read paths.
+- **Trigger signals** — a `delete`/`select`/`where` uses `startswith` / `LIKE 'prefix%'` / `ilike` against a structured key column; IDs follow a `a:b:c:chunk:n` or path-like scheme and are **not fixed-width**; the prefix is caller-supplied without a trailing delimiter; `startswith`/`like` is used without `autoescape=True` on keys that can contain `_` or `%`.
+- **Evidence**
+  - `- {type: caught, ref: PR #25913, date: 2026-06-01}` — `delete_document(doc_id_prefix)` used `Document.id.startswith(doc_id_prefix)` and was called with bare doc ids; because chunk IDs are `{doc_id}:chunk:{n}` and doc ids aren't fixed-width, purging `runbooks:api` would also delete `runbooks:api-v2:chunk:0`. Fix: anchor on `:chunk:` and `autoescape=True`.
+- **Proposed promotion** — `target: references/general-checklist.md` (data-integrity check); `wording:` "Prefix matches/deletes (`startswith`, `LIKE 'x%'`) against structured/variable-width key columns must anchor on a structural delimiter (e.g. `f\"{prefix}:chunk:\"`) and escape LIKE wildcards (`autoescape=True`) — an unanchored prefix over-matches sibling keys (silent data loss on delete paths)."
+- **Status** — pending
+
 ### New-service / scaffold PRs: check conformance to established sibling-service conventions, not just in-diff correctness
 
 - **Shape** — When reviewing a PR that stands up a **new service or scaffold** in an established (esp. polyglot mono-)repo, run an explicit conformance pass against how *existing sibling services* are built and deployed — don't just verify the correctness of the code in the diff. The common miss is approving a self-consistent scaffold that silently diverges from house patterns (build/deploy/config/infra).
