@@ -1,1 +1,7 @@
 openai_base_url = "https://us.api.openai.com/v1"
+
+[projects."/Users/sammcdavid/Developer/dscout-wt"]
+trust_level = "trusted"
+
+[mcp_servers.notion.tools.notion-update-page]
+approval_mode = "approve"
