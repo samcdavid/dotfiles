@@ -161,6 +161,7 @@
     ],
     "deny": []
   },
+  "model": "sonnet[1m]",
   "hooks": {
     "Stop": [
       {
@@ -194,6 +195,5 @@
       }
     ]
   },
-  "skipAutoPermissionPrompt": true,
-  "model": "opus[1m]"
+  "skipAutoPermissionPrompt": true
 }
