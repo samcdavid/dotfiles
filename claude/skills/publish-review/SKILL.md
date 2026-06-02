@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: sonnet
 name: publish-review
 description: Publish a PR review from the current session to GitHub. Formats inline comments, thread replies, and the review body, then posts via `gh api`. Handles line number mapping, reply targeting, and markdown formatting. Manual invocation only.
 disable-model-invocation: true
