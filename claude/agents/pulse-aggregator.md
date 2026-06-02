@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: pulse-aggregator
 description: Gathers and synthesizes recent project activity for the `pulse` skill. Runs git log queries, GitHub PR queries, migration scans, dependency-change scans, and (when available) Linear and Notion enrichment in parallel. Returns a complete briefing in the format defined below. Read-only — never commits, never publishes.
 ---

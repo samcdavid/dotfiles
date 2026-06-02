@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: log-work
 description: Log what was accomplished in the current session to the daily Notion doc. Appends brief actions (fixes, implementations, reviews, investigations) to today's entry. Use at the end of a work session or after completing something notable.
 ---

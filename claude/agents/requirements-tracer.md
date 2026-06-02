@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: requirements-tracer
 description: Traces upstream/downstream impact of a code change across the repo, cross-references it against related Linear issues, and reports regression risk on shipped features. Read-only — uses codebase grep/read, git, gh, and Linear MCP.
 ---

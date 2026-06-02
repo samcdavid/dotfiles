@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: daily-wrapup
 description: End-of-day companion to daily-summary. Consolidates today's Notion entry — identifies what was accomplished, summarizes Linear ticket activity, and rewrites the Actions/Decisions and Notes sections for readability.
 disable-model-invocation: true

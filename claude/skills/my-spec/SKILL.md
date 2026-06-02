@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: my-spec
 description: Iterate on issue definition like a technical product manager. Takes vague ideas, bug reports, or rough requests and refines them through conversation into well-scoped specs with clear problem statements, boundaries, and acceptance criteria.
 ---

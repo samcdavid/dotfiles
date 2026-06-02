@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: my-clarify
 description: Systematically surface ambiguities, unstated assumptions, and underspecified areas in specs or research documents before downstream work begins. Acts as a second-pass quality gate between authoring and planning.
 ---

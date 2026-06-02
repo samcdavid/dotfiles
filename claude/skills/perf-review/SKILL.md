@@ -1,4 +1,5 @@
 ---
+model: opus
 name: perf-review
 description: Deep performance review of code changes or a codebase area. Profiles query plans, evaluates index coverage, estimates load impact, checks for resource exhaustion, and audits caching strategy. Goes deeper than performance checks in a code review.
 ---

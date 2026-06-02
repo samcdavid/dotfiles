@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: create-pr
 description: Create a PR with a concise description plus targeted review guidance — recommended review lens, triggered specialty reviews, and focus areas for human reviewers. Updates an existing PR body in place if one already exists for the branch.
 disable-model-invocation: true

@@ -1,4 +1,5 @@
 ---
+model: opus
 name: runtime-investigator
 description: Investigates production or runtime issues for the `my-investigate` skill. Builds a timeline, narrows the blast radius, traces the request path, tests hypotheses against logs/metrics/traces/code, and returns structured evidence and a ranked hypothesis list. Read-only — never applies fixes, never restarts services, never modifies infrastructure.
 ---

@@ -1,4 +1,5 @@
 ---
+model: opus
 name: git-resolve-conflicts
 description: Automatically resolve merge and rebase conflicts using intelligent analysis and editing. Reads both sides of each conflict, merges intent rather than picking a winner, stages resolved files, and hands the final merge/rebase completion back to you.
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git log:*), mcp__sequential-thinking__sequentialthinking, Read, Edit, MultiEdit

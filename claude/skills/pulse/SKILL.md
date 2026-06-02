@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: pulse
 description: Project pulse — digest of recent codebase activity across all contributors. Surfaces hot areas, significant changes (migrations, new modules, API shifts, dependency updates), and per-author summaries. Default 1 week, configurable via argument. Delegates gathering/synthesis to the `pulse-aggregator` agent.
 ---

@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: my-test-plan
 description: Analyze a ticket and PR to produce a structured manual E2E test plan. Reads the ticket requirements, understands the bug or feature, reviews the code changes, and designs targeted test scenarios with expected outcomes.
 ---

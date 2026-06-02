@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: my-implement
 description: Execute an approved implementation plan phase-by-phase using mandatory red/green/refactor TDD. Writes failing tests first, then minimum production code to pass, with loop detection to maintain forward momentum.
 ---

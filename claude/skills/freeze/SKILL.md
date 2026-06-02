@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: freeze
 description: Block file edits outside a specified directory. Use during debugging or investigation to prevent accidental changes to unrelated code. Pass the allowed directory as argument.
 disable-model-invocation: false

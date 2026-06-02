@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: address-pr-feedback
 description: Systematically address all pending PR review feedback. Reads comments, triages by actionability, applies fixes with commit references, drafts responses for questions and deferrals, and verifies the build passes before finishing. Manual invocation only.
 disable-model-invocation: true

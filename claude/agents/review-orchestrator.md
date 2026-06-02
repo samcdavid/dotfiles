@@ -1,4 +1,5 @@
 ---
+model: opus
 name: review-orchestrator
 description: Runs deep investigation and systematic review for the `my-review` skill. Given a diff bundle and a set of active lenses, spawns research subagents in parallel, applies the general checklist plus each active lens-skill's checklist, and returns structured findings ready for adversarial challenge by the caller. Read-only: never edits code, never publishes anything.
 ---

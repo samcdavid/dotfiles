@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: autoresearch-iteration
 description: Runs a single iteration of the `autoresearch` loop. Reviews state, picks a change, applies it, commits, runs the verify command, decides keep/discard/crash, and returns a structured iteration result. The calling skill owns the loop control and the results log; this agent owns the per-iteration work.
 ---

@@ -1,4 +1,5 @@
 ---
+model: opus
 name: my-workflow
 description: Run my full delivery pipeline end-to-end and autonomously — my-research → my-spec → my-clarify → my-plan → my-observe → my-analyze → my-implement → my-validate → requirements-audit → security-audit → my-arch-review → my-review. Establishes the task once, carries context through every stage, and only stops when a decision genuinely needs a human AND can't be resolved by researching the codebase, Notion, or Google Drive.
 disable-model-invocation: true

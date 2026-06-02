@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: gotcha
 description: Capture a failure pattern or anti-pattern as a gotcha for an existing skill. Use when Claude makes a mistake, the user corrects an approach, or a non-obvious pattern is discovered. Builds up institutional knowledge over time.
 disable-model-invocation: false

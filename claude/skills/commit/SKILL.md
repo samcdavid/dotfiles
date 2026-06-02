@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: commit
 description: Stage and commit changes following the project's gitmessage template. Groups changes into logical units of work — each file in exactly one commit. Writes detailed messages with subject line, Why, How, Side Effects, and Related Cards. Supports partial staging and ticket references.
 allowed-tools: Bash(git commit:*), Bash(git add:*), Bash(git restore:*), Bash(git diff:*), Bash(git status:*), Bash(git log:*), Bash(git rev-parse:*)

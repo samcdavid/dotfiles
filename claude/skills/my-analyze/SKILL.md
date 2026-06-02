@@ -1,4 +1,5 @@
 ---
+model: opus
 name: my-analyze
 description: Cross-artifact consistency analysis. Compares specs, research, and plans against each other to find alignment gaps, contradictions, and coverage drift before implementation begins.
 ---

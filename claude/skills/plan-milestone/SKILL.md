@@ -1,4 +1,5 @@
 ---
+model: sonnet
 name: plan-milestone
 description: Review the issues in a Linear milestone and produce a dependency/sequencing analysis, then update issue relationships to match reality. Builds an inventory, finds the real critical path, identifies what can run in parallel, and encodes only genuine blockers as Linear relations.
 allowed-tools: Bash(jq:*), Bash(cat:*), mcp__linear-server__list_issues, mcp__linear-server__get_issue, mcp__linear-server__save_issue, mcp__linear-server__list_milestones, mcp__linear-server__get_milestone, mcp__linear-server__list_projects, mcp__linear-server__get_project, Read, Write

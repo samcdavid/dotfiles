@@ -1,4 +1,5 @@
 ---
+model: haiku
 name: log-on-call
 description: Log an off-hours on-call incident to the daily Notion doc. Finds-or-creates the day's entry with Day Type "On Call" and records a timeline of the actions taken to resolve the issue, in a form useful for post-mortems. Use when paged outside business hours on a day you don't normally work.
 ---
