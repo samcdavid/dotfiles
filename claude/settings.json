@@ -204,6 +204,17 @@
             "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/pre-commit-checks.sh",
+            "if": "Skill(commit)",
+            "statusMessage": "Checking format and lint before commit"
+          }
+        ]
       }
     ],
     "PostToolUse": [
