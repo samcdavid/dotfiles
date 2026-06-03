@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: sonnet
 name: walk-through
 description: Walk through a multi-item list one at a time. Presents each item individually for focused discussion, captures resolutions, and summarizes at the end.
 ---

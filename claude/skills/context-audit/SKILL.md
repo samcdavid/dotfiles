@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: sonnet
 name: context-audit
 description: Audits context window usage and helps drop unnecessary content. Identifies what's consuming context, flags waste, and offers to compact or shed load. Use when performance degrades, responses feel shallow, or the session has been running long.
 ---
