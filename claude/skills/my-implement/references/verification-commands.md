@@ -4,13 +4,13 @@ Quick reference for common verification commands. **Always check the project's C
 
 ## TDD Cycle Commands
 
-The RED/GREEN/REFACTOR cycle uses the same test runners — the difference is WHEN you run them and WHAT you expect:
+The RED/GREEN/VALIDATE cycle uses the same test runners — the difference is WHEN you run them and WHAT you expect:
 
 | Step | Run | Expect |
 |------|-----|--------|
 | **RED** | Run the new test(s) only | FAIL (test exists, asserts correct behavior, but production code doesn't exist yet) |
-| **GREEN** | Run the new test(s) + full suite | ALL PASS (new code satisfies the test, nothing else broke) |
-| **REFACTOR** | Run full suite | ALL PASS (behavior unchanged after cleanup) |
+| **GREEN** | Run the new test(s) + relevant suite | ALL PASS (new code satisfies the test, nothing else broke; behavior-preserving cleanup folded in here) |
+| **VALIDATE** | Run the phase's mechanical success criteria + relevant suite | ALL PASS (the phase's criteria are satisfied) |
 
 **RED verification**: Run ONLY the new test file/test case. Confirm it fails for the right reason — missing function, wrong return value, etc. NOT a syntax error or import failure.
 

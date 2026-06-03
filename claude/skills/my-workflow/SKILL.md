@@ -1,13 +1,13 @@
 ---
 model: opus
 name: my-workflow
-description: Run my full delivery pipeline end-to-end and autonomously — my-research → my-spec → my-clarify → my-plan → my-observe → my-analyze → my-implement → my-validate → requirements-audit → security-audit → my-arch-review → my-review. Establishes the task once, carries context through every stage, and only stops when a decision genuinely needs a human AND can't be resolved by researching the codebase, Notion, or Google Drive.
+description: Run my full delivery pipeline end-to-end and autonomously — my-research → my-spec → my-clarify → my-plan → my-observe → my-analyze → my-implement → my-validate → my-review. Establishes the task once, carries context through every stage, and only stops when a decision genuinely needs a human AND can't be resolved by researching the codebase, Notion, or Google Drive. The single my-review stage now fans out to specialized lens reviewers (security, architecture, performance, QA, requirements), subsuming the former separate audit stages.
 disable-model-invocation: true
 ---
 
 # My Workflow — Full Pipeline, End to End
 
-Orchestrate the complete delivery pipeline as a single autonomous run. The task is established **once** at intake; the context then flows through all twelve stages without re-asking. The pipeline pauses only when it hits a decision that genuinely requires a human and cannot be resolved by more thorough research.
+Orchestrate the complete delivery pipeline as a single autonomous run. The task is established **once** at intake; the context then flows through all nine stages without re-asking. The pipeline pauses only when it hits a decision that genuinely requires a human and cannot be resolved by more thorough research.
 
 ## What this is — and is not
 
@@ -36,14 +36,13 @@ When a sub-skill's instructions conflict with anything below, **these win**. Rea
 | 4 | `my-plan` | spec + research | plan in `~/.claude/thoughts/shared/plans/` |
 | 5 | `my-observe` | plan | observability/monitoring design (companion plan) |
 | 6 | `my-analyze` | research + spec + plan | cross-artifact consistency report |
-| 7 | `my-implement` | approved plan | code changes (TDD red/green/refactor) |
+| 7 | `my-implement` | approved plan | code changes (per-phase TDD red/green/validate, dispatched to isolated executors) |
 | 8 | `my-validate` | plan + changes | validation report (self-repairs failures) |
-| 9 | `requirements-audit` | spec + diff | requirements traceability findings |
-| 10 | `security-audit` | diff | security findings |
-| 11 | `my-arch-review` | diff | architecture findings |
-| 12 | `my-review` | diff vs base branch | code-review findings |
+| 9 | `my-review` | spec + diff vs base branch | consolidated review findings — fans out to security / architecture / performance / QA / requirements / general lens reviewers, then merges, de-dupes, and renders a verdict |
 
-Track these twelve as a TodoWrite list. Mark each `in_progress` when it starts and `completed` when its output exists.
+Track these nine as a TodoWrite list. Mark each `in_progress` when it starts and `completed` when its output exists.
+
+The single `my-review` stage replaces what used to be four separate stages (`requirements-audit`, `security-audit`, `my-arch-review`, `my-review`): its lens reviewers read those same audit skills' checklists as their source of truth, so running them separately would just duplicate work. The standalone deep audits still exist as skills (`/security-audit`, `/requirements-audit`, `/my-arch-review`, `/perf-review`, `/quality-audit`) — invoke one directly only when a review finding warrants a deeper, opus-level pass on that one lens.
 
 ## Step 0 — Intake & entry-point detection (the one upfront confirmation)
 
@@ -108,27 +107,28 @@ On the answer, resume from that stage with the new input folded into the ledger.
 
 - **2 `my-spec` / 3 `my-clarify`:** These are the most question-prone. Most "questions" are answerable from research + code — resolve them and record assumptions. Feed clarify's resolutions back into the spec file before planning.
 - **5 `my-observe`:** It asks which observability platforms/alert channels exist. Detect from the repo first (config files, dependencies, existing dashboards/monitors, CLAUDE.md). If undetectable, default to platform-agnostic recommendations rather than asking. Its output is a companion observability plan linked to the main plan — keep it as a deliverable, not a blocker.
-- **7 `my-implement`:** The autonomous code-writing core. TDD red/green/refactor is non-negotiable. Honor its **loop detection**: if the same check fails 3× across attempts, STOP and escalate with the error output and your root-cause theory — that is a genuine blocker, not something to power through.
+- **7 `my-implement`:** The autonomous code-writing core. It orchestrates the plan one small phase at a time, dispatching each to an isolated `implementation-executor` that does red/green/validate TDD, then re-verifying the result itself. TDD is non-negotiable, and phases must be function-grained — if a plan phase is too big for a single executor, it gets split before dispatch. Honor the orchestrator's **loop detection**: if the same check fails 3× across attempts (executor + re-verify), STOP and escalate with the error output and your root-cause theory — that is a genuine blocker, not something to power through.
 - **8 `my-validate`:** Run in **Plan Mode** against the plan file from stage 4. Let it self-repair trivial failures; escalate what it cannot fix confidently.
-- **Compute the diff once for the review stages.** Detect the base branch and the changed files, then feed both to stages 9–12 so they share one scope:
+- **Compute the diff once for the review stage.** Detect the base branch and the changed files, then pass both to `my-review`:
   ```bash
   base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')
   [ -z "$base" ] && { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
   git diff --name-only "$base"...HEAD
   git diff "$base"...HEAD   # the review scope
   ```
-- **9 `requirements-audit`:** Audit the diff against the **stage-2 spec** (and linked Linear ticket) as the source of truth — that satisfies its "requires a spec" gate without asking.
-- **10 `security-audit` / 11 `my-arch-review`:** Pass the changed-files list from above as the scope.
-- **12 `my-review`:** Run against the base branch so it diffs the current work tree vs `main`/`master` (invoke it with the base branch name). Stay in read-only local review — no checkout, no PR.
+- **9 `my-review`:** The single, consolidated review stage. Invoke it with the base branch name so it diffs the current work tree vs `main`/`master`; stay in read-only local review — no checkout, no PR. Because this is the deliberate full pipeline, don't let lens triage thin the review:
+  - **Force the full lens set active** — Security, Architecture, Performance, QA, and PM/requirements, plus whichever general lenses (Backend/Frontend/Ops/Migration/Dependency) the diff touches. The pipeline always wants the comprehensive pass, not a minimal triage.
+  - **Feed the stage-2 spec as the requirements source.** Pass the spec path so `requirements-reviewer` traces acceptance criteria against the spec (and any linked Linear ticket) — this replaces the former standalone `requirements-audit` stage and satisfies its "requires a spec" need without asking.
+  - It internally spawns the research subagents + the per-lens reviewers, then merges, de-dupes, runs the adversarial pass, and proposes a verdict. That single output is the pipeline's complete review surface.
 
 ## Final report & hand-off
 
-After stage 12, assemble one consolidated report from the ledger:
+After stage 9, assemble one consolidated report from the ledger:
 
 - **Task & entry point** — what ran, what was skipped and why.
 - **Artifacts produced** — paths to research / spec / plan / observability / analysis / validation reports.
 - **Autonomous decisions & assumptions** — the full list from the ledger. This is the after-the-fact review surface; make it scannable.
-- **Findings by severity** — merge requirements-audit + security-audit + arch-review + my-review, de-duplicated, grouped Critical → Minor.
+- **Findings by severity** — `my-review` already merges and de-dupes across all lenses; present its compiled findings grouped Critical → Minor.
 - **What I changed** — files touched (paths + line counts), tests run + results.
 - **Suggested next steps** — `/commit`, then `/create-pr`; and re-run a specific stage if any finding is substantial.
 

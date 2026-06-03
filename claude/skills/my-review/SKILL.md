@@ -1,14 +1,14 @@
 ---
-model: sonnet
+model: opus
 name: my-review
-description: Rigorous code review modeled on OSS standards. Reviews local changes or GitHub PRs for correctness, cross-service contracts, idempotency, test fidelity, and performance. De-duplicates against existing review comments. Delegates deep investigation and systematic review to the `review-orchestrator` agent; keeps interactive triage, targeted questions, and verdict in the main conversation.
+description: Rigorous code review modeled on OSS standards. Reviews local changes or GitHub PRs for correctness, cross-service contracts, idempotency, test fidelity, and performance. De-duplicates against existing review comments. Orchestrates parallel research subagents and specialized per-lens reviewer subagents, then compiles, adversarially challenges, and renders the verdict in the main conversation.
 ---
 
 # Code Review
 
 Perform a thorough, high-quality code review. Works on local changes (unstaged/staged/committed) or GitHub pull requests.
 
-The heavy lifting (parallel research subagents + systematic checklist application + lens-specific deep-dives) runs inside the `review-orchestrator` agent. This skill stays in the main window only for what genuinely needs you: triage confirmation, targeted questions, adversarial passes, verdict choice, and pattern-capture prompts.
+This skill is the **orchestrator**. It fans the work out to subagents — parallel research subagents for deep context, then specialized per-lens reviewer subagents (security, architecture, performance, QA, requirements, and a general reviewer for the rest) — and then does the parts that genuinely need the main window: triage, merging and de-duplicating the lens findings, targeted questions, the adversarial passes, the verdict, and pattern capture. The deep per-lens reasoning happens in the subagents; the judgment and synthesis happen here.
 
 ## Getting Started
 
@@ -56,7 +56,7 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews --paginate
 gh api repos/{owner}/{repo}/issues/{number}/comments --paginate
 ```
 
-Build an `existing_comments_index` of every issue already raised — file path, line range, substance summary, and `thread_root_id`. You will pass this to the orchestrator for dedupe.
+Build an `existing_comments_index` of every issue already raised — file path, line range, substance summary, and `thread_root_id`. You will pass this to every reviewer subagent for dedupe, and use it again when you merge their findings.
 
 If existing comments include any from **your own prior review pass** on this PR, treat this as a re-review and apply the **"Re-review means full re-review"** gotcha: re-read the full diff, re-read every comment (including issue-level threads where authors often explain what changed), and check whether prior findings are still valid or have been addressed.
 
@@ -68,11 +68,11 @@ git diff --cached           # staged
 git log --oneline -5        # recent commits for context
 ```
 
-The orchestrator will read every changed file fully (not just the diff hunks). You don't need to pre-read.
+The research subagents and lens reviewers read every changed file fully (not just the diff hunks). You don't need to pre-read.
 
 ## Step 2 — Cursory Pass: Identify Review Lenses
 
-Do a quick triage to pick which review **lenses** apply. Lenses drive which checklists the orchestrator applies and which deep-dive subsections appear in the final review.
+Do a quick triage to pick which review **lenses** apply. Lenses drive which reviewer subagents you spawn in Step 3 and which deep-dive subsections appear in the final review.
 
 ### Inputs
 
@@ -101,7 +101,9 @@ If the change has no obvious lens fit, default to **Backend + Security + QA**.
 
 ### Requirements checklist (if a ticket is linked)
 
-If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it via the Linear MCP and build a `requirements_checklist`: title, description, acceptance criteria, sub-issues. Pass this to the orchestrator.
+If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it via the Linear MCP and build a `requirements_checklist`: title, description, acceptance criteria, sub-issues. Pass this to the `requirements-reviewer` (and activate the PM lens).
+
+If a caller supplies a **spec or requirements document** directly (e.g. `my-workflow` passes the stage-2 spec path, or `$ARGUMENTS` names a spec/PRD), read it and build the `requirements_checklist` from its acceptance criteria the same way — a spec is an equally valid requirements source, and takes precedence when both a spec and a ticket are present. Activate the PM lens whenever any requirements source exists.
 
 ### Tracer triggers
 
@@ -109,7 +111,7 @@ Set `tracer_triggers.neighbor_commits_heuristic = true` if any of the diff's cha
 
 ### Plan-file lookup
 
-Check `~/.claude/thoughts/shared/plans/` for a plan file matching the linked Linear ticket (filename or `feature:` frontmatter). If found, read the plan's surfaces (Phase sections, "Changes Required" lists, "What We're NOT Doing") and pass them as `plan_surfaces` to the orchestrator.
+Check `~/.claude/thoughts/shared/plans/` for a plan file matching the linked Linear ticket (filename or `feature:` frontmatter). If found, read the plan's surfaces (Phase sections, "Changes Required" lists, "What We're NOT Doing") and hold them as `plan_surfaces` — you'll pass them to `requirements-tracer` if it runs in Step 3.
 
 ### Triage output
 
@@ -150,37 +152,69 @@ Ask which skill level to calibrate against. Skip for Local Mode.
 
 Default: **Lead** if I skip.
 
-## Step 3 — Spawn the orchestrator
+## Step 3 — Fan out, then compile
 
-Invoke the `review-orchestrator` agent. Pass the full input bundle:
+You orchestrate in two waves: research first (shared context), then specialized per-lens reviewers (parallel), then you merge everything. The deep reasoning lives in the subagents; the synthesis lives here.
+
+### PR Mode — Hard Constraints, propagated to every subagent
+
+Subagents will silently read on-disk files unless told not to. In PR mode you MUST paste this block verbatim into **every** subagent prompt (research and lens reviewers alike):
 
 ```
-- mode: "pr" | "local"
-- pr_number, repo, pr_head_sha (PR mode)
-- diff_text (the unified diff)
-- changed_files
-- lenses (active lenses from Step 2)
-- author_calibration
-- existing_comments_index
-- requirements_checklist (or null)
-- plan_surfaces (or null)
-- tracer_triggers
+PR Mode Hard Constraints. The PR diff is the source of truth; the local working tree is NOT (main often lags remote, and the PR branch may not exist locally).
+- NEVER run git checkout/switch, gh pr checkout, or git fetch origin pull/N/head:<name> — nothing that changes the working tree or creates a local branch ref.
+- NEVER read PR-changed files from disk (Read/cat/grep) and treat the result as the PR's code — that reads main, not the PR.
+- NEVER compare the PR against local main as a substitute for the diff.
+- Read PR code ONLY via: the supplied diff_text, and `gh api repos/{repo}/contents/{path}?ref={pr_head_sha}` for full file contents at PR HEAD.
 ```
 
-The orchestrator spawns research subagents (`codebase-analyzer`, `codebase-pattern-finder`, `docs-researcher`, and conditionally `requirements-tracer`), reads the general checklist plus each active lens-skill's checklist, applies systematic review, and returns structured findings: Blocking Issues, Non-blocking Suggestions, Targeted Questions, What's Good, lens-specific deep-dive subsections, and (if the tracer ran) Related-Issue Regression Risks.
+### Wave 1 — Research subagents (parallel, one message)
 
-If the orchestrator returns an `## Error` block naming a missing input, surface it and stop — do not try to review with incomplete inputs.
+Spawn these so the lens reviewers get shared deep context instead of each re-deriving it:
+
+- **codebase-analyzer** — deep-read the changed files AND their callers/consumers; map call chains, data flow, dependencies.
+- **codebase-pattern-finder** — find how similar changes were made elsewhere; specifically whether a utility/function/module already does what new code adds (duplication is a common finding).
+- **docs-researcher** — for new dependencies, or APIs/framework patterns used in ways you're not 100% sure are correct (version-specific behavior). Don't review library usage without checking the actual docs.
+- **requirements-tracer** — spawn only if any `tracer_triggers` flag is true. Pass `mode: review`, `scope: wide`, the primary Linear issue ID (if any), the PR number, and `plan_surfaces` if present (it diffs predicted-vs-actual and only re-runs related-issue discovery if they differ meaningfully).
+
+Collect their outputs into a **compact `research_notes` summary** — the load-bearing facts (call chains, duplication hits, doc gaps), not raw dumps. This is what you hand to the lens reviewers.
+
+### Wave 2 — Lens reviewer subagents (parallel, one message)
+
+For each active lens from Step 2, spawn its reviewer. Send them all in a single message so they run concurrently. Pass each the bundle: `mode`, `pr_head_sha`, `repo`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, the PR-mode constraints block, plus any lens-specific extras.
+
+| Active lens(es) | Reviewer agent | Extra input |
+|---|---|---|
+| Security | `security-reviewer` | — |
+| Architecture | `arch-reviewer` | — |
+| Performance | `perf-reviewer` | — |
+| QA | `quality-reviewer` | — |
+| PM | `requirements-reviewer` | `requirements_checklist` |
+| Backend, Frontend, Full-stack, Ops, Migration, Dependency | `general-reviewer` | `assigned_lenses` (the subset that fired) |
+
+Spawn a reviewer only for lenses that actually fired in triage. Always include `general-reviewer` if any non-specialized lens is active (it also carries the cross-service-contract checks). Each reviewer reads its source-of-truth skill, applies the checklist, dedupes against `existing_comments_index`, and returns a findings fragment.
+
+### Wave 3 — Compile
+
+Merge the lens reviewers' fragments into one findings set:
+
+1. **De-duplicate across reviewers.** Two lenses often flag the same line (e.g. security + general on the same input handler). Collapse to one finding, keeping the most precise framing and noting both lenses.
+2. **Re-check dedupe against `existing_comments_index`** — a reviewer may have missed a thread; drop or `add_to_thread` anything already raised.
+3. **Assemble** Blocking Issues, Non-blocking Suggestions, Targeted Questions, What's Good, the lens deep-dive subsections each reviewer returned (Security Deep-Dive, Architecture Assessment, Performance Deep-Dive, Quality Deep-Dive, Requirements Traceability), and — if the tracer ran — Related-Issue Regression Risks.
+4. **Sanity-check coverage**: every active lens produced a fragment. If a reviewer returned an `## Error` (e.g. missing `requirements_checklist`) or came back empty for a lens that clearly applies, re-dispatch it once with a tightened brief before proceeding. Do not silently drop a lens.
+
+This compiled set is what Steps 4–8 operate on.
 
 ## Step 4 — Targeted Questions
 
-If the orchestrator returned a `### Targeted Questions` block, ask them. The point is to catch things where the situation depends on context only I have.
+If the compiled findings include a `### Targeted Questions` block, ask them. The point is to catch things where the situation depends on context only I have.
 
 ### After I answer — challenge my answers
 
 Once I respond, spawn the **adversarial-debate** agent to challenge *my* answers. This is a separate pass from the Step 6 finding challenge — the target here is my context, not the assistant's findings.
 
 Pass to the agent:
-- The original question + the investigation context that surfaced it (diff, relevant files, orchestrator findings)
+- The original question + the investigation context that surfaced it (diff, relevant files, the compiled findings)
 - My answer
 
 The agent returns a verdict per answer:
@@ -195,13 +229,13 @@ Apply the verdicts:
 
 ### When to skip
 
-If the orchestrator returned no `### Targeted Questions` block, skip this step entirely.
+If the compiled findings include no `### Targeted Questions` block, skip this step entirely.
 
 If I've authorized auto-mode (or said "no questions, just review"), log these as a **Questions** section in the final review output (Step 5) instead of pausing. The post-answer adversarial pass is also skipped in this mode — there are no answers to challenge.
 
 ## Step 5 — Format the Review
 
-Take the orchestrator's output + user answers + any FLAGged answers from Step 4, and structure the review as follows:
+Take the compiled findings from Step 3 + user answers + any FLAGged answers from Step 4, and structure the review as follows:
 
 ```markdown
 ## Review: [Brief description of what the change does]
@@ -229,22 +263,22 @@ Take the orchestrator's output + user answers + any FLAGged answers from Step 4,
 [Code snippet if helpful]
 
 ### Security Deep-Dive
-[Only if the orchestrator returned this block — skip otherwise]
+[Only if the compiled findings include this block — skip otherwise]
 
 ### Architecture Assessment
-[Only if the orchestrator returned this block — skip otherwise]
+[Only if the compiled findings include this block — skip otherwise]
 
 ### Performance Deep-Dive
-[Only if the orchestrator returned this block — skip otherwise]
+[Only if the compiled findings include this block — skip otherwise]
 
 ### Quality Deep-Dive
-[Only if the orchestrator returned this block — skip otherwise]
+[Only if the compiled findings include this block — skip otherwise]
 
 ### Requirements Traceability
-[Only if the orchestrator returned this block — skip otherwise]
+[Only if the compiled findings include this block — skip otherwise]
 
 ### Related-Issue Regression Risks
-[Only if the orchestrator returned this block — skip otherwise]
+[Only if the compiled findings include this block — skip otherwise]
 
 ### Questions
 - [Genuine clarifying questions — things where the author has context you don't]
@@ -295,7 +329,7 @@ After applying verdicts, confirm:
 - [ ] Blocking vs. non-blocking classification reflects the agent's severity calibration
 - [ ] Every surviving finding passed the `/this-important` filter
 - [ ] No comment duplicates anything already raised in existing review threads
-- [ ] Findings are grounded in the diff (or the orchestrator's subagent research), not assumptions
+- [ ] Findings are grounded in the diff (or the research subagents' findings), not assumptions
 - [ ] Dropped Findings section captures what was filtered out, with reasons
 
 ### In-review pattern capture
@@ -442,15 +476,15 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 
 ## References
 
-- `references/general-checklist.md` — cross-cutting blocking/non-blocking categories. Read by the orchestrator on every invocation.
-- `references/cross-service-contracts.md` — checklist for cross-service changes. Read by the orchestrator on every invocation.
+- `references/general-checklist.md` — cross-cutting blocking/non-blocking categories. Read by `general-reviewer` (and is the promotion target for cross-cutting patterns).
+- `references/cross-service-contracts.md` — checklist for cross-service changes. Read by `general-reviewer`.
 - `references/learned-misses.md` — pattern queue. Auto-promote check runs at the top of every invocation; triage block reports promotions.
-- `references/team-review-patterns.md` — team-and-community review patterns distilled from a multi-developer PR mining pass. Created by a separate mining pass; the orchestrator reads it when present.
-- `gotchas.md` — known failure patterns. Both this skill and the orchestrator agent read it.
+- `references/team-review-patterns.md` — team-and-community review patterns distilled from a multi-developer PR mining pass. Created by a separate mining pass; pass it into the lens reviewers (or fold the relevant patterns into their briefs) when present.
+- `gotchas.md` — known failure patterns. This skill and every lens reviewer read it.
 
 ## Gotchas
 
-Read `gotchas.md` before starting work. The orchestrator agent reads it independently before producing findings. Patterns belonging in this skill's main flow (don't auto-publish, re-review means full re-review) are enforced here; patterns belonging in the deep investigation (lazy imports, cross-service contracts, brand capitalization, PR Mode constraints) are enforced inside the orchestrator.
+Read `gotchas.md` before starting work. Every lens reviewer reads it independently before producing findings. Patterns belonging in this skill's main flow (don't auto-publish, re-review means full re-review, propagating PR Mode constraints into subagents) are enforced here; patterns belonging in the deep per-lens investigation (lazy imports, cross-service contracts, brand capitalization) are enforced inside the reviewer agents.
 
 ## Never auto-publish
 

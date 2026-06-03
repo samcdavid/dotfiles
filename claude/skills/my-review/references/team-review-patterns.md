@@ -1,10 +1,10 @@
 # Team Review Patterns
 
-Patterns the review-orchestrator should consider when scanning a diff. Distilled from a ~2,000-PR mining pass across senior Elixir-ecosystem developers (2022–2026): internal-monorepo backend engineers plus OSS maintainers of major Elixir libraries (Elixir core, Phoenix, Phoenix LiveView, Ash, Oban, Nerves, `req`, `phoenix_test`, `credo`, `ex_doc`, etc.).
+Patterns the lens reviewers should consider when scanning a diff. Distilled from a ~2,000-PR mining pass across senior Elixir-ecosystem developers (2022–2026): internal-monorepo backend engineers plus OSS maintainers of major Elixir libraries (Elixir core, Phoenix, Phoenix LiveView, Ash, Oban, Nerves, `req`, `phoenix_test`, `credo`, `ex_doc`, etc.).
 
 Patterns are listed in approximate **frequency-across-reviewers** order. High-confidence patterns (≥6 independent reviewers reinforce each) are ready-to-flag. Medium-confidence patterns (3–5 reviewers) need to be weighed against the specifics of the diff.
 
-The orchestrator reads this file when present; `general-checklist.md` covers the always-on categories. This file is the *team-and-community knowledge layer* on top of that checklist.
+The lens reviewers read this file when present (the orchestrator passes it into their briefs); `general-checklist.md` covers the always-on categories. This file is the *team-and-community knowledge layer* on top of that checklist.
 
 ---
 
@@ -222,7 +222,7 @@ This isn't a defect pattern — it's a *style* pattern. When the diff has a non-
 
 Most high-volume reviewers in the sample write their corrections as ` ```suggestion ` blocks rather than prose. Roughly 50%+ of inline review comments are suggestion blocks for the most prolific reviewers.
 
-**Application to the orchestrator:** When a finding has a one- or two-line fix, render it as a ```suggestion block in the Fix section. Authors apply these with one click — fastest path to resolution.
+**Application to reviewers:** When a finding has a one- or two-line fix, render it as a ```suggestion block in the Fix section. Authors apply these with one click — fastest path to resolution.
 
 ---
 
@@ -263,7 +263,7 @@ If the diff has AI-bot review comments in the dedupe index, surface fact-check v
 
 ## Lens severity calibration (when to block vs. nit)
 
-Most reviewers in this sample use explicit severity labels on inline comments. The orchestrator should emit findings using the same idiom so authors can triage fast:
+Most reviewers in this sample use explicit severity labels on inline comments. Reviewers should emit findings using the same idiom so authors can triage fast:
 
 - **Bug:** / **Bug** — correctness issue with concrete consequence
 - **Nit:** — non-blocking style/naming/cleanup
@@ -299,7 +299,7 @@ These are common reviewer styles, not specific people. Adopt the matching archet
 
 ## Style guidance summary
 
-When the orchestrator emits a finding, calibrate against these defaults:
+When a reviewer emits a finding, calibrate against these defaults:
 
 1. **One-line fix** → `suggestion` block. Authors apply these fastest.
 2. **Architectural concern** → prose paragraph explaining the layer/boundary issue. 2-paragraph explanations are normal for blocking architectural findings.

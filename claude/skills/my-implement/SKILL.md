@@ -1,127 +1,111 @@
 ---
 model: sonnet
 name: my-implement
-description: Execute an approved implementation plan phase-by-phase using mandatory red/green/refactor TDD. Writes failing tests first, then minimum production code to pass, with loop detection to maintain forward momentum.
+description: Orchestrate execution of an approved plan one small phase at a time. Dispatches each phase to an isolated implementation-executor subagent that does strict RED → GREEN → VALIDATE TDD, then independently re-verifies the result before moving on. Owns loop detection; escalates instead of spinning.
 ---
 
 # Implement Plan
 
-Execute an approved technical plan with continuous verification. Every change is verified before moving forward. If you get stuck, you escalate — you don't spin.
+Execute an approved technical plan **phase by phase, sequentially**, by dispatching each phase to a fresh `implementation-executor` subagent. You are the orchestrator: you size and hand off the work, you re-verify what comes back, you own loop detection across attempts, and you keep the plan file as the single source of truth. You do **not** write the production code or tests yourself — the executor does, in its own isolated context.
+
+Why this shape: each phase runs in a small, fresh context instead of one ever-growing thread, and the implementer (the executor) is never its own reviewer — you re-run the criteria independently. That keeps cost down and quality honest.
 
 ## Getting Started
 
 If `$ARGUMENTS` contains a path, read that plan. Otherwise, list plans in `~/.claude/thoughts/shared/plans/` and ask the user which to implement.
 
-Read the plan completely. Check for existing `[x]` checkmarks — if resuming, trust completed work and pick up from the first unchecked item. Only re-verify previous work if something seems off.
+Read the plan completely. Check for existing `[x]` checkmarks — if resuming, trust completed work and pick up from the first unchecked phase. Only re-verify previous work if something seems off.
 
-Read ALL files mentioned in the plan FULLY (no limit/offset).
+Create a todo list (TodoWrite) to track phases. Each plan phase is one todo.
 
-Create a todo list (TodoWrite) to track implementation progress.
+**Phase granularity expectation.** Plans from `my-plan` are sized **one function / one small unit of behavior per phase** — test it in isolation, implement it, return to the checklist, next unit. If a phase in front of you is clearly larger than that (touches many files, bundles several behaviors), treat it as a planning gap: split it into ordered sub-phases yourself before dispatching, or stop and ask for a plan revision. Do not hand an oversized phase to one executor.
 
-## Implementation Loop — Red/Green/Refactor
+## The orchestration loop — one phase at a time
 
-TDD is mandatory. For each phase, follow this cycle strictly:
+For each unchecked phase, in order:
 
-### 1. RED — Write the Failing Test
+### 1. Assemble the phase slice
 
-Before writing ANY production code for this phase:
+Pull from the plan **only what this phase needs** — do not pass the whole plan or the whole repo. Each executor should run in a small context (target **under ~50k tokens**); a phase that can't fit that is too big and should be split. Note this is a *budget you enforce by scoping*, not a hard cap the harness imposes — so size the slice deliberately. The slice:
 
-1. **State intent**: What behavior are you testing and why?
-2. **Write the test(s)** defined in the plan's "Tests First (RED)" section
-3. **Run the test(s)** — they MUST FAIL
-   - If the test passes immediately, it's not testing new behavior. Rewrite it or investigate why.
-   - If the test errors (won't compile/import), fix the test scaffolding only — do NOT write production code yet.
-4. **Confirm RED**: You now have a failing test that describes the desired behavior.
+- `phase_name`, `phase_overview`
+- `red_tests` — the phase's "Tests First (RED)" list
+- `green_changes` — the phase's "Changes Required (GREEN)" list
+- `success_criteria` — the phase's mechanical success criteria (RED ones first, then GREEN/checks)
+- `allowed_paths` — the files/dirs this phase may touch (derive from the change list)
+- `verification_commands` — how to run tests/checks in this stack (see `references/verification-commands.md`)
+- `architectural_constraints` — the plan's constraints relevant to this phase
+- `working_context` — cwd, stack, any setup notes
 
-Update the plan's RED checkboxes to `[x]`.
+If a phase lacks a "Tests First (RED)" section, **stop and ask** — the plan needs updating before this phase can run. TDD is not optional.
 
-**HARD RULE**: Do not proceed to GREEN until you have a test that fails for the RIGHT reason (missing behavior, not a syntax error).
+### 2. Dispatch one executor
 
-### 2. GREEN — Make It Pass
+Spawn the `implementation-executor` agent with the slice. **One at a time** — never run two executors in parallel; they share the working tree and the plan's phase order encodes dependencies. Let it finish before you do anything else.
 
-1. **Write the minimum production code** to make the failing test(s) pass
-2. Follow the plan's "Changes Required (GREEN)" section as a guide, adapting to codebase reality
-3. **Run the test(s)** — they MUST PASS
-4. **Run the full phase test suite** — nothing unrelated should break
+### 3. Re-verify independently (you are not the implementer)
 
-If tests pass: update the plan's GREEN checkboxes to `[x]`, update todos.
+When the executor returns its report, **do not take it on faith**. As the reviewer-not-implementer, confirm two things: that the mechanical checks pass, and — the real goal — that the implementation actually **matches the requirements this phase was given**.
 
-If tests fail: attempt to fix (max 2 attempts on the same issue). If still failing, see Loop Detection below.
+1. **Re-run the phase's mechanical `success_criteria`** yourself and read the diff the executor produced.
+2. **Check requirements conformance against the slice you handed it.** Read the executor's "Requirements Conformance" table, then verify it against the diff: does the code satisfy `phase_overview` and every behavioral expectation, fully? Do the tests genuinely exercise the requirement, or are they vacuous? Was anything in the brief silently dropped or reinterpreted? Green tests that don't actually encode the requirement do **not** count as done.
 
-### 3. REFACTOR (Optional)
+- All criteria pass, the diff stays within `allowed_paths`, AND the implementation meets the phase's requirements → the phase is genuinely done.
+- A criterion fails, the diff touched files it shouldn't have, the executor returned `ESCALATE`, OR the work doesn't conform to the requirements (even with green tests) → go to Loop Detection (re-dispatch with a brief that names the specific gap).
 
-If the plan identifies refactor opportunities, or you see clear structural improvements:
+Before declaring a Python phase green where it involves a dependency pin, lockfile change, or fresh-install behavior **inside a git worktree**: apply the **Worktree `.venv/bin/*` shebangs** gotcha. A `uv run pytest` can silently run via a sibling worktree's interpreter if the entry-point shebang snapshotted it at venv creation. Check `head -1 .venv/bin/pytest`; if it points outside this worktree, `rm -rf .venv && uv sync` and re-run, or `uv run --no-active python -m pytest ...`.
 
-1. **Refactor** — improve code structure without changing behavior
-2. **Run tests again** — they must still pass. If any test fails after refactoring, you changed behavior — revert and try again.
+### 4. Record and advance
 
-Skip this step if there's nothing to clean up. Don't gold-plate.
+On a verified-done phase:
+1. Mark the phase's RED, GREEN, and Success-Criteria checkboxes `[x]` in the plan file.
+2. Update the todo to completed.
+3. Move to the next phase.
 
-### Repeat
+Maintain FORWARD MOMENTUM. Don't re-open finished phases, don't gold-plate, don't let an executor wander beyond its slice.
 
-Move to the next set of tests/changes within the phase, or to the next phase.
+## Loop Detection (orchestrator-owned)
 
-## Loop Detection
+The executor stops itself after one repeated failure; **you** track failures across attempts. For a given phase:
 
-Track repeated failures. If the SAME check fails 3 times across attempts:
+- **First failure** (criterion fails or executor escalates): diagnose from the report + the diff. If the cause is a too-thin brief (missing path, ambiguous criterion), tighten the slice and re-dispatch **once**.
+- **Same check fails a second time** (3rd total across executor + your re-runs): **STOP.** Do not re-dispatch again. Present to the user:
+  - What this phase is trying to accomplish
+  - What keeps failing + the error output
+  - What the executor and you have tried
+  - Your best root-cause theory
+  - Suggested path forward (often a plan revision)
+- **`escalation: phase-too-big`**: the phase exceeded a single executor's reasonable scope. Split it into smaller ordered sub-phases (function-grained) and dispatch those — or, if it can't be cleanly split, stop and ask for a plan revision.
 
-**STOP.** Present to the user:
-- What you're trying to accomplish
-- What keeps failing and the error output
-- What you've tried so far
-- Your best theory on the root cause
-- Suggested path forward (may require plan revision)
-
-Do NOT keep retrying the same approach. Escalation is not failure — it's efficiency.
-
-## Phase Transitions
-
-Before moving to the next phase:
-1. Confirm ALL RED checkboxes are marked — every planned test was written and failed first
-2. Confirm ALL GREEN checkboxes are marked — every test now passes
-3. Run ALL success criteria for the completed phase
-4. Verify no architectural constraints were violated
-5. Update the plan file — mark phase checkboxes as `[x]`
-6. Update todos
-
-Only proceed when the current phase is fully verified.
+Escalation is efficiency, not failure. Never power through a 3-strike failure.
 
 ## Handling Plan Deviations
 
-If reality differs from the plan:
-- **Minor**: Adapt and note the deviation in the plan file
-- **Major**: STOP and discuss with the user before proceeding. The plan may need revision.
-
-Indicators of a major deviation:
-- A file the plan assumes exists doesn't exist
-- An API or interface has changed since planning
-- The approach described won't work for a reason not anticipated
-- You'd need to modify files NOT listed in the plan
+If reality differs from the plan (reported by the executor or found in your re-verify):
+- **Minor**: accept the executor's adaptation, note the deviation in the plan file, continue.
+- **Major**: STOP and discuss before proceeding. Indicators: a file the plan assumes exists doesn't; an API changed since planning; the approach can't work for an unanticipated reason; the work needs files outside every phase's `allowed_paths`.
 
 ## Completion
 
-When all phases are complete:
-1. Run the full testing strategy from the plan
-2. Update the plan status to `implemented`
-3. Present a summary: what was done, any deviations from plan, any remaining concerns
-4. Suggest running `/validate` for a thorough post-implementation check
-
-**Before declaring "tests pass locally" on any Python change involving a dependency pin, lockfile change, or fresh-install behavior — and you're running inside a git worktree — apply the "Worktree `.venv/bin/*` shebangs" gotcha.** A `uv run pytest` from worktree A can silently execute via a sibling worktree's interpreter if the entry-point shebang snapshotted that interpreter at venv creation. Check `head -1 .venv/bin/pytest` (or the relevant entry point) — the shebang must point at *this* worktree's `.venv/bin/python`. If it doesn't, `rm -rf .venv && uv sync` and re-run, or use `uv run --no-active python -m pytest ...` to bypass the shebang. Otherwise CI will catch a regression that "passed locally."
+When all phases are verified done:
+1. Run the full testing strategy from the plan (you run this yourself — it's the holistic gate).
+2. Update the plan status to `implemented`.
+3. Present a summary: what was done, any deviations, any remaining concerns, and how many phases needed a re-dispatch (a signal for tuning future plan granularity).
+4. Suggest running `/my-validate` for a thorough post-implementation check.
 
 ## Guidelines
 
-- **Tests before code — always.** Never write production code without a failing test. This is not negotiable.
-- Maintain FORWARD MOMENTUM — don't gold-plate or refactor beyond the plan
-- Keep the end goal in mind, not just the current step
-- Commit meaningful chunks of work as you go (don't wait until everything is done)
-- If you discover something important the plan missed, note it — but stay focused on execution
-- The plan is the WHAT. You decide the HOW based on current codebase state.
-- If a plan phase lacks a "Tests First (RED)" section, stop and ask the user — the plan needs updating before implementation can proceed.
+- **You orchestrate; the executor implements.** Don't write the tests or production code in the main context — dispatch them. Your job is slicing, verifying, and loop control.
+- **Tests before code — always**, enforced inside every executor. A phase with no RED tests does not get dispatched.
+- One executor at a time; phases are sequential.
+- Keep each slice minimal — the executor's context should be small, which is the whole point.
+- Commit nothing and push nothing — this skill produces verified working-tree changes only. Outward git actions are the user's call.
+- The plan is the WHAT; the executor decides the HOW for its phase, within `allowed_paths` and `architectural_constraints`.
 
 ## References
 
-This skill has reference files in `references/` — consult them during implementation:
-- `references/verification-commands.md` — common verification commands by stack
+This skill has reference files in `references/` — consult them while assembling slices:
+- `references/verification-commands.md` — common verification commands by stack (feeds `verification_commands` and your re-verify step).
 
 ## Gotchas
-If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them. Pass any phase-relevant gotcha into the executor's slice so it doesn't rediscover it the hard way.

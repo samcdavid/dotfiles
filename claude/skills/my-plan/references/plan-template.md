@@ -62,10 +62,10 @@ RED criteria run first (tests exist and FAIL), then GREEN criteria (tests PASS):
 ...
 
 ## TDD Discipline
-All phases follow red/green/refactor:
-1. **RED** — Write tests first. They MUST fail before any production code is written.
-2. **GREEN** — Write the minimum production code to make the tests pass.
-3. **REFACTOR** — Clean up without changing behavior (optional per phase).
+Each phase is one small unit of behavior (a single function/method where possible) and follows red/green/validate:
+1. **RED** — Write the test(s) first. They MUST fail before any production code is written.
+2. **GREEN** — Write the minimum production code to make the tests pass (fold in any obvious, behavior-preserving cleanup here).
+3. **VALIDATE** — Confirm the implementation meets the phase's requirements. Run the mechanical success criteria and the relevant suite as evidence, and verify the behavior actually matches what the phase asked for. The phase is done only when it conforms.
 
 ## Testing Strategy
 [How to verify the complete feature works end-to-end]

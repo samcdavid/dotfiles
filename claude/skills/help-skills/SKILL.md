@@ -39,7 +39,7 @@ If `$ARGUMENTS` is empty or "list":
 ### Implementation
 | Skill | What it does | When to use |
 |-------|-------------|-------------|
-| `my-implement` | Executes a plan with mandatory red/green/refactor TDD | After plan is approved |
+| `my-implement` | Orchestrates a plan phase-by-phase, dispatching each to an isolated executor doing red/green/validate TDD | After plan is approved |
 | `commit` | Groups changes into logical commits with detailed messages | After implementation, ready to commit |
 | `update-deps` | Updates all outdated dependencies with changelog lookup | Dependency maintenance |
 
