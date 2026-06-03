@@ -163,6 +163,18 @@
   },
   "model": "sonnet[1m]",
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/session-setup.sh",
+            "statusMessage": "Installing deps + initial compile (background)",
+            "async": true
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
@@ -190,6 +202,31 @@
           {
             "type": "command",
             "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/format-file.sh",
+            "statusMessage": "Formatting edited file"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "implementation-executor",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/implementation-checks.sh",
+            "timeout": 600,
+            "statusMessage": "Verifying phase: format, lint, tests"
           }
         ]
       }
