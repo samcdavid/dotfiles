@@ -26,6 +26,14 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Credo enforces no raw SQL in migrations. The Ecto DSL has full support for concurrent index operations and resolves the index name automatically from column list, or accepts an explicit `name:` option for named indexes
 - **Source:** Migration that replaced a raw `execute "DROP INDEX CONCURRENTLY..."` to fix credo CI failure
 
+### Approval review body may contain questions or sanity-check requests — read it fully
+- **Category:** failure-mode
+- **Context:** When gathering PR feedback and a reviewer has submitted an APPROVE state review
+- **Wrong:** Treating an APPROVE review as "no action needed" and skipping the body text — only scanning `state: APPROVED` and moving on
+- **Right:** Read the full body of every review, regardless of state. APPROVE reviews frequently contain inline questions, non-blocking sanity checks, design confirmations, or follow-up notes that still need a response.
+- **Why:** GitHub's review state (APPROVE / COMMENT / REQUEST_CHANGES) indicates merge readiness, not whether the reviewer has questions. Approving reviewers often leave "this looks good, but did you consider X?" or "worth confirming before merge" notes that go unaddressed if only the state is checked.
+- **Source:** Observed when a reviewer submitted an APPROVE containing a specific question about docstring clarity that was missed because only the review state was checked
+
 ### Ecto concurrent index migrations: both `up` and `down` need `concurrently: true`
 - **Category:** edge-case
 - **Context:** Writing `up`/`down` for a migration that uses `@disable_ddl_transaction true` for concurrent index operations
