@@ -1,13 +1,21 @@
 ---
 model: opus
 name: address-pr-feedback
-description: Systematically address all pending PR review feedback. Reads comments, triages by actionability, applies fixes with commit references, drafts responses for questions and deferrals, and verifies the build passes before finishing. Manual invocation only.
+description: Systematically address all pending PR review feedback as a condensed research → plan → implement pipeline. Investigates and triages comments into verified findings, plans test-drivable fixes as small one-fix phases, dispatches each to an isolated implementation-executor (strict TDD), applies non-behavioral trivia directly, then commits with references, drafts evidence-backed responses, and verifies before finishing. Manual invocation only.
 disable-model-invocation: true
 ---
 
 # Address PR Feedback
 
-Systematically work through all pending review feedback on a PR. Apply fixes, respond to questions, and flag items that need discussion — then verify the result.
+Systematically work through all pending review feedback on a PR. This skill is a **condensed `my-research` → `my-plan` → `my-implement` pipeline** specialized for reviewer feedback:
+
+- **Act I — Research** (condensed `my-research`): gather every comment and turn it into a **verified, classified finding** — substantiated by code you actually read, challenged adversarially, importance-filtered.
+- **Act II — Plan** (condensed `my-plan`): split confirmed fixes into **test-drivable behavioral phases** (sized one fix per phase, with RED tests and mechanical success criteria) versus **non-behavioral direct edits**.
+- **Act III — Implement** (condensed `my-implement`): dispatch each behavioral phase to a fresh **`implementation-executor`** subagent (the same agent `my-implement` uses), re-verify each independently, and own loop detection. Apply direct edits yourself.
+
+Then commit with feedback references, draft responses, verify, and publish.
+
+**You orchestrate; the executor implements the behavioral fixes.** You do not write production code or tests for a behavioral fix in the main context — you slice the work, dispatch it, and re-verify what comes back as a skeptical reviewer. The exception is non-behavioral trivia, which you apply directly because it has no honest failing test.
 
 ## Getting Started
 
@@ -16,6 +24,12 @@ Determine which PR to address:
 - If `$ARGUMENTS` contains a PR number or URL, use that.
 - Otherwise, check `gh pr status` for the current branch's PR.
 - If neither works, ask the user.
+
+---
+
+# Act I — Research (condensed `my-research`)
+
+The goal of this act is **verified findings**: every classification is backed by code you read, not by the reviewer's assertion or your memory.
 
 ## Step 1 — Gather All Feedback
 
@@ -51,7 +65,7 @@ Skip comments that are already resolved or addressed. Focus only on **pending, u
 
 If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it using the Linear MCP tools. Extract the title, description, acceptance criteria, and sub-issues.
 
-Build a **requirements map**: for each acceptance criterion, which file(s) and change(s) in the current PR diff address it. You will use this map in Step 7 to verify that your fixes don't accidentally remove coverage for an original requirement.
+Build a **requirements map**: for each acceptance criterion, which file(s) and change(s) in the current PR diff address it. You will use this map in the self-audit (Step 10) to verify that your fixes don't accidentally remove coverage for an original requirement.
 
 ## Step 2 — Investigate Every Comment
 
@@ -123,7 +137,7 @@ Invoke `/this-important strict` by default. Use `moderate` if I've signaled this
 
 Pass every classified comment as a finding. Apply the returned verdicts:
 
-- **KEEP** → stays as Confirmed Fix / Partially Correct (proceed to fix in Step 4)
+- **KEEP** → stays as Confirmed Fix / Partially Correct (proceed to plan in Act II)
 - **DOWNGRADE** → move from Confirmed Fix to Question Requiring Response (reply with investigation findings, no code change)
 - **DEFER** → move to Valid Deferral (must have a follow-up plan)
 - **DROP** → only valid for items already in the Question or Push Back classifications where investigation showed no real concern; never drop a verified reviewer-flagged bug, security issue, or data-loss risk
@@ -160,72 +174,117 @@ Present the triage to the user **with your investigation findings**:
    Evidence: [what you found that contradicts the suggestion]
 ```
 
-Get user confirmation before proceeding. The user may reclassify items, add context, or challenge your investigation findings.
+Get user confirmation before proceeding. The user may reclassify items, add context, or challenge your investigation findings. **The confirmed triage is the research output of this skill — it is held inline, not written to a research doc.**
 
-## Step 3 — Research Before Fixing
+---
 
-Step 2 investigated each comment individually. Now build broader context for the fixes you're about to make:
+# Act II — Plan (condensed `my-plan`)
+
+Turn the confirmed triage into an executable fix plan. This act produces an **inline plan** (a TodoWrite list + the per-fix slices below) — no plan file is written to disk.
+
+## Step 3 — Context for Fixes
+
+Before planning slices, build the context the fixes need:
 
 - **Read every changed file fully** — not just the diff hunks. You need surrounding context to avoid introducing new problems while fixing old ones.
 - **Spawn a codebase-pattern-finder** if any fix involves adding new code — check whether the codebase already has a utility or pattern for what's needed. Duplicating existing functionality while addressing feedback is a common second-round review finding.
-- **Spawn a docs-researcher** if any fix involves library/framework APIs — even if you investigated in Step 2, confirm the exact usage pattern before writing code.
+- **Spawn a docs-researcher** if any fix involves library/framework APIs — even if you investigated in Step 2, confirm the exact usage pattern before writing the slice.
 - **Check for interactions between fixes** — will fixing comment A conflict with fixing comment B? If two reviewers gave contradictory feedback, flag it for the user rather than choosing one silently.
 
-## Step 4 — Apply Fixes
+## Step 4 — Sort Fixes Into Two Tracks
 
-For each confirmed fix and partially-correct item, in priority order (blocking before non-blocking):
+For each **Confirmed Fix** and **Partially Correct** item that survived Act I, decide its track:
 
-1. **Re-read the file and surrounding context** at the referenced line — state may have changed since Step 2 if you've already applied other fixes.
-2. **Address the underlying concern, not just the surface suggestion.** If the reviewer said "use `Enum.map` here" but the real issue is an N+1 query, fix the N+1 — don't just swap the enumeration function.
-3. **Apply the fix.** If the reviewer provided specific code, verify it's correct in context before using it. If it's a "partially correct" item, implement your alternative approach from the triage.
-4. **Check for ripple effects** — does this fix require changes elsewhere? (callers, tests, types, other files in the diff)
-5. **Run the fix through the my-review checklist.** Before committing, evaluate your change against the same categories reviewers will use on re-review. The point of addressing feedback is not to create new findings.
+- **Behavioral fix (→ executor phase).** The fix changes runtime behavior, and a test could fail before the fix and pass after it: bug fixes, logic changes, new edge-case handling, corrected return shapes, validation. These get a TDD phase dispatched to `implementation-executor`.
+- **Non-behavioral direct edit (→ quick-implement-agent).** The fix has no honest failing test: renames, comment/docstring wording, log-level changes, formatting, dead-code removal, doc files, pure config. You dispatch these as `direct_edit` phases to `quick-implement-agent` in Act III — they clear the same format/lint/test SubagentStop gate as behavioral fixes.
 
-### Fix Quality Checks (from my-review)
+When in doubt, prefer the executor track — but never invent a vacuous test just to route a fix through it. The executor **rejects a phase with no `red_tests`**; a fix that can't produce a genuine RED test belongs in the direct-edit track.
 
-Before committing each fix, verify against the review categories that reviewers will check on re-review:
+## Step 5 — Write the Phase Slices (behavioral track)
 
-**Correctness**
+Plan each behavioral fix as **one phase = one fix**, following `my-plan`'s sizing discipline: a single bounded behavior, the smallest set of files (ideally one production file + its test), completable by a subagent that sees only this slice. PR fixes are already granular; if one "fix" bundles several behaviors, split it into ordered phases.
 
-- [ ] The fix addresses the reviewer's actual concern (re-read their comment, then re-read your fix)
-- [ ] Edge cases: for every conditional or pattern match you touched, what else could this value be?
-- [ ] Bang vs. non-bang: appropriate for the error context?
-- [ ] No lazy imports introduced (all imports at module level)
-- [ ] If Oban jobs are involved: uniqueness config still correct? Jobs inside transactions?
-- [ ] When adding a clause to a multi-clause Elixir function, all clauses of the same name/arity stay grouped — never interleave a helper between them (per the **"Elixir multi-clause function grouping"** gotcha; `--warnings-as-errors` fails the build otherwise).
+For each phase, define the slice the `implementation-executor` consumes (see the agent's `## Inputs`):
 
-**Layer Boundaries**
+- `phase_name` / `phase_overview` — the reviewer's concern and what correct behavior looks like
+- `red_tests` — the failing test(s) that encode the corrected behavior (paths + what each asserts)
+- `green_changes` — the production change(s) that make them pass (paths + descriptions)
+- `success_criteria` — **mechanical** (runnable/greppable), RED first (test exists and FAILS) then GREEN (test PASSES) plus any check
+- `allowed_paths` — the file(s) this fix may touch + their tests
+- `verification_commands` — how to run tests/checks in this stack (derive from the project's Makefile/justfile/CI or Step 9's command list; see `my-implement`'s `references/verification-commands.md`)
+- `architectural_constraints` — boundaries the fix must not violate (layer boundaries, dependency direction, naming) — draw from the Fix Quality Bar below
+- `working_context` — cwd, stack, and **any relevant gotcha** (e.g. Elixir multi-clause grouping, concurrent-index DSL) so the executor doesn't rediscover it the hard way
 
-- [ ] No API/resolver concerns leaked into contexts (or vice versa) as part of the fix
-- [ ] If you extracted a helper, it lives at the right layer
+Create a TodoWrite list: one todo per behavioral phase, one todo per direct-edit phase.
 
-**Migration Safety** (if the fix touches a migration)
+### Fix Quality Bar (from `my-review`)
 
-- [ ] NOT NULL constraints safe on the table size?
-- [ ] Column types correct (money = `numeric(16,2)`, JSONB has defaults)?
-- [ ] Down migration present and safe?
-- [ ] Concurrent index ops use the **Ecto DSL, not raw SQL** (per gotcha), and `concurrently: true` is on **both `up` and `down`** when `@disable_ddl_transaction true` is set — credo scans both clauses, not just `up`.
+These are the standards every fix — executor phase or direct edit — must meet. Encode the relevant ones as `architectural_constraints` in each slice, and apply them yourself when re-verifying (Step 6) and on direct edits.
 
-**Tests**
+**Correctness** — fix addresses the reviewer's *actual* concern; edge cases covered (for every conditional/pattern match touched, what else could the value be?); appropriate bang vs. non-bang; no lazy imports; Oban uniqueness/transaction config still correct; when adding a clause to a multi-clause Elixir function, all clauses of that name/arity stay grouped (`--warnings-as-errors` fails otherwise).
+**Layer boundaries** — no API/resolver concerns leaked into contexts (or vice versa); extracted helpers live at the right layer.
+**Migration safety** (if touched) — NOT NULL safe for table size; correct column types (money = `numeric(16,2)`, JSONB defaults); down migration present; concurrent index ops use the Ecto DSL (not raw SQL) with `concurrently: true` on **both** `up` and `down` under `@disable_ddl_transaction true`.
+**Tests** — behavior changes have updated tests; tests at the right level (unit for branching, integration for wiring); assertions specific, not vacuous.
+**Lint discipline** — no checks disabled/suppressed; no formatter violations; no new warnings.
+**Existing patterns** — reuse existing utilities; if the reviewer pointed you to a function, actually use it.
 
-- [ ] If you changed behavior, tests are updated
-- [ ] New tests are at the right level — unit for branching, integration for wiring only
-- [ ] Assertions are specific, not vacuous
+Present the fix plan to the user — the behavioral phases (with what each RED test will assert) and the direct-edit list — and get a quick confirmation of the approach before executing. The triage was already approved in Act I; this confirms *how* you'll fix, not *whether*.
 
-**Lint Discipline**
+---
 
-- [ ] No lint checks disabled or suppressed
-- [ ] No formatter violations
-- [ ] No new warnings
+# Act III — Implement (condensed `my-implement`)
 
-**Existing Patterns**
+Execute the plan **one phase at a time, sequentially**. You are the orchestrator: dispatch, re-verify, own loop detection. Apply blocking feedback before non-blocking.
 
-- [ ] New code reuses existing patterns — no duplicate utilities introduced
-- [ ] If the reviewer pointed you to an existing function, you're actually using it (not reimplementing it)
+## Step 6 — Execute Fixes
 
-### Commit Strategy
+### Behavioral phases — the orchestration loop
 
-Group related fixes into logical commits. Each commit message should reference the feedback:
+For each behavioral phase, in priority order (blocking before non-blocking):
+
+1. **Assemble the slice** — pass only what this phase needs (the fields from Step 5), not the whole triage or repo. Keep the executor's context small.
+2. **Dispatch ONE `implementation-executor`.** One at a time — never two in parallel; they share the working tree and fixes may touch overlapping files. Let it finish before doing anything else. (A `SubagentStop` hook independently re-runs format + lint + the changed tests on what the executor touched — so a green report has already cleared that gate.)
+3. **Re-verify independently — you are not the implementer.** Do not take the executor's report on faith:
+   - Re-run the phase's mechanical `success_criteria` yourself and read the diff.
+   - Check requirements conformance against the slice: does the code satisfy `phase_overview` and the reviewer's actual concern, fully? Do the tests genuinely exercise the corrected behavior, or are they vacuous? Was anything dropped or reinterpreted? Apply the **Fix Quality Bar** above.
+   - Confirm the diff stayed within `allowed_paths`.
+   - All criteria pass, diff in-bounds, requirements met → phase is genuinely done. Otherwise → Loop Detection.
+4. **Record and advance** — mark the phase's todo completed and move to the next. Maintain forward momentum: don't re-open finished phases, don't gold-plate, don't let an executor wander beyond its slice.
+
+#### Loop Detection (orchestrator-owned)
+
+The executor stops itself after one repeated failure; **you** track failures across attempts:
+
+- **First failure** (criterion fails / executor returns `ESCALATE`): diagnose from the report + diff. If the cause is a thin brief (missing path, ambiguous criterion), tighten the slice and re-dispatch **once**.
+- **Same check fails a second time** (3rd total): **STOP.** Do not re-dispatch. Surface to the user: what the fix is trying to do, what keeps failing (+ error output), what's been tried, your root-cause theory, and a suggested path forward.
+- **`escalation: phase-too-big`**: split the fix into smaller ordered phases and dispatch those, or ask the user.
+
+Escalation is efficiency, not failure. Never power through a 3-strike failure.
+
+### Direct edits — quick-implement-agent
+
+For each non-behavioral direct edit, dispatch it as a `direct_edit` phase to `quick-implement-agent`. The SubagentStop hook fires identically to behavioral phases (format + lint + changed tests) — direct edits clear the same gate.
+
+Assemble the slice:
+- `phase_name` / `phase_overview` — the reviewer's concern and what the fix does
+- `phase_type: "direct_edit"`
+- `edit_target` — file path + function name + line range (re-read the file before specifying; state may have shifted from earlier fixes in this session)
+- `edit_description` — what the edit does, plus any **Fix Quality Bar** constraints relevant to this fix (encode them so the agent doesn't violate them)
+- `success_criteria` — grep/lint/test checks that confirm the edit is correct and regressions are absent
+- `allowed_paths` — the file(s) for this fix
+- `verification_commands` — lint + relevant test command
+
+Dispatch ONE `quick-implement-agent` per direct-edit phase. Sequential — never parallel.
+
+Re-verify independently: read the diff, confirm the edit addressed the reviewer's underlying concern (not just the surface suggestion), confirm no ripple effects on callers or other files in the diff. Apply the **Fix Quality Bar** in your re-verify pass.
+
+### Plan deviations
+
+If reality differs from the plan (reported by an executor or found on re-verify): **minor** — accept the adaptation, note it, continue; **major** (a file the plan assumed doesn't exist, an API changed, the fix needs files outside every `allowed_paths`) — STOP and discuss.
+
+## Step 7 — Commit
+
+Unlike `my-implement` (which commits nothing — executors only produce working-tree changes), this skill **does** commit, because responses reference commit SHAs. Group related fixes into logical commits; each message references the feedback:
 
 ```
 Address review: [brief description of what changed]
@@ -236,7 +295,11 @@ Address review: [brief description of what changed]
 
 After each commit, note the short SHA — you'll use it in responses.
 
-## Step 5 — Draft Responses
+---
+
+# Tail — Respond, Verify, Publish
+
+## Step 8 — Draft Responses
 
 For every pending comment (fixed or not), draft a response. Every response should show that you investigated — not just acted or dismissed.
 
@@ -317,9 +380,9 @@ Present all drafted responses to the user for review before posting, showing the
    [your response]
 ```
 
-## Step 6 — Verify
+## Step 9 — Verify
 
-After all fixes are applied, run the full verification suite:
+Per-phase work was already verified by the executor, its `SubagentStop` hook, and your independent re-verify. This step is the **holistic gate** — run the full suite once over the combined result:
 
 ### Build / Compile
 
@@ -343,7 +406,7 @@ If the project has a `Makefile`, `justfile`, or CI script, prefer those over ind
 
 If any check fails, fix the issue before proceeding. Do not leave the branch in a broken state.
 
-## Step 7 — Self-Audit Against my-review
+## Step 10 — Self-Audit Against my-review
 
 Before presenting the final result, run your changes through the full `/my-review` checklist. The point is to catch anything that would be flagged on re-review — your fixes should not create new findings.
 
@@ -406,7 +469,7 @@ If a requirements map was built in Step 1:
 - [ ] Contradictions between your fixes and your push-backs? (e.g. fixing a pattern in one place but defending it in another)
 - [ ] Importance bar from `/this-important` applied consistently — fixes match the items that survived filtering; dropped/deferred items were not silently fixed anyway
 
-## Step 8 — Summary
+## Step 11 — Summary
 
 Present the final result:
 
@@ -415,9 +478,9 @@ Present the final result:
 
 ### Fixes Applied ([N])
 
-| #   | Reviewer | File        | Change              | Commit |
-| --- | -------- | ----------- | ------------------- | ------ |
-| 1   | [name]   | `file:line` | [brief description] | [SHA]  |
+| #   | Reviewer | File        | Change              | Track            | Commit |
+| --- | -------- | ----------- | ------------------- | ---------------- | ------ |
+| 1   | [name]   | `file:line` | [brief description] | executor /direct | [SHA]  |
 
 ### Responses Drafted ([N])
 
@@ -434,6 +497,11 @@ Present the final result:
 |---|---|---|---|
 | [Criterion] | Covered | Covered | [unchanged / moved to X] |
 | [Criterion] | Covered | Partial | [fix removed Y, needs attention] |
+
+### Execution Notes
+
+- Phases dispatched to executor: [N] | Re-dispatches needed: [N] (a signal for tuning future fix granularity)
+- Direct edits applied: [N]
 
 ### Dropped Items
 
@@ -452,7 +520,7 @@ Present the final result:
 [Ask user whether to post the drafted responses to GitHub]
 ```
 
-## Step 9 — Publish Responses
+## Step 12 — Publish Responses
 
 Only after user confirmation. Push any new commits first, then post responses.
 
@@ -497,20 +565,24 @@ Response text"
 
 ## Guidelines
 
-- **Investigate first, act second.** Every comment — whether you agree or disagree — deserves investigation before you decide how to respond. Acceptance without understanding is as bad as rejection without evidence.
-- **Fix first, respond second.** Apply all code changes before drafting responses. This way responses can reference specific commits.
-- **Show your work.** Responses should demonstrate you investigated — what you checked, what you found, why you're taking the action you're taking. "Fixed in abc123" without context tells the reviewer nothing about whether you understood the concern.
-- **One concern per commit when possible.** This makes it easy for reviewers to verify each fix maps to their feedback.
+- **Research, then plan, then implement.** Don't jump to editing code — investigate every comment into a verified finding (Act I), slice the confirmed fixes (Act II), then execute (Act III).
+- **You orchestrate; the executor implements behavioral fixes.** Don't write a behavioral fix's tests or production code in the main context — dispatch it to `implementation-executor` and re-verify. Only non-behavioral trivia is yours to edit directly.
+- **One executor at a time.** Fixes are sequential; they share the working tree and may touch overlapping files.
+- **TDD for behavioral fixes is not optional.** A behavioral phase with no honest RED test either gets a real test or moves to the direct-edit track — never a vacuous test to satisfy the executor.
+- **Investigate first, act second.** Every comment — agree or disagree — deserves investigation before you decide how to respond.
+- **Fix first, respond second.** Apply all code changes before drafting responses, so responses can reference specific commits.
+- **Show your work.** Responses should demonstrate investigation — what you checked, what you found, why. "Fixed in abc123" without context tells the reviewer nothing.
+- **One concern per commit when possible.** Makes it easy for reviewers to verify each fix maps to their feedback.
 - **Never argue style.** If a reviewer prefers a different but equally valid approach, adopt it. Reserve push back for correctness and constraints.
-- **Deferred is not forgotten.** Every deferral must have a concrete follow-up plan (ticket, next PR, specific timeline). If you can't articulate the plan, it's not a valid deferral — just do it.
-- **Don't fix what wasn't flagged.** Resist the urge to refactor surrounding code while you're in the file. Address the feedback, nothing more.
-- **Verify against the review checklist.** Your fixes will be re-reviewed. Run them through the same `/my-review` categories the reviewers use. Creating new findings while addressing old ones wastes everyone's time.
+- **Deferred is not forgotten.** Every deferral needs a concrete follow-up plan, or it's not a deferral — just do it.
+- **Don't fix what wasn't flagged.** Address the feedback, nothing more — no refactoring surrounding code while you're in the file.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
 
 ## References
 
 - `references/pushback-patterns.md` — 12 pushback shapes distilled from a 24-developer PR mining pass. Used during Step 2 (investigate) to pick a response shape; includes a "When to push back vs. when to accept" decision table and per-person pushback fingerprints.
+- The plan and implement acts mirror `my-plan` and `my-implement`; `my-implement`'s `references/verification-commands.md` is the source for per-stack `verification_commands` passed into each slice.
 
 ## Gotchas
 
-If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them. Pass any fix-relevant gotcha into the executor's slice (`working_context`) so it doesn't rediscover it the hard way.
