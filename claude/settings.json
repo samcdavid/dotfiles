@@ -181,6 +181,12 @@
           {
             "type": "command",
             "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
+            "timeout": 600,
+            "statusMessage": "Format/lint/test gate (PR feedback)"
           }
         ]
       }
@@ -210,9 +216,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/pre-commit-checks.sh",
+            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
             "if": "Skill(commit)",
-            "statusMessage": "Checking format and lint before commit"
+            "statusMessage": "Format/lint/test gate (pre-commit)"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/apf-mark.sh",
+            "if": "Skill(address-pr-feedback)",
+            "statusMessage": "Arming format/lint gate for PR feedback"
           }
         ]
       }
@@ -235,7 +247,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/implementation-checks.sh",
+            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
+            "timeout": 600,
+            "statusMessage": "Verifying phase: format, lint, tests"
+          }
+        ]
+      },
+      {
+        "matcher": "quick-implement-agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
             "timeout": 600,
             "statusMessage": "Verifying phase: format, lint, tests"
           }
