@@ -80,6 +80,19 @@ For each pending comment:
 3. **Check the docs.** If the feedback involves a library API, framework behavior, or Oban/Ecto pattern, verify against actual documentation — not memory.
 4. **Form a judgment with evidence.** You now know whether the reviewer is right, partially right, or mistaken. Classify accordingly — and consult `references/pushback-patterns.md` to pick the response shape that fits (e.g. Pattern 3 "evidence-backed pushback" for falsifiable bot claims, Pattern 1 "out-of-scope defer" for adjacent cleanup, Pattern 4 "acknowledge-and-fix" for clear bugs).
 
+### Deduplication Requests
+
+When a reviewer requests deduplication (DRY refactors, "extract this repeated pattern", "this is duplicated"), count the actual occurrences before accepting:
+
+- **≤3 occurrences** → push back. Three instances of a pattern is not a strong enough signal to justify extraction at review time. Classify as **Disagree / Push Back** (see below).
+- **>3 occurrences** → treat as a Confirmed Fix or Partially Correct item and proceed.
+
+The push-back response must:
+1. Acknowledge the reviewer's DRY instinct.
+2. State the actual count: "I count N occurrences of this pattern."
+3. Explain the threshold: "At N occurrences, introducing an abstraction adds indirection without enough payoff — the bar for extraction is more than 3."
+4. Offer to revisit: "Happy to extract it if this pattern spreads further."
+
 ### Classification
 
 After investigation, classify each comment:
