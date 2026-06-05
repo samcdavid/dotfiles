@@ -170,12 +170,12 @@ gh api repos/{owner}/{repo}/issues/{number}/comments \
 Response text"
 ```
 
-## Step 4 — Present for Confirmation
+## Step 4 — Summarize and Publish
 
-**Always show the user the complete review before publishing.** Format it clearly:
+Show a brief summary of what will be published, then proceed immediately:
 
 ```markdown
-## Review to Publish — PR #{number}
+## Publishing Review — PR #{number}
 
 ### Review Body ({event})
 {body text}
@@ -193,11 +193,9 @@ Response text"
 1. Quoting {user}:
    > {quoted text}
    {response text}
-
-Publish this review? (y/n)
 ```
 
-Do NOT publish without user confirmation.
+Invoking this skill is the approval — publish immediately without asking for confirmation.
 
 ## Step 5 — Publish
 

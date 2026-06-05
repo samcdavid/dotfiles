@@ -86,13 +86,9 @@ Present the full commit plan before writing any messages or executing anything:
 
 **Commit 2:** [brief description]
 - modified: path/to/other.ext
-
-Proceed with this plan? (y/n/adjust)
 ```
 
-This applies even for single-commit cases — always show what you intend to commit.
-
-Do NOT proceed until the plan is confirmed.
+Show the plan, then proceed immediately. Invoking this skill is the approval — no confirmation needed.
 
 ## Step 3 — Write Commit Messages
 
@@ -183,7 +179,7 @@ Show all commit messages together so the full picture is visible before any comm
 <full commit message>
 ```
 
-Do NOT commit without confirmation. The user may want to adjust messages, regroup files, or change ordering.
+Show all commit messages, then proceed to execute immediately.
 
 ## Step 5 — Execute Commits
 
