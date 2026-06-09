@@ -39,8 +39,9 @@ When a sub-skill's instructions conflict with anything below, **these win**. Rea
 | 7 | `my-implement` | approved plan | code changes (per-phase TDD red/green/validate, dispatched to isolated executors) |
 | 8 | `my-validate` | plan + changes | validation report (self-repairs failures) |
 | 9 | `my-review` | spec + diff vs base branch | consolidated review findings — fans out to security / architecture / performance / QA / requirements / general lens reviewers, then merges, de-dupes, and renders a verdict |
+| 9+ | **post-review fix loop** | review findings | repeats `address-pr-feedback` → `my-validate` → `my-review` until the review verdict contains zero blocking and zero non-blocking findings |
 
-Track these nine as a TodoWrite list. Mark each `in_progress` when it starts and `completed` when its output exists.
+Track stages 1–9 as a TodoWrite list. Mark each `in_progress` when it starts and `completed` when its output exists. The post-review fix loop is tracked as a single repeating entry in the ledger (loop iteration count, findings delta per pass).
 
 The single `my-review` stage replaces what used to be four separate stages (`requirements-audit`, `security-audit`, `my-arch-review`, `my-review`): its lens reviewers read those same audit skills' checklists as their source of truth, so running them separately would just duplicate work. The standalone deep audits still exist as skills (`/security-audit`, `/requirements-audit`, `/my-arch-review`, `/perf-review`, `/quality-audit`) — invoke one directly only when a review finding warrants a deeper, opus-level pass on that one lens.
 
@@ -121,14 +122,36 @@ On the answer, resume from that stage with the new input folded into the ledger.
   - **Feed the stage-2 spec as the requirements source.** Pass the spec path so `requirements-reviewer` traces acceptance criteria against the spec (and any linked Linear ticket) — this replaces the former standalone `requirements-audit` stage and satisfies its "requires a spec" need without asking.
   - It internally spawns the research subagents + the per-lens reviewers, then merges, de-dupes, runs the adversarial pass, and proposes a verdict. That single output is the pipeline's complete review surface.
 
+## Post-review fix loop (stage 9+)
+
+After `my-review` produces its verdict, inspect the compiled findings:
+
+- **Converged** — zero blocking (Critical/High) AND zero non-blocking (Medium/Minor) findings: skip the loop entirely and proceed to the final report.
+- **Findings remain** — any blocking or non-blocking findings: enter the fix loop.
+
+**Each loop iteration:**
+
+1. **`address-pr-feedback`** — invoke it with the full findings list from the most recent `my-review` run. Pass the review output path/content explicitly so it has the exact findings to address. This skill applies fixes autonomously; treat it the same as `my-implement` under the Autonomy Override.
+2. **`my-validate`** — run it against the plan file (same as stage 8) to verify the fixes didn't break anything. Let it self-repair trivial failures; escalate what it cannot fix.
+3. **`my-review`** — re-run the full review against the same base branch. Force the full lens set again — do not thin the lens set across iterations.
+
+**After each `my-review`**, re-evaluate:
+- Zero blocking and zero non-blocking → loop converged, proceed to the final report.
+- Still findings → start the next iteration.
+
+**Loop-detection cap:** If after **3 iterations** findings are still non-zero, STOP and escalate:
+> Post-review loop did not converge after 3 iterations. Final finding count: **[N]**. Remaining issues: **[list]**. Likely cause: **[root-cause theory]**.
+
+Log each iteration in the ledger: iteration number, findings count going in, findings count coming out, what `address-pr-feedback` changed.
+
 ## Final report & hand-off
 
-After stage 9, assemble one consolidated report from the ledger:
+After the post-review loop converges (or escalates), assemble one consolidated report from the ledger:
 
 - **Task & entry point** — what ran, what was skipped and why.
 - **Artifacts produced** — paths to research / spec / plan / observability / analysis / validation reports.
 - **Autonomous decisions & assumptions** — the full list from the ledger. This is the after-the-fact review surface; make it scannable.
-- **Findings by severity** — `my-review` already merges and de-dupes across all lenses; present its compiled findings grouped Critical → Minor.
+- **Findings by severity** — present the final `my-review` verdict (the pass that converged the loop) grouped Critical → Minor. Note how many loop iterations it took to reach zero findings.
 - **What I changed** — files touched (paths + line counts), tests run + results.
 - **Suggested next steps** — `/commit`, then `/create-pr`; and re-run a specific stage if any finding is substantial.
 
