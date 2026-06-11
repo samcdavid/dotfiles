@@ -80,19 +80,41 @@ fail=""
 note() { fail="${fail}$1"$'\n'; }
 
 # ---- Elixir ----
-if [ "${#ex[@]}" -gt 0 ] && [ -f mix.exs ] && command -v mix >/dev/null 2>&1; then
-  if ! out=$(mix format --check-formatted "${ex[@]}" 2>&1); then
-    note "FORMAT (elixir): run \`mix format ${ex[*]}\`"$'\n'"$out"
-  fi
-  if mix help credo >/dev/null 2>&1; then
-    if ! out=$(mix credo --strict "${ex[@]}" 2>&1); then
-      note "LINT (mix credo):"$'\n'"$out"
-    fi
-  fi
-  if [ "${#ex_tests[@]}" -gt 0 ]; then
-    if ! out=$(mix test "${ex_tests[@]}" 2>&1); then
-      note "TESTS (mix test, changed files) FAILING:"$'\n'"$out"
-    fi
+# Find the nearest mix.exs by walking up from the first changed .ex/.exs file.
+# This handles monorepos where mix.exs lives in a sub-app (e.g. apps/axon/),
+# not at the git root.
+find_mix_root() {
+  local f="$1" d
+  d=$(cd "$(dirname "$f")" 2>/dev/null && pwd) || return 1
+  while [ "$d" != "/" ]; do
+    [ -f "$d/mix.exs" ] && { echo "$d"; return 0; }
+    d=$(dirname "$d")
+  done
+  return 1
+}
+if [ "${#ex[@]}" -gt 0 ] && command -v mix >/dev/null 2>&1; then
+  mix_root=$(find_mix_root "${ex[0]}")
+  if [ -n "$mix_root" ]; then
+    # Make paths relative to mix_root so mix commands work correctly.
+    # Files in changed[] are relative to $root (git root); mix_root is absolute.
+    ex_rel=(); for f in "${ex[@]}"; do abs="$root/$f"; ex_rel+=("${abs#${mix_root}/}"); done
+    ex_tests_rel=(); for f in "${ex_tests[@]}"; do abs="$root/$f"; ex_tests_rel+=("${abs#${mix_root}/}"); done
+    (
+      cd "$mix_root" || exit 0
+      if ! out=$(mix format --check-formatted "${ex_rel[@]}" 2>&1); then
+        printf 'FORMAT (elixir): run `mix format %s`\n%s\n' "${ex_rel[*]}" "$out"
+      fi
+      if mix help credo >/dev/null 2>&1; then
+        if ! out=$(mix credo --strict "${ex_rel[@]}" 2>&1); then
+          printf 'LINT (mix credo):\n%s\n' "$out"
+        fi
+      fi
+      if [ "${#ex_tests_rel[@]}" -gt 0 ]; then
+        if ! out=$(mix test "${ex_tests_rel[@]}" 2>&1); then
+          printf 'TESTS (mix test, changed files) FAILING:\n%s\n' "$out"
+        fi
+      fi
+    ) | while IFS= read -r line; do note "$line"; done
   fi
 fi
 
