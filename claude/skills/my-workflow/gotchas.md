@@ -6,17 +6,17 @@ Known failure patterns for the full-pipeline orchestrator. Read before running.
 
 Every stage skill has an interactive opener ("Ready to research. What's your question?", "Describe the task…", "Do NOT proceed until confirmed"). Those are written for standalone use. Inside `my-workflow` they are **noise** — the task was established at Step 0. Supply the context from the ledger and continue. Halting here defeats the entire point of the skill.
 
-## Asking before researching
+## Asking a factual question before researching
 
-The user's hard requirement: only stop for input that cannot be resolved by researching the codebase, Notion, or Google Drive. A question that could have been answered by spawning a `codebase-analyzer`, running `notion-search`, or searching Google Drive is a protocol violation, not diligence. Run the four-step Blocking-Question Protocol every time before you even consider stopping.
+Only stop for a *factual* question that cannot be resolved by researching the codebase, Notion, Google Drive, or Linear. A factual question that could have been answered by spawning a `codebase-analyzer`, running `notion-search`, or searching Google Drive is a protocol violation, not diligence. Run the Blocking-Question Protocol every time before you stop. (This is about *factual* questions — genuine decisions are a different thing entirely; see the next gotcha.)
 
 ## Re-discovering what an earlier stage already produced
 
 `my-plan` should consume the stage-1 research doc and stage-2 spec by path, not re-research from scratch. `requirements-audit` should audit against the stage-2 spec, not ask for a spec source. If a later stage starts exploring ground an earlier stage already covered, you forgot to pass the artifact forward — check the ledger.
 
-## Self-approval drift into approval gates
+## Self-approving a decision the user owns
 
-The chosen mode is fully autonomous: no spec gate, no plan gate. It's tempting to "just confirm the plan looks right" with the user — don't. Self-approve, log it, proceed. The user reviews everything at the end. (If the user later wants gates, that's a different mode, not a quiet behavior change.)
+Decisions belong to the user — approach selection, scope trade-offs, product intent, and sign-off on the spec and the plan. Do NOT self-approve the spec or plan and march on, and do NOT auto-default a genuine decision just because a "reasonable" answer exists. That is the exact judgment the user reserves. Instead, do all the research and preparation, present the decision with options + a recommendation + the evidence, and wait. The flip side — don't over-correct into asking the user *factual* questions you could research; that's the previous gotcha. The line is: facts you resolve, decisions you tee up.
 
 ## Treating a hard failure as skippable
 
