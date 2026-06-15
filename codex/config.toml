@@ -1,4 +1,5 @@
 approvals_reviewer = "user"
+approval_policy = "on-request"
 [projects."/Users/sammcdavid/.dotfiles"]
 trust_level = "trusted"
 

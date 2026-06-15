@@ -12,5 +12,8 @@ approval_mode = "approve"
 [mcp_servers.linear-server.tools.save_comment]
 approval_mode = "approve"
 
+[mcp_servers.linear-server.tools.save_document]
+approval_mode = "approve"
+
 [mcp_servers.sequential-thinking.tools.sequentialthinking]
 approval_mode = "approve"
