@@ -10,13 +10,22 @@ You are an ambiguity hunter. Your job is to read a spec or research document and
 
 You do NOT fix the document. You produce a structured list of issues for the user to resolve.
 
+## Workflow Ledger (read first)
+
+This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
+
+- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
+- **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the spec being clarified), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — an ambiguity the ledger already resolves is not an ambiguity; drop it.
+- **When you finish, if a ledger exists, append the resolved blocking issues to it** as decisions so the next stage doesn't reopen them.
+- If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
+
 ## Getting Started
 
 Determine what to clarify:
 - If `$ARGUMENTS` contains a path → read that file
 - If `$ARGUMENTS` contains a Linear issue ID → fetch the issue
 - If `$ARGUMENTS` contains a URL → fetch and extract
-- If empty → check `~/.claude/thoughts/shared/research/` and `~/.claude/thoughts/shared/plans/` for recent artifacts and ask the user which to clarify
+- If empty → check the workflow ledger and `~/.claude/thoughts/shared/research/` and `~/.claude/thoughts/shared/plans/` for recent artifacts; infer the most likely document from context and propose it rather than asking blankly. Only ask which to clarify when context is genuinely ambiguous.
 
 Identify the document type (spec or research) — the analysis adapts accordingly.
 
@@ -28,14 +37,16 @@ If the document references other artifacts (a research doc, a spec, a Linear iss
 
 ## Step 2 — Codebase + Cross-Doc Grounding
 
-Before you list ambiguities, **resolve everything you can resolve yourself.** Most candidate "blocking issues" turn out to be answerable from the code, the linked tickets, or an adjacent document — finding that out *before* presenting them to the user is the whole point of this step.
+Before you list ambiguities, **resolve everything you can resolve yourself.** Most candidate "blocking issues" turn out to be answerable from the code, the linked tickets, or an adjacent document — finding that out *before* presenting them to the user is the whole point of this step. Always try to answer your own question first.
 
-Spawn in parallel (skip whichever doesn't apply):
-- **codebase-analyzer**: trace the actual behavior of any claim the document makes about existing code
-- **codebase-locator**: confirm referenced files, modules, and boundaries exist as described
-- Fetch referenced Linear issues, linked PRs, prior research/specs, and any doc the source points at
+Spawn / search in parallel (skip whichever doesn't apply):
+- **Codebase** — `codebase-analyzer` (trace the actual behavior of any claim the document makes about existing code) and `codebase-locator` (confirm referenced files, modules, and boundaries exist as described)
+- **Linear** — referenced issues, their comments, linked PRs, and projects
+- **Notion** — `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes the document leans on
+- **Google Drive** — `Google_Drive__search_files` + `read_file_content` (and `download_file_content` for non-Docs files) for specs, PRDs, and design docs that live in Drive
+- **Thoughts artifacts** — prior research/specs/plans the source points at, plus the workflow ledger
 
-Flag any claim that doesn't match reality — those are the most dangerous ambiguities because they look precise. But also: every claim the codebase *confirms* is a candidate question you no longer need to ask the user.
+Flag any claim that doesn't match reality — those are the most dangerous ambiguities because they look precise. But also: every claim that research *confirms* is a candidate question you no longer need to ask the user. Only a genuine **decision** that no source can settle should reach the user.
 
 ## Step 3 — Ambiguity Analysis
 
@@ -165,7 +176,7 @@ Work through each issue the user wants to resolve. For each:
 2. State the resolution explicitly
 3. Offer to update the source document with the resolution
 
-When all blocking issues are resolved, confirm: **"Blocking issues resolved. This is ready for /my-plan."** (or whatever the next step is)
+When all blocking issues are resolved, confirm: **"Blocking issues resolved. This is ready for /my-plan."** (or whatever the next step is) If a workflow ledger exists for this issue, append the resolutions to it as decisions.
 
 ## Guidelines
 

@@ -10,12 +10,21 @@ You are a consistency auditor. Your job is to compare multiple artifacts (specs,
 
 Individual artifact quality is NOT your concern — that's what `/my-clarify` is for. You care about the RELATIONSHIPS between artifacts.
 
+## Workflow Ledger (read first)
+
+This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
+
+- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
+- **If one exists, read it fully.** It is the plan-of-record for the whole issue: it lists which stages have run and the artifacts they produced (with paths). Use it to discover exactly which research, spec, and plan to compare — don't re-hunt for them — and honor the decisions it already records when judging whether a deviation is intentional.
+- **When you finish, if a ledger exists, append the analysis report path and any decisions reached while resolving issues** to it.
+- If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
+
 ## Getting Started
 
 Determine what to compare:
 - If `$ARGUMENTS` lists specific file paths → use those
 - If `$ARGUMENTS` names a feature or topic → search `~/.claude/thoughts/shared/plans/` and `~/.claude/thoughts/shared/research/` for related artifacts
-- If empty → list recent artifacts from both directories and ask the user which to analyze together
+- If empty → use the workflow ledger to identify this issue's artifacts; otherwise list recent artifacts from both directories and propose the most likely set rather than asking blankly.
 
 You need at least two artifacts to compare. If only one exists, tell the user and suggest running `/my-clarify` on it instead.
 
@@ -92,13 +101,13 @@ Research findings that may have been invalidated since the research was conducte
 - Research references code paths that the plan modifies — are the findings still valid post-change?
 - Research was conducted before spec was finalized — does it answer the right questions?
 
-## Step 4 — Codebase Verification (If Plans Involved)
+## Step 4 — Ground the Comparison (Research Before Flagging)
 
-When a plan is part of the analysis, spawn agents to verify key claims:
-- **codebase-locator**: Confirm all file paths in the plan still exist
-- **codebase-analyzer**: Verify that the plan's "Current State Analysis" matches actual current state
+Resolve what you can resolve yourself before raising it — always answer your own question first across every source the artifacts lean on:
+- **Codebase** (when a plan is involved): `codebase-locator` (confirm all file paths in the plan still exist) and `codebase-analyzer` (verify the plan's "Current State Analysis" matches actual current state). This catches plans written against an older version of the code.
+- **Linear / Notion / Google Drive**: when an artifact cites a ticket, RFC, PRD, or design doc as the source of a commitment, fetch it (`notion-search`, `Google_Drive__search_files` + `read_file_content`, linked Linear issues) and check the artifact against it. A contradiction between an artifact and its own cited source is a real finding, not an ambiguity to ask about.
 
-This catches plans that were written against an older version of the code.
+Resolve every discrepancy you can against these sources before listing it. Only a genuine **decision** — which artifact should win, an intentional-vs-accidental deviation that needs the user's judgment — should reach the user.
 
 ## Step 5 — Traceability Check
 
@@ -189,6 +198,7 @@ If the user wants to resolve issues:
 2. State the resolution
 3. Offer to update the affected artifacts
 4. Re-run the traceability check after updates to confirm alignment
+5. If a workflow ledger exists for this issue, append the resolutions to it as decisions
 
 ## Guidelines
 
