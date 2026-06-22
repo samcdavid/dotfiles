@@ -1,9 +1,16 @@
+openai_base_url = "https://us.api.openai.com/v1"
+
 approvals_reviewer = "user"
 approval_policy = "on-request"
+notify = ["/Users/sammcdavid/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+
 [projects."/Users/sammcdavid/.dotfiles"]
 trust_level = "trusted"
 
 [projects."/Users/sammcdavid/Developer/dscout-wt"]
+trust_level = "trusted"
+
+[projects."/Users/sammcdavid/Developer/claude-plugins-wt"]
 trust_level = "trusted"
 
 [tui.model_availability_nux]
@@ -51,3 +58,78 @@ env_vars = ["CIRCLECI_TOKEN"]
 
 [mcp_servers.linear-server]
 url = "https://mcp.linear.app/mcp"
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+
+[mcp_servers.dscout]
+url = "https://app.dscout.com/astro/mcp"
+
+[mcp_servers.dscout-local]
+url = "http://localhost:8000/mcp/"
+
+[mcp_servers.dscout-staging-20]
+url = "https://staging-20.app.dscout.com/astro/mcp"
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/sammcdavid/.codex"
+CODEX_HOME = "/Users/sammcdavid/.codex"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "eb55d24cf065cd5311af6f99b16bade2b7a670790ff2db9accf60d012dd55dd1"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.611.62324"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+
+[plugins."gmail@openai-curated"]
+enabled = true
+
+[plugins."google-calendar@openai-curated"]
+enabled = true
+
+[plugins."google-drive@openai-curated"]
+enabled = true
+
+[plugins."slack@openai-curated"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[marketplaces.openai-bundled]
+last_updated = "2026-06-17T20:39:44Z"
+source_type = "local"
+source = "/Users/sammcdavid/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-06-17T20:35:35Z"
+source_type = "local"
+source = "/Users/sammcdavid/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[features]
+js_repl = false
+
+[desktop]
+conversationDetailMode = "STEPS_COMMANDS"
+ambient-suggestions-enabled = true
