@@ -18,6 +18,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Does the change scope match the stated intent? Removing a guard or feature flag should not silently broaden behavior beyond what's intended.
 - Are there callers or consumers of changed interfaces that aren't updated?
 - Are new pattern match branches missing fallback clauses that existing code depends on?
+- **Stale imports / aliases after deletions** — when the diff removes a file, module, function, or class, grep the codebase for any remaining import statements, aliases, `require`/`use`/`from … import`, or re-export references that still name the deleted artifact. Any hit outside the diff is a **blocking issue** (will cause a compile or runtime error). Grep by the module path *and* by the exported symbol name; they may be imported separately. In PR Mode, read the diff for all `-` lines that indicate removals and construct the grep targets from those identifiers.
 
 ### Layer Boundaries
 - Do API/resolver/controller concerns leak into backend contexts or domain modules? (e.g. GraphQL types, HTTP params, response formatting in a context module)
