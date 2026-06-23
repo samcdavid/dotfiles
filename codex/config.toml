@@ -44,9 +44,15 @@ url = "https://api.braintrust.dev/mcp"
 [mcp_servers.notion]
 url = "https://mcp.notion.com/mcp"
 
+[mcp_servers.notion.tools.notion-update-page]
+approval_mode = "approve"
+
 [mcp_servers.sequential-thinking]
 command = "npx"
 args = ["@modelcontextprotocol/server-sequential-thinking"]
+
+[mcp_servers.sequential-thinking.tools.sequentialthinking]
+approval_mode = "approve"
 
 [mcp_servers.datadog-mcp]
 url = "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp"
@@ -58,6 +64,15 @@ env_vars = ["CIRCLECI_TOKEN"]
 
 [mcp_servers.linear-server]
 url = "https://mcp.linear.app/mcp"
+
+[mcp_servers.linear-server.tools.save_issue]
+approval_mode = "approve"
+
+[mcp_servers.linear-server.tools.save_comment]
+approval_mode = "approve"
+
+[mcp_servers.linear-server.tools.save_document]
+approval_mode = "approve"
 
 [mcp_servers.figma]
 url = "https://mcp.figma.com/mcp"
