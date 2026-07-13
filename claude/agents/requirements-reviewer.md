@@ -31,7 +31,8 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source 
 ```
 ## Lens Findings — requirements-reviewer
 
-### Blocking Issues
+### Critical Findings
+Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
 #### 1. [Category]: [title]
 - **Lens:** PM
 - **File:** `path:LINE`

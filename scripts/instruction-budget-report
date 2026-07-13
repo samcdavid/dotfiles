@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Report instruction size for Claude/Codex skill and agent files."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import re
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_GLOBS = [
+    "claude/skills/**/SKILL.md",
+    "claude/skills/**/*.md",
+    "claude/agents/*.md",
+    "claude/rules/*.md",
+]
+
+ENTRYPOINT_GLOBS = [
+    "claude/skills/**/SKILL.md",
+    "claude/agents/*.md",
+]
+
+
+def word_count(text: str) -> int:
+    return len(re.findall(r"\S+", text))
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Report large instruction files.")
+    parser.add_argument("--limit", type=int, default=1000, help="word threshold")
+    parser.add_argument("--all", action="store_true", help="show every file")
+    parser.add_argument(
+        "--entrypoints",
+        action="store_true",
+        help="only count default-loaded skill and agent entrypoints",
+    )
+    args = parser.parse_args()
+
+    files: set[Path] = set()
+    patterns = ENTRYPOINT_GLOBS if args.entrypoints else DEFAULT_GLOBS
+    for pattern in patterns:
+        files.update(ROOT.glob(pattern))
+
+    rows = []
+    for path in sorted(files):
+        if not path.is_file():
+            continue
+        text = path.read_text(errors="replace")
+        words = word_count(text)
+        rows.append((words, path))
+
+    total = sum(words for words, _ in rows)
+    shown = [(words, path) for words, path in rows if args.all or words >= args.limit]
+    for words, path in sorted(shown, reverse=True):
+        print(f"{words:5d}  {path.relative_to(ROOT)}")
+    print(f"\nfiles={len(rows)} words={total} approx_tokens={int(total * 1.35)}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

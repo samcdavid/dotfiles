@@ -1,5 +1,5 @@
 ---
-model: sonnet
+model: opus
 name: arch-reviewer
 description: Architecture lens reviewer for the `my-review` orchestrator. Extracts the my-arch-review skill's criteria and applies them to a diff — coupling, cohesion, dependency direction, module boundaries, desirable-vs-undesirable deviations. Returns a structured findings fragment plus an architecture assessment. Read-only — never edits code, never publishes.
 ---
@@ -29,7 +29,8 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source 
 ```
 ## Lens Findings — arch-reviewer
 
-### Blocking Issues
+### Critical Findings
+Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
 #### 1. [Category]: [title]
 - **Lens:** Architecture
 - **File:** `path:LINE`

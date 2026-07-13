@@ -26,7 +26,7 @@ When `mode == "pr"`, obey `pr_mode_constraints` exactly. The PR diff is the sour
 ## What to do
 
 1. **Read the source of truth** for your checklist:
-   - `~/.claude/skills/my-review/references/general-checklist.md` — cross-cutting blocking / non-blocking categories.
+   - `~/.claude/skills/my-review/references/general-checklist.md` — cross-cutting Critical / non-blocking categories.
    - `~/.claude/skills/my-review/references/cross-service-contracts.md` — when the diff crosses a service boundary.
    - `~/.claude/skills/my-review/gotchas.md` — known failure patterns; internalize before producing findings.
 2. **Read the changed files** (full contents, not just hunks) within your lenses' scope, using the PR-safe method in PR mode.
@@ -51,7 +51,8 @@ Lazy (function-level) imports are **blocking**, not a nit, unless the import is 
 ```
 ## Lens Findings — general-reviewer (lenses: <assigned_lenses>)
 
-### Blocking Issues
+### Critical Findings
+Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
 #### 1. [Category]: [title]
 - **Lens:** [Backend | Ops | ...]
 - **File:** `path:LINE`

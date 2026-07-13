@@ -4,7 +4,7 @@ The cross-cutting review categories that apply to every `my-review` invocation r
 
 Categories are ordered by priority. Before raising any issue, check it against the existing-comments dedupe index supplied by the caller. Do not re-raise anything already covered by an existing thread.
 
-## Blocking Issues (must fix before merge)
+## Critical Candidates (request changes only if merge-blocking)
 
 ### Correctness / Bugs
 - Logic errors, off-by-one, nil/null handling, race conditions
@@ -18,7 +18,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Does the change scope match the stated intent? Removing a guard or feature flag should not silently broaden behavior beyond what's intended.
 - Are there callers or consumers of changed interfaces that aren't updated?
 - Are new pattern match branches missing fallback clauses that existing code depends on?
-- **Stale imports / aliases after deletions** — when the diff removes a file, module, function, or class, grep the codebase for any remaining import statements, aliases, `require`/`use`/`from … import`, or re-export references that still name the deleted artifact. Any hit outside the diff is a **blocking issue** (will cause a compile or runtime error). Grep by the module path *and* by the exported symbol name; they may be imported separately. In PR Mode, read the diff for all `-` lines that indicate removals and construct the grep targets from those identifiers.
+- **Stale imports / aliases after deletions** — when the diff removes a file, module, function, or class, grep the codebase for any remaining import statements, aliases, `require`/`use`/`from … import`, or re-export references that still name the deleted artifact. Any hit outside the diff is Critical when it will cause a compile or runtime error. Grep by the module path *and* by the exported symbol name; they may be imported separately. In PR Mode, read the diff for all `-` lines that indicate removals and construct the grep targets from those identifiers.
 
 ### Layer Boundaries
 - Do API/resolver/controller concerns leak into backend contexts or domain modules? (e.g. GraphQL types, HTTP params, response formatting in a context module)
@@ -64,16 +64,16 @@ Categories are ordered by priority. Before raising any issue, check it against t
 
 ### Lint and Tooling Discipline
 - Are any lint checks, formatter rules, or static analysis warnings being disabled or suppressed (e.g. `# credo:disable-for-this-file`, `# noqa`, `# eslint-disable`, `# rubocop:disable`, `@dialyzer`, `mix format` skip comments)?
-- Every disabled check is a **blocking issue** unless the author provides a valid justification. "Valid" means: the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass").
+- A newly disabled check is Critical only when it can hide a production, security, data, contract, or launch-critical correctness issue; otherwise raise a non-blocking question or suggestion. "Valid" means: the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass").
 - Common invalid justifications: disabling formatting rules to preserve manual formatting, disabling import-order checks, suppressing warnings instead of fixing them, disabling type checks because a type is hard to express.
-- If a disable comment already existed and the PR didn't add it, it's not a blocking issue — but flag it as a question ("is this still needed?").
+- If a disable comment already existed and the PR didn't add it, it is not Critical — but flag it as a question ("is this still needed?").
 
 ### Requirements Traceability (if a requirements checklist was supplied by the caller)
-- For each requirement/acceptance criterion, identify which file(s) and change(s) address it. Flag any requirement with no corresponding code change as a **blocking issue** (missing requirement).
+- For each requirement/acceptance criterion, identify which file(s) and change(s) address it. Classify a missing requirement as Critical only when it is must-have for launch; otherwise raise a non-blocking requirements gap or question.
 - For each code change that doesn't trace back to any requirement, flag it as a **question** (unplanned scope — may be intentional, but the author should confirm).
 
 ### Related-Issue Regression (if `requirements-tracer` was spawned)
-- For each `At-risk` finding from the tracer where the regression is `Likely-breakage`, flag as a **blocking issue** — name the related Linear issue, the surface, and the call chain (`file:line`).
+- For each `At-risk` finding from the tracer where the regression is `Likely-breakage`, classify as Critical only when the likely regression is merge-blocking; name the related Linear issue, surface, and call chain (`file:line`).
 - For `At-risk` findings classified `Behavior-shift-unverified` (tracer couldn't fully verify the contract is preserved), flag as a **non-blocking question** asking the author to confirm.
 - For `At-risk` findings where the tracer's Test Coverage verdict is `No-test-found` or `Unlikely`, additionally flag a **non-blocking suggestion** to add a regression test, naming the specific behavior to cover.
 - Do NOT re-raise tracer findings already in the existing-comments index (dedupe still applies).

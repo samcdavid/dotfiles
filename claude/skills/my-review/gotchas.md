@@ -7,7 +7,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Category:** failure-mode
 - **Context:** Reviewing a PR linked to a ticket or spec
 - **Wrong:** Reviewing only the code diff for correctness without checking whether all acceptance criteria are addressed
-- **Right:** Fetch the linked ticket/spec and verify every acceptance criterion is addressed in the PR. Flag missing requirements as blocking issues.
+- **Right:** Fetch the linked ticket/spec and verify every acceptance criterion is addressed in the PR. Flag missing must-have launch requirements as Critical; otherwise raise a non-blocking requirements comment or question.
 - **Why:** PRs that pass code review but miss spec requirements are a recurring pattern. Code can be correct and well-written but incomplete.
 - **Source:** Recurring pattern in PR reviews
 
@@ -25,7 +25,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Category:** convention
 - **Context:** PR changes LLM prompts, system messages, or tool docstrings
 - **Wrong:** Reviewing prompt changes for readability and intent without checking for eval coverage
-- **Right:** Verify there's a corresponding eval or test that validates the change doesn't regress AI behavior. Flag missing eval coverage as a blocking issue.
+- **Right:** Verify there's a corresponding eval or test that validates the change doesn't regress AI behavior. Flag missing eval coverage as Critical only when the prompt/tool change can plausibly regress a launch-critical AI behavior; otherwise raise a non-blocking quality concern.
 - **Why:** Prompt changes without eval coverage are high-risk — small wording changes can cause significant behavior regressions that aren't caught by traditional tests
 - **Source:** Recurring pattern in AI-powered applications
 
@@ -38,12 +38,12 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** The review skill's job is to REPORT, not to ACT. Editing code during review conflates two distinct roles, bypasses the author's judgment, and can introduce changes the author didn't ask for — especially dangerous when the working tree has uncommitted changes that can't be cleanly reverted.
 - **Source:** Review session where a node file was edited during review, had to manually revert
 
-### Lazy imports are a blocking issue — not just a code smell
+### Lazy imports are usually non-blocking unless they create runtime failure
 
 - **Category:** convention
 - **Context:** Any Python code that uses `import X` inside a function body. Applies to both new code in PRs and existing lazy imports in files being touched.
 - **Wrong:** Accepting function-level imports as normal, downgrading them to "non-blocking suggestion," or writing them yourself. Common excuses: "avoids circular imports," "the file has a comment about circular imports," "nearby code does it this way." A common failure mode: new lazy imports are written AND the review only flags them as a non-blocking suggestion — when in fact the circular dependency doesn't even exist.
-- **Right:** Flag lazy imports as a **blocking issue**. Before accepting any lazy import, verify the circular dependency actually exists by testing the module-level import. If it does exist, the fix is better module architecture — not a lazy import. The only valid exception is genuinely expensive imports (SpaCy model loading, heavy ML libraries) where startup cost measurably matters.
+- **Right:** Flag lazy imports as non-blocking maintainability issues unless you can show they create a runtime failure or mask an import error that would break production; only then classify Critical. Before accepting any lazy import, verify the circular dependency actually exists by testing the module-level import. If it does exist, the fix is better module architecture — not a lazy import. The only valid exception is genuinely expensive imports (SpaCy model loading, heavy ML libraries) where startup cost measurably matters.
 - **Why:** Lazy imports hide dependency relationships, create per-call overhead, bypass import-time error detection, and paper over architecture problems that get worse over time. They are NEVER an acceptable workaround for circular dependencies.
 - **Source:** Recurring pattern — most recently, lazy imports were both written and reviewed without being flagged as blocking. The assumed circular import turned out not to exist at all.
 

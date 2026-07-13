@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""Check Claude/Codex skill, agent, rule, and RCM drift."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tomllib
+
+
+ROOT = Path(__file__).resolve().parents[1]
+HOME = Path.home()
+ENTRYPOINT_LIMIT = 700
+CRITICAL_AGENT_NAMES = {
+    "adversarial-debate",
+    "arch-reviewer",
+    "perf-reviewer",
+    "security-reviewer",
+}
+
+
+def rel(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def is_symlink_to(path: Path, expected: str) -> bool:
+    return path.is_symlink() and path.readlink().as_posix() == expected
+
+
+def word_count(path: Path) -> int:
+    return len(re.findall(r"\S+", path.read_text(errors="replace")))
+
+
+def run(cmd: list[str]) -> tuple[int, str]:
+    proc = subprocess.run(
+        cmd,
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    return proc.returncode, proc.stdout.strip()
+
+
+def check_repo_links(errors: list[str]) -> None:
+    if not is_symlink_to(ROOT / "AGENTS.md", "CLAUDE.md"):
+        errors.append("AGENTS.md must be a symlink to CLAUDE.md")
+
+    rcrc = (ROOT / "rcrc").read_text(errors="replace")
+    if "AGENTS.md" not in rcrc:
+        errors.append("rcrc must exclude AGENTS.md")
+
+    if not is_symlink_to(ROOT / "agents" / "rules", "../claude/rules"):
+        errors.append("agents/rules must symlink to ../claude/rules")
+
+    claude_skills = {
+        path.name
+        for path in (ROOT / "claude" / "skills").iterdir()
+        if path.is_dir()
+    }
+    exposed_skills = {
+        path.name
+        for path in (ROOT / "agents" / "skills").iterdir()
+        if path.is_symlink()
+    }
+
+    for name in sorted(claude_skills - exposed_skills):
+        errors.append(f"missing Codex skill symlink: agents/skills/{name}")
+    for name in sorted(exposed_skills - claude_skills):
+        errors.append(f"stale Codex skill symlink: agents/skills/{name}")
+
+    for name in sorted(claude_skills & exposed_skills):
+        expected = f"../../claude/skills/{name}"
+        if not is_symlink_to(ROOT / "agents" / "skills" / name, expected):
+            errors.append(f"agents/skills/{name} should point to {expected}")
+
+
+def check_codex_agents(errors: list[str]) -> None:
+    code, output = run(["scripts/sync-codex-agents", "--check"])
+    if code != 0:
+        errors.append("codex agents are out of sync:\n" + output)
+
+    for path in sorted((ROOT / "codex" / "agents").glob("*.toml")):
+        try:
+            data = tomllib.loads(path.read_text())
+        except Exception as exc:
+            errors.append(f"{rel(path)} is invalid TOML: {exc}")
+            continue
+
+        for key in ("name", "description", "developer_instructions"):
+            if not data.get(key):
+                errors.append(f"{rel(path)} missing {key}")
+
+        source_name = data.get("name")
+        source = ROOT / "claude" / "agents" / f"{source_name}.md"
+        source_is_opus = source.exists() and "model: opus" in source.read_text(errors="replace")
+        if source_is_opus or source_name in CRITICAL_AGENT_NAMES:
+            if data.get("model_reasoning_effort") != "xhigh":
+                errors.append(f"{rel(path)} should set model_reasoning_effort = \"xhigh\"")
+
+
+def check_budget(errors: list[str]) -> None:
+    files = list((ROOT / "claude" / "skills").glob("**/SKILL.md"))
+    files += list((ROOT / "claude" / "agents").glob("*.md"))
+    for path in sorted(files):
+        words = word_count(path)
+        if words > ENTRYPOINT_LIMIT:
+            errors.append(f"{rel(path)} has {words} words; limit is {ENTRYPOINT_LIMIT}")
+
+    full_protocols = sorted((ROOT / "claude" / "skills").glob("*/references/full-protocol.md"))
+    for path in full_protocols:
+        errors.append(f"{rel(path)} should be split into protocol-index.md/protocol-sections, not kept as full-protocol.md")
+
+
+def check_home_links(errors: list[str], skip_home: bool) -> None:
+    if skip_home:
+        return
+
+    expected = {
+        HOME / ".codex" / "agents": ROOT / "codex" / "agents",
+        HOME / ".agents" / "rules": ROOT / "agents" / "rules",
+        HOME / ".claude" / "rules": ROOT / "claude" / "rules",
+    }
+    for path, target in expected.items():
+        if not path.exists():
+            errors.append(f"missing home link: {path}")
+            continue
+        try:
+            resolved = path.resolve()
+        except OSError as exc:
+            errors.append(f"could not resolve {path}: {exc}")
+            continue
+        if resolved != target.resolve():
+            errors.append(f"{path} resolves to {resolved}, expected {target.resolve()}")
+
+    if (HOME / ".AGENTS.md").exists() or (HOME / ".AGENTS.md").is_symlink():
+        errors.append("~/.AGENTS.md should not exist; AGENTS.md is repo-local only")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Check local Claude/Codex instruction drift.")
+    parser.add_argument("--skip-home", action="store_true", help="skip $HOME symlink checks")
+    args = parser.parse_args()
+
+    errors: list[str] = []
+    check_repo_links(errors)
+    check_codex_agents(errors)
+    check_budget(errors)
+    check_home_links(errors, args.skip_home)
+
+    if errors:
+        print("agent drift detected:")
+        for error in errors:
+            print(f"- {error}")
+        return 1
+
+    print("agent drift check passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

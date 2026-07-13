@@ -1,5 +1,5 @@
 ---
-model: sonnet
+model: opus
 name: perf-reviewer
 description: Performance lens reviewer for the `my-review` orchestrator. Extracts the perf-review skill's criteria and applies them to a diff — hot-path queries, N+1, index coverage, unbounded iteration, caching. Returns a structured findings fragment plus a performance deep-dive. Read-only — never edits code, never publishes.
 ---
@@ -29,7 +29,8 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source 
 ```
 ## Lens Findings — perf-reviewer
 
-### Blocking Issues
+### Critical Findings
+Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
 #### 1. [Category]: [title]
 - **Lens:** Performance
 - **File:** `path:LINE`

@@ -271,7 +271,7 @@ Most reviewers in this sample use explicit severity labels on inline comments. R
 - **Question:** — needs author's context to decide
 - **AI fact check:** — used specifically when challenging an AI reviewer's finding
 
-Categories that are **blocking by default** across the sample: layering / module-boundary violations, missing authorization on new endpoints, defaults that hide bugs, split-the-PR direction, race conditions / unsafe migration patterns, missing tests on new behavior.
+Categories that are **Critical candidates** across the sample when they meet the shared merge-blocking bar: layering / module-boundary violations, missing authorization on new endpoints, defaults that hide bugs, split-the-PR direction, race conditions / unsafe migration patterns, missing tests on launch-critical behavior.
 
 Categories that are **non-blocking question-first**: naming nits, preload efficiency, documentation hygiene on satellite code, "why this change?" intent probes.
 
@@ -283,7 +283,7 @@ These are common reviewer styles, not specific people. Adopt the matching archet
 
 - **The library-internal expert** — knows the codebase's frameworks deeply, catches OSS-vs-Pro confusions, suggests existing helpers by name. Strong signal in lens areas where there's an authoritative library (Oban, Phoenix, Ecto, Ash).
 
-- **The architecture-layering reviewer** — owns the "what belongs where" judgment. Flags resolver→context leaks, schema modules with domain logic, cross-domain imports. Bias toward 2-paragraph prose for blocking findings.
+- **The architecture-layering reviewer** — owns the "what belongs where" judgment. Flags resolver→context leaks, schema modules with domain logic, cross-domain imports. Bias toward 2-paragraph prose for Critical findings.
 
 - **The empirical/AI-era reviewer** — verifies every claim against source code or queries before accepting. Splits responses into "Real bug — fixed in `<sha>`" vs "False positive — here's the evidence". Use when the codebase has AI reviewer noise.
 

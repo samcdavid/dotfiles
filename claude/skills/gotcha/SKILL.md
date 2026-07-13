@@ -1,56 +1,25 @@
 ---
 model: sonnet
 name: gotcha
-description: Capture a failure pattern or anti-pattern as a gotcha for an existing skill. Use when Claude makes a mistake, the user corrects an approach, or a non-obvious pattern is discovered. Builds up institutional knowledge over time.
-disable-model-invocation: false
+description: Capture a discovered failure pattern or correction as a gotcha for an existing skill.
 ---
 
-# Capture Gotcha
+# Gotcha
 
-Capture a failure pattern, anti-pattern, convention, or edge case and persist it so future work avoids the same mistake.
+Record a reusable failure pattern where future agents will see it.
 
-## Getting Started
+## Load Rules
 
-If invoked explicitly, ask what went wrong or what was learned. If invoked after a correction, use conversation context to identify the gotcha.
+Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact formatting, read `references/protocol-index.md`.
 
-## Step 1 — Identify the Gotcha
+## Flow
 
-Review the conversation to determine:
-1. **What went wrong** (or what non-obvious thing was learned)
-2. **Which skill it applies to** — ask if ambiguous. Valid targets are any skill directory under `~/.dotfiles/claude/skills/`.
-3. **Category:**
-   - `failure-mode` — Claude did X wrong
-   - `anti-pattern` — code pattern to avoid
-   - `convention` — non-obvious project rule
-   - `edge-case` — surprising behavior
+1. Identify the skill affected by the mistake or correction.
+2. Distill the pattern, trigger, wrong behavior, correct behavior, and why it matters.
+3. Append to that skill's `gotchas.md` or create it if appropriate.
+4. Keep it short and operational.
 
-## Step 2 — Write the Gotcha
+## Output
 
-Append a structured entry to `~/.dotfiles/claude/skills/{skill}/gotchas.md`.
+Return the file updated and the gotcha added.
 
-If `gotchas.md` doesn't exist for that skill, create it with:
-```markdown
-# Gotchas — {skill name}
-
-Known failure patterns and lessons learned. Read before starting work with this skill.
-```
-
-Then append the entry:
-
-```markdown
-### [Short descriptive title]
-- **Category:** failure-mode | anti-pattern | convention | edge-case
-- **Context:** [When this comes up]
-- **Wrong:** [What Claude did or what seems right but isn't]
-- **Right:** [Correct approach]
-- **Why:** [Root cause / reasoning]
-- **Source:** [Generic description of where the pattern was observed — NOT project-specific ticket IDs, PR numbers, or branch names]
-```
-
-## Rules
-
-- **Append, don't overwrite** — gotchas accumulate over time
-- **Be specific** — vague gotchas ("be careful with X") are useless. Include concrete wrong/right examples.
-- **One gotcha per entry** — if multiple things went wrong, create multiple entries
-- **De-duplicate** — read the existing gotchas.md first. Don't add something already captured. Update an existing entry if the new instance adds nuance.
-- **Keep gotchas generic** — gotchas must apply across any project. Never include project-specific ticket IDs (e.g., `ENA-184`, `CNVS-429`), PR numbers (e.g., `#24481`), branch names, or project-specific code paths/namespaces. Generalize language-specific patterns to the underlying principle (e.g., "unique keys in batch operations" not "Ecto.Multi key uniqueness"). Use the language or framework name for context but keep the lesson transferable.

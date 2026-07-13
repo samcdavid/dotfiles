@@ -1,2 +1,2 @@
-SYMLINK_DIRS="claude/agents agents/skills"
-EXCLUDES="setup"
+SYMLINK_DIRS="claude/agents claude/rules agents/skills agents/rules codex/agents"
+EXCLUDES="setup AGENTS.md"

@@ -14,6 +14,14 @@ Only stop for a *factual* question that cannot be resolved by researching the co
 
 `my-plan` should consume the stage-1 research doc and stage-2 spec by path, not re-research from scratch. `requirements-audit` should audit against the stage-2 spec, not ask for a spec source. If a later stage starts exploring ground an earlier stage already covered, you forgot to pass the artifact forward — check the ledger.
 
+## Jumping straight to implementation
+
+New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-6 complete and the user resumes after the plan/analysis checkpoints or explicitly asks to proceed with implementation.
+
+## Silently switching to my-quick
+
+If the work is small enough for `my-quick`, say so upfront and write it into the workflow ledger before handing off. The ledger should show `route: my-quick`, why the full pipeline was skipped, expected scope, and the exact handoff command. Do not leave a workflow ledger that looks like stage 1 started when the actual path was quick mode.
+
 ## Self-approving a decision the user owns
 
 Decisions belong to the user — approach selection, scope trade-offs, product intent, and sign-off on the spec and the plan. Do NOT self-approve the spec or plan and march on, and do NOT auto-default a genuine decision just because a "reasonable" answer exists. That is the exact judgment the user reserves. Instead, do all the research and preparation, present the decision with options + a recommendation + the evidence, and wait. The flip side — don't over-correct into asking the user *factual* questions you could research; that's the previous gotcha. The line is: facts you resolve, decisions you tee up.

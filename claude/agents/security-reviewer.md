@@ -1,5 +1,5 @@
 ---
-model: sonnet
+model: opus
 name: security-reviewer
 description: Security lens reviewer for the `my-review` orchestrator. Extracts the security-audit skill's checklist and applies it to a diff — auth/authz, input validation, injection, secrets, token exposure. Returns a structured findings fragment plus a security deep-dive. Read-only — never edits code, never publishes.
 ---
@@ -30,7 +30,8 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. The PR diff is the sou
 ```
 ## Lens Findings — security-reviewer
 
-### Blocking Issues
+### Critical Findings
+Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
 #### 1. [Category]: [title]
 - **Lens:** Security
 - **File:** `path:LINE`
@@ -49,7 +50,7 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. The PR diff is the sou
 1. [novel security surface in a phrase] — [context]; [the question]
 
 ### Security Deep-Dive
-[Prose: input-flow traces, authz placement, secret-exposure audit. Reference Blocking/Non-blocking items by number rather than repeating them.]
+[Prose: input-flow traces, authz placement, secret-exposure audit. Reference Critical/Non-blocking items by number rather than repeating them.]
 
 ### What's Good
 - [specific, grounded positive]
