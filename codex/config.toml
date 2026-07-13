@@ -1,9 +1,10 @@
-# openai_base_url = "https://us.api.openai.com/v1"
-openai_base_url = "http://127.0.0.1:8787/v1"
+openai_base_url = "https://us.api.openai.com/v1"
 
 approvals_reviewer = "user"
 approval_policy = "on-request"
 notify = ["/Users/sammcdavid/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+model = "gpt-5.5"
+model_reasoning_effort = "high"
 
 [projects."/Users/sammcdavid/.dotfiles"]
 trust_level = "trusted"
@@ -14,8 +15,12 @@ trust_level = "trusted"
 [projects."/Users/sammcdavid/Developer/claude-plugins-wt"]
 trust_level = "trusted"
 
+[projects."/Users/sammcdavid/Documents/Codex/2026-07-07/i-w"]
+trust_level = "trusted"
+
 [tui.model_availability_nux]
 "gpt-5.5" = 4
+"gpt-5.6-sol" = 1
 
 [[hooks.Stop]]
 
@@ -66,13 +71,13 @@ env_vars = ["CIRCLECI_TOKEN"]
 [mcp_servers.linear-server]
 url = "https://mcp.linear.app/mcp"
 
-[mcp_servers.linear-server.tools.save_issue]
-approval_mode = "approve"
-
 [mcp_servers.linear-server.tools.save_comment]
 approval_mode = "approve"
 
 [mcp_servers.linear-server.tools.save_document]
+approval_mode = "approve"
+
+[mcp_servers.linear-server.tools.save_issue]
 approval_mode = "approve"
 
 [mcp_servers.figma]
@@ -98,12 +103,12 @@ NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_nod
 NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/sammcdavid/.codex"
 CODEX_HOME = "/Users/sammcdavid/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "eb55d24cf065cd5311af6f99b16bade2b7a670790ff2db9accf60d012dd55dd1"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "97669f77b3ca7114a2df05d55646416ea34b28100c07213ef9f643803449ef2f"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.611.62324"
+BROWSER_USE_CODEX_APP_VERSION = "26.623.141536"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
 
 [plugins."gmail@openai-curated"]
@@ -133,13 +138,16 @@ enabled = true
 [plugins."browser@openai-bundled"]
 enabled = true
 
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
 [marketplaces.openai-bundled]
-last_updated = "2026-06-17T20:39:44Z"
+last_updated = "2026-07-07T18:06:54Z"
 source_type = "local"
 source = "/Users/sammcdavid/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-06-17T20:35:35Z"
+last_updated = "2026-07-07T18:42:23Z"
 source_type = "local"
 source = "/Users/sammcdavid/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
@@ -149,3 +157,4 @@ js_repl = false
 [desktop]
 conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = true
+followUpQueueMode = "queue"
