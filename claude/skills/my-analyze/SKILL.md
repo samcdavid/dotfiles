@@ -1,5 +1,6 @@
 ---
 model: opus
+effort: xhigh
 name: my-analyze
 description: Compare research, specs, plans, and related artifacts to find contradictions, coverage gaps, scope drift, and implementation-readiness risks.
 ---
@@ -15,7 +16,7 @@ Read:
 - `~/.claude/rules/question-policy.md`
 - `~/.claude/rules/context-checkpoint.md`
 
-Use `~/.agents/rules/` when running through Codex. For complex multi-artifact comparisons or workflow-stage runs, read `references/protocol-index.md`.
+Use `~/.agents/rules/` when running through Codex. For complex multi-artifact comparisons or workflow-stage runs, read `references/protocol.md`.
 
 ## Flow
 

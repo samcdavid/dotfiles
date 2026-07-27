@@ -1,7 +1,9 @@
 ---
 model: opus
+effort: xhigh
 name: perf-review
-description: Deep performance review: query plans, index coverage, load impact, caching strategy, resource use, and scaling risks.
+description: "Deep performance review: query plans, index coverage, load impact, caching strategy, resource use, and scaling risks."
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Performance Review
@@ -10,7 +12,7 @@ Find performance issues that plausibly matter under real load.
 
 ## Load Rules
 
-Read `~/.claude/rules/review-finding-format.md` and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol-index.md`.
+Read `~/.claude/rules/review-finding-format.md` and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol.md`.
 
 ## Flow
 

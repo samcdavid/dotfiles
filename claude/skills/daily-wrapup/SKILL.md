@@ -2,6 +2,7 @@
 model: sonnet
 name: daily-wrapup
 description: Consolidate today's Notion entry, summarize Linear/work activity, and rewrite actions, decisions, and notes into a clean end-of-day record.
+disable-model-invocation: true
 ---
 
 # Daily Wrapup
@@ -10,7 +11,7 @@ Produce a concise end-of-day record from today's work artifacts.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact Notion formatting or edge cases, read `references/protocol-index.md`.
+Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact Notion formatting or edge cases, read `references/protocol.md`.
 
 ## Flow
 

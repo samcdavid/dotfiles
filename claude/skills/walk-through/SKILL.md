@@ -10,7 +10,7 @@ Process a list interactively without losing decisions.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For detailed facilitation rules, read `references/protocol-index.md`.
+Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex.
 
 ## Flow
 

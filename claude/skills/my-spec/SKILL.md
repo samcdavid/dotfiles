@@ -15,7 +15,7 @@ Read:
 - `~/.claude/rules/question-policy.md`
 - `~/.claude/rules/context-checkpoint.md`
 
-Use `~/.agents/rules/` when running through Codex. For complex product scope or workflow-stage runs, read `references/protocol-index.md` and local `gotchas.md` when present.
+Use `~/.agents/rules/` when running through Codex. For complex product scope or workflow-stage runs, read `references/protocol.md` and local `gotchas.md` when present.
 
 ## Flow
 

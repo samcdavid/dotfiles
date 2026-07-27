@@ -1,7 +1,9 @@
 ---
 model: opus
+effort: xhigh
 name: my-investigate
 description: Investigate production, runtime, CI, or test issues by gathering evidence from logs, metrics, traces, code, and CI, then ranking hypotheses.
+disable-model-invocation: true
 ---
 
 # Investigate
@@ -10,7 +12,7 @@ Coordinate a read-only runtime or CI investigation.
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/model-escalation.md` when available. Use `~/.agents/rules/` under Codex. For full investigation procedure, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/model-escalation.md` when available. Use `~/.agents/rules/` under Codex. For full investigation procedure, read `references/protocol.md`.
 
 ## Flow
 

@@ -2,6 +2,7 @@
 model: sonnet
 name: log-on-call
 description: Log an off-hours on-call incident to the daily Notion doc with a timeline useful for follow-up or postmortem.
+disable-model-invocation: true
 ---
 
 # Log On Call
@@ -10,7 +11,7 @@ Record an on-call incident in the daily Notion entry.
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For Notion formatting details, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For Notion formatting details, read `references/protocol.md`.
 
 ## Flow
 

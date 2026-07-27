@@ -1,7 +1,8 @@
 ---
 model: opus
 name: autoresearch
-description: Autonomous iteration loop for a measurable goal: review, ideate, modify, verify, keep or rollback, repeat until interrupted or capped.
+description: "Autonomous iteration loop for a measurable goal: review, ideate, modify, verify, keep or rollback, repeat until interrupted or capped."
+disable-model-invocation: true
 ---
 
 # Autoresearch
@@ -10,7 +11,7 @@ Iterate toward a measurable goal without drifting.
 
 ## Load Rules
 
-Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For loop protocol and logging, read `references/protocol-index.md` plus specific reference files as needed.
+Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For loop protocol and logging, read `references/protocol.md` plus specific reference files as needed.
 
 ## Flow
 

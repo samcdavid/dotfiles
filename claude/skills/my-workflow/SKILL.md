@@ -1,7 +1,7 @@
 ---
 model: opus
 name: my-workflow
-description: Run one checkpointed delivery stage at a time: research, spec, clarify, plan, observe, analyze, then the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the workflow ledger explicitly marks all prior stages complete.
+description: "Run one checkpointed delivery stage at a time: research, spec, clarify, plan, observe, eval-plan, analyze, then the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the workflow ledger explicitly marks all prior stages complete."
 disable-model-invocation: true
 ---
 
@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 Run the complete delivery pipeline as resumable stage work while keeping decisions user-owned and factual work agent-owned. Stop after each major stage so the user can review output, clear context, and resume from the workflow ledger. The exception is the gated atomic execution/review block: `my-implement` -> `my-validate` -> `my-review`.
 
-Default to `my-research` on a new workflow. Do not infer permission to implement from the user's task wording, an existing plan-looking file, or the assistant's confidence. Implementation is allowed only when the workflow ledger explicitly marks research, spec, clarify, plan, observe, and analyze complete, and the user has resumed after the plan/analysis checkpoints.
+Default to `my-research` on a new workflow. Do not infer permission to implement from the user's task wording, an existing plan-looking file, or the assistant's confidence. Implementation is allowed only when the workflow ledger explicitly marks research, spec, clarify, plan, observe, and analyze complete, eval-plan complete or `not_applicable`, and the user has resumed after the plan/analysis checkpoints.
 
 If intake identifies the work belongs in `my-quick` instead of the full pipeline, create/update the workflow ledger first. Record `route: my-quick`, the reason, the expected scope, and the exact handoff command before invoking or recommending `my-quick`.
 
@@ -40,9 +40,10 @@ Load targeted references as needed:
 3. `my-clarify` -> checkpoint.
 4. `my-plan` -> checkpoint.
 5. `my-observe` -> checkpoint.
-6. `my-analyze` -> checkpoint.
-7. Gated atomic block: `my-implement` -> `my-validate` -> `my-review` -> checkpoint.
-8. Post-review fix iteration when resumed: `address-pr-feedback` -> `my-validate` -> `my-review` -> checkpoint.
+6. `my-eval-plan` when the plan touches an AI/LLM surface; otherwise ledger it `not_applicable` -> checkpoint.
+7. `my-analyze` -> checkpoint.
+8. Gated atomic block: `my-implement`, then the fix loop below, then checkpoint.
+9. Fix loop, run automatically inside the block: `my-validate` -> `my-review` -> if findings warrant fixes, `address-pr-feedback local` -> repeat. Exit when a review pass yields no Critical and no substantive non-blocking findings, or after 3 iterations. Checkpoint after the final review.
 
 ## Flow
 
@@ -55,7 +56,7 @@ Load targeted references as needed:
 7. Update ledger with stage status, artifacts, assumptions, and decisions.
 8. Stop with checkpoint output and exact resume command.
 
-Use question policy: factual questions must be researched; genuine decisions go to the user. No commits, pushes, PR creation, or remote state changes unless explicitly requested.
+Use question policy: factual questions must be researched; genuine decisions go to the user. Validated phases and fixes are committed locally as they land; no pushes, PR creation, or remote state changes unless explicitly requested.
 
 ## Output
 

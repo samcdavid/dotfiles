@@ -1,16 +1,19 @@
 ---
 model: opus
 name: team-plan
-description: Plan parallel milestone work for multiple developers by analyzing issue surfaces, dependencies, sequencing, and merge-conflict risk.
+description: Plan milestone work by analyzing issue surfaces, dependencies, sequencing, and merge-conflict risk. Handles multiple developers as parallel waves, or a single developer as a critical-path sequence.
+disable-model-invocation: true
 ---
 
 # Team Plan
 
-Turn a milestone or issue set into parallelizable work waves.
+Turn a milestone or issue set into an ordered execution plan.
+
+Establish the developer count first — from `$ARGUMENTS`, the conversation, or Linear assignees. With several developers, produce parallel waves. With one, skip wave assignment and conflict analysis (a single developer cannot collide with themselves) and produce a critical-path sequence: dependency map, recommended order, prerequisites, and the Linear relationships that are missing or wrong.
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For full Linear/dependency workflow, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For full Linear/dependency workflow, read `references/protocol.md`.
 
 ## Flow
 

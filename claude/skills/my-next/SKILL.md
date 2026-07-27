@@ -2,6 +2,7 @@
 model: sonnet
 name: my-next
 description: Synthesize current session state into a prioritized action plan after research, validation, review, or divergent discussion.
+disable-model-invocation: true
 ---
 
 # Next
@@ -10,7 +11,7 @@ Clarify the path forward from current context.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For full synthesis process, read `references/protocol-index.md`.
+Read `~/.claude/rules/context-checkpoint.md` and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex.
 
 ## Flow
 

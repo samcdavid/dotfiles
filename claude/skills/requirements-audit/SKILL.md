@@ -1,7 +1,9 @@
 ---
 model: opus
+effort: xhigh
 name: requirements-audit
 description: Audit a PR, ticket, spec, or local change against stated requirements and acceptance criteria.
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Requirements Audit
@@ -10,7 +12,7 @@ Trace requirements to implementation and tests. Focus on missing, partial, exces
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md`, `~/.claude/rules/review-finding-format.md`, and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full audit procedure, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md`, `~/.claude/rules/review-finding-format.md`, and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full audit procedure, read `references/protocol.md`.
 
 ## Flow
 

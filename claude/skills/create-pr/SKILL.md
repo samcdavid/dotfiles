@@ -10,7 +10,7 @@ Prepare a useful pull request from the current branch.
 
 ## Load Rules
 
-Read `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. For PR template details, read `references/pr-template.md`, `references/review-categories.md`, and `references/protocol-index.md` as needed.
+Read `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. For PR template details, read `references/pr-template.md`, `references/review-categories.md`, and `references/protocol.md` as needed.
 
 ## Flow
 

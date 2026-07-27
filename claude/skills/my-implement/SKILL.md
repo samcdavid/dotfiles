@@ -20,7 +20,7 @@ Read these first:
 
 If running through Codex, use the same files under `~/.agents/rules/`.
 
-For unusual or ambiguous implementation runs, read `references/protocol-index.md`.
+For unusual or ambiguous implementation runs, read `references/protocol.md`.
 
 ## Flow
 
@@ -37,10 +37,10 @@ For unusual or ambiguous implementation runs, read `references/protocol-index.md
    - architectural constraints
    - relevant gotchas
 5. Dispatch exactly one executor.
-6. Re-run the phase success criteria yourself and read the diff.
-7. If the phase conforms, mark its checklist items complete in the plan and continue.
-8. If it fails, apply the loop-detection rule. Retry only with new information.
-9. After all phases, run the plan’s full validation strategy and mark the plan implemented.
+6. Re-run the phase success criteria yourself and read the diff. Read the phase's committed diff (`git show`) when the executor committed; otherwise read the working tree.
+7. If the phase conforms, confirm the executor committed it. If it did not — and validation passed — commit it yourself via the `commit` skill scoped to the phase's paths, so every green phase lands as its own commit. Then mark its checklist items complete in the plan and continue.
+8. If it fails, apply the loop-detection rule. Retry only with new information. Leave failed work uncommitted.
+9. After all phases, run the plan’s full validation strategy and mark the plan implemented. Report the commit series.
 
 ## Stop Conditions
 
@@ -54,5 +54,5 @@ Stop instead of dispatching when:
 
 ## Output
 
-Summarize phases completed, deviations, tests run, failed checks if any, files changed, and whether `/my-validate` should run next.
+Summarize phases completed, deviations, tests run, failed checks if any, files changed, the commit SHA and subject for each phase, anything left uncommitted and why, and whether `/my-validate` should run next.
 

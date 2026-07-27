@@ -10,7 +10,7 @@ Design manual test scenarios that validate the intended behavior and likely regr
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For full test-plan process, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex.
 
 ## Flow
 

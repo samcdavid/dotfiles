@@ -2,6 +2,7 @@
 model: sonnet
 name: gotcha
 description: Capture a discovered failure pattern or correction as a gotcha for an existing skill.
+when_to_use: "Use when the user corrects a recurring mistake and wants it remembered for a skill."
 ---
 
 # Gotcha
@@ -10,7 +11,7 @@ Record a reusable failure pattern where future agents will see it.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact formatting, read `references/protocol-index.md`.
+Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex.
 
 ## Flow
 

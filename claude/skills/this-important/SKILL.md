@@ -1,7 +1,9 @@
 ---
 model: opus
+effort: xhigh
 name: this-important
 description: Filter previous findings through an importance bar so only issues worth raising or fixing survive.
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # This Important
@@ -10,7 +12,7 @@ Calibrate findings for real importance. Do not re-review from scratch.
 
 ## Load Rules
 
-Read `~/.claude/rules/review-finding-format.md` when available. Use `~/.agents/rules/` under Codex. For calibration examples, read `references/protocol-index.md`.
+Read `~/.claude/rules/review-finding-format.md` when available. Use `~/.agents/rules/` under Codex. For calibration examples, read `references/protocol.md`.
 
 ## Flow
 

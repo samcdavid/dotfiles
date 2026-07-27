@@ -1,7 +1,9 @@
 ---
 model: opus
+effort: xhigh
 name: security-audit
-description: Deep security audit for code changes or areas: auth/authz, data exposure, injection, secrets, dependency risk, and OWASP-style issues.
+description: "Deep security audit for code changes or areas: auth/authz, data exposure, injection, secrets, dependency risk, and OWASP-style issues."
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Security Audit
@@ -10,7 +12,7 @@ Review for concrete exploitable or data-exposure risk.
 
 ## Load Rules
 
-Read `~/.claude/rules/review-finding-format.md`, `~/.claude/rules/pr-mode-readonly.md`, and `~/.claude/rules/model-escalation.md` when available. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol-index.md`.
+Read `~/.claude/rules/review-finding-format.md`, `~/.claude/rules/pr-mode-readonly.md`, and `~/.claude/rules/model-escalation.md` when available. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol.md`.
 
 ## Flow
 

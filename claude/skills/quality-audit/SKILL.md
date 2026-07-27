@@ -1,7 +1,9 @@
 ---
 model: opus
+effort: xhigh
 name: quality-audit
 description: Deep audit of test quality, coverage fidelity, flakiness risk, assertions, mocks, and whether tests actually catch intended bugs.
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Quality Audit
@@ -10,7 +12,7 @@ Evaluate whether the test suite meaningfully protects the behavior under review.
 
 ## Load Rules
 
-Read `~/.claude/rules/review-finding-format.md` and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol-index.md`.
+Read `~/.claude/rules/review-finding-format.md` and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol.md`.
 
 ## Flow
 

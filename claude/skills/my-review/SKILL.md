@@ -1,7 +1,8 @@
 ---
-model: sonnet
+effort: xhigh
 name: my-review
-description: Rigorous code review for local diffs or GitHub PRs. Uses a high bar for REQUEST_CHANGES: only Critical merge-blocking issues should block a PR; approve only when requirements are satisfied.
+description: "Rigorous code review for local diffs or GitHub PRs. Uses a high bar for REQUEST_CHANGES: only Critical merge-blocking issues should block a PR; approve only when requirements are satisfied."
+when_to_use: "Use when the user asks to review their changes, diff, branch, or a GitHub PR."
 ---
 
 # Code Review

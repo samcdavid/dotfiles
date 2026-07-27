@@ -1,6 +1,6 @@
 # Review Categories — Rubric
 
-Used by Step 3 of `/create-pr`. These are guidance for the sequential-thinking analysis — not rigid regex matchers. Reason from the diff and commit messages using these as a checklist.
+Used by Step 3 of `/create-pr`. These are guidance for the Step 3 analysis — not rigid regex matchers. Reason from the diff and commit messages using these as a checklist.
 
 ## RISC Scoring
 

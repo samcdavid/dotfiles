@@ -1,7 +1,10 @@
 ---
 model: opus
+effort: xhigh
 name: you-sure
 description: Adversarial confidence challenge. Forces calibrated confidence ratings on claims from the conversation, then dispatches an independent agent to verify them. Use when something feels off, before acting on recommendations, or to keep Claude honest.
+disable-model-invocation: true
+disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # You Sure?

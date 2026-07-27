@@ -2,6 +2,7 @@
 model: sonnet
 name: log-work
 description: Append concise session accomplishments to today's Notion work log.
+disable-model-invocation: true
 ---
 
 # Log Work
@@ -10,7 +11,7 @@ Record notable work from the current session in today's Notion entry.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For Notion edge cases, read `references/protocol-index.md`.
+Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For Notion edge cases, read `references/protocol.md`.
 
 ## Flow
 

@@ -12,7 +12,7 @@ Publish already prepared and verified review comments.
 
 Read `~/.claude/rules/pr-mode-readonly.md`, `~/.claude/rules/pr-cost-control.md`, `~/.claude/rules/review-finding-format.md`, `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex.
 
-For GitHub API mapping details, read `references/protocol-index.md`.
+For GitHub API mapping details, read `references/protocol.md`.
 
 ## Flow
 

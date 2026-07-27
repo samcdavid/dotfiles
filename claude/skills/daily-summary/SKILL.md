@@ -2,6 +2,7 @@
 model: opus
 name: daily-summary
 description: Build a daily work brief from yesterday/off-hours activity plus today's Linear, Calendar, Gmail, and Notion context; update Notion and produce standup/checklist.
+disable-model-invocation: true
 ---
 
 # Daily Summary
@@ -10,7 +11,7 @@ Create the daily work summary and planning brief. Prefer connected tools over me
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For unusual calendars, off-hours on-call handling, or Notion formatting details, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For unusual calendars, off-hours on-call handling, or Notion formatting details, read `references/protocol.md`.
 
 ## Flow
 

@@ -2,6 +2,7 @@
 model: sonnet
 name: pulse
 description: Project pulse — digest of recent codebase activity across all contributors. Surfaces hot areas, significant changes (migrations, new modules, API shifts, dependency updates), and per-author summaries. Default 1 week, configurable via argument. Delegates gathering/synthesis to the `pulse-aggregator` agent.
+when_to_use: "Use when the user asks what changed recently in the repo, what is active, or what others have been working on."
 ---
 
 # Project Pulse

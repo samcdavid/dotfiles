@@ -9,10 +9,11 @@ Stop after every stage except inside the atomic execution/review block:
 - Stage 3 `my-clarify` -> stop.
 - Stage 4 `my-plan` -> stop; do not implement until user resumes.
 - Stage 5 `my-observe` -> stop.
-- Stage 6 `my-analyze` -> stop.
-- Atomic block `my-implement` -> `my-validate` -> `my-review` -> stop after review output.
+- Stage 6 `my-eval-plan` -> stop when it ran; continue without stopping when ledgered `not_applicable`.
+- Stage 7 `my-analyze` -> stop.
+- Atomic block `my-implement` -> fix loop -> stop after the final review output.
 
-Post-review fixes are checkpointed by review pass: when the user resumes to address findings, run one loop iteration `address-pr-feedback` -> `my-validate` -> `my-review`, then stop after the new review output.
+The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 iterations elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.
 
 Every checkpoint must update the workflow ledger and report:
 

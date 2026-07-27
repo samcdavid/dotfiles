@@ -1,25 +1,38 @@
 ---
 model: opus
+effort: xhigh
 name: address-pr-feedback
-description: Address pending PR review feedback through verified triage, small fix phases, implementation, validation, and evidence-backed replies. Manual invocation only.
-disable-model-invocation: true
+description: "Address review feedback — GitHub PR comments or local my-review findings — through verified triage, small fix phases, implementation, validation, and evidence-backed replies."
+when_to_use: "Use when the user asks to address, respond to, or work through review feedback or review findings."
 ---
 
-# Address PR Feedback
+# Address Review Feedback
 
-Work through pending PR review feedback without blindly accepting or rejecting comments. This is a condensed research -> plan -> implement -> validate loop specialized for review feedback.
+Work through pending review feedback without blindly accepting or rejecting it. This is a condensed research -> plan -> implement -> validate loop specialized for review feedback.
+
+## Modes
+
+Establish the mode first — it decides the feedback source and whether triage has a confirmation gate.
+
+- **PR mode** (a PR exists): feedback is GitHub comments; triage is confirmed before any code change; replies are drafted.
+- **Local mode** (`local` in `$ARGUMENTS`, findings passed inline, or no PR): feedback is `my-review`'s findings on the working tree; no gate, no GitHub. Used by `my-workflow`'s automatic fix loop.
+
+Read `references/mode-semantics.md` before acting on either.
 
 ## Load Rules
 
 Read these first:
 
-- `~/.claude/rules/pr-mode-readonly.md`
 - `~/.claude/rules/question-policy.md`
 - `~/.claude/rules/tdd-phase.md`
 - `~/.claude/rules/subagent-contract.md`
 - `~/.claude/rules/loop-detection.md`
 - `~/.claude/rules/no-outward-actions.md`
 - `~/.claude/rules/review-finding-format.md`
+
+PR mode only — skip in local mode:
+
+- `~/.claude/rules/pr-mode-readonly.md`
 - `~/.claude/rules/pr-cost-control.md`
 
 Use `~/.agents/rules/` when running through Codex.
@@ -34,8 +47,8 @@ Load targeted references as needed:
 
 ## Flow
 
-1. Resolve the PR from `$ARGUMENTS`, current branch, or `gh pr status`.
-2. Fetch PR metadata, diff, reviews, inline comments, review bodies, and issue comments using filtered payloads only.
+1. Resolve the mode. PR mode: resolve the PR from `$ARGUMENTS`, current branch, or `gh pr status`. Local mode: take findings from `$ARGUMENTS` or the conversation, and the diff from the working tree against the base branch.
+2. PR mode only: fetch PR metadata, diff, reviews, inline comments, review bodies, and issue comments using filtered payloads only. Local mode: skip — you already have the findings and the diff.
 3. Build a pending-feedback index:
    - reviewer
    - location
@@ -56,22 +69,22 @@ Load targeted references as needed:
    - Disagree / Push Back
    - Already Addressed
 7. Run adversarial challenge on classifications before acting.
-8. Present triage and wait for user confirmation.
+8. PR mode: present triage and wait for user confirmation. Local mode: state the triage and proceed — no gate.
 9. Plan fixes:
    - behavioral fixes -> `implementation-executor` TDD phases
    - non-behavioral edits -> `quick-implement-agent` direct-edit phases
-10. Dispatch one phase at a time, re-verify each result, and apply loop detection.
+10. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; if it did not and validation passed, commit it yourself via the `commit` skill scoped to that fix's files.
 11. Run final validation against tests, requirements map, and reviewer concerns.
-12. Draft evidence-backed replies. Do not publish unless explicitly asked.
+12. PR mode: draft evidence-backed replies; do not publish unless explicitly asked. Local mode: skip replies and report the resolution per finding instead.
 
 ## Boundaries
 
-- Do not check out PR branches or treat local changed files as PR truth.
-- Do not commit, push, publish replies, or mark threads resolved unless explicitly asked.
+- In PR mode, do not check out PR branches or treat local changed files as PR truth. In local mode, the working tree *is* the truth and `pr-mode-readonly.md` does not apply.
+- Commit each validated fix locally. Do not push, publish replies, or mark threads resolved unless explicitly asked.
 - Do not implement behavioral fixes in the main context; dispatch the executor.
 - Do not defer fixes under roughly 20 lines unless there is a real scope or product reason.
 - Do not push back without specific code, test, docs, or requirement evidence.
 
 ## Output
 
-Return pending-feedback triage, fixes completed, validation commands/results, unresolved items, and draft replies grouped by comment.
+Return pending-feedback triage, fixes completed with commit SHAs, validation commands/results, unresolved items, and in PR mode the draft replies grouped by comment.

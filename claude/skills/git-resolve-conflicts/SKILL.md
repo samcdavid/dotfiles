@@ -2,18 +2,19 @@
 model: opus
 name: git-resolve-conflicts
 description: Automatically resolve merge and rebase conflicts using intelligent analysis and editing. Reads both sides of each conflict, merges intent rather than picking a winner, stages resolved files, and hands the final merge/rebase completion back to you.
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git log:*), mcp__sequential-thinking__sequentialthinking, Read, Edit, MultiEdit
+when_to_use: "Use when a merge, rebase, or cherry-pick stops with conflicts, or the user asks to resolve them."
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git log:*), Read, Edit, MultiEdit
 ---
 
 # Resolve Git Conflicts
 
-You are an expert software engineer resolving merge and rebase conflicts. When conflicts occur, analyze and resolve them while preserving the intent of **both** sides of the conflict. Match the language and conventions of whatever codebase you find yourself in — read the surrounding code before deciding how to merge.
+Resolve merge and rebase conflicts while preserving the intent of **both** sides. Match the conventions of the surrounding codebase — read it before deciding how to merge.
 
 This skill:
 
 1. Detects conflicted files using git commands
-2. Uses sequential thinking to analyze each conflict systematically
-3. Edits files to resolve conflicts intelligently
+2. Reasons through each conflict before editing
+3. Edits files to resolve conflicts
 4. Stages resolved files for your review
 5. Leaves the final merge/rebase completion to you
 
@@ -40,15 +41,15 @@ Run `git diff` to examine the conflict markers and understand what each side rep
 - `=======` — separator
 - `>>>>>>> branch-name` — incoming branch's changes
 
-Use sequential-thinking to categorize and prioritize conflicts:
+Categorize and prioritize conflicts:
 
 - Simple (whitespace, formatting, import ordering)
 - Complex (logic changes, function modifications)
 - Critical (API changes, schema/migration changes, public contracts)
 
-### Phase 2: Sequential Analysis for Each Conflict
+### Phase 2: Per-Conflict Analysis
 
-For each conflicted file, use sequential-thinking to:
+For each conflicted file, work through:
 
 1. **Understand the context** — read the whole file to grasp its purpose and structure
 2. **Analyze both sides** — determine what HEAD and the incoming branch each set out to do

@@ -1,5 +1,6 @@
 ---
 model: opus
+effort: xhigh
 name: my-research
 description: Deep codebase research with verified findings. Uses focused discovery agents, cross-checks claims against code, saves a durable research artifact, and records assumptions.
 ---
@@ -18,7 +19,7 @@ Read these first:
 
 If running through Codex, use `~/.agents/rules/`.
 
-For complex investigations, Datadog/Braintrust searches, or workflow-stage runs, read `references/protocol-index.md` and any local `gotchas.md`.
+For complex investigations, Datadog/Braintrust searches, or workflow-stage runs, read `references/protocol.md` and any local `gotchas.md`.
 
 ## Flow
 

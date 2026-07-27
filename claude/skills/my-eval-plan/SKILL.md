@@ -1,7 +1,8 @@
 ---
 model: opus
+effort: high
 name: my-eval-plan
-description: Design evaluation plans for AI/LLM features: datasets, scorers, baselines, success criteria, and regression strategy.
+description: "Design evaluation plans for AI/LLM features: datasets, scorers, baselines, success criteria, and regression strategy."
 ---
 
 # Eval Plan
@@ -10,7 +11,7 @@ Design a practical evaluation strategy before or alongside AI feature work.
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For full planning procedure, read `references/protocol-index.md`.
+Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For full planning procedure, read `references/protocol.md`.
 
 ## Flow
 

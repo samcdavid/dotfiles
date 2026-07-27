@@ -15,7 +15,7 @@ Read:
 - `~/.claude/rules/question-policy.md`
 - `~/.claude/rules/context-checkpoint.md`
 
-Use `~/.agents/rules/` when running through Codex. For complex specs/research or workflow-stage runs, read `references/protocol-index.md`.
+Use `~/.agents/rules/` when running through Codex. For complex specs/research or workflow-stage runs, read `references/protocol.md`.
 
 ## Flow
 

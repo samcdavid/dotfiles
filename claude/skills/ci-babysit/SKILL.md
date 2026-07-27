@@ -2,6 +2,7 @@
 model: sonnet
 name: ci-babysit
 description: Monitor a PR's CircleCI pipeline, diagnose failures, apply scoped fixes, push when requested, and continue until green or blocked.
+disable-model-invocation: true
 ---
 
 # CI Babysit
@@ -10,7 +11,7 @@ Watch CI and drive failures to resolution.
 
 ## Load Rules
 
-Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For CircleCI polling and fix-loop details, read `references/protocol-index.md`.
+Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For CircleCI polling and fix-loop details, read `references/protocol.md`.
 
 ## Flow
 

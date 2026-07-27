@@ -1,5 +1,6 @@
 ---
 model: opus
+effort: xhigh
 name: my-plan
 description: Create a detailed implementation plan with mechanically verifiable success criteria, phase boundaries, tests-first steps, and explicit non-goals.
 ---
@@ -16,7 +17,7 @@ Read:
 - `~/.claude/rules/context-checkpoint.md`
 - `~/.claude/rules/tdd-phase.md`
 
-Use `~/.agents/rules/` when running through Codex. For complex plans, workflow resumes, or ambiguous scope decisions, read `references/protocol-index.md`.
+Use `~/.agents/rules/` when running through Codex. For complex plans, workflow resumes, or ambiguous scope decisions, read `references/protocol.md`.
 
 ## Flow
 

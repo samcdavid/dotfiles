@@ -16,7 +16,7 @@ Read:
 - `~/.claude/rules/loop-detection.md`
 - `~/.claude/rules/no-outward-actions.md`
 
-Use `~/.agents/rules/` when running through Codex. For observability validation, session-mode claim audits, or ambiguous failures, read `references/protocol-index.md`.
+Use `~/.agents/rules/` when running through Codex. For observability validation, session-mode claim audits, or ambiguous failures, read `references/protocol.md`.
 
 ## Modes
 

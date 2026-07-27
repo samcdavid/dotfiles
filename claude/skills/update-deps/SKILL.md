@@ -2,6 +2,7 @@
 model: sonnet
 name: update-deps
 description: Update outdated dependencies across supported package managers, handling safe updates first and flagging breaking changes.
+when_to_use: "Use when the user asks to update, upgrade, or bump dependencies, or to deal with outdated packages."
 ---
 
 # Update Dependencies
@@ -10,7 +11,7 @@ Update dependencies while preserving behavior.
 
 ## Load Rules
 
-Read `~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/loop-detection.md`, and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For manager-specific details, read `references/protocol-index.md`.
+Read `~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/loop-detection.md`, and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For manager-specific details, read `references/protocol.md`.
 
 ## Flow
 

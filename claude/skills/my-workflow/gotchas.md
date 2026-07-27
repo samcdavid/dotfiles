@@ -38,6 +38,6 @@ The review scope is the **working-tree diff against the local base branch** (`ma
 
 Twelve stages is a long way to fall. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it as each stage finishes. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research.
 
-## Forgetting the no-git boundary
+## Forgetting where the git boundary now sits
 
-The hand-off is the stopping point. No commit, no push, no PR — even if the work looks finished and clean. Suggest `/commit` and `/create-pr`; let the user pull the trigger.
+Commits are expected: every validated implementation phase and every validated fix lands as its own local commit via the `commit` skill, so the session leaves a readable history instead of one giant working tree. The boundary is *remote* actions — no push, no PR, no thread resolution, even when the work looks finished and clean. Suggest `/create-pr` and let the user pull that trigger.
