@@ -1,51 +1,28 @@
 #!/usr/bin/env bash
-# Unified format/lint/test gate — used by three hook contexts:
+# Format/lint/test gate. Single hook context:
 #
-#   SubagentStop  (implementation-executor, quick-implement-agent)
-#   Stop          (address-pr-feedback, via session marker set by apf-mark.sh)
-#   PreToolUse    (Skill(commit))
+#   PreToolUse  matcher "Skill", if: Skill(commit)
 #
-# Context is auto-detected from the JSON payload:
-#   agent_id present  → subagent mode  (retry counter keyed by agent_id)
-#   tool_name present → precommit mode (one-shot; no retry counter)
-#   session_id only   → stop mode      (retry counter keyed by session_id;
-#                                        only runs while the APF marker is set)
+# Every code change now lands through the `commit` skill — implementation and
+# fix phases commit as they go — so gating commits gates everything. This used
+# to also run on SubagentStop and Stop; those were removed once phases started
+# committing, since they duplicated this run.
 #
-# All three modes run the same checks: format + lint + changed test files,
-# scoped to working-tree changes only.
+# One-shot and blocking: exit 2 with the failures on stderr so the commit is
+# refused and the model fixes them before retrying. No retry counter — the
+# model re-invokes /commit, which re-runs this.
+#
+# Checks are scoped to working-tree changes (staged + unstaged + untracked).
 #
 # bash 3.2 safe (macOS system bash): no mapfile, no `set -u`.
 
 export PATH="$HOME/.asdf/shims:/opt/homebrew/bin:/usr/local/bin:$PATH"
 
-MAX_RETRIES=2
-
 command -v jq  >/dev/null 2>&1 || exit 0
 command -v git >/dev/null 2>&1 || exit 0
 
 input=$(cat)
-agent_id=$(printf '%s' "$input" | jq -r '.agent_id // empty')
-session_id=$(printf '%s' "$input" | jq -r '.session_id // empty')
-tool_name=$(printf '%s' "$input" | jq -r '.tool_name // empty')
 cwd=$(printf '%s' "$input" | jq -r '.cwd // empty')
-
-# Detect context.
-if [ -n "$agent_id" ]; then
-  mode="subagent"
-  retry_key="$agent_id"
-elif [ -n "$tool_name" ]; then
-  mode="precommit"
-  retry_key=""
-else
-  mode="stop"
-  retry_key="${session_id:-unknown}"
-fi
-
-# Stop mode: only run while the APF session marker is active.
-if [ "$mode" = "stop" ]; then
-  marker="/tmp/claude-apf-${session_id:-unknown}.flag"
-  [ -f "$marker" ] || exit 0
-fi
 
 [ -n "$cwd" ] && cd "$cwd" 2>/dev/null || exit 0
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
@@ -58,13 +35,8 @@ while IFS= read -r line; do
   [ -n "$line" ] && [ -f "$line" ] && changed+=("$line")
 done < <( { git diff --name-only; git diff --name-only --cached; git ls-files --others --exclude-standard; } 2>/dev/null | sort -u )
 
-cnt_file="/tmp/claude-checks-${retry_key:-unknown}.cnt"
-
 # Nothing changed → nothing to gate.
-if [ "${#changed[@]}" -eq 0 ]; then
-  [ -n "$retry_key" ] && rm -f "$cnt_file" 2>/dev/null
-  exit 0
-fi
+[ "${#changed[@]}" -eq 0 ] && exit 0
 
 # Partition by language.
 ex=(); py=(); js=(); ex_tests=(); py_tests=()
@@ -156,65 +128,17 @@ if [ "${#js[@]}" -gt 0 ] && [ -d node_modules ]; then
 fi
 
 # ---- Verdict ----
-if [ -z "$fail" ]; then
-  [ -n "$retry_key" ] && rm -f "$cnt_file" 2>/dev/null
-  exit 0
-fi
+[ -z "$fail" ] && exit 0
 
 # Truncate so we never dump a giant payload back to the model.
 fail=$(printf '%s' "$fail" | tail -n 200)
 
-# Pre-commit: one-shot hard block — no retry counter.
-if [ "$mode" = "precommit" ]; then
-  {
-    echo "BLOCKED — fix format/lint/test issues before committing."
-    echo "Checked: all staged + unstaged changed files (and any changed test files)."
-    echo
-    printf '%s\n' "$fail"
-    echo
-    echo "Fix the above, then run /commit again."
-  } >&2
-  exit 2
-fi
-
-# Subagent + stop: retry-capped block.
-count=0
-[ -f "$cnt_file" ] && count=$(cat "$cnt_file" 2>/dev/null || echo 0)
-case "$count" in ''|*[!0-9]*) count=0 ;; esac
-
-if [ "$count" -ge "$MAX_RETRIES" ]; then
-  rm -f "$cnt_file" 2>/dev/null
-  if [ "$mode" = "subagent" ]; then
-    jq -n --arg m "Implementation checks still failing after $((MAX_RETRIES + 1)) attempts — releasing the executor. It should report Result: ESCALATE; the orchestrator will re-verify and apply loop detection.
-
-$fail" '{continue: true, systemMessage: $m}'
-  else
-    jq -n --arg m "Format/lint/test still failing after $((MAX_RETRIES + 1)) attempts — releasing the gate. Fix the remaining issues manually before pushing.
-
-$fail" '{continue: true, systemMessage: $m}'
-  fi
-  exit 0
-fi
-
-echo $((count + 1)) > "$cnt_file"
-
-if [ "$mode" = "subagent" ]; then
-  {
-    echo "BLOCKED — phase checks failed; fix before finishing (attempt $((count + 1)) of $((MAX_RETRIES + 1)))."
-    echo "Only the files you changed this phase were checked."
-    echo
-    printf '%s\n' "$fail"
-    echo
-    echo "Fix the above, then finish normally — checks re-run automatically. If the SAME failure persists, finish with Result: ESCALATE instead of retrying."
-  } >&2
-else
-  {
-    echo "BLOCKED — format/lint/test issues in your uncommitted changes (attempt $((count + 1)) of $((MAX_RETRIES + 1)))."
-    echo "Only working-tree changes were checked."
-    echo
-    printf '%s\n' "$fail"
-    echo
-    echo "Fix the above, then finish — checks re-run automatically."
-  } >&2
-fi
+{
+  echo "BLOCKED — fix format/lint/test issues before committing."
+  echo "Checked: all staged + unstaged changed files (and any changed test files)."
+  echo
+  printf '%s\n' "$fail"
+  echo
+  echo "Fix the above, then run /commit again."
+} >&2
 exit 2

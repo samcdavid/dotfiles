@@ -1,5 +1,6 @@
 {
   "permissions": {
+    "defaultMode": "auto",
     "allow": [
       "Bash(./apps/astro/bin/ci)",
       "Bash(./bin/check-astro-types types:*)",
@@ -147,7 +148,6 @@
       "mcp__notion__notion-search",
       "mcp__notion__notion-update-page",
       "mcp__notion__search",
-      "mcp__sequential-thinking__sequentialthinking",
       "mcp__tidewave-local__get_logs",
       "mcp__tidewave-local__get_source_location",
       "mcp__tidewave-local__project_eval",
@@ -161,6 +161,7 @@
     ],
     "deny": []
   },
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -180,12 +181,6 @@
           {
             "type": "command",
             "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
-            "timeout": 600,
-            "statusMessage": "Format/lint/test gate (PR feedback)"
           }
         ]
       }
@@ -217,13 +212,8 @@
             "type": "command",
             "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
             "if": "Skill(commit)",
+            "timeout": 600,
             "statusMessage": "Format/lint/test gate (pre-commit)"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/apf-mark.sh",
-            "if": "Skill(address-pr-feedback)",
-            "statusMessage": "Arming format/lint gate for PR feedback"
           }
         ]
       }
@@ -239,32 +229,7 @@
           }
         ]
       }
-    ],
-    "SubagentStop": [
-      {
-        "matcher": "implementation-executor",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
-            "timeout": 600,
-            "statusMessage": "Verifying phase: format, lint, tests"
-          }
-        ]
-      },
-      {
-        "matcher": "quick-implement-agent",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
-            "timeout": 600,
-            "statusMessage": "Verifying phase: format, lint, tests"
-          }
-        ]
-      }
     ]
   },
-  "skipAutoPermissionPrompt": true,
-  "model": "sonnet[1m]"
+  "skipAutoPermissionPrompt": true
 }
