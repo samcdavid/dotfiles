@@ -1,7 +1,7 @@
 ---
 model: sonnet
 name: autoresearch-iteration
-description: Runs one autoresearch iteration: inspect state, choose one scoped experiment, commit, verify, keep or rollback, and return structured result.
+description: "Runs one autoresearch iteration: inspect state, choose one scoped experiment, commit, verify, keep or rollback, and return structured result."
 ---
 
 # Autoresearch Iteration

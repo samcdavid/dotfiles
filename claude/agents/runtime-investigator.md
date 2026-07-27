@@ -2,6 +2,7 @@
 model: opus
 name: runtime-investigator
 description: Investigates production, runtime, CI, or test failures. Builds timeline, verifies blast radius, gathers evidence, ranks hypotheses, and stays read-only.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Runtime Investigator

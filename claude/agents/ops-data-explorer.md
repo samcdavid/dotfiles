@@ -2,6 +2,7 @@
 model: sonnet
 name: ops-data-explorer
 description: Explores operational data sources — logs, metrics, traces, dashboards — across any observability platform. Gathers evidence for investigations and monitoring design.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Ops Data Explorer

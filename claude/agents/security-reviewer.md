@@ -2,6 +2,7 @@
 model: opus
 name: security-reviewer
 description: Security lens reviewer for the `my-review` orchestrator. Extracts the security-audit skill's checklist and applies it to a diff — auth/authz, input validation, injection, secrets, token exposure. Returns a structured findings fragment plus a security deep-dive. Read-only — never edits code, never publishes.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Security Reviewer
@@ -18,7 +19,7 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. The PR diff is the sou
 
 ## What to do
 
-1. Read `~/.claude/skills/security-audit/SKILL.md` and extract its evaluation criteria (OWASP top 10, auth/authz patterns, data exposure, injection vectors, dependency CVEs, secrets). That skill is the single source of truth — apply its criteria, don't reinvent them.
+1. Load the `security-audit` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist (OWASP top 10, auth/authz patterns, data exposure, injection vectors, dependency CVEs, secrets) lives in `~/.claude/skills/security-audit/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth — apply its criteria, don't reinvent them or stop at `SKILL.md`.
 2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
 3. Read the changed files (full contents, PR-safe in PR mode).
 4. **Trace every user input** from entry → processing → storage → output. Verify auth/authz checks at the **data layer**, not just the edge. Audit token/secret exposure in logs, URLs, and error messages.

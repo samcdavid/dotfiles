@@ -2,6 +2,7 @@
 model: sonnet
 name: requirements-tracer
 description: Traces repo-local blast radius for a planned or reviewed change, cross-references related Linear issues, and reports shipped-feature regression risk. Read-only.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Requirements Tracer

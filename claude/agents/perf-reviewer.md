@@ -2,6 +2,7 @@
 model: opus
 name: perf-reviewer
 description: Performance lens reviewer for the `my-review` orchestrator. Extracts the perf-review skill's criteria and applies them to a diff — hot-path queries, N+1, index coverage, unbounded iteration, caching. Returns a structured findings fragment plus a performance deep-dive. Read-only — never edits code, never publishes.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Performance Reviewer
@@ -18,7 +19,7 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source 
 
 ## What to do
 
-1. Read `~/.claude/skills/perf-review/SKILL.md` and extract its evaluation criteria. It is the single source of truth for this lens.
+1. Load the `perf-review` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/perf-review/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth for this lens — apply its criteria, don't reinvent them or stop at `SKILL.md`.
 2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
 3. Read the changed files (PR-safe in PR mode).
 4. Identify queries on large tables, hot-path computation, N+1 access, and unbounded iteration. **Verify index usage matches operator semantics** (e.g. the index supports the actual `WHERE`/`ORDER BY`, not just the column). Check caching strategy and invalidation. Estimate load impact where the diff gives you enough to reason about it.

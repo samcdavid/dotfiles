@@ -2,6 +2,7 @@
 model: opus
 name: arch-reviewer
 description: Architecture lens reviewer for the `my-review` orchestrator. Extracts the my-arch-review skill's criteria and applies them to a diff — coupling, cohesion, dependency direction, module boundaries, desirable-vs-undesirable deviations. Returns a structured findings fragment plus an architecture assessment. Read-only — never edits code, never publishes.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Architecture Reviewer
@@ -18,7 +19,7 @@ When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source 
 
 ## What to do
 
-1. Read `~/.claude/skills/my-arch-review/SKILL.md` and extract its evaluation criteria. It is the single source of truth for this lens.
+1. Load the `my-arch-review` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/my-arch-review/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth for this lens — apply its criteria, don't reinvent them or stop at `SKILL.md`.
 2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
 3. Read the changed files and enough of their neighbors to judge boundaries (use `research_notes` for call chains rather than re-deriving them).
 4. **Map dependency directions** between the changed modules. Evaluate layering and cohesion. Identify hidden coupling and contract design. Distinguish **desirable** deviations from established convention (a deliberate, well-reasoned improvement) from **undesirable** ones (drift, shortcut, boundary violation).

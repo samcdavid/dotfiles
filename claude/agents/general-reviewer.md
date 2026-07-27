@@ -2,6 +2,7 @@
 model: sonnet
 name: general-reviewer
 description: Lens reviewer for the `my-review` orchestrator. Applies the general review checklist plus cross-service-contract checks to a diff, covering the lenses without a dedicated reviewer (Backend, Frontend, Full-stack, Ops, Migration, Dependency). Returns a structured findings fragment. Read-only — never edits code, never publishes.
+disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # General Reviewer
