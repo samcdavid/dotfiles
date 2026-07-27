@@ -53,24 +53,50 @@ def toml_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
-def codex_model_fields(agent_name: str, claude_model: str | None) -> list[str]:
-    """Map Claude model intent to optional Codex agent config.
+# Claude's `effort` vocabulary maps onto Codex reasoning effort directly, except
+# `max`, which Codex has no equivalent for.
+EFFORT_TO_CODEX = {
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "xhigh": "xhigh",
+    "max": "xhigh",
+}
 
-    Claude's `opus` means "use the expensive/high-judgment model." Codex cannot
-    run Claude models, so we preserve that intent by increasing reasoning effort
-    for generated Codex agents. Set CODEX_CRITICAL_MODEL to pin a Codex model too.
+
+def codex_model_fields(
+    agent_name: str, claude_model: str | None, claude_effort: str | None
+) -> list[str]:
+    """Map Claude reasoning intent to optional Codex agent config.
+
+    `effort` is the direct expression of intent and wins when present. Otherwise
+    fall back to the legacy signal: Claude's `opus` means "use the expensive/
+    high-judgment model", which Codex cannot run, so we preserve the intent as
+    elevated reasoning effort. Set CODEX_CRITICAL_MODEL to pin a Codex model too.
     """
 
-    if claude_model != "opus" and agent_name not in CRITICAL_AGENT_NAMES:
+    effort = (claude_effort or "").strip().lower()
+    if effort and effort not in EFFORT_TO_CODEX:
+        raise ValueError(
+            f"{agent_name}: unknown effort {effort!r}; "
+            f"expected one of {', '.join(sorted(EFFORT_TO_CODEX))}"
+        )
+
+    is_critical = claude_model == "opus" or agent_name in CRITICAL_AGENT_NAMES
+    if not effort and not is_critical:
         return []
 
     critical_model = os.environ.get("CODEX_CRITICAL_MODEL", "").strip()
-    reasoning_effort = os.environ.get("CODEX_CRITICAL_REASONING_EFFORT", "xhigh").strip()
+    if effort:
+        reasoning_effort = EFFORT_TO_CODEX[effort]
+        note = f"# Reasoning effort mirrors the source agent's `effort: {effort}`."
+    else:
+        reasoning_effort = os.environ.get(
+            "CODEX_CRITICAL_REASONING_EFFORT", "xhigh"
+        ).strip()
+        note = "# Generated with elevated Codex reasoning effort for critical/high-judgment work."
 
-    fields = [
-        "# Critical/high-judgment agent.",
-        "# Generated with elevated Codex reasoning effort for critical/high-judgment work.",
-    ]
+    fields = ["# Critical/high-judgment agent.", note]
     if critical_model:
         fields.append(f"model = {toml_string(critical_model)}")
     if reasoning_effort:
@@ -85,7 +111,13 @@ def render_agent(source_path: Path, frontmatter: dict[str, str], body: str) -> s
         f"name = {toml_string(frontmatter['name'])}",
         f"description = {toml_string(frontmatter['description'])}",
     ]
-    lines.extend(codex_model_fields(frontmatter["name"], frontmatter.get("model")))
+    lines.extend(
+        codex_model_fields(
+            frontmatter["name"],
+            frontmatter.get("model"),
+            frontmatter.get("effort"),
+        )
+    )
     lines.append(f"developer_instructions = {toml_string(body)}")
     return "\n".join(lines) + "\n"
 

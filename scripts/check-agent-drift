@@ -14,12 +14,27 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
 ENTRYPOINT_LIMIT = 700
+REFERENCE_LIMIT = 6000
 CRITICAL_AGENT_NAMES = {
     "adversarial-debate",
     "arch-reviewer",
     "perf-reviewer",
     "security-reviewer",
 }
+
+# Must mirror EFFORT_TO_CODEX in scripts/sync-codex-agents.
+EFFORT_TO_CODEX = {
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "xhigh": "xhigh",
+    "max": "xhigh",
+}
+
+# Backtick-quoted markdown paths, e.g. `references/protocol-index.md`.
+LINK_PATTERN = re.compile(r"`([~\w][^`\s]*\.md)`")
+# Placeholder-ish citations that are illustrative, not real files.
+LINK_PLACEHOLDER = re.compile(r"[<>{}*|]|/step-N\.md$|<name>|\.\.\.")
 
 
 def rel(path: Path) -> str:
@@ -99,8 +114,22 @@ def check_codex_agents(errors: list[str]) -> None:
 
         source_name = data.get("name")
         source = ROOT / "claude" / "agents" / f"{source_name}.md"
-        source_is_opus = source.exists() and "model: opus" in source.read_text(errors="replace")
-        if source_is_opus or source_name in CRITICAL_AGENT_NAMES:
+        source_text = source.read_text(errors="replace") if source.exists() else ""
+        source_is_opus = "model: opus" in source_text
+        effort_match = re.search(r"^effort:\s*(\S+)\s*$", source_text, re.M)
+
+        if effort_match:
+            # An explicit `effort` is the source of truth; xhigh is only the
+            # fallback for agents that express intent via `model: opus`.
+            expected = EFFORT_TO_CODEX.get(effort_match.group(1).strip().lower())
+            if expected is None:
+                errors.append(f"{rel(source)} has unknown effort: {effort_match.group(1)}")
+            elif data.get("model_reasoning_effort") != expected:
+                errors.append(
+                    f"{rel(path)} should set model_reasoning_effort = \"{expected}\" "
+                    f"to match source effort"
+                )
+        elif source_is_opus or source_name in CRITICAL_AGENT_NAMES:
             if data.get("model_reasoning_effort") != "xhigh":
                 errors.append(f"{rel(path)} should set model_reasoning_effort = \"xhigh\"")
 
@@ -113,9 +142,67 @@ def check_budget(errors: list[str]) -> None:
         if words > ENTRYPOINT_LIMIT:
             errors.append(f"{rel(path)} has {words} words; limit is {ENTRYPOINT_LIMIT}")
 
-    full_protocols = sorted((ROOT / "claude" / "skills").glob("*/references/full-protocol.md"))
-    for path in full_protocols:
-        errors.append(f"{rel(path)} should be split into protocol-index.md/protocol-sections, not kept as full-protocol.md")
+    # References are loaded on demand, so they get a far larger budget than an
+    # entrypoint — but a reference that outgrows this cap should be split by
+    # topic rather than left as a single unnavigable wall.
+    for path in sorted((ROOT / "claude" / "skills").glob("*/references/**/*.md")):
+        words = word_count(path)
+        if words > REFERENCE_LIMIT:
+            errors.append(
+                f"{rel(path)} has {words} words; reference limit is {REFERENCE_LIMIT}"
+                " — split it by topic"
+            )
+
+
+def skill_root_of(path: Path) -> Path | None:
+    """Return the claude/skills/<name> directory containing path, if any."""
+    skills = ROOT / "claude" / "skills"
+    try:
+        parts = path.relative_to(skills).parts
+    except ValueError:
+        return None
+    return skills / parts[0] if parts else None
+
+
+def resolve_link(citing: Path, raw: str) -> Path | None:
+    """Map a cited markdown path to the repo file it should point at."""
+    for prefix, target_dir in (
+        ("~/.claude/skills/", ROOT / "claude" / "skills"),
+        ("~/.agents/skills/", ROOT / "claude" / "skills"),
+        ("~/.claude/rules/", ROOT / "claude" / "rules"),
+        ("~/.agents/rules/", ROOT / "claude" / "rules"),
+    ):
+        if raw.startswith(prefix):
+            return target_dir / raw[len(prefix) :]
+    if raw.startswith("~"):
+        return None  # some other home path; not ours to validate
+
+    # Relative citation: try the citing file's directory, then the skill root,
+    # then the skills dir (cross-skill citations like `my-review/references/x.md`).
+    candidates = [citing.parent / raw]
+    root = skill_root_of(citing)
+    if root is not None:
+        candidates.append(root / raw)
+    candidates.append(ROOT / "claude" / "skills" / raw)
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[-1]
+
+
+def check_links(errors: list[str]) -> None:
+    """Every concrete markdown path cited by a skill or agent must resolve."""
+    files = sorted((ROOT / "claude" / "skills").glob("**/*.md"))
+    files += sorted((ROOT / "claude" / "agents").glob("*.md"))
+
+    for path in sorted(files):
+        for raw in LINK_PATTERN.findall(path.read_text(errors="replace")):
+            # Bare filenames (`gotchas.md`) are usually prose, not citations.
+            if "/" not in raw or LINK_PLACEHOLDER.search(raw):
+                continue
+            target = resolve_link(path, raw)
+            if target is not None and not target.is_file():
+                errors.append(f"{rel(path)} cites missing file: {raw}")
 
 
 def check_home_links(errors: list[str], skip_home: bool) -> None:
@@ -142,6 +229,16 @@ def check_home_links(errors: list[str], skip_home: bool) -> None:
     if (HOME / ".AGENTS.md").exists() or (HOME / ".AGENTS.md").is_symlink():
         errors.append("~/.AGENTS.md should not exist; AGENTS.md is repo-local only")
 
+    # Removing a repo file leaves its $HOME symlink dangling; rcup cannot clean
+    # these up, and a dangling reference file is visible to the agent as a
+    # readable path that then fails.
+    for root in (HOME / ".claude" / "skills", HOME / ".claude" / "hooks"):
+        if not root.is_dir():
+            continue
+        for path in sorted(root.rglob("*")):
+            if path.is_symlink() and not path.exists():
+                errors.append(f"dangling home symlink: {path}")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check local Claude/Codex instruction drift.")
@@ -152,6 +249,7 @@ def main() -> int:
     check_repo_links(errors)
     check_codex_agents(errors)
     check_budget(errors)
+    check_links(errors)
     check_home_links(errors, args.skip_home)
 
     if errors:
