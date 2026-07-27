@@ -3,7 +3,7 @@ openai_base_url = "https://us.api.openai.com/v1"
 approvals_reviewer = "user"
 approval_policy = "on-request"
 notify = ["/Users/sammcdavid/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
-model = "gpt-5.5"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "high"
 
 [projects."/Users/sammcdavid/.dotfiles"]
@@ -20,7 +20,7 @@ trust_level = "trusted"
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
-"gpt-5.6-sol" = 1
+"gpt-5.6-sol" = 4
 
 [[hooks.Stop]]
 
