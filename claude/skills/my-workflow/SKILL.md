@@ -49,14 +49,15 @@ Load targeted references as needed:
 
 ## Flow
 
-1. Establish task once from arguments, conversation, ticket, file, or URL.
-2. Read or create `~/.claude/thoughts/shared/workflows/<slug>.md`.
-3. Detect existing workflow ledger first; use loose artifacts only as evidence to attach to a stage, not as permission to skip uncompleted stages.
-4. Decide whether to route to the full pipeline or `my-quick`; ledger the decision before any handoff.
-5. Pick earliest incomplete stage from `references/stage-routing.md`.
-6. Run only that stage, except run the atomic execution/review block as one unit after its gates are satisfied.
-7. Update ledger with stage status, artifacts, assumptions, and decisions.
-8. Stop with checkpoint output and exact resume command.
+1. Detect the current git branch first and search for a workflow ledger whose `branch` field matches it. On a feature branch, a match is almost always the ledger to resume. On the default branch (`main`/`master`) or with no branch match, fall back to matching by Linear ID, ticket slug, or topic.
+2. Establish task once from arguments, conversation, ticket, file, or URL; a branch-matched ledger's recorded task always wins, no confirmation needed — never open a second ledger for a branch that already has one unless the user explicitly says to abandon it.
+3. Read or create `~/.claude/thoughts/shared/workflows/<slug>.md`, recording the current branch when creating a new ledger.
+4. Use loose artifacts only as evidence to attach to a stage, not as permission to skip uncompleted stages.
+5. Decide whether to route to the full pipeline or `my-quick`; ledger the decision before any handoff.
+6. Pick earliest incomplete stage from `references/stage-routing.md`.
+7. Run only that stage, except run the atomic execution/review block as one unit after its gates are satisfied.
+8. Update ledger with stage status, artifacts, assumptions, and decisions.
+9. Stop with checkpoint output and exact resume command.
 
 Use question policy: factual questions must be researched; genuine decisions go to the user. Validated phases and fixes are committed locally as they land; no pushes, PR creation, or remote state changes unless explicitly requested.
 

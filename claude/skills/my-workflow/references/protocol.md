@@ -57,13 +57,17 @@ The single `my-review` stage replaces separate `requirements-audit`, `security-a
 
 This first human touchpoint frames the workflow and creates or updates the ledger.
 
-1. **Establish task.** Parse `$ARGUMENTS`:
+1. **Detect the workflow ledger first, keyed to the current branch.** Run `git branch --show-current` before matching by anything else, then search `~/.claude/thoughts/shared/workflows/`:
+   - **Feature branch:** a ledger whose `branch` field matches is the ledger, full stop. Resume it and use its recorded task — no confirmation needed, even if this invocation's arguments are phrased differently. There is exactly one ledger per branch; never create a second one for a branch that already has one. The only way to start a new ledger on a branch that has one is the user explicitly saying to abandon or replace the existing one.
+   - **Default branch (`main`/`master`) or no branch match:** fall back to matching by Linear ID, ticket slug, or topic — several ledgers can legitimately sit on the default branch before their feature branch exists, so branch alone doesn't disambiguate there.
+   - **No match by either key:** this is a new workflow; the current branch gets recorded on it in Step 6.
+   Then search research, specs, and plans only to attach artifact paths to ledger stages. Artifacts do not mark stages complete by themselves.
+2. **Establish task.** Parse `$ARGUMENTS`, unless Step 1 already resolved the task from a branch-matched ledger:
    - Linear issue ID/URL -> fetch issue, comments, linked issues, project.
    - File path -> read fully.
    - URL -> fetch/extract.
    - Free-text description -> use task.
    - Empty -> read conversation context first; ask only if there is genuinely no target.
-2. **Detect the workflow ledger first.** Search workflow ledgers under `~/.claude/thoughts/shared/workflows/`. Then search research, specs, and plans only to attach artifact paths to ledger stages. Artifacts do not mark stages complete by themselves.
 3. **Choose full pipeline or quick handoff.** Use `references/stage-routing.md`. If no ledger exists and the work is not explicitly routed to `my-quick`, the entry stage is always `my-research`.
    - If routing to `my-quick`, open the workflow ledger first and record `route: my-quick`, reason, expected scope, skipped full-pipeline rationale, and exact handoff command.
    - Then present the handoff upfront instead of pretending the full pipeline started.
@@ -83,7 +87,7 @@ Starting assumptions: **[list]**.
 
 Wait for go-ahead once to start the selected stage.
 
-6. **Open ledger.** Create/update `~/.claude/thoughts/shared/workflows/<slug>.md` with task, base branch, chosen entry point, route, stage statuses, artifact paths, decisions, autonomous assumptions, and (when applicable) the `cross_workflow` section from `references/cross-workflow-coordination.md`. New full-pipeline ledgers start with all stages incomplete. Quick-handoff ledgers record the route and handoff command instead of stage completion. Update it at every checkpoint.
+6. **Open ledger.** Create/update `~/.claude/thoughts/shared/workflows/<slug>.md` with task, `branch` (the current git branch — the primary lookup key for future invocations per Step 1), `base_branch` (the diff target for review, usually `main`/`master`), chosen entry point, route, stage statuses, artifact paths, decisions, autonomous assumptions, and (when applicable) the `cross_workflow` section from `references/cross-workflow-coordination.md`. New full-pipeline ledgers start with all stages incomplete. Quick-handoff ledgers record the route and handoff command instead of stage completion. Update it at every checkpoint; if the branch changes mid-workflow (renamed, or moved intentionally), update `branch` too rather than leaving it stale.
 
 ## Autonomy Override
 

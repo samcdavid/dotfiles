@@ -10,6 +10,10 @@ Every stage skill has an interactive opener ("Ready to research. What's your que
 
 Only stop for a *factual* question that cannot be resolved by researching the codebase, Notion, Google Drive, or Linear. A factual question that could have been answered by spawning a `codebase-analyzer`, running `notion-search`, or searching Google Drive is a protocol violation, not diligence. Run the Blocking-Question Protocol every time before you stop. (This is about *factual* questions — genuine decisions are a different thing entirely; see the next gotcha.)
 
+## Starting a second ledger for a branch that already has one
+
+Always run `git branch --show-current` and check for a ledger whose `branch` field matches before parsing `$ARGUMENTS` into what looks like a fresh task. If you're on a feature branch with an existing ledger, that ledger is the one — resume it and use its recorded task with no confirmation step, even if this invocation's phrasing reads like a new or different request. There is exactly one ledger per branch. Do not open a second one because the phrasing doesn't match; the only way a branch gets a new ledger while an old one exists is the user explicitly saying to abandon or replace it. Only fall back to matching by Linear ID, ticket slug, or topic when on the default branch (`main`/`master`, where several ledgers can legitimately coexist) or when no ledger's `branch` field matches at all. If the branch was renamed and the ledger's `branch` field is now stale, a Linear ID/topic cross-check will still find it — update the field once confirmed rather than leaving it pointing at a branch that no longer exists.
+
 ## Re-discovering what an earlier stage already produced
 
 `my-plan` should consume the stage-1 research doc and stage-2 spec by path, not re-research from scratch. `requirements-audit` should audit against the stage-2 spec, not ask for a spec source. If a later stage starts exploring ground an earlier stage already covered, you forgot to pass the artifact forward — check the ledger.

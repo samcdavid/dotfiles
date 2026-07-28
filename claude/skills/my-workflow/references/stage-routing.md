@@ -2,11 +2,11 @@
 
 Load when starting or resuming `my-workflow`.
 
-Read the workflow ledger first. The ledger is the source of truth for completed stages. Loose artifacts can support a stage, but they do not mark that stage complete and they never authorize implementation by themselves.
+Read the workflow ledger first — detected primarily by the current git branch, per `references/protocol.md`'s Step 0. The ledger is the source of truth for completed stages. Loose artifacts can support a stage, but they do not mark that stage complete and they never authorize implementation by themselves.
 
 Default:
 
-- No ledger: create one and run `my-research`, then checkpoint.
+- No ledger (no branch match, and no Linear ID/ticket-slug/topic match): create one, recording the current branch, and run `my-research`, then checkpoint.
 - Ledger exists: pick the earliest stage not marked `completed`.
 
 Quick handoff:
