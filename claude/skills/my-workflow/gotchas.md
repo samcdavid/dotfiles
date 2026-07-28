@@ -38,6 +38,14 @@ The review scope is the **working-tree diff against the local base branch** (`ma
 
 Twelve stages is a long way to fall. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it as each stage finishes. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research.
 
+## Treating one clean cross-workflow check as good for the rest of the run
+
+Sibling ledgers advance and Linear issue statuses change between checkpoints. A "no overlap" result at intake does not carry forward — re-run `references/cross-workflow-coordination.md` before every checkpoint, not just once at Step 0. Skipping the re-check because "I already looked" is how a sibling's plan lands on the same files mid-run without anyone noticing.
+
+## Escalating on sibling existence instead of sibling overlap
+
+Most sibling issues on the same Linear project are unrelated. Do not stop the pipeline just because another in-progress workflow or issue shares the project — that is noise, not a decision. Only escalate to the user when there is an actual file/module overlap (surfaces named in both plans/diffs) or a requirement/scope conflict (contradictory or duplicated acceptance criteria). Everything short of that is a one-line ledger note, not a checkpoint stop.
+
 ## Forgetting where the git boundary now sits
 
 Commits are expected: every validated implementation phase and every validated fix lands as its own local commit via the `commit` skill, so the session leaves a readable history instead of one giant working tree. The boundary is *remote* actions — no push, no PR, no thread resolution, even when the work looks finished and clean. Suggest `/create-pr` and let the user pull that trigger.

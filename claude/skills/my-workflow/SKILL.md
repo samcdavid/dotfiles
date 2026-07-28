@@ -29,6 +29,7 @@ Load targeted references as needed:
 
 - `references/stage-routing.md` when starting or resuming.
 - `references/checkpoint-policy.md` before ending any stage.
+- `references/cross-workflow-coordination.md` at intake and again before every checkpoint, when the task is a Linear issue.
 - `references/autonomy-boundaries.md` when a stage wants to ask questions.
 - `references/post-review-loop.md` after `my-review`.
 - `references/final-report.md` before final handoff.

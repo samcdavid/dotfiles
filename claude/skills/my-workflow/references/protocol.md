@@ -30,6 +30,7 @@ These override sub-skill instructions.
 6. **Fix loop runs unattended.** After `my-implement`, loop `my-validate` -> `my-review` -> `address-pr-feedback local` until a review pass is clean of Critical and substantive non-blocking findings, capped at 3 iterations. No checkpoint between iterations; stop once after the final review. Nits never trigger another iteration.
 7. **No remote actions.** Local commits per validated phase/fix are expected. No `git push`, `gh pr create`, published replies, or state-changing remote calls unless explicitly requested.
 8. **Carry artifacts forward.** Each stage's output is the next stage's input. Track concrete paths/IDs in the ledger.
+9. **Cross-workflow coordination runs every checkpoint.** When the task is a Linear issue, re-run `references/cross-workflow-coordination.md` before each checkpoint output — sibling ledgers and sibling issues can change between checkpoints. Log a note when siblings are clear; escalate to the user only on an actual file/module or requirement/scope overlap, per that reference's escalation bar.
 
 ## Pipeline Exact Order
 
@@ -65,21 +66,23 @@ This first human touchpoint frames the workflow and creates or updates the ledge
 3. **Choose full pipeline or quick handoff.** Use `references/stage-routing.md`. If no ledger exists and the work is not explicitly routed to `my-quick`, the entry stage is always `my-research`.
    - If routing to `my-quick`, open the workflow ledger first and record `route: my-quick`, reason, expected scope, skipped full-pipeline rationale, and exact handoff command.
    - Then present the handoff upfront instead of pretending the full pipeline started.
-4. **Confirm mode once.** Present:
+4. **Cross-workflow coordination.** If the task resolves to a Linear issue, run `references/cross-workflow-coordination.md` now: resolve the issue's project/milestone, scan sibling ledgers and live Linear sibling issues, and check for file/module or requirement overlap. Fold the result into the confirm-mode message below — either "no sibling overlap found" or the overlap decision to raise.
+5. **Confirm mode once.** Present:
 
 ```markdown
 Here's the task as I understand it: **[one paragraph]**.
 Entry point: **[stage]**; skipped stages: **[only stages already completed in the ledger, with artifact paths]**.
 Route: **[full pipeline | my-quick, with ledgered reason]**.
+Cross-workflow: **[no Linear issue | siblings checked and clear | overlap found — see decision below]**.
 
-Mode: I run one stage at a time, checkpoint after each artifact, and give you an exact resume command. You can clear context between stages. The only uninterrupted block is `my-implement` plus the automatic fix loop (`my-validate` -> `my-review` -> `address-pr-feedback local`, up to 3 passes), and it is available only after the ledger marks research, spec, clarify, plan, observe, and analyze complete, with eval-plan either complete or not applicable. Factual questions are researched; decisions stay yours. Each validated phase and fix is committed locally so the session leaves a readable history; no pushes, PRs, or other outward actions unless explicitly requested.
+Mode: I run one stage at a time, checkpoint after each artifact, and give you an exact resume command. You can clear context between stages. The only uninterrupted block is `my-implement` plus the automatic fix loop (`my-validate` -> `my-review` -> `address-pr-feedback local`, up to 3 passes), and it is available only after the ledger marks research, spec, clarify, plan, observe, and analyze complete, with eval-plan either complete or not applicable. Factual questions are researched; decisions stay yours. Each validated phase and fix is committed locally so the session leaves a readable history; no pushes, PRs, or other outward actions unless explicitly requested. When the task shares a Linear project or milestone with other in-progress work, I re-check for sibling overlap at every checkpoint and only stop you for an actual file/module or requirement conflict, not just because a sibling exists.
 
 Starting assumptions: **[list]**.
 ```
 
 Wait for go-ahead once to start the selected stage.
 
-5. **Open ledger.** Create/update `~/.claude/thoughts/shared/workflows/<slug>.md` with task, base branch, chosen entry point, route, stage statuses, artifact paths, decisions, and autonomous assumptions. New full-pipeline ledgers start with all stages incomplete. Quick-handoff ledgers record the route and handoff command instead of stage completion. Update it at every checkpoint.
+6. **Open ledger.** Create/update `~/.claude/thoughts/shared/workflows/<slug>.md` with task, base branch, chosen entry point, route, stage statuses, artifact paths, decisions, autonomous assumptions, and (when applicable) the `cross_workflow` section from `references/cross-workflow-coordination.md`. New full-pipeline ledgers start with all stages incomplete. Quick-handoff ledgers record the route and handoff command instead of stage completion. Update it at every checkpoint.
 
 ## Autonomy Override
 
@@ -118,6 +121,7 @@ On the answer, resume from that stage with the decision folded into the ledger. 
 
 ## Stage notes (where the override needs specifics)
 
+- **Every stage, cross-workflow:** Before writing the checkpoint output, re-run `references/cross-workflow-coordination.md` when the task is a Linear issue. Sibling ledgers and Linear issue status can change between checkpoints — do not rely on the intake-time result past stage 1. Log a clear note when siblings are unrelated; only escalate on an actual file/module or requirement/scope overlap. For the atomic block (stages 8-10), run it twice: once before `my-implement` starts and once more at the final checkpoint.
 - **2 `my-spec` / 3 `my-clarify`:** These are the most question-prone. Most "questions" are *factual* and answerable from research + code — resolve those and record assumptions. The residue is usually a genuine scope or product-intent **decision** (what's in scope, what success means, which trade-off) — surface those to the user rather than deciding for them. Feed clarify's resolutions back into the spec file before planning.
 - **5 `my-observe`:** It asks which observability platforms/alert channels exist. Detect from the repo first (config files, dependencies, existing dashboards/monitors, CLAUDE.md). If undetectable, default to platform-agnostic recommendations rather than asking. Its output is a companion observability plan linked to the main plan — keep it as a deliverable, not a blocker.
 - **6 `my-eval-plan` (conditional):** Run it only when the plan touches an AI/LLM surface — prompts, system messages, tool docstrings, model or retrieval selection, scoring, or any behavior a model produces. Decide this from the plan's changed surfaces, not by asking. Its output is a companion eval plan linked to the main plan, the same shape as `my-observe`'s: a deliverable, not a blocker. When it does not apply, ledger it `not_applicable` with a one-line reason and move on without a checkpoint — an unset stage blocks the implementation gate, `not_applicable` does not.

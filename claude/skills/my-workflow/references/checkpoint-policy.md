@@ -15,12 +15,15 @@ Stop after every stage except inside the atomic execution/review block:
 
 The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 iterations elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.
 
+Before writing the checkpoint output, re-run `references/cross-workflow-coordination.md` when the task is a Linear issue — sibling ledgers and Linear issue status can shift between checkpoints.
+
 Every checkpoint must update the workflow ledger and report:
 
 - stage completed
 - artifact path(s)
 - decisions still needed, if any
 - assumptions recorded
+- cross-workflow status (siblings checked, overlap found/resolved, or "no Linear issue")
 - next stage
 - exact resume command
 - whether context can be cleared safely

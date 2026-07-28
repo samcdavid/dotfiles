@@ -9,6 +9,7 @@ Report:
 - Artifacts produced.
 - User decisions.
 - Factual assumptions.
+- Cross-workflow coordination — sibling ledgers/issues checked on the same Linear project (or "no Linear issue"), any overlap found, and how it was resolved.
 - Files changed.
 - Tests and validation commands.
 - Final review verdict.
