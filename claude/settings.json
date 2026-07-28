@@ -1,6 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "auto",
     "allow": [
       "Bash(./apps/astro/bin/ci)",
       "Bash(./bin/check-astro-types types:*)",
@@ -159,9 +158,10 @@
       "mcp__tidewave__package_docs_search",
       "mcp__tidewave__project_eval"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "sonnet",
   "hooks": {
     "SessionStart": [
       {
