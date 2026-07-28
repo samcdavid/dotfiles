@@ -30,6 +30,7 @@ Run stages in this order, based on ledger status:
 - `my-observe` not completed: run `my-observe`, then checkpoint.
 - `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan`, then checkpoint. Otherwise mark it `not_applicable` with a one-line reason and continue without stopping.
 - `my-analyze` not completed: run `my-analyze`, then checkpoint.
+- `my-analyze` completed but `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, checkpoint with the decision (`overlap_pending`). If clear, ledger `passed` and continue straight into the atomic block below with no separate checkpoint. Not a Linear issue: ledger `passed` (not applicable) and continue.
 - Implementation not reviewed, and implementation gate is satisfied: run the atomic block — `my-implement`, then the fix loop — then checkpoint.
 
 Fix loop (runs automatically, no checkpoint between iterations):
@@ -45,6 +46,7 @@ Implementation gate:
 
 - The ledger must explicitly mark `my-research`, `my-spec`, `my-clarify`, `my-plan`, `my-observe`, and `my-analyze` as `completed`, and `my-eval-plan` as either `completed` or `not_applicable`.
 - The ledger must contain artifact paths for the research, spec, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
+- `cross_workflow.pre_implementation_check` must be `passed` for the current plan version — `not_run`, unset, or `overlap_pending` all block implementation the same way an incomplete stage does.
 - The current invocation must be a resume after the plan/analysis checkpoints or must explicitly say to proceed with implementation.
 
 If any gate is missing, do not implement. Run the earliest missing stage or checkpoint with the missing ledger/artifact requirement.

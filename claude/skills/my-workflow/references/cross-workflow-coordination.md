@@ -35,9 +35,18 @@ This is the same conflict-detection judgment `team-plan` applies across a whole 
 
   Wait for the user's call before continuing past the checkpoint. Record the resolution in the ledger's `cross_workflow` note.
 
-## Atomic block timing
+## Pre-Implementation Gate
 
-The atomic execution/review block (stages 8-10) checkpoints only once, at the end. Run this check twice there: once before `my-implement` starts (file-overlap risk is highest right before code changes land) and once more at the final checkpoint after review.
+This check also runs as its own pipeline stage — after `my-analyze` and before `my-implement` starts. It is the last checkpoint before code changes land, and the most precise one, because the plan is now finalized and its exact surfaces are known. Re-run Steps 1-4 above with two changes:
+
+- Compare against the plan's actual surfaces, not just the spec's stated scope — spawn `codebase-locator`/`codebase-analyzer` against the plan file itself to extract the exact files, functions, and schemas it will touch.
+- Re-query sibling ledgers and Linear issues fresh. Do not reuse an earlier checkpoint's result — a sibling may have advanced a stage or landed commits since then.
+
+This is a mandatory gate, not optional context: `my-implement` cannot start until it has run for the current plan version. Record `pre_implementation_check: passed` (no overlap) or `pre_implementation_check: overlap_pending` (escalated, awaiting the user's decision) in the ledger's `cross_workflow` section — a missing or `not_run` value blocks the implementation gate the same way an incomplete stage does.
+
+Escalation follows the same bar as Step 5: only stop the pipeline on an actual file/module or requirement/scope overlap. When clear, log it and continue directly into `my-implement` — no separate checkpoint stop, since this gate exists to be the last thing before the atomic block runs as one uninterrupted unit.
+
+The standing per-checkpoint re-check (Steps 1-5 above) still applies once more at the atomic block's own final checkpoint after review — implementation can take a while, and siblings can change during it.
 
 ## Ledger fields
 
@@ -49,6 +58,7 @@ linear_project_name: ...
 linear_milestone_id: ...        # if set
 siblings_checked: [ISSUE-1 (ledger: stage X), ISSUE-2 (no ledger, status: In Progress), ...]
 overlaps_found: [none | list with resolution]
+pre_implementation_check: not_run | passed | overlap_pending
 ```
 
 ## What this is not

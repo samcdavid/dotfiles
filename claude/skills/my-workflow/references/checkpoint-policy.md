@@ -11,6 +11,7 @@ Stop after every stage except inside the atomic execution/review block:
 - Stage 5 `my-observe` -> stop.
 - Stage 6 `my-eval-plan` -> stop when it ran; continue without stopping when ledgered `not_applicable`.
 - Stage 7 `my-analyze` -> stop.
+- Stage 8 Pre-implementation coordination check -> stop only if it finds a file/module or requirement/scope overlap; when clear (or not a Linear issue), ledger `pre_implementation_check: passed` and continue straight into the atomic block without a separate stop.
 - Atomic block `my-implement` -> fix loop -> stop after the final review output.
 
 The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 iterations elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.
@@ -30,4 +31,4 @@ Every checkpoint must update the workflow ledger and report:
 
 Resume by reading the workflow ledger first, then continue from the earliest incomplete stage. Do not re-run completed stages unless their input artifact changed or the user asks.
 
-Implementation is a hard gate, not a default next action. Do not start `my-implement` unless the ledger explicitly marks all prior stages complete and the user resumed after reviewing the plan/analysis checkpoints or explicitly requested implementation.
+Implementation is a hard gate, not a default next action. Do not start `my-implement` unless the ledger explicitly marks all prior stages complete, `cross_workflow.pre_implementation_check` is `passed` for the current plan version, and the user resumed after reviewing the plan/analysis checkpoints or explicitly requested implementation.

@@ -16,7 +16,7 @@ Only stop for a *factual* question that cannot be resolved by researching the co
 
 ## Jumping straight to implementation
 
-New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-6 complete and the user resumes after the plan/analysis checkpoints or explicitly asks to proceed with implementation.
+New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-6 complete, `cross_workflow.pre_implementation_check` is `passed` for the current plan version (not `not_run`, unset, or `overlap_pending`), and the user resumes after the plan/analysis checkpoints or explicitly asks to proceed with implementation. A clean cross-workflow result from an earlier checkpoint (say, from `my-plan`) does not carry forward to this gate — the plan may have changed since, and siblings may have advanced; the gate needs its own fresh run.
 
 ## Silently switching to my-quick
 
