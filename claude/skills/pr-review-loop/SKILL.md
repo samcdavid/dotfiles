@@ -28,12 +28,13 @@ For PR-list parsing (explicit and auto-discovery), per-PR skip conditions, failu
    - **Explicit**: PR numbers/URLs given — use them as-is, no approval filtering.
    - **Auto-discovery**: none given — run `scripts/discover-review-queue.sh`, scoped to the current repo (via `gh repo view`). It drops a PR only if my *latest* review on it is `APPROVED`; never-reviewed, `COMMENTED`, and `CHANGES_REQUESTED` are all kept.
 2. For each PR, in order:
-   - Pre-check state; skip merged/closed PRs.
+   - Pre-check with `scripts/pre-check-pr.sh`; skip merged/closed PRs. This runs for every PR in both modes — it catches a PR merging *between* discovery and review in a multi-PR batch, and it's the only state check explicit-mode PRs get at all.
    - Run `my-review` in PR mode.
    - Run `publish-review` immediately after — invoking this skill is the batch's standing approval to publish every PR it processes, the same as `publish-review`'s own single-PR convention.
 3. Record one ledger line per PR (verdict, published event, comment/reply counts, URL, or skip/failure reason) and drop that PR's raw findings from context before starting the next one.
 4. Apply the three-strike rule **per PR**: a PR that fails twice more after its first failure gets skipped and reported, not retried indefinitely — one bad PR never stalls the batch.
-5. After the last PR, report the full progress table.
+5. **Auto-discovery only:** re-run `scripts/discover-review-queue.sh` and repeat from step 2 over any PR not already processed this run, until a call returns nothing new (capped at 25 outer-loop iterations as a safety net). The stop condition is "nothing new," not "the script returned empty" — a PR that only ever earns a `COMMENT` verdict stays in the script's output forever (it's never `APPROVED`), so looping on raw-empty output would never terminate.
+6. After the last iteration, report the full progress table.
 
 In explicit mode, always re-review every named PR, even one reviewed before at the same commit — `my-review` already dedupes new findings against its `existing_comments_index` (including its own prior passes), so a re-review does not re-post what's already there. In auto-discovery mode, the approved-exclusion runs before the loop starts (Step 1): only already-approved PRs are dropped, since re-approving something already signed off on adds no value — everything else in the queue, including PRs never reviewed at all, gets processed.
 

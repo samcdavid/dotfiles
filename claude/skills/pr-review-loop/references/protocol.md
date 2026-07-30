@@ -37,11 +37,28 @@ The script exists so discovery runs the same way every time rather than being re
 
 Print the discovered, filtered list before starting the loop (`Discovered N PRs to review: ...`) so it's visible what's about to be processed — this is informational, not a gate; per the standing-approval convention below, discovery does not pause for confirmation.
 
+### Repeat Until Nothing New (auto-discovery mode only)
+
+Calling `discover-review-queue.sh` once only gives a snapshot. Re-run it after each batch and keep going — but **the stop condition is not "the script's output is empty."**
+
+**Why raw-empty is the wrong stop condition.** `my-review`'s approval bar is strict; `COMMENT` is a common, legitimate verdict, not a failure. A PR reviewed with `COMMENT` is not approved, so it correctly stays in `discover-review-queue.sh`'s output on the next call (the script only excludes `APPROVED` PRs). Looping until the script's raw output is literally empty would spin forever on any PR that never reaches full approval.
+
+**The actual stop condition.** Track every `(owner, repo, number)` already processed this run — reviewed, skipped, or failed, regardless of verdict. Each iteration:
+
+1. Run `scripts/discover-review-queue.sh`.
+2. Drop any tuple already in the processed set.
+3. If nothing remains, stop — there is nothing left this run hasn't already handled.
+4. Otherwise, run the Per-PR Loop over the new tuples, adding each to the processed set as it finishes (Step 4), then go back to step 1.
+
+This still picks up PRs newly requested mid-run and still drops PRs this run itself just approved, without ever reprocessing something already handled. As a safety net against anything unexpected keeping this from converging (e.g. review requests arriving faster than they can be processed), cap outer-loop iterations at 25; if the cap is hit, stop and report what's left rather than spinning indefinitely.
+
+Explicit mode does not use this loop — it processes its fixed list once, in order, with no re-discovery.
+
 ### Build the Working List
 
 Either mode produces `(owner, repo, number)` tuples. Order matters only for the progress table — there is no dependency between PRs, but they are processed **sequentially, not in parallel**: `my-review` fans out several lens-reviewer subagents per PR, and running multiple PRs' reviews concurrently would multiply that fan-out and risk colliding on GitHub's secondary rate limit (80 content-creating requests/minute) when publishing back to back.
 
-If explicit mode finds no PR references and auto-discovery finds zero open review requests, say so and stop — do not guess a range or invent PRs to process.
+If explicit mode finds no PR references and auto-discovery's first call finds zero open review requests, say so and stop — do not guess a range or invent PRs to process.
 
 ## Per-PR Loop
 
@@ -50,12 +67,16 @@ For each `(owner, repo, number)` tuple, in order:
 ### Step 1 — Pre-check
 
 ```bash
-gh api "repos/${owner}/${repo}/pulls/${number}" --jq '{state, merged, draft, title}'
+scripts/pre-check-pr.sh <owner> <repo> <number>
 ```
 
-- `state == "closed"` (merged or not): **skip**. Reviewing/publishing to a closed PR provides no value and some review actions may be rejected by the API. Record the skip with reason `closed` or `merged`.
-- `draft == true`: proceed normally in either mode — a named PR is explicit intent, and a discovered PR was actually requested for review, so draft status alone is not a reason to skip. Note `draft` in the ledger line so it's visible in the final table.
-- If the `gh api` call itself fails (bad PR number, no access, repo typo): treat as this PR's first failure (see Failure Handling below), not a reason to abort the batch.
+Prints `{"skip": bool, "reason": "merged"|"closed"|null, "draft": bool, "title": string}`.
+
+- `skip: true, reason: "merged"`: **skip**. The PR has already merged — reviewing it now provides no value. Record the skip with reason `merged`.
+- `skip: true, reason: "closed"`: **skip** the same way, reason `closed`.
+- This check runs even for auto-discovered PRs, which are already filtered to open state at discovery time — it exists to catch a PR merging *between* discovery and actual review (a real race across a multi-PR batch), and it's the only state check explicit-mode PRs get at all, since a user-supplied number has no prior filtering.
+- `skip: false`: proceed. If `draft` is `true`, proceed normally in either mode — a named PR is explicit intent, and a discovered PR was actually requested for review, so draft status alone is not a reason to skip. Note `draft` in the ledger line so it's visible in the final table.
+- If the script itself fails (bad PR number, no access, repo typo): treat as this PR's first failure (see Failure Handling below), not a reason to abort the batch.
 
 ### Step 2 — Review
 
@@ -99,3 +120,4 @@ After the last PR (or after the list is exhausted, however many were skipped/fai
 ## References
 
 - `scripts/discover-review-queue.sh` — auto-discovery mode's backing script; runs independently of this skill for spot-checking (`scripts/discover-review-queue.sh`, no arguments).
+- `scripts/pre-check-pr.sh <owner> <repo> <number>` — Step 1's merged/closed check, used for every PR in both modes.
