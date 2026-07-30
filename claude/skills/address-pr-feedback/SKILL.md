@@ -37,7 +37,7 @@ PR mode only — skip in local mode:
 
 Use `~/.agents/rules/` when running through Codex.
 
-Always read `references/pushback-patterns.md`.
+Always read `references/pushback-patterns.md` and `references/workflow-ledger-context.md`.
 
 Load targeted references as needed:
 
@@ -48,34 +48,36 @@ Load targeted references as needed:
 ## Flow
 
 1. Resolve the mode. PR mode: resolve the PR from `$ARGUMENTS`, current branch, or `gh pr status`. Local mode: take findings from `$ARGUMENTS` or the conversation, and the diff from the working tree against the base branch.
-2. PR mode only: fetch PR metadata, diff, reviews, inline comments, review bodies, and issue comments using filtered payloads only. Local mode: skip — you already have the findings and the diff.
-3. Build a pending-feedback index:
+2. Check for a `my-workflow` ledger tied to the current branch (`references/workflow-ledger-context.md`). If found, read its spec/plan before investigating — it supplies requirements, settled decisions, and sibling-overlap context. No match: proceed as below.
+3. PR mode only: fetch PR metadata, diff, reviews, inline comments, review bodies, and issue comments using filtered payloads only. Local mode: skip — you already have the findings and the diff.
+4. Build a pending-feedback index:
    - reviewer
    - location
    - comment text
    - comment ID and type
    - current addressed/resolved status
-4. Fetch linked Linear requirements when present and build a requirements map for regression checks.
-5. Investigate every pending comment in code context:
+5. Fetch linked Linear requirements when present and build a requirements map for regression checks, merging in the ledger's spec/plan requirements from step 2 when a ledger was found.
+6. Investigate every pending comment in code context:
    - reproduce or trace the concern
    - verify suggested utilities or patterns
    - check docs for framework/library claims
+   - check the ledger for a settled decision or assumption the comment revisits
    - classify with evidence
-6. Classify each item:
+7. Classify each item:
    - Confirmed Fix
    - Partially Correct
    - Question Requiring Response
    - Valid Deferral
    - Disagree / Push Back
    - Already Addressed
-7. Run adversarial challenge on classifications before acting.
-8. PR mode: present triage and wait for user confirmation. Local mode: state the triage and proceed — no gate.
-9. Plan fixes:
-   - behavioral fixes -> `implementation-executor` TDD phases
-   - non-behavioral edits -> `quick-implement-agent` direct-edit phases
-10. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; if it did not and validation passed, commit it yourself via the `commit` skill scoped to that fix's files.
-11. Run final validation against tests, requirements map, and reviewer concerns.
-12. PR mode: draft evidence-backed replies; do not publish unless explicitly asked. Local mode: skip replies and report the resolution per finding instead.
+8. Run adversarial challenge on classifications before acting.
+9. PR mode: present triage and wait for user confirmation. Local mode: state the triage and proceed — no gate.
+10. Plan fixes:
+    - behavioral fixes -> `implementation-executor` TDD phases
+    - non-behavioral edits -> `quick-implement-agent` direct-edit phases
+11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; if it did not and validation passed, commit it yourself via the `commit` skill scoped to that fix's files.
+12. Run final validation against tests, requirements map, and reviewer concerns.
+13. PR mode: draft evidence-backed replies; do not publish unless explicitly asked. Local mode: skip replies and report the resolution per finding instead.
 
 ## Boundaries
 

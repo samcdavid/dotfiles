@@ -22,6 +22,8 @@ Determine which PR to address:
 - Otherwise, check `gh pr status` for the current branch's PR.
 - If neither works, ask the user.
 
+Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its spec, plan, and decisions feed the Requirements Traceability Baseline below and the investigation in Step 2. When none exists, this adds nothing — proceed as usual.
+
 ---
 
 ## Act I — Research (condensed `my-research`)
@@ -64,6 +66,8 @@ Skip comments that are already resolved or addressed. Focus only on **pending, u
 
 If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it using the Linear MCP tools. Extract the title, description, acceptance criteria, and sub-issues.
 
+If Getting Started found a workflow ledger for this branch, pull its spec's acceptance criteria and the plan's phase breakdown in too — the spec is usually more granular than the raw ticket, and the plan shows which files/changes were meant to satisfy which criterion. Merge both sources into one map rather than keeping them separate.
+
 Build a **requirements map**: for each acceptance criterion, which file(s) and change(s) in the current PR diff address it. You will use this map in the self-audit (Step 10) to verify that your fixes don't accidentally remove coverage for an original requirement.
 
 ## Step 2 — Investigate Every Comment
@@ -79,7 +83,8 @@ For each pending comment:
 1. **Reproduce the concern.** Read the referenced code. Does the reviewer's claim hold? If they say there's a bug, can you construct the failing case? If they suggest an alternative, does it actually work in context? If they flag a missing edge case, trace the code path — does the value they're worried about actually reach this point?
 2. **Check the codebase.** If the reviewer suggests using an existing utility or pattern, verify it exists and does what they think it does. If they suggest a refactor, check whether it would break callers. If they flag a naming issue, check how the term is used elsewhere in the domain.
 3. **Check the docs.** If the feedback involves a library API, framework behavior, or Oban/Ecto pattern, verify against actual documentation — not memory.
-4. **Form a judgment with evidence.** You now know whether the reviewer is right, partially right, or mistaken. Classify accordingly — and consult `references/pushback-patterns.md` to pick the response shape that fits (e.g. Pattern 3 "evidence-backed pushback" for falsifiable bot claims, Pattern 1 "out-of-scope defer" for adjacent cleanup, Pattern 4 "acknowledge-and-fix" for clear bugs).
+4. **Check the workflow ledger, if one was found.** Does the comment revisit a decision the spec or plan already made deliberately? Treat that decision as settled, not as a fresh question — its recorded rationale is evidence for your response, per `references/workflow-ledger-context.md`. Does a `cross_workflow` sibling-overlap note make the comment's suggestion someone else's tracked work rather than this PR's?
+5. **Form a judgment with evidence.** You now know whether the reviewer is right, partially right, or mistaken. Classify accordingly — and consult `references/pushback-patterns.md` to pick the response shape that fits (e.g. Pattern 3 "evidence-backed pushback" for falsifiable bot claims, Pattern 1 "out-of-scope defer" for adjacent cleanup, Pattern 4 "acknowledge-and-fix" for clear bugs).
 
 ### Deduplication Requests
 
@@ -601,6 +606,7 @@ Response text"
 ## References
 
 - `references/pushback-patterns.md` — 12 pushback shapes distilled from a 24-developer PR mining pass. Used during Step 2 (investigate) to pick a response shape; includes a "When to push back vs. when to accept" decision table and per-person pushback fingerprints.
+- `references/workflow-ledger-context.md` — checked in Getting Started, before anything else. Detects a `my-workflow` ledger tied to the current branch and folds its spec/plan/decisions into the requirements map and investigation.
 - The plan and implement acts mirror `my-plan` and `my-implement`; `my-implement/references/verification-commands.md` is the source for per-stack `verification_commands` passed into each slice.
 
 ## Gotchas

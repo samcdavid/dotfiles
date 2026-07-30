@@ -28,7 +28,7 @@ This matters because local mode usually runs inside `my-workflow`'s automatic fi
 
 ### Pushing back in local mode
 
-Push back exactly as rigorously as in PR mode — `references/pushback-patterns.md` still governs, and a finding you disagree with still needs code, test, docs, or requirement evidence before you dismiss it. A finding produced by `my-review` is not automatically correct; it can be wrong about intent, miss context the plan established, or misread a deliberate trade-off. Record the disagreement and its evidence in the triage output rather than silently skipping the item.
+Push back exactly as rigorously as in PR mode — `references/pushback-patterns.md` still governs, and a finding you disagree with still needs code, test, docs, or requirement evidence before you dismiss it. A finding produced by `my-review` is not automatically correct; it can be wrong about intent, miss context the plan established, or misread a deliberate trade-off. This is exactly what `references/workflow-ledger-context.md` exists to catch — read the ledger's spec/plan before triaging, don't rely on whatever plan context happens to still be in the conversation, since this mode is also invoked standalone outside `my-workflow`'s loop. Record the disagreement and its evidence in the triage output rather than silently skipping the item.
 
 ## Commits in both modes
 
