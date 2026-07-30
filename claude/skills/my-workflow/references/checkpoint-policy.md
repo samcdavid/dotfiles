@@ -7,11 +7,12 @@ Stop after every stage except inside the atomic execution/review block:
 - Stage 1 `my-research` -> stop.
 - Stage 2 `my-spec` -> stop.
 - Stage 3 `my-clarify` -> stop.
-- Stage 4 `my-plan` -> stop; do not implement until user resumes.
-- Stage 5 `my-observe` -> stop.
-- Stage 6 `my-eval-plan` -> stop when it ran; continue without stopping when ledgered `not_applicable`.
-- Stage 7 `my-analyze` -> stop.
-- Stage 8 Pre-implementation coordination check -> stop only if it finds a file/module or requirement/scope overlap; when clear (or not a Linear issue), ledger `pre_implementation_check: passed` and continue straight into the atomic block without a separate stop.
+- Stage 4 `my-architecture-plan` -> stop.
+- Stage 5 `my-plan` -> stop; do not implement until user resumes.
+- Stage 6 `my-observe` -> stop.
+- Stage 7 `my-eval-plan` -> stop when it ran; continue without stopping when ledgered `not_applicable`.
+- Stage 8 `my-analyze` -> stop.
+- Stage 9 Pre-implementation coordination check -> stop only if it finds a file/module or requirement/scope overlap; when clear (or not a Linear issue), ledger `pre_implementation_check: passed` and continue straight into the atomic block without a separate stop.
 - Atomic block `my-implement` -> fix loop -> stop after the final review output.
 
 The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 iterations elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.

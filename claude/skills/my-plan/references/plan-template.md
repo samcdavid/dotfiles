@@ -7,6 +7,7 @@ Copy this structure when writing a new plan. Save to `~/.claude/thoughts/shared/
 date: [ISO timestamp]
 feature: [Feature name]
 research: [path to research doc if exists]
+architecture: [path to my-architecture-plan artifact if exists]
 status: approved
 ---
 
@@ -25,7 +26,7 @@ status: approved
 [Explicit scope boundaries — constraints that channel the work]
 
 ## Architectural Constraints
-[Boundaries that must NOT be violated — dependency directions, module boundaries, naming conventions. These should be mechanically enforceable.]
+[Boundaries that must NOT be violated — dependency directions, module boundaries, naming conventions. These should be mechanically enforceable. If a `my-architecture-plan` artifact exists for this task, copy its `## Architectural Constraints` section here rather than re-deriving constraints independently.]
 
 ## Phase 1: [Descriptive Name]
 

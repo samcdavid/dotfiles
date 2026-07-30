@@ -1,7 +1,7 @@
 ---
 model: opus
 name: my-workflow
-description: "Run one checkpointed delivery stage at a time: research, spec, clarify, plan, observe, eval-plan, analyze, a pre-implementation coordination check, then the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the workflow ledger explicitly marks all prior stages complete."
+description: "Run one checkpointed delivery stage at a time: research, spec, clarify, architecture plan, plan, observe, eval-plan, analyze, a pre-implementation coordination check, then the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the workflow ledger explicitly marks all prior stages complete."
 disable-model-invocation: true
 ---
 
@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 Run the complete delivery pipeline as resumable stage work while keeping decisions user-owned and factual work agent-owned. Stop after each major stage so the user can review output, clear context, and resume from the workflow ledger. The exception is the gated atomic execution/review block: `my-implement` -> `my-validate` -> `my-review`.
 
-Default to `my-research` on a new workflow. Do not infer permission to implement from the user's task wording, an existing plan-looking file, or the assistant's confidence. Implementation is allowed only when the workflow ledger explicitly marks research, spec, clarify, plan, observe, and analyze complete, eval-plan complete or `not_applicable`, the pre-implementation coordination check `passed` for the current plan version, and the user has resumed after the plan/analysis checkpoints.
+Default to `my-research` on a new workflow. Do not infer permission to implement from the user's task wording, an existing plan-looking file, or the assistant's confidence. Implementation is allowed only when the workflow ledger explicitly marks research, spec, clarify, architecture plan, plan, observe, and analyze complete, eval-plan complete or `not_applicable`, the pre-implementation coordination check `passed` for the current plan version, and the user has resumed after the plan/analysis checkpoints.
 
 If intake identifies the work belongs in `my-quick` instead of the full pipeline, create/update the workflow ledger first. Record `route: my-quick`, the reason, the expected scope, and the exact handoff command before invoking or recommending `my-quick`.
 
@@ -39,13 +39,14 @@ Load targeted references as needed:
 1. `my-research` -> checkpoint.
 2. `my-spec` -> checkpoint.
 3. `my-clarify` -> checkpoint.
-4. `my-plan` -> checkpoint.
-5. `my-observe` -> checkpoint.
-6. `my-eval-plan` when the plan touches an AI/LLM surface; otherwise ledger it `not_applicable` -> checkpoint.
-7. `my-analyze` -> checkpoint.
-8. Pre-implementation coordination check (Linear issues only): re-run cross-workflow coordination against the finalized plan and current sibling state. Stop only if it finds a file/module or requirement/scope overlap; otherwise continue straight into the atomic block.
-9. Gated atomic block: `my-implement`, then the fix loop below, then checkpoint.
-10. Fix loop, run automatically inside the block: `my-validate` -> `my-review` -> if findings warrant fixes, `address-pr-feedback local` -> repeat. Exit when a review pass yields no Critical and no substantive non-blocking findings, or after 3 iterations. Checkpoint after the final review.
+4. `my-architecture-plan` -> checkpoint.
+5. `my-plan` -> checkpoint.
+6. `my-observe` -> checkpoint.
+7. `my-eval-plan` when the plan touches an AI/LLM surface; otherwise ledger it `not_applicable` -> checkpoint.
+8. `my-analyze` -> checkpoint.
+9. Pre-implementation coordination check (Linear issues only): re-run cross-workflow coordination against the finalized plan and current sibling state. Stop only if it finds a file/module or requirement/scope overlap; otherwise continue straight into the atomic block.
+10. Gated atomic block: `my-implement`, then the fix loop below, then checkpoint.
+11. Fix loop, run automatically inside the block: `my-validate` -> `my-review` -> if findings warrant fixes, `address-pr-feedback local` -> repeat. Exit when a review pass yields no Critical and no substantive non-blocking findings, or after 3 iterations. Checkpoint after the final review.
 
 ## Flow
 

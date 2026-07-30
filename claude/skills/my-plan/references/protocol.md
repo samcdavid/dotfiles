@@ -11,7 +11,7 @@ Create a detailed, verified implementation plan through interactive collaboratio
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
-- **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the research doc and spec this plan builds on), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — consume the linked research and spec by path rather than re-discovering them, and honor decisions the ledger already records.
+- **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the research doc, spec, and `my-architecture-plan` artifact this plan builds on), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — consume the linked research, spec, and architecture plan by path rather than re-discovering them, and honor decisions the ledger already records. When an architecture plan exists, its `## Architectural Constraints` section is the source for this plan's own — copy it forward rather than re-deriving constraints from scratch.
 - **When you finish, if a ledger exists, append this stage's outcome to it**: the plan path and any assumptions/decisions recorded here.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
@@ -96,6 +96,7 @@ Format:
 date: [ISO timestamp]
 feature: [Feature name]
 research: [path to research doc if exists]
+architecture: [path to my-architecture-plan artifact if exists]
 status: approved
 ---
 
@@ -114,7 +115,7 @@ status: approved
 [Explicit scope boundaries — constraints that channel the work. Apply the **"Boy scout rule"** gotcha: if a small fix or inconsistency lives in a file the plan already touches, bring it into scope rather than deferring. Challenge every item here — only genuinely unrelated work belongs on this list.]
 
 ## Architectural Constraints
-[Boundaries that must NOT be violated — dependency directions, module boundaries, naming conventions. These should be mechanically enforceable.]
+[Boundaries that must NOT be violated — dependency directions, module boundaries, naming conventions. These should be mechanically enforceable. If a `my-architecture-plan` artifact exists for this task, copy its `## Architectural Constraints` section here rather than re-deriving constraints independently.]
 
 ## Related-Issue Regression Constraints
 [Only if requirements-tracer ran in Step 1 — skip otherwise]
@@ -207,6 +208,7 @@ Format the plan's phases, assumptions, and constraints as structured claims and 
 - The success criteria
 - The "What Could Go Wrong" sections
 - The research doc (if one was used)
+- The architecture plan (if one was used), especially its Architectural Constraints section — verify this plan's own constraints actually match it rather than silently diverging
 
 The agent will:
 - Verify every file path referenced in the plan actually exists
@@ -225,7 +227,7 @@ After applying verdicts, confirm:
 - [ ] Every phase is small enough for a single implementation subagent — one function / narrow behavior, a bounded file set, no whole-repo reading required. Split any oversized phase before presenting.
 - [ ] No open questions remain — all resolved or explicitly deferred with rationale
 - [ ] Scope boundaries are clear (What We're NOT Doing is populated)
-- [ ] Architectural constraints are defined and mechanically enforceable
+- [ ] Architectural constraints are defined and mechanically enforceable, and match the `my-architecture-plan` artifact's constraints when one exists
 
 If any check fails, fix it before presenting to the user.
 

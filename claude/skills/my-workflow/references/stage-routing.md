@@ -26,7 +26,8 @@ Run stages in this order, based on ledger status:
 - `my-research` not completed: run `my-research`, then checkpoint.
 - `my-spec` not completed: run `my-spec`, then checkpoint.
 - `my-clarify` not completed: run `my-clarify`, feed resolutions into spec, then checkpoint.
-- `my-plan` not completed: run `my-plan`, then checkpoint before implementation.
+- `my-architecture-plan` not completed: run `my-architecture-plan`, then checkpoint.
+- `my-plan` not completed: run `my-plan`, passing the architecture plan's path so it seeds `## Architectural Constraints` from it, then checkpoint before implementation.
 - `my-observe` not completed: run `my-observe`, then checkpoint.
 - `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan`, then checkpoint. Otherwise mark it `not_applicable` with a one-line reason and continue without stopping.
 - `my-analyze` not completed: run `my-analyze`, then checkpoint.
@@ -44,8 +45,8 @@ Nits and clearly optional suggestions never justify another iteration; carry the
 
 Implementation gate:
 
-- The ledger must explicitly mark `my-research`, `my-spec`, `my-clarify`, `my-plan`, `my-observe`, and `my-analyze` as `completed`, and `my-eval-plan` as either `completed` or `not_applicable`.
-- The ledger must contain artifact paths for the research, spec, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
+- The ledger must explicitly mark `my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-plan`, `my-observe`, and `my-analyze` as `completed`, and `my-eval-plan` as either `completed` or `not_applicable`.
+- The ledger must contain artifact paths for the research, spec, architecture plan, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
 - `cross_workflow.pre_implementation_check` must be `passed` for the current plan version — `not_run`, unset, or `overlap_pending` all block implementation the same way an incomplete stage does.
 - The current invocation must be a resume after the plan/analysis checkpoints or must explicitly say to proceed with implementation.
 

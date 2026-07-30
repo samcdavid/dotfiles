@@ -20,7 +20,7 @@ Always run `git branch --show-current` and check for a ledger whose `branch` fie
 
 ## Jumping straight to implementation
 
-New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-6 complete, `cross_workflow.pre_implementation_check` is `passed` for the current plan version (not `not_run`, unset, or `overlap_pending`), and the user resumes after the plan/analysis checkpoints or explicitly asks to proceed with implementation. A clean cross-workflow result from an earlier checkpoint (say, from `my-plan`) does not carry forward to this gate — the plan may have changed since, and siblings may have advanced; the gate needs its own fresh run.
+New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-7 complete, `cross_workflow.pre_implementation_check` is `passed` for the current plan version (not `not_run`, unset, or `overlap_pending`), and the user resumes after the plan/analysis checkpoints or explicitly asks to proceed with implementation. A clean cross-workflow result from an earlier checkpoint (say, from `my-plan`) does not carry forward to this gate — the plan may have changed since, and siblings may have advanced; the gate needs its own fresh run.
 
 ## Silently switching to my-quick
 
@@ -34,13 +34,13 @@ Decisions belong to the user — approach selection, scope trade-offs, product i
 
 If `my-implement` trips loop-detection, or `my-validate` can't self-repair, or a sub-skill errors — that is a blocker. STOP and escalate with full context. Marching to the next stage on a broken foundation produces a green-looking pipeline over broken work.
 
-## Reviewing the wrong thing in stages 9–12
+## Reviewing the wrong thing in stages 10–13
 
 The review scope is the **working-tree diff against the local base branch** (`main`/`master`), computed once and shared. Don't let `my-review` slip into PR mode (there is no PR) or review only uncommitted changes when committed-on-branch work also exists. Compute `git diff "$base"...HEAD` once and feed it to all four review stages.
 
 ## Losing the ledger on a long run
 
-Twelve stages is a long way to fall. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it as each stage finishes. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research.
+Thirteen stages is a long way to fall. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it as each stage finishes. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research.
 
 ## Treating one clean cross-workflow check as good for the rest of the run
 

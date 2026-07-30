@@ -22,7 +22,7 @@ Use `~/.agents/rules/` when running through Codex. For complex plans, workflow r
 ## Flow
 
 1. Resolve task from `$ARGUMENTS`, conversation, workflow ledger, research, spec, ticket, or file path.
-2. Read existing workflow ledger if present; consume linked research/spec artifacts before asking questions.
+2. Read existing workflow ledger if present; consume linked research/spec/architecture-plan artifacts before asking questions. If an architecture plan exists, seed `## Architectural Constraints` from it rather than re-deriving constraints independently.
 3. Research factual gaps yourself. Pause only for genuine scope, product, or approach decisions.
 4. Propose implementation approach and boundaries.
 5. Write ordered phases, each small enough for one executor run.
