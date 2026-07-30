@@ -21,18 +21,21 @@ Explicit mode processes every PR named, with **no approval-state filtering** —
 
 ### Auto-discovery mode
 
-`$ARGUMENTS` names no PRs. Discover what's actually in the reviewer's queue instead of asking for a list:
+`$ARGUMENTS` names no PRs. Discover what's actually worth a second look in the **current repo** instead of asking for a list:
 
 ```bash
 scripts/discover-review-queue.sh
 ```
 
-This prints one NDJSON object per PR still worth reviewing: `{"owner", "repo", "number", "title", "url", "draft"}`. Empty output means nothing left to review — say so and stop (see below).
+Run this from (or have it resolve) the repo the current session is actually working in — it scopes to that one repo via `gh repo view`, not across every repo the account can see. It prints one NDJSON object per PR still worth reviewing: `{"owner", "repo", "number", "title", "url", "draft"}`. Empty output means nothing left to review — say so and stop (see below).
 
-The script exists so discovery runs the same way every time rather than being re-derived ad hoc each run — that matters here specifically because the naive version of this got the `gh search prs` JSON field wrong on the first attempt (`.repository.fullName` — correct for `gh search commits`, but `gh search prs` uses `.repository.nameWithOwner`), which would have silently produced `owner=null` on every call. It:
+The script exists so discovery runs the same way every time rather than being re-derived ad hoc each run — that matters here specifically because the naive first draft got the `gh search prs` JSON field wrong (`.repository.fullName` — correct for `gh search commits`, but `gh search prs` uses `.repository.nameWithOwner`), which would have silently produced `owner=null` on every call. It:
 
-- Uses `gh search prs --review-requested=@me`, not `gh pr list` — `gh pr list` only lists one repo at a time (`-R owner/repo`); the search form covers every repo the account can see in one call. A reviewer's queue routinely spans repos (e.g. a main app repo and a tooling repo), so a single-repo list would silently miss some.
-- Filters out anything already approved. `review-requested:@me` alone is not enough — GitHub can leave or re-add a PR to that queue after an approval (e.g. new commits under a branch-protection rule that dismisses stale reviews). For every candidate, it checks the actual *latest* review submitted by this user (`sort_by(.submitted_at) | last`, not just "was there ever an approval") and drops the PR only if that latest state is exactly `APPROVED`. `null`/no review yet, `COMMENTED`, and `CHANGES_REQUESTED` are all kept. This is unconditional — an approved PR is dropped even if new commits landed since; the point of auto-discovery is to surface what genuinely still needs a look, not to re-litigate something already signed off on.
+- Filters `gh search prs --review-requested=@me` to `--repo <current repo>`, resolved via `gh repo view --json nameWithOwner`. Scoped deliberately, not a gap: this loop tracks the repo the calling session is in, not the account's whole review queue everywhere.
+- Applies a **keep-list**, not just an approved-exclusion: a PR only survives if this user's own *latest* review on it is `COMMENTED` or `CHANGES_REQUESTED`.
+  - `APPROVED` is dropped — nothing left to re-review once you've signed off.
+  - **No review yet is also dropped.** This script surfaces PRs worth a *second* look after you've already left feedback — not first-time review requests. A brand-new PR sitting in `review-requested:@me` with no review from you yet will not appear here, even though GitHub still lists it under that queue. First-time reviews go through explicit mode or a direct `my-review` call.
+  - "Latest" matters, not "ever": GitHub can leave/re-add a PR to the review-requested queue after an approval (e.g. new commits under a branch-protection rule that dismisses stale reviews) — the script sorts by `submitted_at` and checks the last state, not whether an approval ever happened anywhere in the history.
 
 Print the discovered, filtered list before starting the loop (`Discovered N PRs to review: ...`) so it's visible what's about to be processed — this is informational, not a gate; per the standing-approval convention below, discovery does not pause for confirmation.
 
