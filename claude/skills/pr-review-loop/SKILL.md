@@ -1,13 +1,13 @@
 ---
 model: sonnet
 name: pr-review-loop
-description: "Batch-process GitHub PRs by running my-review then publish-review on each one in sequence, publishing as it goes. Takes an explicit PR list, or auto-discovers PRs in the current repo where the user left feedback that hasn't been re-reviewed."
-when_to_use: "Use when the user gives a list of PR numbers to review and publish, or asks to sweep the current repo for PRs where they left a comment/changes-requested that hasn't had a follow-up look, instead of doing them one at a time."
+description: "Batch-process GitHub PRs by running my-review then publish-review on each one in sequence, publishing as it goes. Takes an explicit PR list, or auto-discovers open review requests in the current repo, skipping ones already approved."
+when_to_use: "Use when the user gives a list of PR numbers to review and publish, or asks to review whatever PRs are currently requested of them in the current repo, instead of doing them one at a time."
 ---
 
 # PR Review Loop
 
-Run each PR through `my-review` -> `publish-review`, in sequence, publishing every review as it goes. Takes an explicit PR list, or — with none given — auto-discovers PRs in the current repo that need a follow-up look.
+Run each PR through `my-review` -> `publish-review`, in sequence, publishing every review as it goes. Takes an explicit PR list, or — with none given — auto-discovers open review requests in the current repo, excluding ones already approved.
 
 ## Load Rules
 
@@ -26,7 +26,7 @@ For PR-list parsing (explicit and auto-discovery), per-PR skip conditions, failu
 
 1. Resolve the working list of `(owner, repo, number)` tuples from `$ARGUMENTS`:
    - **Explicit**: PR numbers/URLs given — use them as-is, no approval filtering.
-   - **Auto-discovery**: none given — run `scripts/discover-review-queue.sh`, scoped to the current repo (via `gh repo view`). It keeps only PRs where my *latest* review is `COMMENTED` or `CHANGES_REQUESTED` — dropping both `APPROVED` PRs and PRs I've never reviewed at all, since this mode is for catching up on feedback I already gave, not first-time reviews.
+   - **Auto-discovery**: none given — run `scripts/discover-review-queue.sh`, scoped to the current repo (via `gh repo view`). It drops a PR only if my *latest* review on it is `APPROVED`; never-reviewed, `COMMENTED`, and `CHANGES_REQUESTED` are all kept.
 2. For each PR, in order:
    - Pre-check state; skip merged/closed PRs.
    - Run `my-review` in PR mode.
@@ -35,7 +35,7 @@ For PR-list parsing (explicit and auto-discovery), per-PR skip conditions, failu
 4. Apply the three-strike rule **per PR**: a PR that fails twice more after its first failure gets skipped and reported, not retried indefinitely — one bad PR never stalls the batch.
 5. After the last PR, report the full progress table.
 
-In explicit mode, always re-review every named PR, even one reviewed before at the same commit — `my-review` already dedupes new findings against its `existing_comments_index` (including its own prior passes), so a re-review does not re-post what's already there. In auto-discovery mode, the keep-list filter runs before the loop starts (Step 1): only PRs where my last review was `COMMENTED` or `CHANGES_REQUESTED` make it in — both already-approved PRs and never-reviewed PRs are excluded, since this mode exists to catch up on feedback already given, not to approve for the first time or re-approve.
+In explicit mode, always re-review every named PR, even one reviewed before at the same commit — `my-review` already dedupes new findings against its `existing_comments_index` (including its own prior passes), so a re-review does not re-post what's already there. In auto-discovery mode, the approved-exclusion runs before the loop starts (Step 1): only already-approved PRs are dropped, since re-approving something already signed off on adds no value — everything else in the queue, including PRs never reviewed at all, gets processed.
 
 ## Output
 

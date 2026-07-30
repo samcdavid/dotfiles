@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Discover open PRs, in the current repo, where review is requested from the
-# authenticated user and where their own latest review left something open
-# (a comment or changes-requested) — not brand new, not already approved.
+# authenticated user and the user hasn't already approved.
 #
 # Usage: discover-review-queue.sh   (run from inside the target repo)
 # Output: one JSON object per line (NDJSON) — owner, repo, number, title,
@@ -11,13 +10,11 @@
 # `gh repo view`. This deliberately does not search across repos — it
 # tracks the repo the calling Claude session is actually working in.
 #
-# Keep-list, not just an approved-exclusion: a PR is only surfaced if this
-# user's *latest* review on it is COMMENTED or CHANGES_REQUESTED.
-#   - APPROVED is dropped — nothing left to re-review once you've signed off.
-#   - No review yet (never reviewed) is also dropped — this script surfaces
-#     PRs worth a second look after leaving feedback, not first-time review
-#     requests. A brand-new, never-reviewed PR in the queue will not appear
-#     here even though GitHub still lists it under review-requested:@me.
+# Exclusion, not a keep-list: a PR is dropped only if this user's *latest*
+# review on it is APPROVED — nothing left to review once you've signed off.
+# Never-reviewed (no review yet), COMMENTED, and CHANGES_REQUESTED are all
+# kept — this surfaces both first-time review requests and PRs worth a
+# second look after earlier feedback.
 # "Latest" (not "ever") matters: GitHub can leave/re-add a PR to the
 # review-requested queue after an approval (e.g. new commits under a
 # branch-protection rule that dismisses stale reviews) — sort by
@@ -50,10 +47,9 @@ echo "$CANDIDATES" | jq -c '.[]' | while IFS= read -r pr; do
   last_state=$(gh api "repos/${owner}/${repo}/pulls/${number}/reviews" 2>/dev/null \
     | jq -r --arg me "$ME" '[.[] | select(.user.login == $me)] | sort_by(.submitted_at) | last | .state // "NONE"')
 
-  case "$last_state" in
-    COMMENTED|CHANGES_REQUESTED) ;;
-    *) continue ;;
-  esac
+  if [ "$last_state" = "APPROVED" ]; then
+    continue
+  fi
 
   jq -c --arg owner "$owner" --arg repo "$repo" \
     '{owner: $owner, repo: $repo, number, title, url, draft: .isDraft}' <<<"$pr"
