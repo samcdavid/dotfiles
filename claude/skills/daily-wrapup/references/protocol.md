@@ -20,15 +20,13 @@ If missing, ask the user before proceeding. Once present:
 
 Fetch all of the following in parallel:
 
-1. **Notion**: Fetch today's entry from the Daily ToDo database using **view mode** (sorted descending by Date, `page_size: 5`, pick the top result whose `date:Date:start` matches today — per the daily-summary `Notion SQL date-filter` gotcha; do not use SQL mode). Then fetch the page contents in full — Checklist, Actions and decisions, Notes — that is the raw state we will consolidate.
+1. **Notion — today's own entry**: Fetch today's entry from the Daily ToDo database using **view mode** (sorted descending by Date, `page_size: 5`, pick the top result whose `date:Date:start` matches today — per the daily-summary `Notion SQL date-filter` gotcha; do not use SQL mode). Then fetch the page contents in full — Checklist, Actions and decisions, Notes — that is the raw state we will consolidate.
 
-2. **Linear — my activity today**: List issues assigned to me with `updatedAt: "-P1D"` to capture today's churn. Scope per the `list_issues` gotcha to keep results bounded. Also list issues NOT assigned to me where I commented, transitioned status, or had a PR linked today (best signal: recent comments authored by me, plus PR links from today's GitHub activity in Phase 1.4).
+2. **The four activity sources** (`references/activity-sources.md`) — GitHub, Linear, Notion (workspace-wide), and Slack. These replace manually logging work throughout the day: run each source's procedure for today's date and treat the combined output as the raw material for Phases 3-5, the same way today's Notion bullets are used.
 
 3. **Google Calendar**: Today's events — which ran, which were canceled, what was added late. This tells us what consumed today's focus time.
 
 4. **Gmail**: Messages I sent today (Sent folder, today's date) and notable inbound replies that completed an action.
-
-5. **GitHub** (optional): PRs I opened, reviewed, or merged today (`gh search prs --author @me --created today` and `gh search prs --reviewed-by @me --updated today`, or equivalent). Skip if the user is not actively in code today.
 
 ## Phase 2 — Enrich Linear
 
@@ -105,6 +103,11 @@ Do **not** touch:
 - **## Checklist** — today's historical record of what was planned. Stands as-is.
 - **## Summary** — tomorrow morning's daily-summary writes this in performance-review tone.
 - Page `Status` property — tomorrow's daily-summary flips it to `Complete` after the Summary is written.
+
+## References
+
+- `references/activity-sources.md` — the four activity-gathering procedures (GitHub, Linear, Notion, Slack) used in Phase 1, including the GitHub script's invocation and each source's known limitations.
+- `scripts/github-activity.sh` — standalone script backing the GitHub activity source; runs independently of this skill for spot-checking (`scripts/github-activity.sh [YYYY-MM-DD]`).
 
 ## Gotchas
 If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.

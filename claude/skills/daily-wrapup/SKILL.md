@@ -11,12 +11,12 @@ Produce a concise end-of-day record from today's work artifacts.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact Notion formatting or edge cases, read `references/protocol.md`.
+Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact Notion formatting or edge cases, read `references/protocol.md`. Always read `references/activity-sources.md` before Phase 1 — it's what replaces manual per-task `log-work` calls with an automated pull of the day's real activity.
 
 ## Flow
 
 1. Locate or create today's Notion entry.
-2. Collect today's Linear changes, Git activity, calendar context, and session notes.
+2. Run the four activity sources (`references/activity-sources.md`): GitHub (`scripts/github-activity.sh`), Linear, Notion, and Slack — plus calendar context and today's raw Notion notes.
 3. Deduplicate and rewrite actions, decisions, blockers, and accomplishments.
 4. Preserve useful raw details only when they help tomorrow's handoff.
 5. Update Notion.
