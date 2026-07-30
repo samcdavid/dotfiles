@@ -18,6 +18,14 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** SQL-mode queries against long-lived daily databases appear to trip Notion-internal rate limiting (years of entries to scan); view mode hits a different, indexed code path. Retrying the SQL form just burns time — pivot on the first 429, don't iterate.
 - **Source:** Observed when two variations of a date-equality SQL query against a multi-year daily database both returned 429 immediately, while a view-mode query against the same data source succeeded on first try.
 
+### Slack standup message posted with literal `\n` instead of real line breaks
+- **Category:** failure-mode
+- **Context:** Phase 4 (Generate Standup) — posting the Y:/T: standup via `slack_send_message`.
+- **Wrong:** Building the `message` argument with two-character `\n` escape sequences (as if writing a JSON-escaped string or shell heredoc) instead of an actual multi-line string with real newline characters. The tool posts exactly what it's given — Slack rendered the whole standup as one line with literal visible `\n` text instead of paragraph/bullet breaks.
+- **Right:** Pass `message` as a real multi-line string (actual embedded newlines), the same way you'd write it in a text editor — not an escaped one-liner. Immediately after posting, call `slack_read_thread` (or equivalent read-back) to confirm the message rendered with real line breaks before moving on, since Phase 4 has no other checkpoint that would catch this.
+- **Why:** There is no message-edit or message-delete tool in this Slack MCP integration. A malformed post can't be fixed in place — the only recovery is a follow-up "reposting, previous had a formatting glitch" reply, which clutters the thread and requires the user to manually delete the bad one. Verifying formatting before considering Phase 4 done is much cheaper than that cleanup.
+- **Source:** Observed 2026-07-29 — the daily-summary standup posted to the MCP daily-standup thread with literal `\n` sequences; only caught because the user flagged the formatting after the fact.
+
 ### `list_issues` without filters can exceed the token cap
 - **Category:** failure-mode
 - **Context:** Phase 1 (Gather Context) — listing Linear issues assigned to the user.
