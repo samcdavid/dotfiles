@@ -545,68 +545,12 @@ Present the final result:
 
 ### Publishing Next
 
-[State that commits are being pushed, responses posted, and their threads resolved next — status line, not a question]
+[State that commits are being pushed, responses posted, their threads resolved, and reviews re-requested next — status line, not a question]
 ```
 
 ## Step 12 — Publish Responses
 
-Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — Step 2's triage confirmation already authorized this. Push any new commits first, then post responses, then resolve threads.
-
-### Push Commits
-
-```bash
-git push
-```
-
-### Post Thread Replies
-
-For each response targeting an inline review comment (has a `comment_id`):
-
-```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments \
-  -f body="Response text" \
-  -F in_reply_to={comment_id}
-```
-
-### Post PR-Level Replies
-
-For each response targeting a review body or issue comment (no `comment_id`):
-
-```bash
-gh api repos/{owner}/{repo}/issues/{number}/comments \
-  -f body="> Quoted original text
-
-Response text"
-```
-
-### Resolve Threads
-
-For each `review_comment` item that just received a reply and has a `thread_id` (captured in Step 1's index), mark the thread resolved:
-
-```bash
-gh api graphql -f threadId="{thread_id}" -f query='
-mutation($threadId: ID!) {
-  resolveReviewThread(input: {threadId: $threadId}) {
-    thread { id isResolved }
-  }
-}'
-```
-
-`review_body` and `issue_comment` replies have no GraphQL review thread to resolve — skip them.
-
-### Publish Order
-
-1. Push commits first — so commit SHA links in responses resolve correctly
-2. Thread replies next — these are the most targeted and expected
-3. PR-level replies last
-4. Resolve threads last — only after the reply addressing each thread has actually posted
-
-### Error Handling
-
-- If a thread reply fails (e.g. comment ID no longer exists), report the error and fall back to a PR-level comment quoting the original
-- If a push fails, do NOT post responses — commit SHAs in responses would be wrong
-- If resolving a thread fails (e.g. already resolved, stale ID), report it and continue — a resolve failure never blocks other replies or a prior push
-- Report each posted response and each resolved thread as it succeeds so the user can track progress
+Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — Step 2's triage confirmation already authorized this. Read `references/replies-and-publishing.md`'s "Publish Mechanics" section for the exact commands and order: push commits, post thread/PR-level replies, resolve threads, then re-request review from the reviewers who left them.
 
 ## Guidelines
 
@@ -622,12 +566,13 @@ mutation($threadId: ID!) {
 - **Deferred is not forgotten.** Every deferral needs a concrete follow-up plan, or it's not a deferral — just do it.
 - **Don't fix what wasn't flagged.** Address the feedback, nothing more — no refactoring surrounding code while you're in the file.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
-- **One gate, not several.** PR mode confirms triage once (Step 2); everything after — planning, fixes, commits, push, reply-publishing, thread-resolution — runs to completion without asking again. Only a loop-detection stop or a major plan deviation interrupts it.
+- **One gate, not several.** PR mode confirms triage once (Step 2); everything after — planning, fixes, commits, push, reply-publishing, thread-resolution, re-requesting review — runs to completion without asking again. Only a loop-detection stop or a major plan deviation interrupts it.
 
 ## References
 
 - `references/pushback-patterns.md` — 12 pushback shapes distilled from a 24-developer PR mining pass. Used during Step 2 (investigate) to pick a response shape; includes a "When to push back vs. when to accept" decision table and per-person pushback fingerprints.
 - `references/workflow-ledger-context.md` — checked in Getting Started, before anything else. Detects a `my-workflow` ledger tied to the current branch and folds its spec/plan/decisions into the requirements map and investigation.
+- `references/replies-and-publishing.md` — reply shape/publishing rules plus "Publish Mechanics": the exact `gh` commands and order for Step 12 (push, post replies, resolve threads, re-request review).
 - The plan and implement acts mirror `my-plan` and `my-implement`; `my-implement/references/verification-commands.md` is the source for per-stack `verification_commands` passed into each slice.
 
 ## Gotchas

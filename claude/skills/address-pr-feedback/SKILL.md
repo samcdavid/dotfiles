@@ -14,7 +14,7 @@ Work through pending review feedback without blindly accepting or rejecting it. 
 
 Establish the mode first — it decides the feedback source and whether triage has a confirmation gate.
 
-- **PR mode** (a PR exists): feedback is GitHub comments; triage confirmation is the only gate — it authorizes the rest of the run to finish unattended.
+- **PR mode** (a PR exists): feedback is GitHub comments; triage confirmation is the only gate — it authorizes the rest of the run unattended.
 - **Local mode** (`local` in `$ARGUMENTS`, findings passed inline, or no PR): feedback is `my-review`'s findings on the working tree; no gate, no GitHub. Used by `my-workflow`'s automatic fix loop.
 
 Read `references/mode-semantics.md` before acting on either.
@@ -77,16 +77,16 @@ Load targeted references as needed:
     - non-behavioral edits -> `quick-implement-agent` direct-edit phases
 11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; if it did not and validation passed, commit it yourself via the `commit` skill scoped to that fix's files.
 12. Run final validation against tests, requirements map, and reviewer concerns.
-13. PR mode: draft evidence-backed replies, push, publish, and resolve threads — no further confirmation. Local mode: skip publishing; report resolution per finding instead.
+13. PR mode: draft evidence-backed replies, push, publish, resolve threads, and re-request review — no further confirmation. Local mode: skip publishing; report resolution per finding.
 
 ## Boundaries
 
 - In PR mode, do not check out PR branches or treat local changed files as PR truth. In local mode, the working tree *is* the truth and `pr-mode-readonly.md` does not apply.
-- Commit each validated fix locally. In PR mode, triage confirmation (Modes) also authorizes push/reply/resolve. Local mode has no PR.
+- Commit each validated fix locally. In PR mode, triage confirmation (Modes) also authorizes push/reply/resolve/re-request; local mode has no PR.
 - Do not implement behavioral fixes in the main context; dispatch the executor.
 - Do not defer fixes under roughly 20 lines unless there is a real scope or product reason.
 - Do not push back without specific code, test, docs, or requirement evidence.
 
 ## Output
 
-Return pending-feedback triage, fixes with commit SHAs, validation results, unresolved items, and in PR mode what was pushed, posted, and resolved.
+Return pending-feedback triage, fixes with commit SHAs, validation results, unresolved items, and in PR mode what was pushed, posted, resolved, re-requested.
