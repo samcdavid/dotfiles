@@ -131,3 +131,13 @@ After all updates:
 1. Re-run the outdated command to confirm everything is current.
 2. Summarize what was updated, grouping by safe vs breaking.
 3. Note any breaking changes that required code modifications and what was changed.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "It's just a patch bump, no need to check the changelog" | Patch releases can still ship behavior changes or accidental breaks — skim the changelog for anything touching code you use. |
+| "The major bump only touches an area we don't use" | Confirm that by reading the diff/changelog, not by assuming — transitive usage (a re-exported type, a peer dependency) is easy to miss. |
+| "I'll bundle several breaking upgrades in one pass to save time" | A bulk bump that breaks the build hides which package caused it — isolate breaking changes per package so the cause and the revert stay clean. |
+| "Tests passed, so the upgrade is safe" | Tests cover behavior you wrote tests for, not new deprecation warnings, peer-dependency conflicts, or runtime-only breakage — re-run lint/build/audit too. |
+| "The lockfile diff is huge, I won't review it" | A hand-edited or unreviewed lockfile diff can pull in unexpected transitive versions — skim it for anything beyond the direct bump. |

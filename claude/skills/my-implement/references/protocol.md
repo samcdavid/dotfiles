@@ -100,6 +100,17 @@ When all phases are verified done:
 - Commit nothing and push nothing — this skill produces verified working-tree changes only. Outward git actions are the user's call.
 - The plan is the WHAT; the executor decides the HOW for its phase, within `allowed_paths` and `architectural_constraints`.
 
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "The tests are green, the phase is done" | Green tests don't guarantee the code matches the phase's actual requirements — vacuous tests pass too. Always check requirements conformance against the diff, not just criteria output. |
+| "The executor said it's done, I trust it" | You are the reviewer, not the implementer's rubber stamp — re-run success criteria and read the diff yourself every time. |
+| "This phase is a little bigger than planned, I'll let it ride" | An oversized phase is a planning gap, not a rounding error — split it before dispatch, or the executor's context thins out exactly where it matters. |
+| "One more retry will probably fix it" | That's what the loop-detection limit is for. A third failure on the same root cause means stop and escalate, not "try once more." |
+| "The deviation is minor, I'll just note it and move on" | Confirm it's actually minor against the stated indicators (missing file, changed API, blocked path) before classifying it — a major deviation dressed up as minor compounds silently across phases. |
+| "I'll dispatch two executors to go faster" | Executors share the working tree and phase order encodes dependencies — parallel dispatch risks conflicting edits, not speed. |
+
 ## References
 
 This skill has reference files in `references/` — consult them while assembling slices:

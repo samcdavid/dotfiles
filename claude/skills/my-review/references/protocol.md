@@ -435,6 +435,18 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - Never re-raise an issue already present in the PR conversation.
 - Reserve `REQUEST_CHANGES` for Critical merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or omitted must-have acceptance criteria. Non-Critical findings can be raised as comments, questions, suggestions, or nits; use `COMMENT` rather than `APPROVE` when there are several substantive inline comments or unresolved requirements concerns.
 
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "The tests pass, so it's fine" | Green tests are necessary, not sufficient — they don't catch architecture, security, or requirements gaps. Read the diff itself. |
+| "It's a small PR, a light pass is enough" | Diff size doesn't predict risk. A five-line change to auth or a migration deserves the same scrutiny as a five-hundred-line refactor. |
+| "This finding is annoying but not really Critical" | Match severity to `review-finding-format.md`'s bar, not to how strongly it feels in the moment. If it doesn't meet a Critical criterion, it's non-blocking — say so plainly instead of inflating it to force a fix. |
+| "The author clearly knows what they're doing" | Author competence isn't evidence the diff is correct. Review the code in front of you, not your prior of the author. |
+| "I already found a few issues, that's enough" | Stopping early because a quota feels met leaves real findings on the table — finish the lens sweep before triaging. |
+| "The PR conversation probably already covers this" | Confirm it actually does by checking `existing_comments_index` — don't silently drop a finding on a hunch. |
+| "COMMENT vs APPROVE doesn't matter much here" | It's the signal the author acts on. Reserve APPROVE for when requirements are satisfied and no Critical finding survives — don't let convenience nudge it up a level. |
+
 ## References
 
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
