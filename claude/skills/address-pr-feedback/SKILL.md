@@ -14,7 +14,7 @@ Work through pending review feedback without blindly accepting or rejecting it. 
 
 Establish the mode first — it decides the feedback source and whether triage has a confirmation gate.
 
-- **PR mode** (a PR exists): feedback is GitHub comments; triage is confirmed before any code change; replies are drafted.
+- **PR mode** (a PR exists): feedback is GitHub comments; triage confirmation is the only gate — it authorizes the rest of the run to finish unattended.
 - **Local mode** (`local` in `$ARGUMENTS`, findings passed inline, or no PR): feedback is `my-review`'s findings on the working tree; no gate, no GitHub. Used by `my-workflow`'s automatic fix loop.
 
 Read `references/mode-semantics.md` before acting on either.
@@ -71,22 +71,22 @@ Load targeted references as needed:
    - Disagree / Push Back
    - Already Addressed
 8. Run adversarial challenge on classifications before acting.
-9. PR mode: present triage and wait for user confirmation. Local mode: state the triage and proceed — no gate.
+9. PR mode: present triage and wait for confirmation (only gate). Local mode: state the triage and proceed — no gate.
 10. Plan fixes:
     - behavioral fixes -> `implementation-executor` TDD phases
     - non-behavioral edits -> `quick-implement-agent` direct-edit phases
 11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; if it did not and validation passed, commit it yourself via the `commit` skill scoped to that fix's files.
 12. Run final validation against tests, requirements map, and reviewer concerns.
-13. PR mode: draft evidence-backed replies; do not publish unless explicitly asked. Local mode: skip replies and report the resolution per finding instead.
+13. PR mode: draft evidence-backed replies, push, publish, and resolve threads — no further confirmation. Local mode: skip publishing; report resolution per finding instead.
 
 ## Boundaries
 
 - In PR mode, do not check out PR branches or treat local changed files as PR truth. In local mode, the working tree *is* the truth and `pr-mode-readonly.md` does not apply.
-- Commit each validated fix locally. Do not push, publish replies, or mark threads resolved unless explicitly asked.
+- Commit each validated fix locally. In PR mode, triage confirmation (Modes) also authorizes push/reply/resolve. Local mode has no PR.
 - Do not implement behavioral fixes in the main context; dispatch the executor.
 - Do not defer fixes under roughly 20 lines unless there is a real scope or product reason.
 - Do not push back without specific code, test, docs, or requirement evidence.
 
 ## Output
 
-Return pending-feedback triage, fixes completed with commit SHAs, validation commands/results, unresolved items, and in PR mode the draft replies grouped by comment.
+Return pending-feedback triage, fixes with commit SHAs, validation results, unresolved items, and in PR mode what was pushed, posted, and resolved.

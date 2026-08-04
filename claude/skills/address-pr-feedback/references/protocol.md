@@ -50,6 +50,7 @@ Build a structured index of every comment, organized by:
 - **Where** (file:line, or general PR comment)
 - **What** they said
 - **Comment ID** — the numeric ID from the API (needed for thread replies)
+- **Thread ID** — for `review_comment` type, the GraphQL thread node ID (`thread_id` in `pr-cost-control.md`'s query) — needed to resolve the thread after replying
 - **Comment type** — `review_comment` (inline on a file:line), `review_body` (top-level review submission), or `issue_comment` (general PR conversation)
 - **Status** — is it resolved, pending, or part of an ongoing thread?
 - **Has it already been addressed?** Check if there's a reply with a commit SHA or a "done" acknowledgment.
@@ -196,6 +197,8 @@ Present the triage to the user **with your investigation findings**:
 
 Get user confirmation before proceeding. The user may reclassify items, add context, or challenge your investigation findings. **The confirmed triage is the research output of this skill — it is held inline, not written to a research doc.**
 
+This confirmation is the *only* gate in this skill (PR mode) — it doubles as the explicit outward-action approval `~/.claude/rules/no-outward-actions.md` requires. Once given, proceed through planning, implementation, commit, push, reply-publishing, and thread-resolution without pausing for another ask. The sole exceptions are loop-detection stops on repeated failure (Step 6) and major plan deviations (Step 6's "Plan deviations") — both are correctness stops, not approval stops.
+
 ---
 
 ## Act II — Plan (condensed `my-plan`)
@@ -248,7 +251,7 @@ These are the standards every fix — executor phase or direct edit — must mee
 **Lint discipline** — no checks disabled/suppressed; no formatter violations; no new warnings.
 **Existing patterns** — reuse existing utilities; if the reviewer pointed you to a function, actually use it.
 
-Present the fix plan to the user — the behavioral phases (with what each RED test will assert) and the direct-edit list — and get a quick confirmation of the approach before executing. The triage was already approved in Act I; this confirms *how* you'll fix, not *whether*.
+State the fix plan — the behavioral phases (with what each RED test will assert) and the direct-edit list — for visibility, then proceed directly to Act III. Step 2's triage confirmation already covers *how* you'll fix, not just *whether* — do not stop for a second approval here.
 
 ---
 
@@ -540,14 +543,14 @@ Present the final result:
 - Lint: pass/fail
 - Tests: pass/fail
 
-### Ready to post?
+### Publishing Next
 
-[Ask user whether to post the drafted responses to GitHub]
+[State that commits are being pushed, responses posted, and their threads resolved next — status line, not a question]
 ```
 
 ## Step 12 — Publish Responses
 
-Only after user confirmation. Push any new commits first, then post responses.
+Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — Step 2's triage confirmation already authorized this. Push any new commits first, then post responses, then resolve threads.
 
 ### Push Commits
 
@@ -576,17 +579,34 @@ gh api repos/{owner}/{repo}/issues/{number}/comments \
 Response text"
 ```
 
+### Resolve Threads
+
+For each `review_comment` item that just received a reply and has a `thread_id` (captured in Step 1's index), mark the thread resolved:
+
+```bash
+gh api graphql -f threadId="{thread_id}" -f query='
+mutation($threadId: ID!) {
+  resolveReviewThread(input: {threadId: $threadId}) {
+    thread { id isResolved }
+  }
+}'
+```
+
+`review_body` and `issue_comment` replies have no GraphQL review thread to resolve — skip them.
+
 ### Publish Order
 
 1. Push commits first — so commit SHA links in responses resolve correctly
 2. Thread replies next — these are the most targeted and expected
 3. PR-level replies last
+4. Resolve threads last — only after the reply addressing each thread has actually posted
 
 ### Error Handling
 
 - If a thread reply fails (e.g. comment ID no longer exists), report the error and fall back to a PR-level comment quoting the original
 - If a push fails, do NOT post responses — commit SHAs in responses would be wrong
-- Report each posted response as it succeeds so the user can track progress
+- If resolving a thread fails (e.g. already resolved, stale ID), report it and continue — a resolve failure never blocks other replies or a prior push
+- Report each posted response and each resolved thread as it succeeds so the user can track progress
 
 ## Guidelines
 
@@ -602,6 +622,7 @@ Response text"
 - **Deferred is not forgotten.** Every deferral needs a concrete follow-up plan, or it's not a deferral — just do it.
 - **Don't fix what wasn't flagged.** Address the feedback, nothing more — no refactoring surrounding code while you're in the file.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
+- **One gate, not several.** PR mode confirms triage once (Step 2); everything after — planning, fixes, commits, push, reply-publishing, thread-resolution — runs to completion without asking again. Only a loop-detection stop or a major plan deviation interrupts it.
 
 ## References
 
