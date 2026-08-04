@@ -48,13 +48,15 @@ Before presenting any question to the user, run it through this filter. The bar 
 
 When in doubt, run a quick adversarial pass: spawn an `adversarial-debate` agent (or do it yourself, fresh-eyed) on your draft question list — "which of these are actually load-bearing vs. thoroughness theater?" Keep only the load-bearing ones.
 
-## Step 4 — Ask the Survivors (Sparingly)
+## Step 4 — Ask the Survivors, One at a Time
 
-Now interview the user — but only on what survived the filter. Lead with what you already know:
+Now interview the user — but only on what survived the filter, and one question at a time rather than batched. Open with a hypothesis, then ask each surviving question with a guess attached:
 
-> "From the ticket and the code I've read: [3-5 bullets of what's clear]. Assumptions I'm making: [list]. The decisions I actually need from you: [the surviving questions]."
-
-Ask 2-3 at a time, not all at once. Respond to answers with follow-ups that dig deeper when something new is surfaced — but re-apply the filter to those follow-ups too.
+1. **State the hypothesis, with a confidence number.** Before the first question: "From the ticket and the code I've read: [3-5 bullets of what's clear]. My read of what we're actually building: [hypothesis]. Confidence: ~X% — missing: [what's still unclear]."
+2. **Ask one question, with a guess attached.** Don't pose an open question — attach your best-guess answer and the reasoning behind it: "Q: [question] GUESS: [answer], because [reasoning]. If wrong, [what changes about the spec]." The user is now correcting a concrete guess instead of answering a blank prompt, which surfaces a wrong assumption faster than an open question does.
+3. **Listen for "want vs. should want."** The first answer often restates the request rather than the underlying need (a "dashboard" that's actually "a list"). If an answer reveals the ask itself was off, say so and restate the hypothesis before continuing — don't quietly keep going down the original path.
+4. **Update confidence after every answer**, and re-apply the Step 3 filter to any new question the answer surfaces — an answer can retire a queued question as easily as raise a new one.
+5. **Stop once you can restate the ask in the user's own words and they've given an explicit confirmation** — not "whatever you think," an actual yes. This skill doesn't need `interview-me`'s ~95% open-ended-intent bar since Step 2/3 already narrowed to problem/requirements-level decisions, but the same "restate and confirm" discipline applies before moving to Step 5.
 
 Useful framings if questions are still warranted:
 - **Who is this for?** Who benefits? Who's affected?

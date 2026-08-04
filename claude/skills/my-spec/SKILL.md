@@ -29,7 +29,7 @@ Use `~/.agents/rules/` when running through Codex. For complex product scope or 
    - acceptance criteria
    - constraints and dependencies
    - open decisions
-5. Ask only unresolved decision questions, batched with options and recommendation.
+5. Ask only unresolved decision questions, one at a time, each with a stated confidence and a guessed answer attached; update confidence as answers land and restate the ask for explicit confirmation before drafting.
 6. Save the spec under `~/.claude/thoughts/shared/specs/`.
 7. Append spec path and decisions/assumptions to workflow ledger when present.
 
