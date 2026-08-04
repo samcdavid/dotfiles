@@ -7,7 +7,7 @@ description: Plan the architectural shape of a change before implementation — 
 
 # Architecture Plan
 
-Design where and how a change should fit into the existing system, before `my-plan` writes phases and before any code exists. Reuses `my-arch-review`'s criteria — Structural Fit, Coupling, Cohesion, Boundary Integrity, Dependency Health — applied prospectively as design decisions instead of retrospectively as review judgments.
+Design where and how a change should fit into the existing system, before `my-plan` writes phases and before any code exists. Reuses `my-arch-review`'s criteria — Structural Fit, Coupling, Cohesion, Boundary Integrity, Dependency Health — applied prospectively as design decisions instead of retrospectively as review judgments. When the change adds or touches a public interface, also applies contract-first design principles (Hyrum's Law, consistent error semantics, boundary validation, addition-over-modification, predictable naming).
 
 ## Load Rules
 
@@ -24,10 +24,11 @@ Use `~/.agents/rules/` when running through Codex. For the full flow, the criter
 2. Read the workflow ledger (if present) and consume linked research/spec/clarify artifacts by path before asking questions.
 3. Learn the existing architecture: module boundaries, dependency directions, and established conventions (`codebase-locator`/`codebase-analyzer`/`codebase-pattern-finder`, same discovery `my-arch-review` runs).
 4. Apply `my-arch-review`'s five criteria categories to the *planned* change — decide where it belongs and how it should be shaped, not just critique a diff that doesn't exist yet.
-5. Flag any deliberate deviation from convention, with rationale, before code is written — this is the cheapest point to catch an undesirable one.
-6. Assess long-term impact of the proposed structure if the pattern is repeated.
-7. Write the architecture plan; save under `~/.claude/thoughts/shared/architecture/`.
-8. Append the artifact path and any assumptions/decisions to the workflow ledger when present.
+5. If the change adds or touches a public interface, apply contract-first design (Hyrum's Law, error semantics, boundary validation, addition-over-modification, predictable naming) before moving on.
+6. Flag any deliberate deviation from convention, with rationale, before code is written — this is the cheapest point to catch an undesirable one.
+7. Assess long-term impact of the proposed structure if the pattern is repeated.
+8. Write the architecture plan; save under `~/.claude/thoughts/shared/architecture/`.
+9. Append the artifact path and any assumptions/decisions to the workflow ledger when present.
 
 ## Architecture Plan Quality Bar
 

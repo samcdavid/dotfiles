@@ -51,6 +51,17 @@ State your understanding of the architecture before proceeding:
 
 Since there is no diff to read yet, ground every decision in Step 1's actual findings (file:line evidence, real import graphs) — a plausible-sounding placement that contradicts the codebase's actual layering is worse than no plan at all.
 
+## Step 2a — Interface & Contract Design
+
+Applies whenever the planned change adds, extends, or crosses a public interface: an API endpoint, a cross-service contract, or a module's public function surface. Skip this step for a purely internal, single-module change with no external callers.
+
+- **Contract first.** Design the shape — request/response types, function signature, event schema — before the implementation that fills it in. Write the shape into the plan's Interface & Contract Design section verbatim; `my-plan`/`my-implement` should not have to infer it from prose.
+- **Hyrum's Law.** Once an interface has consumers, every observable behavior becomes a de facto dependency, not just the documented contract. Keep the surface minimal and intentional — don't expose incidental behavior (internal ordering, timing, error message text) that isn't meant to be relied on.
+- **Consistent error semantics.** Decide the error shape (status codes, error type/enum, message structure) as part of the contract, not as an afterthought once implementation hits an edge case. Match the codebase's existing error convention (from Step 1 evidence) unless there's a stated reason to deviate — log that under Step 3.
+- **Validate at the boundary.** Trust drops at a boundary crossing (service-to-service, module-to-module, user input). Input validation belongs at the boundary the untrusted data crosses, not several layers deep where the caller is assumed already-valid.
+- **Prefer addition over modification.** When extending an existing contract, design new optional fields/methods rather than changing or removing existing ones. A breaking change to a contract with existing consumers is a deviation — route it through Step 3's Desirable/Undesirable classification, don't let it pass as a silent edit.
+- **Predictable naming.** Name new interface members consistently with sibling interfaces already in the codebase (verb/noun conventions, pluralization, casing) — grounded in Step 1 evidence, not personal preference.
+
 ## Step 3 — Evaluate Deviations from Convention
 
 Not every convention needs following, but every break needs to be a decision, not an accident. Before writing the plan, classify anything the proposed structure does differently from established convention:
@@ -105,7 +116,7 @@ status: proposed
 [New dependency edges this change introduces, their direction, and why they don't violate existing layering. Note anything that increases coupling and whether it's necessary]
 
 ## Interface & Contract Design
-[Public interfaces/contracts this change introduces or modifies. Keep minimal. Note backward-compatibility/versioning if crossing a service boundary]
+[Public interfaces/contracts this change introduces or modifies. Keep minimal. Cover error semantics, boundary validation, and addition-vs-modification for any existing contract touched. Note backward-compatibility/versioning if crossing a service boundary. Omit this section if Step 2a did not apply]
 
 ## Deviations from Convention
 
@@ -136,12 +147,14 @@ The agent must:
 - Challenge the deviation classification — is something classified "desirable" actually just convenient, or is something classified as a needed deviation actually avoidable?
 - Check for contradictions — approving a pattern in one section while implicitly relying on its absence elsewhere.
 - Verify dependency-direction claims against the actual import graph from Step 1, not the plan's assertion of it.
+- When Step 2a applied: challenge whether the contract is genuinely minimal (a Hyrum's-Law audit — does it expose behavior beyond what's meant to be relied on?), whether error semantics match the codebase's existing convention or deviate without justification, and whether an "addition" to an existing contract is actually a breaking change in disguise.
 
 Apply every correction before presenting. Then confirm:
 - [ ] Every claimed convention has file:line or pattern-count evidence.
 - [ ] Every architectural constraint is concretely falsifiable, not prose-only guidance.
 - [ ] Desirable vs. rejected deviations are clearly distinguished with rationale.
 - [ ] The proposed placement and dependency design are grounded in Step 1's actual findings, not assumption.
+- [ ] If Step 2a applied: the contract is minimal (Hyrum's-Law audit passed), error semantics are stated and justified against existing convention, and no "addition" silently breaks an existing consumer.
 
 ## Step 7 — Review and Iterate
 
@@ -158,6 +171,7 @@ Present the plan. Incorporate user feedback on the proposed structure — this i
 ## References
 
 - `~/.claude/skills/my-arch-review/references/protocol.md` — criteria source of truth (Structural Fit, Coupling, Cohesion, Boundary Integrity, Dependency Health, Desirable/Undesirable Deviations). Read it directly rather than trusting a paraphrase — if it changes, this skill's criteria should track it automatically rather than drift from a stale copy.
+- Step 2a's interface/contract principles (Hyrum's Law, contract-first, error semantics, boundary validation, addition-over-modification) live only in this skill — they apply to prospective design, not `my-arch-review`'s retrospective diff criteria.
 - `~/.claude/skills/my-plan/references/plan-template.md` — the plan this artifact feeds; its `## Architectural Constraints` section should be seeded from this artifact's, not re-derived.
 
 ## Gotchas
