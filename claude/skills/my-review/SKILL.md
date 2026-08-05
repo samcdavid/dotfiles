@@ -52,7 +52,7 @@ Load targeted references as needed:
 - `references/lens-routing.md` before spawning research and lens reviewers.
 - `references/finding-finalization.md` before presenting findings.
 
-For learned-miss maintenance, read `references/learned-misses.md`. Always read local `gotchas.md` when present.
+For learned-miss maintenance, read `references/learned-misses.md` (active queue) and `references/promoted-misses.md` (promoted/discarded archive). Always read local `gotchas.md` when present.
 
 ## Flow
 

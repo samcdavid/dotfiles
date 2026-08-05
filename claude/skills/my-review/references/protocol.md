@@ -22,7 +22,7 @@ Subcommand keywords (`capture`, `promote`) take precedence over branch-name inte
 ### Read these before producing any output
 
 - `gotchas.md` — known failure patterns for this skill.
-- `references/learned-misses.md` — pattern queue. Auto-promote any pending entries whose Evidence has crossed threshold BEFORE producing the triage block, so the triage block can report what was promoted.
+- `references/learned-misses.md` — active pattern queue. Auto-promote any pending entries whose Evidence has crossed threshold BEFORE producing the triage block, so the triage block can report what was promoted.
 
 ## Step 1 - Gather Diff Existing Feedback
 
@@ -122,9 +122,9 @@ Produce a short triage block and show it to me before going deep:
 - **Pending learned misses:** <count> (run `/my-review promote` to triage early)
 ```
 
-To populate the last two lines, scan `references/learned-misses.md`:
-- Pending count = entries with `status: pending` or `status: ready` under `## Pending`.
-- Auto-promoted-since-last-review = entries under `## Promoted` whose `status: promoted (<date>)` is newer than the last completed review. If you can't determine the prior review timestamp, list any promotion dated within the last 14 days.
+To populate the last two lines:
+- Pending count = entries with `status: pending` or `status: ready` under `learned-misses.md`'s `## Pending`.
+- Auto-promoted-since-last-review = entries under `promoted-misses.md`'s `## Promoted` whose `status: promoted (<date>)` is newer than the last completed review. If you can't determine the prior review timestamp, list any promotion dated within the last 14 days.
 
 If `status: ready` entries exist (auto-promote blocked on ambiguous target), call them out by name — these need your input.
 
@@ -352,8 +352,8 @@ After the verdict is finalized, look at any PR comments (from other reviewers or
 2. For the `Worth-considering` set, ask one batched question:
    > "Do any of these point to a pattern the skill should have caught? [numbers or 'none']"
 3. For each selected comment:
-   - Check `references/learned-misses.md` for an existing matching Shape; append a new Evidence entry (`type: missed`, today's date, `ref` = comment link) if found.
-   - Otherwise, draft a Shape and Trigger signals, confirm with me, then append a new entry under `## Pending` with `status: pending`.
+   - Check `references/learned-misses.md` and `references/promoted-misses.md` for an existing matching Shape; append a new Evidence entry (`type: missed`, today's date, `ref` = comment link) if found.
+   - Otherwise, draft a Shape and Trigger signals, confirm with me, then append a new entry under `learned-misses.md`'s `## Pending` with `status: pending`.
 
 If no `Worth-considering` items, skip the prompt entirely.
 
@@ -365,8 +365,8 @@ Direct, source-agnostic entry into the pattern queue. Use when a pattern surface
 
 Flow:
 1. Ask: what pattern are we capturing? Collect Shape (one or two sentences, the *general* pattern), Trigger signals, and the source `ref`.
-2. Check `references/learned-misses.md` for an existing matching Shape. If found, append Evidence (`type: noted`, today's date, the source `ref`) to the existing entry.
-3. Otherwise, draft the entry and confirm with me before writing under `## Pending` with `status: pending`.
+2. Check `references/learned-misses.md` and `references/promoted-misses.md` for an existing matching Shape. If found, append Evidence (`type: noted`, today's date, the source `ref`) to the existing entry.
+3. Otherwise, draft the entry and confirm with me before writing under `learned-misses.md`'s `## Pending` with `status: pending`.
 
 Default Evidence type is `noted` (the user is calling it out — neither a clean catch nor a clean miss).
 
@@ -384,22 +384,22 @@ Walk the pending queue one entry at a time (use the `walk-through` skill). For e
    - The relevant lens skill's `SKILL.md` (e.g. `~/.claude/skills/security-audit/SKILL.md`) when the pattern belongs to a specific lens.
    - `gotchas.md` for a failure-mode lesson ("skill itself does the wrong thing").
 4. Confirm the exact wording — show what will be written, let me edit.
-5. On approval: write to target file under the appropriate section, mark entry `status: promoted (<today's date>)`, move entry to `## Promoted` section.
-6. On reject: mark `status: discarded (<today's date>, <one-line reason>)`, move to `## Discarded`.
+5. On approval: write to target file under the appropriate section, mark entry `status: promoted (<today's date>)`, move entry to `promoted-misses.md`'s `## Promoted` section.
+6. On reject: mark `status: discarded (<today's date>, <one-line reason>)`, move to `promoted-misses.md`'s `## Discarded` section.
 
 Do **not** run any review flow in this mode.
 
 ## Queue lifecycle and auto-promotion
 
-The queue at `references/learned-misses.md` is the single source of truth for patterns the skill is learning. Lifecycle:
+The active queue at `references/learned-misses.md` (`## Pending`) is the single source of truth for patterns the skill is still learning; `references/promoted-misses.md` is the audit archive for entries that graduated or were discarded. Lifecycle:
 
-1. **Capture** — entry appended with `status: pending`. Shape is the key; matching new captures against existing Shapes appends Evidence rather than creating duplicates.
+1. **Capture** — entry appended to `learned-misses.md`'s `## Pending` with `status: pending`. Shape is the key; matching new captures against existing Shapes (check both files) appends Evidence rather than creating duplicates.
 2. **Accumulate** — Evidence accrues across reviews. Both `type: caught` and `type: missed` (and `type: noted` from `capture` mode) count toward the threshold.
 3. **Auto-promote** — when `len(evidence) >= 3`:
    - Draft promotion wording (from the entry's `Proposed promotion: wording` field if set; otherwise generated from Shape + Evidence summary).
    - Pick the target file (from `Proposed promotion: target` if set; otherwise inferred — see below).
    - Write to the target file under the appropriate section.
-   - Mark entry `status: promoted (<today's date>)` and move it to `## Promoted`. Entry is preserved for audit.
+   - Mark entry `status: promoted (<today's date>)` and move it from `learned-misses.md` to `promoted-misses.md`'s `## Promoted`. Entry is preserved for audit.
 4. **Surface** — at the next `/my-review` invocation, Step 2's triage block reports the auto-promotion.
 
 ### When does the auto-promote check run?
@@ -451,7 +451,8 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
 - `references/cross-service-contracts.md` - checklist for cross-service changes. Read by `general-reviewer`.
-- `references/learned-misses.md` - pattern queue. Auto-promote check runs top invocation; triage block reports promotions.
+- `references/learned-misses.md` - active pattern queue. Auto-promote check runs top invocation; triage block reports promotions.
+- `references/promoted-misses.md` - audit archive of promoted/discarded entries, split out of `learned-misses.md` to stay under the reference word-budget cap.
 - `references/team-review-patterns.md` - team-and-community review patterns distilled from multi-developer PR mining pass. Created by separate mining pass; pass into lens reviewers (or fold relevant patterns into briefs) when present.
 - `gotchas.md` - known failure patterns. This skill every lens reviewer read it.
 

@@ -2,7 +2,7 @@
 
 Patterns the skill should learn to catch (or has caught and confirmed are recurring). Entries accumulate Evidence over time. When `len(evidence) >= 3`, an entry is auto-promoted into the relevant lens reference or `gotchas.md`.
 
-See `SKILL.md` § "Queue lifecycle and auto-promotion" for rules.
+See `SKILL.md` § "Queue lifecycle and auto-promotion" for rules. Promoted and discarded entries live in `references/promoted-misses.md`, not here — this file holds only the active `## Pending` queue, split out to stay under the reference word-budget cap.
 
 ## Schema
 
@@ -146,14 +146,3 @@ Each entry is a markdown subsection with:
 - **Proposed promotion** — `target: references/general-checklist.md` (a QA / checklist-quality check); `wording:` "When a checklist item gates on a search/discovery step's outcome (grep/glob for a convention, an existence check), verify it requires the actual search identifiers/scope/matched evidence to be cited, not just the boolean result. 'None found' recorded without evidence is an unfalsifiable assertion, especially when the discovery step is prompt-driven rather than tool-enforced — a reviewer can't tell a true negative from an under-scoped search without re-running it."
 - **Status** — pending
 
-## Promoted
-
-<!-- Entries with status: promoted (preserved for audit, never deleted automatically). -->
-
-_No promoted entries._
-
-## Discarded
-
-<!-- Entries with status: discarded (preserved for audit, never deleted automatically). -->
-
-_No discarded entries._
