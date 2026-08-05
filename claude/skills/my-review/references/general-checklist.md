@@ -13,12 +13,14 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Cross-service contracts — do serialization formats, field names, nullable/required declarations, and type coercions align across service boundaries?
 - Edge case probing — for every pattern match, conditional, and guard: what else could this value be? What happens when the input is nil, an empty list, a negative number, or a type the author didn't anticipate? Ask explicitly.
 - Bang vs. non-bang function choice — does a `!` function raise where the caller can't handle it (e.g. `Req.post!` in a user-facing request path)? Does a non-bang function silently swallow errors that should crash?
+- **Claim verification** — a comment, docstring, or PR-body sentence that asserts a fact about the live system (a DB column has no NOT NULL constraint, an ADR requirement is satisfied or doesn't apply, a GIN index is the right choice given the query's selectivity, "this fix handles the real input") is a claim, not evidence. Check it against the actual source: the real schema/migration history, the ADR's actual text, an actual query plan (`EXPLAIN`), or the real production-shaped input run through the real code path — not synthetic examples. A plausible-sounding prose justification that doesn't survive this check is a Critical finding, not a nit about wording.
 
 ### Blast Radius
 - Does the change scope match the stated intent? Removing a guard or feature flag should not silently broaden behavior beyond what's intended.
 - Are there callers or consumers of changed interfaces that aren't updated?
 - Are new pattern match branches missing fallback clauses that existing code depends on?
 - **Stale imports / aliases after deletions** — when the diff removes a file, module, function, or class, grep the codebase for any remaining import statements, aliases, `require`/`use`/`from … import`, or re-export references that still name the deleted artifact. Any hit outside the diff is Critical when it will cause a compile or runtime error. Grep by the module path *and* by the exported symbol name; they may be imported separately. In PR Mode, read the diff for all `-` lines that indicate removals and construct the grep targets from those identifiers.
+- **Zero-consumer code is not lower-risk.** New foundational or greenfield code (a new DSL, semantic model, composition primitive) with no current callers still gets full correctness scrutiny — "nothing depends on it yet" is a reason bugs are cheap to fix now, not a reason to soften the review. Don't let apparent low blast-radius become an excuse to skim.
 
 ### Layer Boundaries
 - Do API/resolver/controller concerns leak into backend contexts or domain modules? (e.g. GraphQL types, HTTP params, response formatting in a context module)
@@ -87,6 +89,10 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Index alignment — does the query use operators that can leverage existing indexes? (e.g. `@>` uses GIN indexes, `->>` with `=` does not)
 - App-side filtering that could be a SQL WHERE clause — move filtering into the query when the dataset could be large
 - `insert_all` for bulk operations instead of looping `insert` — flag loops that insert/update in a loop when a bulk operation would work
+
+### Observability (new metrics, indexes, or telemetry)
+- A new index, metric, or log field being emitted is not the same as it being populated with real, non-degenerate data — trace the value's actual source. A field hardcoded to a constant, or populated only behind a rarely-true condition, makes an index built on it permanently empty even though the migration and the code both look correct.
+- Confirm the chosen metric type's semantics actually hold for the backend in use — e.g. a gauge assumed to be "sticky" (persists between reporting intervals) that isn't on the actual metrics backend (DogStatsD does not guarantee this) will produce a gapped or unreadable series, not the continuous one the PR intends.
 
 ### Existing Pattern Reuse
 - Does the codebase already have a utility, function, or module that does what this new code adds? Flag duplication. (The `codebase-pattern-finder` subagent should surface these — reference its findings here.)

@@ -135,6 +135,13 @@ For each "Missing" or "Partial" requirement:
 - Is it blocked by something? (dependency, design decision, technical constraint)
 - Is it simply overlooked?
 
+### Deferral Verification
+A deferral is only valid if the cited follow-up actually covers the gap — a ticket number is not proof of a plan. For every requirement or known issue deferred to a ticket:
+- Fetch the cited ticket (Linear MCP) and confirm it exists — a deferral citing a ticket ID that doesn't resolve, or resolves to something unrelated, is not a valid deferral; treat it as "simply overlooked."
+- Read the ticket's actual title and description and confirm it covers the *specific* gap being deferred, not just a topically-adjacent concern. A ticket about "recursion limits" doesn't cover a `RecursionError` unless it actually discusses recursion; check the text, don't infer from the title alone.
+- If every sibling deferral in the same PR cites a ticket and one doesn't, that asymmetry itself is worth flagging — the missing-ticket deferral needs the same scrutiny as one with no ticket at all.
+- A deferral with no ticket, a nonexistent ticket, or a ticket that doesn't cover the gap is not a deferral — classify the requirement as genuinely missing.
+
 ### Missing Tests
 For each requirement:
 - Is there a test that specifically validates this requirement?

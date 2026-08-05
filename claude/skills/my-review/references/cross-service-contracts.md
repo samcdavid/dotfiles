@@ -34,3 +34,12 @@ Use when reviewing changes that touch service boundaries or shared data structur
 - [ ] Identify which service must deploy first to avoid breakage
 - [ ] Backward-compatible changes deploy before breaking changes
 - [ ] Feature flags coordinate multi-service rollout if needed
+
+## Failure-Path Tracing
+
+Shape alignment (above) catches contracts that are wrong on paper. It does not catch defects that only appear when a malformed, duplicate, or unexpected-but-valid value actually reaches the other side — those are invisible from the diff alone and require reading the *consumer's* handling code, not just comparing schemas.
+
+- [ ] For every field this change sends across a service boundary, trace what the **consuming** service actually does with a duplicate, out-of-vocabulary, or boundary value (empty list, max-length string, an enum value the consumer's vocab doesn't have) — does it validate and reject cleanly, or does it crash with an opaque error?
+- [ ] For a value that round-trips (written by one service, read back by another, or written then re-read through an API), verify the round-trip against the actual consumer's parsing/mapping code, not just that both sides "look compatible" — a `question_type` or similar enum can fail to round-trip even when both sides' schemas look aligned in isolation.
+- [ ] For a bulk/relational write (`insert_all`, upsert, bulk update) that's supposed to preserve associated records (`has_many`, join rows), verify the association actually survives the specific bulk operation used — some bulk paths silently drop associated data that a non-bulk `insert`/`update` would have preserved.
+- [ ] For a fix framed as "this satisfies the ticket's correctness definition," check it against the ticket's *full* definition, not just the first predicate — a fix that's one predicate short of the definition looks correct against a partial reading and wrong against production data.

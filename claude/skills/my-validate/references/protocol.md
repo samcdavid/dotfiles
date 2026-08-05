@@ -188,7 +188,11 @@ For each instrumentation point, read the source file(s) listed and verify:
 2. **Spans**: Is `tracer.trace(...)` (or equivalent) wrapping the described block? Are the specified attributes attached?
 3. **Logs**: Is the log statement present with the expected fields/format?
 
-Record each as: IMPLEMENTED, MISSING, or PARTIAL (present but deviates from plan).
+Presence is not the same as producing usable data — being emitted at the right call site with the right labels can still yield a metric or index that's permanently empty or unreadable in practice. For each instrumentation point, additionally trace the *value* being emitted, not just the call site:
+- **Indexed/filtered fields**: if a metric, log field, or DB index is built on a field, trace that field's actual source. A field hardcoded to a constant (e.g. always `None`/`null`), never populated on the code path that's actually exercised, or populated only behind a condition that's rarely true, will make the index or filtered query permanently empty even though the instrumentation code is present and correct-looking.
+- **Metric-type semantics**: confirm the chosen metric type actually behaves the way the plan assumes for this backend. A gauge is not necessarily "sticky" (persists its last value between reporting intervals) on every metrics backend (e.g. DogStatsD) — if the plan relies on gauge stickiness to produce a continuous series and the backend doesn't provide it, the series will have gaps or read as absent rather than flat.
+
+Record each as: IMPLEMENTED, MISSING, or PARTIAL (present but deviates from plan) — a metric/index emitting only degenerate values (always-default field, non-sticky gauge assumed sticky) is PARTIAL, not IMPLEMENTED, with the reason noted.
 
 ### Step 3 — Self-Repair
 

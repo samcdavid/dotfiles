@@ -115,6 +115,14 @@ For the specific changes being audited:
 - Are there high-risk code paths with disproportionately low test coverage?
 - Are there tests that would need to be updated if the implementation changed, even though the behavior didn't? (brittle tests coupled to implementation)
 
+### Mutation Check for New Guards
+
+For any **new** test or guard whose stated purpose is to catch a specific category of drift or regression (a schema/contract check, an invariant assertion, a "these two things must stay in sync" test, an inventory-completeness check), don't stop at reading it — mentally (or actually) reintroduce the exact defect it claims to catch and confirm it fails. A guard that only exercises the current-good state proves nothing about detection. Known failure shapes to check for specifically:
+- **Blind spots in field/contract checks** — a dataclass-field or schema-diff check that enumerates fields explicitly can be blind to a field added via `default_factory`, inheritance, or a dynamic mechanism the enumeration doesn't walk.
+- **One-directional completeness checks** — an "inventory is complete" or "all X have a corresponding Y" check that only verifies X→Y and not Y→X (or vice versa) misses drift introduced from the unchecked direction.
+- **Unanchored regexes** — a regex-based guard that isn't anchored (`^`/`$`, word boundaries) can match an unrelated identifier that merely contains the target substring, passing on inputs it should reject.
+- **Prose-snapshot tests** — a test that snapshots or diffs human-readable text (docs, error messages, descriptions) breaks on *any* rewording, real defect or not, which trains authors to blindly update the snapshot — verify it actually fails specifically when the underlying behavior it's meant to guard changes, not just when the prose changes.
+
 ## Step 6 — Adversarial Challenge
 
 Before presenting, spawn the **adversarial-debate** agent to challenge your quality findings. False gaps waste engineering effort writing unnecessary tests — precision matters.

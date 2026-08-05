@@ -114,7 +114,7 @@ The reviewer asked about intent or design. No code change needed — but your re
 
 #### Valid Deferral
 
-Investigation confirms the feedback is correct, but the fix is out of scope — too large, requires coordination, or is a separate concern. You have a concrete reason for deferring AND a follow-up plan.
+Investigation confirms the feedback is correct, but the fix is out of scope — too large, requires coordination, or is a separate concern. You have a concrete reason for deferring AND a follow-up plan. If the follow-up plan is a ticket, it is not valid evidence until you've fetched it and confirmed both that it exists and that its actual description covers this specific gap — a ticket number alone is not a plan. A deferral pointing at a nonexistent ticket, or one that's topically adjacent but doesn't actually cover the gap, is not a Valid Deferral; reclassify as Confirmed Fix.
 
 #### Disagree / Push Back
 
@@ -360,7 +360,7 @@ Deferring for this PR — [concrete reason: scope, requires coordination, separa
 [Follow-up plan: ticket number, next sprint, or specific next step.]
 ```
 
-Never defer without a follow-up plan. "I'll handle it later" without specifics is not acceptable. If you can't articulate a plan, it's not a valid deferral — just do it.
+Never defer without a follow-up plan. "I'll handle it later" without specifics is not acceptable. If you can't articulate a plan, it's not a valid deferral — just do it. If citing a ticket number, verify it (fetched, exists, description covers this gap) before it goes in the reply — citing an unverified or non-covering ticket number in a public reply is worse than no citation, since it reads as resolved when it isn't.
 
 ### For Push Back
 
