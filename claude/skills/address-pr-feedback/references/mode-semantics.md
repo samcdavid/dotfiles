@@ -9,7 +9,7 @@ Default when a PR exists for the branch, or when `$ARGUMENTS` names one.
 - Feedback source: GitHub review comments, review bodies, and issue comments, fetched with the filtered payloads in `pr-cost-control.md`.
 - Truth: the PR diff at `pr_head_sha`, never the local working tree. `pr-mode-readonly.md` applies in full.
 - Gate: **present triage and wait for confirmation** before changing code. Real reviewers are on the other end; pushing back on a colleague's comment is a judgment call the user owns. This is the *only* gate — per `no-outward-actions.md`, it is the explicit ask that authorizes everything downstream (implement, commit, push, publish replies, resolve threads, re-request review) to run to completion without a second confirmation.
-- Output: evidence-backed replies drafted per comment, then pushed, posted, their threads resolved, and the reviewers who left them re-requested — all automatic once verification (Step 9) and self-audit (Step 10) pass.
+- Output: evidence-backed replies drafted per comment, then pushed, posted, their threads resolved, and non-approving reviewers re-requested — all automatic once verification (Step 9) and self-audit (Step 10) pass.
 
 ## Local mode
 

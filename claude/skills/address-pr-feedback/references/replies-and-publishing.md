@@ -63,13 +63,15 @@ mutation($threadId: ID!) {
 
 ### Re-request Reviews
 
-Once every reply is posted and its thread resolved, re-request review from each unique reviewer who appears in Step 1's pending-feedback index — the same people who just got a reply, so they're the ones with something new to look at. This is the same action as GitHub's "Re-request review" button and works regardless of the reviewer's prior state (APPROVE, COMMENTED, CHANGES_REQUESTED):
+Once every reply is posted and its thread resolved, re-request review from each unique reviewer who appears in Step 1's pending-feedback index — the same people who just got a reply, so they're the ones with something new to look at. This is the same action as GitHub's "Re-request review" button:
 
 ```bash
 gh pr edit {number} --add-reviewer {login1},{login2}
 ```
 
-Skip a reviewer only if they're the PR author (can't review their own PR) or no longer has repo access — report and continue rather than failing the whole batch.
+**Never re-request a reviewer whose latest review on this PR is APPROVE.** Check `reviews` (fetched in Step 1, sorted by `submittedAt`) for each candidate's most recent state before adding them to the batch — an approval means they've already signed off, and pinging them again reopens a decision they made, not a request for a fresh look. Only reviewers whose latest state is COMMENTED or CHANGES_REQUESTED (or who never reviewed at all but still left a comment) are eligible.
+
+Also skip a reviewer if they're the PR author (can't review their own PR) or no longer has repo access — report and continue rather than failing the whole batch.
 
 ### Publish Order
 
