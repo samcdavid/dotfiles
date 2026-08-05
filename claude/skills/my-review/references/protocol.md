@@ -285,26 +285,38 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 
 ## Step 6 — Adversarial Challenge on Findings
 
-Format all Critical findings, non-blocking suggestions, questions, and nits as structured findings. Pass them to `adversarial-debate` with:
+Split the compiled findings into two tiers before challenging them. Per-finding independent verification — not a single batch pass — is what lets a real defect get promoted instead of just steel-manned away; batching everything through one shared-context call is exactly the one-way valve this two-tier split exists to remove.
+
+### Tier 1 — Critical-tier candidates (one dispatch per finding, parallel)
+
+Tier 1 is every finding currently classified Critical, plus every finding from the Security lens or `general-reviewer`'s cross-service-contract checks that asserts a definite defect — not a "might," not a Question — regardless of the severity label it was given. This is where a `REQUEST_CHANGES` verdict actually originates, so it's where independent verification pays for itself.
+
+For each Tier-1 finding, dispatch one `adversarial-debate` agent. All dispatches go in a single message so they run in parallel — never sequentially. Pass each dispatch:
 
 - PR diff or local diff source of truth
-- referenced file paths and lines
+- that finding's file paths and lines only
 - requirements checklist, if present
-- proposed severity
-- proposed verdict
+- proposed severity and verdict
+- nothing from the other findings — each dispatch verifies its own claim in isolation, so shared context can't bias one verdict off another
 
-The agent returns KEEP, DOWNGRADE, REVISE, or DROP with evidence.
+Each dispatch returns one of: KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`, with the mandatory evidence field (`file:line`, or `source` + `query` + `retrieved-at`).
 
 PR mode caveat: adversarial agents can accidentally read the local working tree. If a DROP/REVISE verdict depends on "file does not exist," "identifier is fabricated," or "function cannot be found," verify against the PR diff or PR HEAD before applying it.
 
-Apply verdicts:
+### Tier 2 — everything else (one batched dispatch)
+
+Non-blocking suggestions, nits, questions, and any finding not asserting a definite defect go through a single batched `adversarial-debate` call, same as before — per-finding verification isn't worth the cost for findings that can't become `REQUEST_CHANGES` regardless of outcome.
+
+### Apply verdicts
 
 - KEEP: present as-is.
 - DOWNGRADE: move Critical to non-blocking/question, or suggestion to nit/drop.
 - REVISE: update claim, severity, or fix.
 - DROP: remove and note in Dropped Findings.
+- PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a Tier-1 finding PROMOTEd to Critical carries into Step 7 as Critical; nothing downstream gets to talk it back down without new evidence.
+- `requires clarification`: surface as a Targeted Question naming the exact query a human should run. Never silently drop it, and never fill the gap with a guess presented as verified.
 
-After adversarial review, run `/this-important strict` unless the user explicitly asked for a broader sweep. Do not let `/this-important` upgrade to `REQUEST_CHANGES` unless the finding meets the Critical merge-blocking bar.
+After Tier 1 and Tier 2 both resolve, run `/this-important strict` (unless the user explicitly asked for a broader sweep) on **Tier 2 only** — Tier 1 already went through per-finding verification and does not get re-filtered here. `/this-important` has no PROMOTE verdict and doesn't need one (that's Tier 1's job); it also must not downgrade a Tier-1 KEEP or PROMOTE.
 
 Before Step 7, confirm:
 
@@ -312,33 +324,29 @@ Before Step 7, confirm:
 - every finding is grounded in the diff or verified source
 - every Critical finding truly blocks merge
 - dropped findings have one-line reasons
+- every `requires clarification` finding is surfaced as a question, not silently resolved either way
 
-## Step 7 — Adversarial Verdict Challenge
+## Step 7 — Verdict
 
-Choose the PR review verdict adversarially. Always run this step before publishing or recommending a GitHub review state.
+The verdict is a **mechanical function of Step 6's Tier 1 results**, not a fresh judgment call layered on top.
 
-### Propose Verdict
+- If any Tier-1 finding's post-verification status is Critical (KEPT Critical, or PROMOTEd to Critical) → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it's "genuinely" merge-blocking — Step 6's per-finding dispatch already independently verified it with cited evidence, which is exactly what a fresh challenge here would just redo with less scrutiny (single shared context, not an isolated dispatch). The one exception: if a finding is Critical *only* because its verification returned `requires clarification` (couldn't be checked, not confirmed), don't auto-`REQUEST_CHANGES` on an unverified claim — surface it as a blocking question and let the user decide.
+- If no Tier-1 finding survives as Critical, choose between **APPROVE** and **COMMENT**:
+  - **APPROVE** — requirements are satisfied, and only minor nits or clearly optional Tier-2 suggestions remain.
+  - **COMMENT** — several substantive inline comments, unresolved requirements questions, insufficient context, stale/already-merged PR state, or the user explicitly asks not to approve.
 
-- **APPROVE** — requirements are satisfied, no Critical findings survive, and only minor nits or clearly optional suggestions remain.
-- **COMMENT** — no Critical finding survives, but approval would overstate confidence: several substantive inline comments, unresolved requirements questions, insufficient context, stale/already-merged PR state, or the user explicitly asks not to approve.
-- **REQUEST_CHANGES** — at least one **Critical** merge blocker: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or omitted must-have acceptance criterion.
+### Challenge the APPROVE/COMMENT choice
 
-### Challenge Verdict
+`REQUEST_CHANGES` is not up for debate in this pass — it isn't a judgment call anymore once Step 6 has verified it. This adversarial pass is scoped to the one choice that's still discretionary. Spawn `adversarial-debate` with:
 
-Spawn `adversarial-debate` with:
-
-- proposed verdict
-- final surviving findings
-- severity classification for each finding
+- proposed APPROVE/COMMENT verdict
+- final surviving Tier-2 findings
 - triage context and active lenses
 
-Ask it to challenge both directions:
+Ask it to challenge:
 
-- Is the verdict too soft because a Critical issue is hidden in non-blocking sections?
-- Is the verdict too harsh because a finding is important but not actually merge-blocking?
-- If COMMENT: why not APPROVE? Are the inline comments substantive or numerous enough, or is requirement satisfaction uncertain?
-- If APPROVE: do the changes satisfy the requirements, and are remaining comments only minor or optional?
-- If `REQUEST_CHANGES`, is the worst finding genuinely Critical under the merge-blocking bar?
+- Is COMMENT actually warranted, or is this an APPROVE being held back out of excess caution?
+- Is APPROVE overstating confidence given the volume or substance of remaining comments, or unresolved requirements questions?
 
 Apply the adversarial verdict before final output.
 

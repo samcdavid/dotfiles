@@ -61,8 +61,9 @@ For learned-miss maintenance, read `references/learned-misses.md` (active queue)
 3. Identify active lenses and requirements source.
 4. Fan out research agents, then active lens reviewers.
 5. Merge, dedupe, importance-filter, and severity-classify findings.
-6. Run `adversarial-debate` on findings and proposed verdict.
-7. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
+6. Split into Tier 1 (Critical-tier candidates) and Tier 2 (everything else). Verify each Tier-1 finding independently — one `adversarial-debate` dispatch per finding, in parallel — so a real defect can be promoted, not just steel-manned away; batch-challenge Tier 2 in one call.
+7. Compute the verdict mechanically from Tier 1's results, then adversarially challenge only the remaining APPROVE/COMMENT choice.
+8. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
 
 ## Output
 
