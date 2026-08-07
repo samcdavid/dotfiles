@@ -13,11 +13,15 @@ Read `~/.claude/rules/read-only-verification.md` (or `~/.agents/rules/` under Co
 
 ## Inputs (from the orchestrator)
 
-`mode`, `pr_head_sha`, `repo`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
 
 ## PR Mode — read-only via `gh`
 
 When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source of truth, not the local tree. Never check out the branch, never read PR files from disk as the PR's code, never diff against local `main`. Full contents only via `gh api repos/{repo}/contents/{path}?ref={pr_head_sha}`.
+
+## Local Mode — scope is the whole branch
+
+When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` (the merge base with `base_ref`) plus staged and unstaged changes. Files on disk are the truth. If you re-derive or widen the diff yourself, use `git diff "$fork_sha"` — never bare `git diff`, `git diff --cached`, `git show HEAD`, or `git diff HEAD~1`, each of which covers only a fraction of the branch.
 
 ## What to do
 

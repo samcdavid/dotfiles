@@ -16,7 +16,7 @@ Default when a PR exists for the branch, or when `$ARGUMENTS` names one.
 Active when `$ARGUMENTS` says `local`, when findings are handed to you inline, or when no PR exists for the branch.
 
 - Feedback source: `my-review`'s findings for the working tree, passed inline by the caller or taken from the conversation.
-- Truth: the working tree diffed against the base branch. `pr-mode-readonly.md` and `pr-cost-control.md` do **not** apply — there is no PR to be read-only about.
+- Truth: the whole branch diffed against the base branch — `fork=$(git merge-base "$base_ref" HEAD); git diff "$fork"`, covering every commit added on the branch plus staged and unstaged work. Not `git diff HEAD~1` and not the bare working tree. `pr-mode-readonly.md` and `pr-cost-control.md` do **not** apply — there is no PR to be read-only about.
 - Gate: **none.** State the triage and proceed. The reviewer is `my-review`, not a person, so there is nobody to negotiate with and nothing is gained by stopping.
 - Output: resolution per finding. No replies, no GitHub calls of any kind.
 

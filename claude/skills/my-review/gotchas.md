@@ -56,6 +56,15 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Nested functions are harder to read, harder to test independently, and harder to discover in the codebase. They obscure code organization and make it difficult to understand the module's public surface.
 - **Source:** Recurring pattern in Python codebases
 
+### Local mode reviews the whole branch, not the last commit
+
+- **Category:** failure-mode
+- **Context:** Local Mode (`/my-review` with no arguments, `local`, or a base branch name), including the `my-workflow` fix loop.
+- **Wrong:** Building the scope from `git diff` + `git diff --cached` + `git log --oneline -5`. Once the branch's work is committed, both diffs are empty, and the natural fallback is `git show HEAD` / `git diff HEAD~1` — so a 9-commit branch gets reviewed as its last commit. Equally wrong: taking the merge base against a stale local `main` when `origin/main` exists.
+- **Right:** Resolve the base branch, take the merge base, and diff from there: `fork=$(git merge-base origin/<base> HEAD); git diff "$fork"`. That single range covers every commit added on the branch plus staged and unstaged changes. Report the resolved base ref, commit count, and file count in the triage block, and pass `base_ref`/`fork` to the lens reviewers so nobody re-derives a narrower scope. If the range is empty, say there is nothing to review rather than substituting a narrower one.
+- **Why:** Reviewing one commit out of many silently drops most of the change — and it fails quietly, since the review still produces confident findings about the slice it saw. Earlier commits on the branch are exactly where cross-commit inconsistencies live (a helper introduced in commit 2 and misused in commit 7 is invisible from either commit alone).
+- **Source:** 2026-08-06 — user reported local review looking only at the last commit. `my-workflow` already computed the correct `"$base"...HEAD` scope and passed it in; standalone `my-review` had no equivalent recipe, so any direct invocation fell back to the working tree.
+
 ### Never check out the PR branch — review is read-only via `gh`
 
 - **Category:** failure-mode

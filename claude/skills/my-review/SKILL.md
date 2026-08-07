@@ -56,8 +56,8 @@ For learned-miss maintenance, read `references/learned-misses.md` (active queue)
 
 ## Flow
 
-1. Determine mode: capture/promote, PR, branch/range, or local working tree.
-2. Build the diff source of truth. In PR mode, use filtered GitHub payloads from `pr-cost-control.md`.
+1. Determine mode: capture/promote, PR, branch/range, or local.
+2. Build the diff source of truth. In PR mode, use filtered GitHub payloads from `pr-cost-control.md`. In local mode the scope is the **whole branch** — `git diff $(git merge-base <base_ref> HEAD)`, covering every commit since the base branch plus staged and unstaged changes. Never the last commit alone, never the working tree alone.
 3. Identify active lenses and requirements source.
 4. Fan out research agents, then active lens reviewers.
 5. Merge, dedupe, importance-filter, and severity-classify findings.

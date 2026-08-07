@@ -139,9 +139,16 @@ On the answer, resume from that stage with the decision folded into the ledger. 
   ```bash
   base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')
   [ -z "$base" ] && { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
-  git diff --name-only "$base"...HEAD
-  git diff "$base"...HEAD   # the review scope
+  cur=$(git rev-parse --abbrev-ref HEAD)   # a branch is never its own base
+  [ "$base" = "$cur" ] && [ "$cur" != main ] && [ "$cur" != master ] && \
+    { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
+  base_ref="$base"
+  git show-ref --verify --quiet "refs/remotes/origin/$base" && base_ref="origin/$base"
+  fork=$(git merge-base "$base_ref" HEAD)
+  git diff --name-only "$fork"
+  git diff "$fork"   # the review scope: every branch commit + staged + unstaged
   ```
+  Diff from the merge base, not `HEAD`/`HEAD~1` and not the bare working tree — `git diff "$fork"` is the only form that covers both the branch's commits and anything still uncommitted. Pass `base_ref` and `fork` to `my-review` alongside the diff.
 - **12 `my-review`:** The single, consolidated review stage. Invoke it with the base branch name so it diffs the current work tree vs `main`/`master`; stay in read-only local review — no checkout, no PR. Because this is the deliberate full pipeline, don't let lens triage thin the review:
   - **Force the full lens set active** — Security, Architecture, Performance, QA, and PM/requirements, plus whichever general lenses (Backend/Frontend/Ops/Migration/Dependency) the diff touches. The pipeline always wants the comprehensive pass, not a minimal triage.
   - **Feed the stage-2 spec as the requirements source.** Pass the spec path so `requirements-reviewer` traces acceptance criteria against the spec (and any linked Linear ticket) — this replaces the former standalone `requirements-audit` stage and satisfies its "requires a spec" need without asking.

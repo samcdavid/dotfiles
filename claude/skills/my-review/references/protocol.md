@@ -14,8 +14,8 @@ Determine what to review:
 - If `$ARGUMENTS` is `capture` → **Capture Mode** — queue a Learned Miss (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
 - If `$ARGUMENTS` is `promote` → **Promote Mode** — walk the pending queue (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
 - If `$ARGUMENTS` contains a PR number or URL → **PR Mode** (fetch the PR diff via `gh`).
-- If `$ARGUMENTS` is empty or `local` → **Local Mode** (review working tree changes via `git diff`).
-- If `$ARGUMENTS` contains a branch name → review diff against that branch.
+- If `$ARGUMENTS` is empty or `local` → **Local Mode** (review the whole branch: every commit since the base branch, plus staged and unstaged changes).
+- If `$ARGUMENTS` contains a branch name → same as Local Mode, with that branch as the base instead of the detected default.
 
 Subcommand keywords (`capture`, `promote`) take precedence over branch-name interpretation.
 
@@ -54,11 +54,43 @@ If existing comments include your own prior review pass, treat as re-review: re-
 
 **Local Mode:**
 
+The review scope is **the branch as a whole**: every commit added since it diverged from the base branch, plus staged and unstaged changes. Never the last commit alone, and never the working tree alone.
+
+Resolve the base branch, then diff from the fork point:
+
 ```bash
-git diff
-git diff --cached
-git log --oneline -5
+base="$ARGUMENTS_BRANCH"   # explicit base from $ARGUMENTS, else detect:
+[ -z "$base" ] && base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')
+[ -z "$base" ] && { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
+
+# A branch is never its own base — that silently collapses the scope to uncommitted work.
+cur=$(git rev-parse --abbrev-ref HEAD)
+[ "$base" = "$cur" ] && [ "$cur" != main ] && [ "$cur" != master ] && \
+  { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
+
+# Prefer the remote ref — a stale local base yields a fork point that is too new,
+# which silently drops branch commits from the review.
+base_ref="$base"
+git show-ref --verify --quiet "refs/remotes/origin/$base" && base_ref="origin/$base"
+
+fork=$(git merge-base "$base_ref" HEAD)
+
+git log --oneline "$fork"..HEAD   # every commit added on this branch
+git status --short                # uncommitted work
+git diff --stat "$fork"           # scope check: branch commits + staged + unstaged
+git diff "$fork"                  # THE REVIEW DIFF
 ```
+
+`git diff "$fork"` (two-dot against the merge base) is the one that matters: it equals `git diff "$base_ref"...HEAD` plus everything uncommitted. Pass it as `diff_text`, and pass `base_ref`/`fork` to the lens reviewers so any reviewer re-deriving scope lands on the same range.
+
+Hard constraints:
+
+- Do not use `git show HEAD`, `git diff HEAD~1`, or `git log -1` as the review scope. Those review one commit; the branch may have many.
+- Do not use bare `git diff` / `git diff --cached` as the review scope. Those review only uncommitted work and go empty once the branch is committed — the usual trigger for silently falling back to the last commit.
+- If `$fork` resolves to `HEAD` (you are on the base branch, or the branch has no commits yet), `git diff "$fork"` correctly narrows to uncommitted work. Say so in the triage block rather than widening the scope on your own.
+- If the resulting diff is empty, report that there is nothing to review. Do not substitute a narrower or older scope to have something to say.
+
+State the resolved `base_ref`, the commit count, and the changed-file count in the triage block, so a wrong scope is visible before fan-out.
 
 Research subagents and lens reviewers read changed files fully when needed. Main context does not need to pre-read every file.
 
@@ -111,6 +143,7 @@ Produce a short triage block and show it to me before going deep:
 
 ```
 ### Review Triage
+- **Scope:** <PR #N at <sha>> | <local: <N> commits since `<base_ref>` (<fork sha>) + <clean tree | staged/unstaged changes>>, <N> files
 - **Intent:** <1–2 sentences in your words — what this change does and why>
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
@@ -173,7 +206,9 @@ Collect their outputs into a **compact `research_notes` summary** — the load-b
 
 ### Wave 2 — Lens reviewer subagents (parallel, one message)
 
-For each active lens from Step 2, spawn its reviewer. Send them all in a single message so they run concurrently. Pass each the bundle: `mode`, `pr_head_sha`, `repo`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, the PR-mode constraints block, plus any lens-specific extras.
+For each active lens from Step 2, spawn its reviewer. Send them all in a single message so they run concurrently. Pass each the bundle: `mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, the PR-mode constraints block, plus any lens-specific extras.
+
+In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and `diff_text` is `git diff "$fork"`. Passing both means a reviewer that widens its own diff reproduces the branch-wide range instead of falling back to the working tree or the last commit. Research subagents get the same two values for the same reason.
 
 | Active lens(es) | Reviewer agent | Extra input |
 |---|---|---|

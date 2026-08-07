@@ -36,7 +36,7 @@ If `my-implement` trips loop-detection, or `my-validate` can't self-repair, or a
 
 ## Reviewing the wrong thing in stages 10–13
 
-The review scope is the **working-tree diff against the local base branch** (`main`/`master`), computed once and shared. Don't let `my-review` slip into PR mode (there is no PR) or review only uncommitted changes when committed-on-branch work also exists. Compute `git diff "$base"...HEAD` once and feed it to all four review stages.
+The review scope is the **whole branch against the base branch** (`main`/`master`), computed once and shared. Don't let `my-review` slip into PR mode (there is no PR), review only uncommitted changes when committed-on-branch work also exists, or review only the last commit when the branch has several. Compute `fork=$(git merge-base "$base_ref" HEAD); git diff "$fork"` once — that range covers every branch commit plus staged and unstaged work — and feed it to all four review stages.
 
 ## Losing the ledger on a long run
 
