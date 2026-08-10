@@ -41,3 +41,11 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Every `drop_if_exists`, `create_if_not_exists`, `create`, and `drop` for indexes in BOTH `up` and `down` must include `concurrently: true` when `@disable_ddl_transaction true` is set
 - **Why:** Credo's migration checks scan all clauses, not just `up`. A non-concurrent index op in `down` while the module declares `@disable_ddl_transaction true` triggers `Index not concurrently` warnings
 - **Source:** Migration `down` function that was missing `concurrently: true` on its `drop_if_exists` call, caught by credo CI
+
+### Don't re-request review from someone who already approved
+- **Category:** failure-mode
+- **Context:** Step 13, after pushing fixes for review feedback. Reviewers have approved, and their approvals now predate the new commits.
+- **Wrong:** Re-requesting review from every prior reviewer because "the approvals are stale," including the ones whose state is APPROVED. `gh api .../requested_reviewers -X POST -f 'reviewers[]=<approver>'`
+- **Right:** Re-request only from reviewers who left REQUEST_CHANGES, or who have unresolved substantive threads and have *not* approved. For an approver, the thread reply IS the notification — they get it, and they re-review if they care. Never re-request from someone whose latest state is APPROVED.
+- **Why:** It puts an already-satisfied reviewer back into "Awaiting your review" in their dashboard and inbox, re-pinging them for a PR they already signed off. It also destroys the signal of who actually still owes a review — the pending list stops meaning anything. And on any repo with `dismiss_stale_reviews` branch protection, re-requesting **dismisses the existing approval outright**, converting a mergeable PR into a blocked one. Verified on the PR below that the approvals survived (`reviewDecision` stayed `APPROVED`), so the dismissal risk is config-dependent — but the queue pollution is unconditional.
+- **Source:** MCP-650 / PR #27839 — re-requested all three approvers after round 2 and again after round 3, leaving five names pending on a PR whose review decision was already APPROVED.
