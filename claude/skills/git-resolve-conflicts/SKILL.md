@@ -1,98 +1,42 @@
 ---
 model: opus
 name: git-resolve-conflicts
-description: Automatically resolve merge and rebase conflicts using intelligent analysis and editing. Reads both sides of each conflict, merges intent rather than picking a winner, stages resolved files, and hands the final merge/rebase completion back to you.
+description: Automatically resolve merge and rebase conflicts using intelligent analysis and editing. Reads both sides of each conflict, merges intent rather than picking a winner, stages resolved files, and continues the operation until it completes or genuinely needs you.
 when_to_use: "Use when a merge, rebase, or cherry-pick stops with conflicts, or the user asks to resolve them."
-allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git log:*), Read, Edit, MultiEdit
+allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git log:*), Bash(git rebase:*), Bash(git merge:*), Bash(git cherry-pick:*), Bash(git ls-files:*), Read, Edit, MultiEdit
 ---
 
 # Resolve Git Conflicts
 
-Resolve merge and rebase conflicts while preserving the intent of **both** sides. Match the conventions of the surrounding codebase — read it before deciding how to merge.
+Drive an in-progress merge, rebase, or cherry-pick to completion, preserving the intent of **both** sides of every conflict. Match the conventions of the surrounding codebase — read it before deciding how to merge.
 
-This skill:
+## Load Rules
 
-1. Detects conflicted files using git commands
-2. Reasons through each conflict before editing
-3. Edits files to resolve conflicts
-4. Stages resolved files for your review
-5. Leaves the final merge/rebase completion to you
+Read `~/.claude/rules/loop-detection.md` and `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. For per-conflict analysis detail, the continue loop, and stop conditions, read `references/protocol.md`.
 
 ## Constraints
 
-These boundaries matter more than any step list below — when in doubt, honor these:
+These boundaries matter more than the flow below — when in doubt, honor these:
 
-- **Never** complete the merge or rebase yourself. Stop after staging; the user runs `--continue`/`commit`.
-- **Never** pick one side wholesale when both sides carry real intent. Picking a side is a last resort, not a default.
-- **Never** leave a conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`) anywhere in a file you've touched.
-- **Never** guess at a resolution you can't justify. If a conflict is genuinely ambiguous — both sides changed the same logic in incompatible ways — stop and ask the user rather than fabricate a merge.
+- **Never** run `--abort`, `--skip`, or `reset --hard`. They discard work; the user decides that, not you.
+- **Never** push, or continue past the end of the operation into other work.
+- **Never** pick one side wholesale when both sides carry real intent. Picking a side is a last resort.
+- **Never** leave a conflict marker (`<<<<<<<`, `=======`, `>>>>>>>`) in a file you touched.
+- **Never** guess at a resolution you can't justify. Genuinely ambiguous — both sides changed the same logic incompatibly — means stop and ask, not fabricate a merge.
+- **Never** keep looping without progress. Same commit conflicting the same way twice means stop and report.
 - **Do** keep resolved code syntactically valid and consistent with the file's existing style.
 - **Do** preserve imports, dependencies, API contracts, and test coverage from both branches.
 
-## Your Task
+## Flow
 
-### Phase 1: Conflict Detection and Analysis
+Repeat until the operation finishes or a stop condition fires:
 
-Start by running `git status` to identify all files with merge conflicts — look for "both modified", "both added", "added by us/them", or "deleted by us/them".
+1. Identify the in-progress operation and the commit currently being applied.
+2. Resolve every conflicted file: read the whole file, understand what each side intended, merge both where compatible.
+3. Stage each resolved file and confirm no markers or unmerged paths remain.
+4. Continue the operation non-interactively (`GIT_EDITOR=true git rebase --continue`, or the merge/cherry-pick equivalent).
+5. If it stops again with new conflicts, loop. If it finishes, stop.
 
-Run `git diff` to examine the conflict markers and understand what each side represents:
+## Output
 
-- `<<<<<<< HEAD` — your current branch's changes
-- `=======` — separator
-- `>>>>>>> branch-name` — incoming branch's changes
-
-Categorize and prioritize conflicts:
-
-- Simple (whitespace, formatting, import ordering)
-- Complex (logic changes, function modifications)
-- Critical (API changes, schema/migration changes, public contracts)
-
-### Phase 2: Per-Conflict Analysis
-
-For each conflicted file, work through:
-
-1. **Understand the context** — read the whole file to grasp its purpose and structure
-2. **Analyze both sides** — determine what HEAD and the incoming branch each set out to do
-3. **Identify the conflict type:**
-   - Additive (both sides added different things)
-   - Modification (both sides changed the same thing)
-   - Deletion (one side deleted, the other modified)
-4. **Choose a resolution strategy:**
-   - Merge both changes when they're compatible
-   - Combine the best aspects of both sides
-   - Preserve functionality from both branches wherever possible
-   - Only choose one side outright when the other is genuinely superseded — and say so in your summary
-
-### Phase 3: Resolution
-
-For each conflicted file:
-
-1. **Read the file** to see the full context with markers
-2. **Use Edit or MultiEdit** to:
-   - Remove all conflict markers
-   - Merge changes based on your Phase 2 analysis
-   - Keep syntax valid and behavior intact
-   - Follow the file's existing style and language idioms
-
-### Phase 4: Staging and Handoff
-
-After resolving each file:
-
-1. **Stage it** with `git add <filename>`
-2. **Verify** with `git status` that it's no longer conflicted
-
-When all conflicts are resolved:
-
-1. Run a final `git status` to confirm none remain
-2. Provide a **detailed summary** of every resolution decision — especially anywhere you chose one side over the other, or anywhere you're uncertain
-3. **Instruct the user** to complete the operation, choosing the right command:
-   - `git rebase --continue` (rebase conflicts)
-   - `git merge --continue` (merge conflicts)
-   - `git commit` (if a merge commit is needed)
-
-## Success Criteria
-
-- No conflict markers remain in any file
-- All previously conflicted files are staged
-- Resolved code preserves functionality from both branches where appropriate
-- The user has a clear, accurate summary and the correct completion command
+Return the operation type, how many commits were replayed, each conflicted file with the resolution decision made, anywhere one side was chosen over the other, and any remaining uncertainty. If you stopped early, name the exact blocking conflict and the command the user should run next.
