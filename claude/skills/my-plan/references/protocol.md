@@ -56,8 +56,16 @@ Present your informed understanding. Ask focused questions — only genuine **de
 Based on the user's answers:
 1. Create a research todo list (TodoWrite) for remaining unknowns
 2. Spawn additional research tasks as needed
-3. Present findings with design options (pros/cons for each)
+3. Present findings with design options (pros/cons for each) — order options simplest-first, per Simplicity Bias below
 4. Let the user choose the approach
+
+### Simplicity Bias (default posture)
+
+When multiple designs satisfy the spec, propose the simplest one by default: fewest new abstractions, fewest new files/modules/services, least new state, most reuse of existing patterns. Complexity — a new abstraction layer, a new service boundary, a new dependency, speculative extensibility for a case the spec doesn't ask for — must be justified by a concrete, already-stated requirement, not "might need it later," "more correct in theory," or "this is how it's usually done." This mirrors the global "don't add abstractions beyond what the task requires" principle, applied specifically to plan authoring.
+
+- Lead the design-options presentation with the simplest viable option, not buried among alternatives.
+- If you recommend something more complex than the simplest option, name the specific requirement that rules the simpler one out, and record that trade-off explicitly in the plan (e.g. in `## Overview` or the relevant phase) so the user is approving it knowingly, not inheriting it silently.
+- This is a default posture, not an absolute — a genuinely known scale requirement, an explicit non-functional requirement, or a stated future phase in the ticket/spec can justify more structure up front. The bar is a *stated* reason, not a hypothetical one.
 
 ## Step 3 — Plan Structure
 
@@ -238,6 +246,7 @@ Present the plan. Incorporate user feedback. Update the saved plan file with cha
 ## Important
 
 - Do NOT write code during planning — only specification
+- Prefer the simplest design that satisfies the spec — see Simplicity Bias in Step 2; justify any added complexity against a concrete, stated requirement
 - Every phase MUST define tests before production code changes — TDD is mandatory, not optional
 - Success criteria must be MECHANICAL — if a human has to subjectively judge it, rewrite it as something runnable
 - Be skeptical of your own assumptions — verify against actual code
