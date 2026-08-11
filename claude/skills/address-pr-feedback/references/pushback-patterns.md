@@ -30,6 +30,8 @@ Use these patterns as templates. Each one names the trigger (the kind of comment
 
 **Do NOT use as a generic dismissal** — if the reviewer's concern is *intrinsic* to the PR's stated intent, the answer is to fix it here.
 
+**Do NOT use for low-effort work.** A ticket reference doesn't make a cheap fix expensive. If the change is mechanical, touches one location, and requires no real design decision, fix it in this PR even if a ticket could be opened — "meaningfully grow the diff" means the fix itself is substantial, not that a follow-up mechanism happens to exist.
+
 ---
 
 ### 2. "This is intentional / by design"

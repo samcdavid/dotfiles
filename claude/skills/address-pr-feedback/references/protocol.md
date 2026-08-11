@@ -116,6 +116,8 @@ The reviewer asked about intent or design. No code change needed — but your re
 
 Investigation confirms the feedback is correct, but the fix is out of scope — too large, requires coordination, or is a separate concern. You have a concrete reason for deferring AND a follow-up plan. If the follow-up plan is a ticket, it is not valid evidence until you've fetched it and confirmed both that it exists and that its actual description covers this specific gap — a ticket number alone is not a plan. A deferral pointing at a nonexistent ticket, or one that's topically adjacent but doesn't actually cover the gap, is not a Valid Deferral; reclassify as Confirmed Fix.
 
+**Low effort is never a Valid Deferral, ticket or no ticket.** If the fix is mechanical, touches one location, and requires no real design decision (roughly under 20 lines is a proxy, not the test), it does not qualify for this classification regardless of whether a ticket exists or could be opened. Reclassify as Confirmed Fix and do it in this PR. Reserve deferral for work that's genuinely large, needs coordination with another team/PR, or is a separate concern — not for "this would be quick but I'd rather track it."
+
 #### Disagree / Push Back
 
 Investigation shows the reviewer's suggestion would be incorrect, break something, or conflict with a constraint. You have concrete evidence (linter rule, failing test, contract, doc reference).
@@ -143,7 +145,7 @@ The agent will challenge:
 
 - **Confirmed Fixes**: steel-man the current code — is acceptance actually justified?
 - **Push Backs**: steel-man the reviewer — could they be right and you wrong?
-- **Deferrals**: is this genuinely out of scope, or avoiding a hard fix? (Under 20 lines = not a deferral)
+- **Deferrals**: is this genuinely out of scope/large/needs-coordination, or is it low-effort work being avoided by pointing at a ticket? (Under 20 lines is a proxy for low-effort, not the test — mechanical, single-location, no design decision also disqualifies a deferral regardless of line count)
 - **Partially Correct**: does your alternative actually address the reviewer's concern, or sidestep it?
 - **Contradictions**: accepting a pattern in one fix but pushing back on the same pattern elsewhere?
 
@@ -159,7 +161,7 @@ Pass every classified comment as a finding. Apply the returned verdicts:
 
 - **KEEP** → stays as Confirmed Fix / Partially Correct (proceed to plan in Act II)
 - **DOWNGRADE** → move from Confirmed Fix to Question Requiring Response (reply with investigation findings, no code change)
-- **DEFER** → move to Valid Deferral (must have a follow-up plan)
+- **DEFER** → move to Valid Deferral only if it also passes the effort test above — must have a follow-up plan AND be genuinely large/out-of-scope/needs-coordination. `/this-important` judges importance, not effort; it does not know whether a fix is 3 lines or 300. If a DEFER verdict lands on a low-effort item (mechanical, single-location, no design decision), override it back to KEEP/Confirmed Fix and fix it now instead — a ticket is not a substitute for a cheap fix.
 - **DROP** → only valid for items already in the Question or Push Back classifications where investigation showed no real concern; never drop a verified reviewer-flagged bug, security issue, or data-loss risk
 
 Hard rule: never downgrade or drop a finding from a reviewer whose review was marked as blocking ("Request changes") without surfacing the change to the user explicitly. The reviewer's gate stands until they remove it; importance filtering is for your own action prioritization, not for overriding their blocking review.
@@ -360,7 +362,7 @@ Deferring for this PR — [concrete reason: scope, requires coordination, separa
 [Follow-up plan: ticket number, next sprint, or specific next step.]
 ```
 
-Never defer without a follow-up plan. "I'll handle it later" without specifics is not acceptable. If you can't articulate a plan, it's not a valid deferral — just do it. If citing a ticket number, verify it (fetched, exists, description covers this gap) before it goes in the reply — citing an unverified or non-covering ticket number in a public reply is worse than no citation, since it reads as resolved when it isn't.
+Never defer without a follow-up plan. "I'll handle it later" without specifics is not acceptable. If you can't articulate a plan, it's not a valid deferral — just do it. Same if the fix is actually low effort (mechanical, single location, no design decision) — a ticket is not a substitute for a cheap fix; just do it. If citing a ticket number, verify it (fetched, exists, description covers this gap) before it goes in the reply — citing an unverified or non-covering ticket number in a public reply is worse than no citation, since it reads as resolved when it isn't.
 
 ### For Push Back
 

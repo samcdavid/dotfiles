@@ -8,14 +8,14 @@ when_to_use: "Use when the user asks to address, respond to, or work through rev
 
 # Address Review Feedback
 
-Work through pending review feedback without blindly accepting or rejecting it. This is a condensed research -> plan -> implement -> validate loop specialized for review feedback.
+Work through pending review feedback without blindly accepting or rejecting it. A condensed research -> plan -> implement -> validate loop for review feedback.
 
 ## Modes
 
 Establish the mode first — it decides the feedback source and whether triage has a confirmation gate.
 
-- **PR mode** (a PR exists): feedback is GitHub comments; triage confirmation is the only gate — it authorizes the rest of the run unattended.
-- **Local mode** (`local` in `$ARGUMENTS`, findings passed inline, or no PR): feedback is `my-review`'s findings on the working tree; no gate, no GitHub. Used by `my-workflow`'s automatic fix loop.
+- **PR mode** (a PR exists): feedback is GitHub comments; triage confirmation is the only gate, authorizing the rest of the run unattended.
+- **Local mode** (`local` in `$ARGUMENTS`, findings passed inline, or no PR): feedback is `my-review`'s findings on the working tree; no gate. Used by `my-workflow`'s fix loop.
 
 Read `references/mode-semantics.md` before acting on either.
 
@@ -75,7 +75,7 @@ Load targeted references as needed:
 10. Plan fixes:
     - behavioral fixes -> `implementation-executor` TDD phases
     - non-behavioral edits -> `quick-implement-agent` direct-edit phases
-11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; if it did not and validation passed, commit it yourself via the `commit` skill scoped to that fix's files.
+11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits after its own validation passes; otherwise commit it yourself via the `commit` skill, scoped to that fix's files.
 12. Run final validation against tests, requirements map, and reviewer concerns.
 13. PR mode: draft evidence-backed replies, push, publish, resolve threads, and re-request review — no further confirmation. Local mode: skip publishing; report resolution per finding.
 
@@ -84,7 +84,7 @@ Load targeted references as needed:
 - In PR mode, do not check out PR branches or treat local changed files as PR truth. In local mode, the working tree *is* the truth and `pr-mode-readonly.md` does not apply.
 - Commit each validated fix locally. In PR mode, triage confirmation (Modes) also authorizes push/reply/resolve/re-request; local mode has no PR.
 - Do not implement behavioral fixes in the main context; dispatch the executor.
-- Do not defer fixes under roughly 20 lines unless there is a real scope or product reason.
+- Do not defer low-effort fixes (mechanical, single-location, no design decision; ~20 lines is a proxy, not the test) unless there's a real scope/product reason. Fix them here, not via a ticket.
 - Do not push back without specific code, test, docs, or requirement evidence.
 
 ## Output
