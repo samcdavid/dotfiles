@@ -7,7 +7,7 @@ when_to_use: "Use when the user asks to review their changes, diff, branch, or a
 
 # Code Review
 
-Review local changes, branches, or GitHub PRs for correctness, requirements coverage, security, architecture, performance, operations, migration safety, dependencies, and test quality.
+Review local changes, branches, or GitHub PRs for correctness, requirements coverage, security, architecture, performance, operations, migration safety, dependencies, test quality, and unnecessary complexity.
 
 ## Merge-Blocking Bar
 

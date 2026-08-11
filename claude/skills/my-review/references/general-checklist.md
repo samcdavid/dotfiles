@@ -98,6 +98,12 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Does the codebase already have a utility, function, or module that does what this new code adds? Flag duplication. (The `codebase-pattern-finder` subagent should surface these — reference its findings here.)
 - Does the project have a conventional way to do this (e.g. a factory helper in tests, a shared changeset function, a query module)? New code should follow existing patterns.
 
+### Unnecessary Complexity
+- Speculative abstractions, generic layers, or config knobs added for a use case the spec/ticket doesn't ask for — flag with a concrete simpler alternative, not just "this feels complex."
+- New indirection (an interface, strategy pattern, plugin registry, extra module/service) wrapping a single current implementation — is it earning its cost yet, or would a direct call/function be just as maintainable and easier to read?
+- Preemptive generalization ("might need this for other cases later") with no second use case stated in the ticket/spec — the flexibility is a cost paid now for a benefit that may never arrive.
+- Could the same requirement ship with fewer new files, fewer new abstractions, or by reusing an existing pattern instead? Name the simpler alternative concretely — this is what makes it an actionable suggestion instead of a vibe.
+
 ### Code Cleanliness
 - Dead code, unused imports, orphaned fields, stale backfillers
 - Import organization
