@@ -171,6 +171,8 @@ Each iteration:
 
 Repeat until converged or 3 iterations have run. Only then stop. If Critical findings survive the 3rd pass, treat it as a genuine blocker: report the surviving findings, what each iteration changed, and a root-cause theory rather than starting a 4th pass. Update the ledger with iteration count, finding deltas, commits made, remaining findings, and exact resume command.
 
+Each `address-pr-feedback` run appends its own `## Feedback Round N` section to the ledger — verdict table, lessons, deferrals, validation. That is the round's detail; your job here is the loop-level state above. Don't duplicate the verdict tables, and don't rewrite those sections.
+
 If three resumed iterations do not reduce findings meaningfully, stop and surface root-cause theory instead of continuing.
 
 ## Final report & hand-off

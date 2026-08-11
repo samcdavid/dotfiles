@@ -22,7 +22,7 @@ Determine which PR to address:
 - Otherwise, check `gh pr status` for the current branch's PR.
 - If neither works, ask the user.
 
-Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its spec, plan, and decisions feed the Requirements Traceability Baseline below and the investigation in Step 2. When none exists, this adds nothing — proceed as usual.
+Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its spec, plan, and decisions feed the Requirements Traceability Baseline below and the investigation in Step 2, and Step 13 appends this run's round record back to it. When none exists, this adds nothing — proceed as usual and skip Step 13.
 
 ---
 
@@ -407,25 +407,9 @@ Present all drafted responses to the user for review before posting, showing the
 
 ## Step 9 — Verify
 
-Per-phase work was already verified by the executor, by the pre-commit gate on its commit, and by your independent re-verify. During iteration, run the narrowest affected check first. This step is the **holistic gate** — run broader checks once over the combined result:
+Per-phase work was already verified by the executor, by the pre-commit gate on its commit, and by your independent re-verify. During iteration, run the narrowest affected check first. This step is the **holistic gate** — run build/compile, lint/format, and the test suite once over the combined result.
 
-### Build / Compile
-
-- Elixir: `mix compile --warnings-as-errors`
-- TypeScript: `npx tsc --noEmit`
-- Python: `uv run ruff check` + `uv run ruff format --check`
-
-### Lint / Format
-
-- Elixir: `mix format --check-formatted` + `mix credo` (if present)
-- TypeScript: `npx eslint .` + `npx prettier --check .`
-- Python: `uv run ruff check` + `uv run ruff format --check`
-
-### Tests
-
-- Elixir: `mix test`
-- TypeScript: `npm test`
-- Python: `uv run pytest`
+Take the per-stack commands from `my-implement/references/verification-commands.md` — the same source the Step 5 slices use, so the gate and the phases can't drift apart. It also covers Python runner detection (uv vs. poetry vs. pipenv); don't assume `uv run`.
 
 For each fix, start with the smallest affected test file or command. Save domain/package/full-suite checks for the final gate unless the narrow check cannot exercise the change.
 
@@ -437,66 +421,7 @@ If any check fails, fix the issue before proceeding. Do not leave the branch in 
 
 ## Step 10 — Self-Audit Against my-review
 
-Before presenting the final result, run your changes through the full `/my-review` checklist. The point is to catch anything that would be flagged on re-review — your fixes should not create new findings.
-
-Read the my-review skill (`~/.claude/skills/my-review/SKILL.md`) Step 5 categories and evaluate your changes against every applicable section:
-
-### Blocking-level checks on your fixes
-
-- [ ] **Correctness**: No new logic errors, edge cases, or incorrect bang/non-bang usage
-- [ ] **Blast radius**: No callers broken, no fallback clauses missing from new pattern matches
-- [ ] **Layer boundaries**: No API concerns in contexts, no business logic in resolvers
-- [ ] **Idempotency & resilience**: No unbounded loops, retries have safeguards, Oban config correct
-- [ ] **Transaction design**: Oban jobs in Multi, no unnecessary `Multi.run`, bulk ops where appropriate
-- [ ] **Migration safety**: NOT NULL safe, correct column types, down migration present
-- [ ] **Security**: No auth token exposure, routes scoped correctly, input validated
-- [ ] **Test fidelity**: Tests assert specific values, not vacuously passing
-- [ ] **Test placement**: Unit tests for branching, integration tests for wiring only
-- [ ] **Lint discipline**: No checks disabled, no formatter violations, no new warnings
-- [ ] **Requirements**: Fixes didn't accidentally remove coverage for a requirement from the original PR
-
-### Non-blocking checks on your fixes
-
-- [ ] **Performance**: No N+1 introduced, no app-side filtering where SQL would work, correct index usage
-- [ ] **Existing pattern reuse**: No duplicate utilities, using codebase conventions
-- [ ] **Naming**: Names match domain concepts, no magic numbers introduced
-- [ ] **Log levels**: Appropriate severity for any new logging
-- [ ] **Forward-looking**: Fixes don't reinforce patterns known to be changing
-
-### Output Validation
-
-Spawn the **adversarial-debate** agent to validate your response drafts and fix claims.
-
-Format your responses and fix summaries as findings and pass them to the agent along with:
-
-- The committed code (post-fix state)
-- The commit SHAs you're referencing
-- The investigation claims you're making in responses
-
-The agent will verify:
-
-- File:line references are accurate (lines may have shifted from fixes)
-- Quoted identifiers exist in the codebase
-- Commit SHAs are real
-- Code shown in responses matches actual committed code
-- Investigation claims still hold (e.g., "X can be nil here" — is that still true?)
-
-Apply verdicts — fix invalid references, weaken unverifiable claims, drop items that can't be salvaged after 2 attempts.
-
-### Requirements Re-check
-
-If a requirements map was built in Step 1:
-
-- [ ] Re-map every acceptance criterion against the post-fix state of the PR. Did any of your fixes accidentally remove coverage for a requirement?
-- [ ] If a fix changed the approach for a requirement (e.g. moved logic to a different layer per reviewer feedback), update the requirements map to reflect the new location.
-- [ ] Flag any requirement that is now uncovered or partially covered as a result of your changes.
-
-### Meta-check
-
-- [ ] Every response includes evidence of investigation, not just "done"
-- [ ] No fixes introduced that weren't requested (scope creep on the fix round)
-- [ ] Contradictions between your fixes and your push-backs? (e.g. fixing a pattern in one place but defending it in another)
-- [ ] Importance bar from `/this-important` applied consistently — fixes match the items that survived filtering; dropped/deferred items were not silently fixed anyway
+Before presenting the final result, work through `references/self-audit-checklist.md` — the blocking and non-blocking checks on your own fixes, the `adversarial-debate` output-validation pass over your response drafts and claimed SHAs, the requirements re-check, and the meta-check for scope creep and self-contradiction.
 
 ## Step 11 — Summary
 
@@ -554,6 +479,10 @@ Present the final result:
 
 Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — Step 2's triage confirmation already authorized this. Read `references/replies-and-publishing.md`'s "Publish Mechanics" section for the exact commands and order: push commits, post thread/PR-level replies, resolve threads, then re-request review from the reviewers who left them.
 
+## Step 13 — Append the Round Record to the Ledger
+
+Skip if Getting Started found no ledger. Otherwise this runs last — after Step 11 in local mode, after Step 12 in PR mode — so the record states what landed. Append one dated `## Feedback Round N` section per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Report the path and round number in Step 11's output.
+
 ## Guidelines
 
 - **Research, then plan, then implement.** Don't jump to editing code — investigate every comment into a verified finding (Act I), slice the confirmed fixes (Act II), then execute (Act III).
@@ -568,13 +497,15 @@ Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — 
 - **Deferred is not forgotten.** Every deferral needs a concrete follow-up plan, or it's not a deferral — just do it.
 - **Don't fix what wasn't flagged.** Address the feedback, nothing more — no refactoring surrounding code while you're in the file.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
-- **One gate, not several.** PR mode confirms triage once (Step 2); everything after — planning, fixes, commits, push, reply-publishing, thread-resolution, re-requesting review — runs to completion without asking again. Only a loop-detection stop or a major plan deviation interrupts it.
+- **One gate, not several.** PR mode confirms triage once (Step 2); everything after — planning, fixes, commits, push, reply-publishing, thread-resolution, re-requesting review, the ledger append — runs to completion without asking again. Only a loop-detection stop or a major plan deviation interrupts it.
+- **The round outlives the session.** When a ledger exists, the run isn't done until Step 13 appended its record.
 
 ## References
 
 - `references/pushback-patterns.md` — 12 pushback shapes distilled from a 24-developer PR mining pass. Used during Step 2 (investigate) to pick a response shape; includes a "When to push back vs. when to accept" decision table and per-person pushback fingerprints.
-- `references/workflow-ledger-context.md` — checked in Getting Started, before anything else. Detects a `my-workflow` ledger tied to the current branch and folds its spec/plan/decisions into the requirements map and investigation.
+- `references/workflow-ledger-context.md` — checked in Getting Started, before anything else. Detects a `my-workflow` ledger tied to the current branch, folds its spec/plan/decisions into the requirements map and investigation, and holds the append-only round-record template and write boundaries for Step 13.
 - `references/replies-and-publishing.md` — reply shape/publishing rules plus "Publish Mechanics": the exact `gh` commands and order for Step 12 (push, post replies, resolve threads, re-request review).
+- `references/self-audit-checklist.md` — Step 10's full checklist: blocking/non-blocking checks, output validation, requirements re-check, meta-check.
 - The plan and implement acts mirror `my-plan` and `my-implement`; `my-implement/references/verification-commands.md` is the source for per-stack `verification_commands` passed into each slice.
 
 ## Gotchas

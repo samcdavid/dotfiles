@@ -35,3 +35,7 @@ Push back exactly as rigorously as in PR mode — `references/pushback-patterns.
 Each validated fix lands as its own local commit via the `commit` skill, scoped to that fix's files. A fix that fails validation stays uncommitted.
 
 In PR mode, pushing, publishing replies, resolving threads, and re-requesting review all run automatically after the Step 2 triage confirmation — no further gate. In local mode there is no PR, so none of those four ever apply.
+
+## Ledger append in both modes
+
+Whenever the branch has a `my-workflow` ledger, the run ends by appending its round record (Step 13, `references/workflow-ledger-context.md`). The mode only changes what the record says: PR mode names the reviewer and PR number and reports what was pushed/replied/resolved; local mode names the fix-loop iteration and reports resolution per finding. Append-only in both — never rewrite an existing section, and never create a ledger that isn't there.
