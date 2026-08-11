@@ -61,3 +61,7 @@ Most sibling issues on the same Linear project are unrelated. Do not stop the pi
 ## Forgetting where the git boundary now sits
 
 Commits are expected: every validated implementation phase and every validated fix lands as its own local commit via the `commit` skill, so the session leaves a readable history instead of one giant working tree. The boundary is *remote* actions — no push, no PR, no thread resolution, even when the work looks finished and clean. Suggest `/create-pr` and let the user pull that trigger.
+
+## Treating "no separate stop" at stage 9 as authorization to dispatch my-implement
+
+The protocol says a clean pre-implementation-check (stage 9, no sibling overlap) flows straight into the atomic block with no separate stop — that line describes when the *pipeline* is allowed to proceed, not when *this user* has actually authorized code to be written. Caught on MCP-523: Decisions Checkpoint was confirmed, stage 9 passed clean, phase tasks were staged, and the first `implementation-executor` dispatch was about to fire — the user interrupted: "You didn't have approval to implement yet, just approval of decisions." Confirming the Decisions Checkpoint approves the *decisions*; it is a separate question whether the user is also greenlighting `my-implement` right now. Stop and ask explicitly before dispatching the first executor, even on a clean stage 9 pass — do not treat "the protocol allows continuing" as "the user told me to continue." Same shape as the `my-quick` approval gotcha above, at a different transition point in the same pipeline.
