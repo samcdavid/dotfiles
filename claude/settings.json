@@ -161,7 +161,6 @@
     "deny": [],
     "defaultMode": "auto"
   },
-  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
