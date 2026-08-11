@@ -1,15 +1,15 @@
 ---
 model: opus
 name: my-workflow
-description: "Run one checkpointed delivery stage at a time: research, spec, clarify, architecture plan, plan, observe, eval-plan, analyze, a pre-implementation coordination check, then the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the workflow ledger explicitly marks all prior stages complete."
+description: "Run research through analysis autonomously, resolving decisions with the pipeline's own recommendation, then stop once at a Decisions Checkpoint to present every artifact and provisional decision for confirm/override. Only after that confirmation does the pre-implementation coordination check run, followed by the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the ledger marks all prior stages complete and decisions confirmed."
 disable-model-invocation: true
 ---
 
 # My Workflow
 
-Run the complete delivery pipeline as resumable stage work while keeping decisions user-owned and factual work agent-owned. Stop after each major stage so the user can review output, clear context, and resume from the workflow ledger. The exception is the gated atomic execution/review block: `my-implement` -> `my-validate` -> `my-review`.
+Run the complete delivery pipeline as resumable stage work while keeping decisions user-owned and factual work agent-owned. Stages 1-8 (research through analyze) run back-to-back, no stop: factual questions are researched, genuine decisions get the pipeline's own recommendation and log as provisional instead of asked live. It stops once after stage 8 — the **Decisions Checkpoint** — presenting every artifact and provisional decision for confirm/override; this is the intended point to clear context. Only after resume does stage 9 (pre-implementation coordination check) run; it stops again only on a sibling overlap, else flows into the atomic execution/review block: `my-implement` -> `my-validate` -> `my-review`. Details: `references/protocol.md`.
 
-Default to `my-research` on a new workflow. Do not infer permission to implement from the user's task wording, an existing plan-looking file, or the assistant's confidence. Implementation is allowed only when the workflow ledger explicitly marks research, spec, clarify, architecture plan, plan, observe, and analyze complete, eval-plan complete or `not_applicable`, the pre-implementation coordination check `passed` for the current plan version, and the user has resumed after the plan/analysis checkpoints.
+Default to `my-research` on a new workflow. Do not infer permission to implement from task wording, an existing plan-looking file, or confidence. Implementation requires research/spec/clarify/architecture-plan/plan/observe/analyze complete, eval-plan complete or `not_applicable`, every provisional decision confirmed at the Decisions Checkpoint, and the pre-implementation coordination check `passed` — run fresh, after confirmation, never before.
 
 If intake identifies the work belongs in `my-quick` instead of the full pipeline, create/update the workflow ledger first. Record `route: my-quick`, the reason, the expected scope, and the exact handoff command before invoking or recommending `my-quick`.
 
@@ -28,40 +28,36 @@ Use `~/.agents/rules/` when running through Codex.
 Load targeted references as needed:
 
 - `references/stage-routing.md` when starting or resuming.
-- `references/checkpoint-policy.md` before ending any stage.
-- `references/cross-workflow-coordination.md` at intake and again before every checkpoint, when the task is a Linear issue.
+- `references/checkpoint-policy.md` before the Decisions Checkpoint and the atomic block's final checkpoint.
+- `references/cross-workflow-coordination.md` at intake, stage 9 (post-checkpoint), and the atomic block's final checkpoint, when the task is a Linear issue.
 - `references/autonomy-boundaries.md` when a stage wants to ask questions.
 - `references/post-review-loop.md` after `my-review`.
 - `references/final-report.md` before final handoff.
 
 ## Pipeline
 
-1. `my-research` -> checkpoint.
-2. `my-spec` -> checkpoint.
-3. `my-clarify` -> checkpoint.
-4. `my-architecture-plan` -> checkpoint.
-5. `my-plan` -> checkpoint.
-6. `my-observe` -> checkpoint.
-7. `my-eval-plan` when the plan touches an AI/LLM surface; otherwise ledger it `not_applicable` -> checkpoint.
-8. `my-analyze` -> checkpoint.
-9. Pre-implementation coordination check (Linear issues only): re-run cross-workflow coordination against the finalized plan and current sibling state. Stop only if it finds a file/module or requirement/scope overlap; otherwise continue straight into the atomic block.
-10. Gated atomic block: `my-implement`, then the fix loop below, then checkpoint.
-11. Fix loop, run automatically inside the block: `my-validate` -> `my-review` -> if findings warrant fixes, `address-pr-feedback local` -> repeat. Exit when a review pass yields no Critical and no substantive non-blocking findings, or after 3 iterations. Checkpoint after the final review.
+1. `my-research` 2. `my-spec` 3. `my-clarify` 4. `my-architecture-plan` 5. `my-plan` 6. `my-observe` 7. `my-eval-plan` (or ledger `not_applicable`) 8. `my-analyze`.
+
+Stages 1-8 run back-to-back, no stop; every decision gets a recommendation, logs as provisional, run continues. **Decisions Checkpoint** after stage 8: present every artifact and provisional decision for confirm/override — the point to clear context; resume re-enters via the ledger.
+
+9. Pre-implementation coordination check (Linear issues only), run only after that checkpoint: fresh sibling scan against the finalized plan. Stop only on overlap; otherwise straight into the atomic block.
+10. Gated atomic block: `my-implement`, fix loop, then checkpoint.
+11. Fix loop (automatic): `my-validate` -> `my-review` -> `address-pr-feedback local` if warranted -> repeat, up to 3 iterations. Checkpoint after final review.
 
 ## Flow
 
-1. Detect the current git branch first and search for a workflow ledger whose `branch` field matches it. On a feature branch, a match is almost always the ledger to resume. On the default branch (`main`/`master`) or with no branch match, fall back to matching by Linear ID, ticket slug, or topic.
-2. Establish task once from arguments, conversation, ticket, file, or URL; a branch-matched ledger's recorded task always wins, no confirmation needed — never open a second ledger for a branch that already has one unless the user explicitly says to abandon it.
-3. Read or create `~/.claude/thoughts/shared/workflows/<slug>.md`, recording the current branch when creating a new ledger.
-4. Use loose artifacts only as evidence to attach to a stage, not as permission to skip uncompleted stages.
-5. Decide whether to route to the full pipeline or `my-quick`; ledger the decision before any handoff.
-6. Pick earliest incomplete stage from `references/stage-routing.md`.
-7. Run only that stage, except run the atomic execution/review block as one unit after its gates are satisfied.
-8. Update ledger with stage status, artifacts, assumptions, and decisions.
-9. Stop with checkpoint output and exact resume command.
+1. Detect the current git branch and find a ledger whose `branch` matches; fall back to Linear ID/slug/topic on the default branch or no match.
+2. Establish task once (a branch-matched ledger's task wins, no confirmation needed).
+3. Read or create `~/.claude/thoughts/shared/workflows/<slug>.md`, recording the branch.
+4. Loose artifacts are evidence for a stage, never permission to skip it.
+5. Decide full pipeline vs. `my-quick`; ledger the decision before handoff.
+6. Run every incomplete stage from `references/stage-routing.md`, back-to-back through stage 8. Run stage 9 and the atomic block only after the checkpoint is confirmed.
+7. Update the ledger silently after each stage: status, artifacts, assumptions, provisional decisions.
+8. Stop once, after stage 8, with the consolidated Decisions Checkpoint.
+9. On resume: confirmed decisions run stage 9, then (if clear) the atomic block; an override re-runs only invalidated stages; a stage-9 overlap stops separately for that one decision.
 
-Use question policy: factual questions must be researched; genuine decisions go to the user. Validated phases and fixes are committed locally as they land; no pushes, PR creation, or remote state changes unless explicitly requested.
+Factual questions are researched; decisions get a recommendation, logged provisional, confirmed at the checkpoint rather than asked live. Validated phases/fixes commit locally; no pushes, PRs, or remote changes unless requested.
 
 ## Output
 
-At every checkpoint return completed stage, artifact paths, decisions/assumptions, next stage, exact resume command, and whether context can be cleared safely.
+At the Decisions Checkpoint, a stage-9 overlap stop (if any), and the atomic block's end: completed stages, artifact paths, every provisional decision (options, recommendation, evidence) for confirm/override, assumptions, next stage, resume command, and whether context can be cleared safely.

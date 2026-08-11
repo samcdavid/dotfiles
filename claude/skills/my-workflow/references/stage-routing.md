@@ -6,8 +6,8 @@ Read the workflow ledger first — detected primarily by the current git branch,
 
 Default:
 
-- No ledger (no branch match, and no Linear ID/ticket-slug/topic match): create one, recording the current branch, and run `my-research`, then checkpoint.
-- Ledger exists: pick the earliest stage not marked `completed`.
+- No ledger (no branch match, and no Linear ID/ticket-slug/topic match): create one, recording the current branch, and run `my-research`, then continue into the next stage without stopping.
+- Ledger exists: pick the earliest stage not marked `completed`. If it's stage 1-8, continue running from there through stage 8 without stopping, then stop at the Decisions Checkpoint. If stages 1-8 are already complete and confirmed but stage 9 hasn't run yet, run stage 9 next (not stages 1-8 again).
 
 Quick handoff:
 
@@ -21,18 +21,18 @@ Route to the full pipeline when the change adds new functionality, alters observ
 
 State the route and the one-sentence reason before running either path.
 
-Run stages in this order, based on ledger status:
+Run stages in this order, based on ledger status. Stages 1-8 run back-to-back with no stop; each writes its artifact and any provisional decision to the ledger, then the pipeline moves straight to the next stage:
 
-- `my-research` not completed: run `my-research`, then checkpoint.
-- `my-spec` not completed: run `my-spec`, then checkpoint.
-- `my-clarify` not completed: run `my-clarify`, feed resolutions into spec, then checkpoint.
-- `my-architecture-plan` not completed: run `my-architecture-plan`, then checkpoint.
-- `my-plan` not completed: run `my-plan`, passing the architecture plan's path so it seeds `## Architectural Constraints` from it, then checkpoint before implementation.
-- `my-observe` not completed: run `my-observe`, then checkpoint.
-- `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan`, then checkpoint. Otherwise mark it `not_applicable` with a one-line reason and continue without stopping.
-- `my-analyze` not completed: run `my-analyze`, then checkpoint.
-- `my-analyze` completed but `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, checkpoint with the decision (`overlap_pending`). If clear, ledger `passed` and continue straight into the atomic block below with no separate checkpoint. Not a Linear issue: ledger `passed` (not applicable) and continue.
-- Implementation not reviewed, and implementation gate is satisfied: run the atomic block — `my-implement`, then the fix loop — then checkpoint.
+- `my-research` not completed: run `my-research`, log the artifact, continue.
+- `my-spec` not completed: run `my-spec`, log the artifact and any provisional decision, continue.
+- `my-clarify` not completed: run `my-clarify`, feed resolutions into spec, log any provisional decision, continue.
+- `my-architecture-plan` not completed: run `my-architecture-plan`, log the artifact and any provisional decision, continue.
+- `my-plan` not completed: run `my-plan`, passing the architecture plan's path so it seeds `## Architectural Constraints` from it, log the artifact and any provisional decision, continue.
+- `my-observe` not completed: run `my-observe`, log the artifact, continue.
+- `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan` and log the artifact. Otherwise mark it `not_applicable` with a one-line reason. Either way, continue without stopping.
+- `my-analyze` not completed: run `my-analyze`, log the artifact, then **stop here** at the Decisions Checkpoint — present every stage 1-8 artifact plus every accumulated provisional decision for the user to confirm or override. This is the point to clear context; do not run stage 9 yet.
+- Decisions Checkpoint confirmed (every provisional decision resolved), and `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, stop with just that decision (options, recommendation, evidence) — a small checkpoint of its own. If clear, ledger `passed` and continue straight into the atomic block with no separate stop. Not a Linear issue: ledger `passed` (not applicable) and continue straight into the atomic block.
+- Implementation not reviewed, and implementation gate is satisfied (Decisions Checkpoint confirmed, pre-implementation check `passed`): run the atomic block — `my-implement`, then the fix loop — then checkpoint.
 
 Fix loop (runs automatically, no checkpoint between iterations):
 
@@ -47,8 +47,9 @@ Implementation gate:
 
 - The ledger must explicitly mark `my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-plan`, `my-observe`, and `my-analyze` as `completed`, and `my-eval-plan` as either `completed` or `not_applicable`.
 - The ledger must contain artifact paths for the research, spec, architecture plan, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
-- `cross_workflow.pre_implementation_check` must be `passed` for the current plan version — `not_run`, unset, or `overlap_pending` all block implementation the same way an incomplete stage does.
-- The current invocation must be a resume after the plan/analysis checkpoints or must explicitly say to proceed with implementation.
+- Every entry under `## Provisional Decisions` must be confirmed or overridden at the Decisions Checkpoint — an unconfirmed provisional decision blocks stage 9 and implementation the same way an incomplete stage does.
+- `cross_workflow.pre_implementation_check` must be `passed` for the current plan version, checked fresh *after* the Decisions Checkpoint — `not_run`, unset, or `overlap_pending` all block implementation the same way an incomplete stage does. A check run before the Decisions Checkpoint (or reused from an earlier one) does not satisfy this gate.
+- The current invocation must be a resume after the user confirmed or overrode every provisional decision at the Decisions Checkpoint, or must explicitly say to proceed with implementation.
 
 If any gate is missing, do not implement. Run the earliest missing stage or checkpoint with the missing ledger/artifact requirement.
 

@@ -20,15 +20,23 @@ Always run `git branch --show-current` and check for a ledger whose `branch` fie
 
 ## Jumping straight to implementation
 
-New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-7 complete, `cross_workflow.pre_implementation_check` is `passed` for the current plan version (not `not_run`, unset, or `overlap_pending`), and the user resumes after the plan/analysis checkpoints or explicitly asks to proceed with implementation. A clean cross-workflow result from an earlier checkpoint (say, from `my-plan`) does not carry forward to this gate — the plan may have changed since, and siblings may have advanced; the gate needs its own fresh run.
+New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-8 complete, every entry under `## Provisional Decisions` is confirmed or overridden at the Decisions Checkpoint, `cross_workflow.pre_implementation_check` is `passed` for the current plan version (not `not_run`, unset, or `overlap_pending`), and that check was run *after* the Decisions Checkpoint — not before it, and not reused from an earlier stage. A clean cross-workflow result from an earlier stage does not carry forward to the gate on its own — the pre-implementation coordination check (stage 9) re-runs fresh regardless, because the plan may have changed since and siblings may have advanced.
+
+## Running the pre-implementation coordination check before the Decisions Checkpoint
+
+Stage 9 exists to catch sibling drift right before code changes land — that guarantee only holds if it runs *after* the user has reviewed and confirmed everything from stages 1-8. Running it earlier (during stages 1-8, or bundling it into the Decisions Checkpoint's own output "since the data's already there") defeats the point twice over: it checks against a plan the user hasn't signed off on yet, and it removes the natural pause where the user can clear context before the next stretch of work. The Decisions Checkpoint must fire and get a resume first; stage 9 is the very next thing after that, never before.
 
 ## Silently switching to my-quick
 
 If the work is small enough for `my-quick`, say so upfront and write it into the workflow ledger before handing off. The ledger should show `route: my-quick`, why the full pipeline was skipped, expected scope, and the exact handoff command. Do not leave a workflow ledger that looks like stage 1 started when the actual path was quick mode.
 
+## Invoking my-quick right after ledgering the route, without waiting for approval
+
+Ledgering the `route: my-quick` decision is necessary but not sufficient. The route choice is itself a user-owned decision (same class as "Self-approving a decision the user owns" below) — skipping research/spec/clarify/architecture-plan/plan/observe/analyze on the user's behalf, even for a well-evidenced ticket, is a call the user gets to make, not one to log-and-proceed on. After writing the route decision to the ledger, stop and present it (route + one-sentence reason + expected scope + exact handoff command) and wait for explicit confirmation before calling `Skill(my-quick)`. Concretely: end the turn there; do not chain the routing message and the `my-quick` invocation together in the same turn. Caught when the user was surprised by a batch of file edits landing in their working tree with no chance to redirect first, even though the ledger note itself was correct and complete.
+
 ## Self-approving a decision the user owns
 
-Decisions belong to the user — approach selection, scope trade-offs, product intent, and sign-off on the spec and the plan. Do NOT self-approve the spec or plan and march on, and do NOT auto-default a genuine decision just because a "reasonable" answer exists. That is the exact judgment the user reserves. Instead, do all the research and preparation, present the decision with options + a recommendation + the evidence, and wait. The flip side — don't over-correct into asking the user *factual* questions you could research; that's the previous gotcha. The line is: facts you resolve, decisions you tee up.
+Decisions belong to the user — approach selection, scope trade-offs, product intent, and sign-off on the spec and the plan. Do the research, form a recommendation, and pick it so the pipeline can keep moving — but do NOT drop it silently into a plain assumption. Log it under the ledger's `## Provisional Decisions` section with the options, the recommendation, and the evidence, and it must reach the user at the Decisions Checkpoint for confirmation or override. "I resolved it and kept going" is fine; "I resolved it and it never surfaced again" is self-approval. The flip side — don't over-correct into asking the user *factual* questions you could research; that's the previous gotcha. The line is: facts you resolve and log as assumptions (done, no confirmation needed), decisions you resolve and log as provisional (done for now, but still awaiting the user's sign-off).
 
 ## Treating a hard failure as skippable
 
@@ -40,11 +48,11 @@ The review scope is the **whole branch against the base branch** (`main`/`master
 
 ## Losing the ledger on a long run
 
-Thirteen stages is a long way to fall. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it as each stage finishes. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research.
+Eight stages now run back-to-back with zero stops before the Decisions Checkpoint — that's a long unattended stretch to lose if something interrupts it. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it silently as each stage finishes, including every provisional decision the moment it's made. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research, and not re-litigate a provisional decision that was already logged.
 
 ## Treating one clean cross-workflow check as good for the rest of the run
 
-Sibling ledgers advance and Linear issue statuses change between checkpoints. A "no overlap" result at intake does not carry forward — re-run `references/cross-workflow-coordination.md` before every checkpoint, not just once at Step 0. Skipping the re-check because "I already looked" is how a sibling's plan lands on the same files mid-run without anyone noticing.
+Sibling ledgers advance and Linear issue statuses change between checkpoints. A "no overlap" result at intake does not carry forward to the pre-implementation gate — re-run `references/cross-workflow-coordination.md` fresh at each of the three points it applies (Step 0 intake, stage 9's Pre-Implementation Gate after the Decisions Checkpoint, the atomic block's final checkpoint), not just once. Skipping the re-check because "I already looked" is how a sibling's plan lands on the same files mid-run without anyone noticing. (Stages 1-8 no longer stop at all, so there's nothing to re-check between them — the three points above are the whole list now.)
 
 ## Escalating on sibling existence instead of sibling overlap
 
