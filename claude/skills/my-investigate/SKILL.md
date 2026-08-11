@@ -3,7 +3,7 @@ model: opus
 effort: xhigh
 name: my-investigate
 description: Investigate production, runtime, CI, or test issues by gathering evidence from logs, metrics, traces, code, and CI, then ranking hypotheses.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Investigate

@@ -2,7 +2,7 @@
 model: sonnet
 name: ci-babysit
 description: Monitor a PR's CircleCI pipeline, diagnose failures, apply scoped fixes, push when requested, and continue until green or blocked.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # CI Babysit

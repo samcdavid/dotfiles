@@ -2,7 +2,7 @@
 model: opus
 name: my-workflow
 description: "Run research through analysis autonomously, resolving decisions with the pipeline's own recommendation, then stop once at a Decisions Checkpoint to present every artifact and provisional decision for confirm/override. Only after that confirmation does the pre-implementation coordination check run, followed by the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the ledger marks all prior stages complete and decisions confirmed."
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # My Workflow

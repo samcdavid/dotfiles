@@ -2,7 +2,7 @@
 model: sonnet
 name: my-test-exec
 description: Execute a manual E2E test plan in the browser, record evidence, and format results for the user or PR.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Test Exec

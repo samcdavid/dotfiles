@@ -2,7 +2,7 @@
 model: opus
 name: autoresearch
 description: "Autonomous iteration loop for a measurable goal: review, ideate, modify, verify, keep or rollback, repeat until interrupted or capped."
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Autoresearch

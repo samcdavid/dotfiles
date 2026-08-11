@@ -2,7 +2,7 @@
 model: opus
 name: team-plan
 description: Plan milestone work by analyzing issue surfaces, dependencies, sequencing, and merge-conflict risk. Handles multiple developers as parallel waves, or a single developer as a critical-path sequence.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Team Plan

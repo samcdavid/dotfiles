@@ -2,7 +2,7 @@
 model: sonnet
 name: prove-it
 description: Lightweight fact-check of the current conversation. Separates verified facts from unverified assumptions, cites evidence for each, and flags trust debt. Use when findings feel uncertain or before acting on research.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 # Prove It
