@@ -20,7 +20,7 @@ Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoin
 1. Load milestone/issues and related Linear metadata.
 2. For each issue, identify likely code surfaces, dependencies, blockers, and unknowns.
 3. Detect conflicts by overlapping files/modules/data migrations.
-4. Sequence work into waves that maximize parallelism without merge collisions.
+4. Sequence work into the simplest wave structure that maximizes parallelism without merge collisions — fewest waves and coordination interfaces that satisfy the hard constraints; add structure only when an actual detected conflict requires it, not speculatively.
 5. Identify critical path, prerequisites, and coordination points.
 6. Update issue relationships only when explicitly requested.
 

@@ -98,11 +98,16 @@ Group issues into waves. Hard rules:
 - No two HIGH-conflict issues in the same wave
 - Each issue in a wave is one developer's solo work — they own it atomically
 
-Preferred (override when needed):
-- Prefer grouping by architectural layer across waves (data-layer changes before API changes before feature work)
+### Simplicity Bias (default posture)
+
+Among wave structures that satisfy the hard rules above, prefer the simplest one: fewest waves, fewest coordination interfaces, fewest special-cased sequencing rules. Extra structure — an additional wave split, a new coordination interface, a cross-wave dependency note — must be justified by an actual conflict surfaced in Step 4's matrix, not by "this might reduce risk" or "this feels tidier." A milestone with no HIGH conflicts and few MED ones should usually resolve to one or two waves, not one wave per architectural layer out of habit.
+
+Preferred (override only when the conflict matrix demands it):
+- Fewer waves over more, when the hard rules still hold with fewer
+- Grouping by architectural layer across waves (data-layer changes before API changes before feature work) is a tool for resolving a real ordering dependency, not a default structure to impose
 - Issues that establish shared interfaces go in the earliest possible wave
 
-For any HIGH-conflict pair that must share a wave, define a **coordination interface**: a shared type, function, or contract both issues agree on before either starts. Add this as a Phase 0 in both plans.
+For any HIGH-conflict pair that must share a wave, define a **coordination interface**: a shared type, function, or contract both issues agree on before either starts. Add this as a Phase 0 in both plans. Reach for a coordination interface only when resequencing into different waves can't avoid the conflict — resequencing is simpler than adding a new interface both teams must maintain.
 
 Document the assignment:
 ```
