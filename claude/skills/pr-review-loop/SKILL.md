@@ -20,24 +20,30 @@ Read first:
 
 Use `~/.agents/rules/` under Codex.
 
-For PR-list parsing (explicit and auto-discovery), per-PR skip conditions, failure handling, and the dedup rationale, read `references/protocol.md`.
+For PR-list parsing (explicit and auto-discovery), per-PR skip conditions, failure handling, the claim ledger's concurrency guarantees, and the dedup rationale, read `references/protocol.md`.
 
 ## Flow
 
+0. Generate one session id for the whole run and reuse it on every claim/release call: `printf 'pr-loop-%s-%s\n' "$(date -u +%H%M%S)" "$RANDOM"`. Record it in the run header.
 1. Resolve the working list of `(owner, repo, number)` tuples from `$ARGUMENTS`:
    - **Explicit**: PR numbers/URLs given — use them as-is, no approval filtering.
-   - **Auto-discovery**: none given — run `scripts/discover-review-queue.sh`, scoped to the current repo (via `gh repo view`). It drops a PR only if my *latest* review on it is `APPROVED`; never-reviewed, `COMMENTED`, and `CHANGES_REQUESTED` are all kept.
-2. For each PR, in order:
-   - Pre-check with `scripts/pre-check-pr.sh`; skip merged/closed PRs. This runs for every PR in both modes — it catches a PR merging *between* discovery and review in a multi-PR batch, and it's the only state check explicit-mode PRs get at all.
-   - Run `my-review` in PR mode.
-   - Run `publish-review` immediately after — invoking this skill is the batch's standing approval to publish every PR it processes, the same as `publish-review`'s own single-PR convention.
-3. Record one ledger line per PR (verdict, published event, comment/reply counts, URL, or skip/failure reason) and drop that PR's raw findings from context before starting the next one.
-4. Apply the three-strike rule **per PR**: a PR that fails twice more after its first failure gets skipped and reported, not retried indefinitely — one bad PR never stalls the batch.
-5. **Auto-discovery only:** re-run `scripts/discover-review-queue.sh` and repeat from step 2 over any PR not already processed this run, until a call returns nothing new (capped at 25 outer-loop iterations as a safety net). The stop condition is "nothing new," not "the script returned empty" — a PR that only ever earns a `COMMENT` verdict stays in the script's output forever (it's never `APPROVED`), so looping on raw-empty output would never terminate.
-6. After the last iteration, report the full progress table.
+   - **Auto-discovery**: none given — run `scripts/discover-review-queue.sh`, scoped to the current repo (via `gh repo view`). It drops a PR only if my *latest* review on it is `APPROVED`.
+2. **Shuffle the working list** through `scripts/shuffle-queue.sh`, in both modes. Sessions walking the same queue in the same order contend on every PR; random order spreads them out.
+3. For each PR, in shuffled order:
+   - **Claim it first**, before any other work: `scripts/claim-pr.sh <owner> <repo> <number> --session <id>`. On `"claimed": false` another session holds it — record `SKIPPED: claimed-elsewhere`, treat it as processed, move on. Never review a PR this session does not hold.
+   - Pre-check with `scripts/pre-check-pr.sh`; skip merged/closed PRs. It also returns `head_sha`.
+   - **Auto-discovery only:** `scripts/check-reviewed.sh <owner> <repo> <number> --sha <head_sha>`. On `"reviewed": true` this exact commit was already reviewed — release the claim, record `SKIPPED: already-reviewed`, move on.
+   - Run `my-review` in PR mode, then `publish-review` immediately after — invoking this skill is the batch's standing approval to publish.
+   - **Mark it reviewed, then release**, in that order: `scripts/mark-reviewed.sh ... --sha <head_sha> --verdict <verdict> --session <id>`, then `scripts/release-pr.sh ... --session <id>`. Release every PR claimed, on every exit path — published, skipped, or failed.
+4. Record one ledger line per PR (verdict, published event, comment/reply counts, URL, or skip/failure reason) and drop that PR's raw findings from context before starting the next one.
+5. Apply the three-strike rule **per PR**: a PR that fails twice more after its first failure gets skipped and reported, not retried indefinitely — one bad PR never stalls the batch. Release its claim before moving on.
+6. **Auto-discovery only:** re-run `scripts/discover-review-queue.sh` and repeat from step 2 (re-shuffling) over any PR not already processed this run, until a call returns nothing new (capped at 25 iterations). The stop condition is "nothing new," not "empty output" — a PR that only ever earns `COMMENT` stays in the script's output forever.
+7. After the last iteration, report the full progress table.
 
-In explicit mode, always re-review every named PR, even one reviewed before at the same commit — `my-review` already dedupes new findings against its `existing_comments_index` (including its own prior passes), so a re-review does not re-post what's already there. In auto-discovery mode, the approved-exclusion runs before the loop starts (Step 1): only already-approved PRs are dropped, since re-approving something already signed off on adds no value — everything else in the queue, including PRs never reviewed at all, gets processed.
+In explicit mode, always re-review every named PR, even one reviewed before at the same commit: naming a PR is explicit intent, so the `check-reviewed.sh` gate is skipped there. Still mark it reviewed afterward, so auto-discovery sessions benefit. In auto-discovery mode, only already-approved PRs are dropped (Step 1).
+
+Three mechanisms, three jobs: shuffling reduces contention, the **claim** ledger stops two sessions reviewing a PR at once, and the **reviewed** ledger stops a later session redoing a commit already reviewed. Never review a PR without holding its claim, even when the list looks uncontested.
 
 ## Output
 
-A table of every PR processed: number, verdict, published (event + inline/reply counts), or the skip/failure reason. Call out anything skipped for being merged/closed, and anything that failed after retries.
+A table of every PR processed: number, verdict, published (event + inline/reply counts), or the skip/failure reason. Call out anything skipped for being merged/closed, `claimed-elsewhere`, or `already-reviewed`, and anything that failed after retries. State the run's session id and confirm every claim taken was released.
