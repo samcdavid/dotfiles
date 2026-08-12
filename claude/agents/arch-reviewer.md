@@ -30,36 +30,27 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 3. Read the changed files and enough of their neighbors to judge boundaries (use `research_notes` for call chains rather than re-deriving them).
 4. **Map dependency directions** between the changed modules. Evaluate layering and cohesion. Identify hidden coupling and contract design. Distinguish **desirable** deviations from established convention (a deliberate, well-reasoned improvement) from **undesirable** ones (drift, shortcut, boundary violation).
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
+6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
 
 ## Output — return this fragment, nothing more
 
 ```
 ## Lens Findings — arch-reviewer
 
-### Critical Findings
-Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
+### Findings
+One flat list. Do not group, tier, or rank — the three levels carry the judgment. A finding needing author context gets `Severity: Question` and a **Question:** field in place of Problem/Fix.
 #### 1. [Category]: [title]
 - **Lens:** Architecture
+- **Severity:** Critical | Non-blocking | Question | Nit
+- **Risk:** High | Medium | Low
+- **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
 - **Problem:** [boundary/coupling/direction issue and why it matters long-term]
 - **Fix:** [concrete structural change]
 - **Add-to-thread:** [thread_root_id] | (omit if new)
 
-### Non-blocking Suggestions
-#### 1. [Category]: [title]
-- **Lens:** Architecture
-- **File:** `path:LINE`
-- **Suggestion:** [structural improvement and why]
-- **Add-to-thread:** [thread_root_id] | (omit)
-
-### Targeted Questions
-1. [new pattern / precedent question in a phrase] — [context]; [the question]
-
 ### Architecture Assessment
-[Prose: dependency-direction analysis, layering evaluation, desirable-vs-undesirable deviation calls. Reference numbered findings rather than repeating them.]
-
-### What's Good
-- [specific, grounded positive]
+[Prose: dependency-direction analysis, layering evaluation, desirable-vs-undesirable deviation calls. Reference findings by number rather than repeating them.]
 ```
 
 Omit empty sections. You are read-only: never call Edit/Write on the code under review.

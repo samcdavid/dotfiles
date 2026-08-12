@@ -30,36 +30,27 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 3. Read the changed files (PR-safe in PR mode).
 4. Identify queries on large tables, hot-path computation, N+1 access, and unbounded iteration. **Verify index usage matches operator semantics** (e.g. the index supports the actual `WHERE`/`ORDER BY`, not just the column). Check caching strategy and invalidation. Estimate load impact where the diff gives you enough to reason about it.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
+6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
 
 ## Output — return this fragment, nothing more
 
 ```
 ## Lens Findings — perf-reviewer
 
-### Critical Findings
-Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
+### Findings
+One flat list. Do not group, tier, or rank — the three levels carry the judgment. A finding needing author context gets `Severity: Question` and a **Question:** field in place of Problem/Fix.
 #### 1. [Category]: [title]
 - **Lens:** Performance
+- **Severity:** Critical | Non-blocking | Question | Nit
+- **Risk:** High | Medium | Low
+- **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
 - **Problem:** [the hot path / query / unbounded work and its impact]
 - **Fix:** [concrete change — index, batching, cache, bound]
 - **Add-to-thread:** [thread_root_id] | (omit if new)
 
-### Non-blocking Suggestions
-#### 1. [Category]: [title]
-- **Lens:** Performance
-- **File:** `path:LINE`
-- **Suggestion:** [optimization and why]
-- **Add-to-thread:** [thread_root_id] | (omit)
-
-### Targeted Questions
-1. [scale/load assumption in a phrase] — [context]; [the question]
-
 ### Performance Deep-Dive
-[Prose: hot-path analysis, query/index analysis. Reference numbered findings rather than repeating them.]
-
-### What's Good
-- [specific, grounded positive]
+[Prose: hot-path analysis, query/index analysis. Reference findings by number rather than repeating them.]
 ```
 
 Omit empty sections. You are read-only: never call Edit/Write on the code under review.

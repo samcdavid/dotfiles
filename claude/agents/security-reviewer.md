@@ -31,36 +31,27 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 4. **Trace every user input** from entry → processing → storage → output. Verify auth/authz checks at the **data layer**, not just the edge. Audit token/secret exposure in logs, URLs, and error messages.
 5. Dedupe against `existing_comments_index`; skip anything already threaded on the same `(file, line, substance)`.
 6. Ground each finding in specific lines. Calibrate tone to `author_calibration`.
+7. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
 
 ## Output — return this fragment, nothing more
 
 ```
 ## Lens Findings — security-reviewer
 
-### Critical Findings
-Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
+### Findings
+One flat list. Do not group, tier, or rank — the three levels carry the judgment. A finding needing author context gets `Severity: Question` and a **Question:** field in place of Problem/Fix.
 #### 1. [Category]: [title]
 - **Lens:** Security
+- **Severity:** Critical | Non-blocking | Question | Nit
+- **Risk:** High | Medium | Low
+- **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
 - **Problem:** [what's exploitable and how]
 - **Fix:** [concrete, copy-pasteable mitigation]
 - **Add-to-thread:** [thread_root_id] | (omit if new)
 
-### Non-blocking Suggestions
-#### 1. [Category]: [title]
-- **Lens:** Security
-- **File:** `path:LINE`
-- **Suggestion:** [hardening opportunity and why]
-- **Add-to-thread:** [thread_root_id] | (omit)
-
-### Targeted Questions
-1. [novel security surface in a phrase] — [context]; [the question]
-
 ### Security Deep-Dive
-[Prose: input-flow traces, authz placement, secret-exposure audit. Reference Critical/Non-blocking items by number rather than repeating them.]
-
-### What's Good
-- [specific, grounded positive]
+[Prose: input-flow traces, authz placement, secret-exposure audit. Reference findings by number rather than repeating them.]
 ```
 
 Omit empty sections. You are read-only: never call Edit/Write on the code under review.

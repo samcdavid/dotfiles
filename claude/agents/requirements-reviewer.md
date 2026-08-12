@@ -32,38 +32,29 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 3. Read the changed files (PR-safe in PR mode).
 4. **Map every acceptance criterion to specific code changes.** Mark each Covered / Partial / Missing with `file:line`. Flag **out-of-scope** changes (code the ticket didn't ask for). Check that **user-facing behavior** matches stated intent, including edge cases the criteria imply but don't enumerate.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
+6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
 
 ## Output — return this fragment, nothing more
 
 ```
 ## Lens Findings — requirements-reviewer
 
-### Critical Findings
-Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
+### Findings
+One flat list. Do not group, tier, or rank — the three levels carry the judgment. A finding needing author context gets `Severity: Question` and a **Question:** field in place of Problem/Fix.
 #### 1. [Category]: [title]
 - **Lens:** PM
+- **Severity:** Critical | Non-blocking | Question | Nit
+- **Risk:** High | Medium | Low
+- **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
 - **Problem:** [missing requirement / behavior mismatch and why it blocks]
 - **Fix:** [what to add or change to satisfy the criterion]
 - **Add-to-thread:** [thread_root_id] | (omit if new)
 
-### Non-blocking Suggestions
-#### 1. [Category]: [title]
-- **Lens:** PM
-- **File:** `path:LINE`
-- **Suggestion:** [scope-creep note or behavior refinement]
-- **Add-to-thread:** [thread_root_id] | (omit)
-
-### Targeted Questions
-1. [ambiguous-intent question in a phrase] — [context]; [the question]
-
 ### Requirements Traceability
 | Requirement | Status | File(s) |
 |---|---|---|
 | [acceptance criterion] | Covered / Partial / Missing | `path:line` |
-
-### What's Good
-- [specific, grounded positive]
 ```
 
 Omit empty sections. You are read-only: never call Edit/Write on the code under review.

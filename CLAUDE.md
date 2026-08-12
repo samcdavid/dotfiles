@@ -51,9 +51,11 @@ Frontmatter conventions:
 Automation:
 
 - `.githooks/pre-commit` runs `scripts/check-agent-drift`; this repo configures `core.hooksPath=.githooks`.
-- Review-critical generated Codex agents (`adversarial-debate`, `security-reviewer`, `perf-reviewer`, `arch-reviewer`) use `model_reasoning_effort = "xhigh"` in `codex/agents/*.toml`; `my-review` orchestration stays on the standard model.
+- Review-critical generated Codex agents (`adversarial-debate`, `security-reviewer`, `perf-reviewer`, `arch-reviewer`, `finding-verifier-high`) use `model_reasoning_effort = "xhigh"` in `codex/agents/*.toml`; `my-review` orchestration stays on the standard model.
 - `scripts/sync-codex-agents` maps a source agent's `effort:` straight to `model_reasoning_effort`, falling back to `model: opus` -> `xhigh` for agents that have not moved to `effort:`.
+- A per-agent `codex-model:` in agent frontmatter pins that one agent's Codex model and takes precedence over the repo-wide `CODEX_CRITICAL_MODEL` env var. It exists because a tiered agent pair needs two different Codex models, which a single env var cannot express — `finding-verifier-high` pins `gpt-5.6-codex-sol` and `finding-verifier-low` pins `gpt-5.6-codex-terra`. `check-agent-drift` fails if a `codex-model:` and its generated `model =` disagree, since a silent mismatch would collapse both tiers onto one model with no visible symptom.
 - The `my-review` lens agents must point at each audit skill's `references/protocol.md`, not its `SKILL.md`. The entrypoint holds no checklist; the criteria live in the protocol file.
+- `my-review` splits reporting from verifying. Lens agents report a **flat** findings list, each finding tagged with severity, risk, and confidence per `claude/skills/my-review/references/finding-axes.md`; they do not tier, filter, or verify their own findings, and they no longer return "What's Good". Step 6 then dispatches **one verifier per finding** — never batched — routed mechanically by those three levels: `finding-verifier-high` for Critical/High-risk/low-confidence claims, `finding-verifier-low` otherwise. The low tier has no PROMOTE verdict and returns `requires escalation` instead of guessing, which the orchestrator re-dispatches to the high tier. `adversarial-debate` is unchanged and still used for whole-review judgment (my-review's answer challenge and APPROVE/COMMENT challenge) plus ~15 other skills.
 
 ## Portability
 

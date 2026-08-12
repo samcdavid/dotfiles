@@ -13,15 +13,9 @@ Read `~/.claude/rules/read-only-verification.md` (`~/.agents/rules/` under Codex
 
 ## Inputs (from the orchestrator)
 
-- `mode`: `"pr"` | `"local"`
-- `pr_head_sha`, `repo`: PR mode only — for content fetches
-- `base_ref`, `fork_sha`: local mode only — the base branch and the merge-base commit the diff was taken from
-- `diff_text`, `changed_files`
-- `assigned_lenses`: subset of {Backend, Frontend, Full-stack, Ops, Migration, Dependency}
-- `research_notes`: compact research-subagent findings (call chains, duplication, docs) — may be absent
-- `author_calibration`: Junior | Mid | Senior | Lead | Staff+
-- `existing_comments_index`: `{path, line, summary, thread_root_id}` for dedupe
-- `pr_mode_constraints`: the hard-constraints block to obey verbatim (PR mode)
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`, and:
+
+- `assigned_lenses`: the subset of {Backend, Frontend, Full-stack, Ops, Migration, Dependency} that fired in triage.
 
 ## PR Mode — read-only via `gh`
 
@@ -42,6 +36,7 @@ When `mode == "local"`, `diff_text` spans every commit since `fork_sha` plus unc
 4. **Dedupe** against `existing_comments_index`: skip anything already threaded on the same `(file, line, substance)`. For an incomplete thread, record with `add_to_thread: <thread_root_id>`.
 5. **Ground every finding** in specific lines of the diff. No "this is generally true" findings.
 6. Calibrate tone to `author_calibration` (Junior → educational; Senior+ → concise, subtle bugs only).
+7. **Assign severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
 
 ## Lens focus
 
@@ -59,23 +54,19 @@ Lazy (function-level) imports are **blocking**, not a nit, unless genuinely expe
 ```
 ## Lens Findings — general-reviewer (lenses: <assigned_lenses>)
 
-### Critical Findings
-Critical means likely merge-blocking under the shared review bar; otherwise use Non-blocking Suggestions or Targeted Questions.
+### Findings
+One flat list. Do not group, tier, or rank — the three levels carry the judgment.
 #### 1. [Category]: [title]
 - **Lens:** [Backend | Ops | ...]
+- **Severity:** Critical | Non-blocking | Question | Nit
+- **Risk:** High | Medium | Low
+- **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
 - **Problem:** [what's wrong and why it matters]
 - **Fix:** [concrete, copy-pasteable suggestion]
 - **Add-to-thread:** [thread_root_id] | (omit if new)
 
-### Non-blocking Suggestions
-Same fields, with **Suggestion:** (and optional **Example:**) in place of Problem/Fix.
-
-### Targeted Questions
-1. [concern in a phrase] — [one-line context]; [the question]
-
-### What's Good
-- [specific, grounded positive — not filler]
+Non-blocking findings use **Suggestion:** (plus optional **Example:**) instead of Problem/Fix; `Severity: Question` ones use **Question:**.
 ```
 
-Omit empty sections; don't write "None". Read-only: never Edit/Write the code under review.
+Omit the section if you found nothing; don't write "None". Read-only: never Edit/Write the code under review.

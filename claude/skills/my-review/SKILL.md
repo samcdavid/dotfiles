@@ -50,6 +50,7 @@ Load targeted references as needed:
 - `references/mode-routing.md` when choosing local, branch, PR, capture, or promote mode.
 - `references/pr-mode.md` for GitHub PR reviews.
 - `references/lens-routing.md` before spawning research and lens reviewers.
+- `references/finding-axes.md` before spawning lens reviewers and again before routing findings to verifiers — it defines severity, risk, and confidence, and the tier rule.
 - `references/finding-finalization.md` before presenting findings.
 
 For learned-miss maintenance, read `references/learned-misses.md` (active queue) and `references/promoted-misses.md` (promoted/discarded archive). Always read local `gotchas.md` when present.
@@ -60,9 +61,9 @@ For learned-miss maintenance, read `references/learned-misses.md` (active queue)
 2. Build the diff source of truth. In PR mode, use filtered GitHub payloads from `pr-cost-control.md`. In local mode the scope is the **whole branch** — `git diff $(git merge-base <base_ref> HEAD)`, covering every commit since the base branch plus staged and unstaged changes. Never the last commit alone, never the working tree alone.
 3. Identify active lenses and requirements source.
 4. Fan out research agents, then active lens reviewers.
-5. Merge, dedupe, importance-filter, and severity-classify findings.
-6. Split into Tier 1 (Critical-tier candidates) and Tier 2 (everything else). Verify each Tier-1 finding independently — one `adversarial-debate` dispatch per finding, in parallel — so a real defect can be promoted, not just steel-manned away; batch-challenge Tier 2 in one call.
-7. Compute the verdict mechanically from Tier 1's results, then adversarially challenge only the remaining APPROVE/COMMENT choice.
+5. Merge and dedupe the lens reviewers' flat findings, preserving each one's severity, risk, and confidence.
+6. Verify **every** finding independently — one verifier dispatch per finding, in parallel, never batched. The three levels pick the tier: `finding-verifier-high` (Opus) for Critical, High risk, or low-confidence non-trivial claims; `finding-verifier-low` (Sonnet) for the rest. Re-dispatch any low-tier `requires escalation` to the high tier.
+7. Compute the verdict mechanically from the findings that survive as Critical, then adversarially challenge only the remaining APPROVE/COMMENT choice.
 8. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
 
 ## Output

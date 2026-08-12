@@ -6,7 +6,7 @@ Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the
 
 Perform a thorough, high-quality code review. Works on local changes (unstaged/staged/committed) or GitHub pull requests.
 
-This skill is the **orchestrator**. It fans the work out to subagents — parallel research subagents for deep context, then specialized per-lens reviewer subagents (security, architecture, performance, QA, requirements, and a general reviewer for the rest) — and then does the parts that genuinely need the main window: triage, merging and de-duplicating the lens findings, targeted questions, the adversarial passes, the verdict, and pattern capture. The deep per-lens reasoning happens in the subagents; the judgment and synthesis happen here.
+This skill is the **orchestrator**. It fans the work out to subagents — parallel research subagents for deep context, then specialized per-lens reviewer subagents (security, architecture, performance, QA, requirements, and a general reviewer for the rest) — and then does the parts that genuinely need the main window: triage, merging and de-duplicating the lens findings, targeted questions, routing each finding to its verifier, the whole-review adversarial passes, the verdict, and pattern capture. The deep per-lens reasoning happens in the lens subagents, and per-finding verification happens in one isolated verifier per finding; the routing and synthesis happen here.
 
 ## Getting Started
 
@@ -221,20 +221,22 @@ In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and 
 
 Spawn a reviewer only for lenses that actually fired in triage. Always include `general-reviewer` if any non-specialized lens is active (it also carries the cross-service-contract checks). Each reviewer reads its source-of-truth skill, applies the checklist, dedupes against `existing_comments_index`, and returns a findings fragment.
 
+Each fragment is a **flat findings list** — no Critical/non-blocking grouping — where every finding carries `Severity`, `Risk`, and `Confidence` per `references/finding-axes.md`, plus that lens's deep-dive block. Point every reviewer's brief at that file so all lenses calibrate the three levels identically. Reviewers report levels; they do not tier, importance-filter, verify, or drop their own findings — Step 6 does that. A reviewer that returns pre-grouped Critical/Non-blocking sections is running the old contract: re-dispatch it once with the axes file named explicitly.
+
 ### Wave 3 — Compile
 
 Merge the lens reviewers' fragments into one findings set:
 
 1. **De-duplicate across reviewers.** Two lenses often flag the same line (e.g. security + general on the same input handler). Collapse to one finding, keeping the most precise framing and noting both lenses.
 2. **Re-check dedupe against `existing_comments_index`** — a reviewer may have missed a thread; drop or `add_to_thread` anything already raised.
-3. **Assemble** Critical Findings, Non-blocking Suggestions, Targeted Questions, What's Good, the lens deep-dive subsections each reviewer returned (Security Deep-Dive, Architecture Assessment, Performance Deep-Dive, Quality Deep-Dive, Requirements Traceability), and — if the tracer ran — Related-Issue Regression Risks.
+3. **Assemble** one flat findings set — each finding keeping its `Severity`, `Risk`, `Confidence`, and lens attribution — plus the lens deep-dive subsections each reviewer returned (Security Deep-Dive, Architecture Assessment, Performance Deep-Dive, Quality Deep-Dive, Requirements Traceability), and — if the tracer ran — Related-Issue Regression Risks. When collapsing a duplicate, keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the two: a finding two lenses read differently is one to verify harder, not one to average out.
 4. **Sanity-check coverage**: every active lens produced a fragment. If a reviewer returned an `## Error` (e.g. missing `requirements_checklist`) or came back empty for a lens that clearly applies, re-dispatch it once with a tightened brief before proceeding. Do not silently drop a lens.
 
 This compiled set is what Steps 4–8 operate on.
 
 ## Step 4 — Targeted Questions
 
-If the compiled findings include a `### Targeted Questions` block, ask them. The point is to catch things where the situation depends on context only I have.
+If any compiled finding carries `Severity: Question`, ask it. The point is to catch things where the situation depends on context only I have.
 
 ### After I answer — challenge my answers
 
@@ -252,11 +254,11 @@ The agent returns a verdict per answer:
 Apply the verdicts:
 - ACCEPT → record the answer and proceed
 - PROBE_FURTHER → ask me the follow-up question; re-run adversarial debate on the new answer (max 2 cycles, then accept or flag)
-- FLAG → record as a structured finding (it will get its own adversarial pass in Step 6 along with every other finding)
+- FLAG → record as a structured finding with its own severity/risk/confidence (it gets its own verifier dispatch in Step 6 along with every other finding)
 
 ### When to skip
 
-If the compiled findings include no `### Targeted Questions` block, skip this step entirely.
+If no compiled finding carries `Severity: Question`, skip this step entirely.
 
 If I've authorized auto-mode (or said "no questions, just review"), log these as a **Questions** section in the final review output (Step 5) instead of pausing. The post-answer adversarial pass is also skipped in this mode — there are no answers to challenge.
 
@@ -277,6 +279,7 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 ### Critical Findings
 
 #### 1. [Category]: [Concise issue title]
+**Risk:** [High | Medium | Low] · **Confidence:** [High | Medium | Low] · **Verified by:** [finding-verifier-high | finding-verifier-low]
 **File:** `path/to/file.ext:LINE`
 **Problem:** [What's wrong and why it matters]
 **Fix:**
@@ -285,6 +288,7 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 ### Non-blocking Suggestions
 
 #### 1. [Category]: [Concise title]
+**Risk:** [High | Medium | Low] · **Confidence:** [High | Medium | Low] · **Verified by:** [finding-verifier-high | finding-verifier-low]
 **File:** `path/to/file.ext:LINE`
 **Suggestion:** [What to improve and why]
 **Example:**
@@ -311,71 +315,87 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 ### Questions
 - [Genuine clarifying questions — things where the author has context you don't]
 
-### What's Good
-- [Specific positive callouts — not filler, real recognition of good decisions]
-
 ### Dropped Findings
-- [Findings that failed adversarial self-review — what was considered and why it was dropped]
+- [Findings a verifier DROPped — what was considered and why it was dropped]
 ```
 
-## Step 6 — Adversarial Challenge on Findings
+There is deliberately no "What's Good" section. Lens reviewers no longer return grounded positives, so anything written here would be the orchestrator inventing praise it did not verify. Do not add one back from your own impression of the diff.
 
-Split the compiled findings into two tiers before challenging them. Per-finding independent verification — not a single batch pass — is what lets a real defect get promoted instead of just steel-manned away; batching everything through one shared-context call is exactly the one-way valve this two-tier split exists to remove.
+## Step 6 — Per-Finding Verification
 
-### Tier 1 — Critical-tier candidates (one dispatch per finding, parallel)
+**Every** finding is verified on its own, by its own agent, with no knowledge of the others. Nothing is batched. A shared-context batch pass is a one-way valve — it can talk a real defect down but rarely talks one up, because the cheap findings around it set the tone. Isolation is what lets an under-classified defect get promoted instead of steel-manned away.
 
-Tier 1 is every finding currently classified Critical, plus every finding from the Security lens or `general-reviewer`'s cross-service-contract checks that asserts a definite defect — not a "might," not a Question — regardless of the severity label it was given. This is where a `REQUEST_CHANGES` verdict actually originates, so it's where independent verification pays for itself.
+### Route each finding to a tier
 
-For each Tier-1 finding, dispatch one `adversarial-debate` agent. All dispatches go in a single message so they run in parallel — never sequentially. Pass each dispatch:
+Read `references/finding-axes.md` and compute the tier mechanically from the finding's three levels:
 
-- PR diff or local diff source of truth
+```
+finding-verifier-high  if severity == Critical
+                       OR risk == High
+                       OR (confidence == Low AND severity not in (Nit, Question))
+finding-verifier-low   otherwise
+```
+
+Do not hand-pick a tier because a finding feels important — if it feels important, fix the levels and let the rule follow. Do not collapse everything to the high tier "to be safe"; that discards the cost control this split exists for.
+
+### Dispatch
+
+Send **all** dispatches — both tiers — in a single message so they run in parallel. Never sequentially. Pass each dispatch:
+
+- `mode`, and the PR diff or local diff source of truth (plus `pr_head_sha`/`repo` and the PR-mode constraints block in PR mode)
 - that finding's file paths and lines only
-- requirements checklist, if present
-- proposed severity and verdict
-- nothing from the other findings — each dispatch verifies its own claim in isolation, so shared context can't bias one verdict off another
+- the finding's claim, severity, risk, confidence, evidence, and proposed fix
+- requirements checklist, if present and relevant to that finding
+- **nothing about the other findings** — each dispatch verifies its own claim in isolation so no verdict can be biased off a sibling
 
-Each dispatch returns one of: KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`, with the mandatory evidence field (`file:line`, or `source` + `query` + `retrieved-at`).
+High-tier returns KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`. Low-tier returns the same minus PROMOTE, plus `requires escalation`. Both must cite evidence (`file:line`, or `source` + `query` + `retrieved-at`).
 
-PR mode caveat: adversarial agents can accidentally read the local working tree. If a DROP/REVISE verdict depends on "file does not exist," "identifier is fabricated," or "function cannot be found," verify against the PR diff or PR HEAD before applying it.
+### Handle escalations
 
-### Tier 2 — everything else (one batched dispatch)
+A low-tier `requires escalation` means the cheap pass could not honestly verify the claim. Re-dispatch that finding to `finding-verifier-high` and use the high-tier verdict. Escalations from one round can be re-dispatched together in one message.
 
-Non-blocking suggestions, nits, questions, and any finding not asserting a definite defect go through a single batched `adversarial-debate` call, same as before — per-finding verification isn't worth the cost for findings that can't become `REQUEST_CHANGES` regardless of outcome.
+Never resolve an escalation yourself by reasoning about it in the main window, and never treat an escalation as a DROP — an unverified finding is unverified, not disproven. If a re-dispatched finding escalates again or returns `requires clarification`, surface it as a question rather than looping (see `~/.claude/rules/loop-detection.md`).
+
+### PR mode caveat
+
+Verifier agents can accidentally read the local working tree. If any DROP or REVISE rests on "file does not exist," "identifier is fabricated," or "function cannot be found," verify against the PR diff or PR HEAD before applying it — a PR that adds a file means the file is real and just isn't checked out.
 
 ### Apply verdicts
 
 - KEEP: present as-is.
-- DOWNGRADE: move Critical to non-blocking/question, or suggestion to nit/drop.
-- REVISE: update claim, severity, or fix.
+- DOWNGRADE: apply the verifier's revised levels.
+- REVISE: update claim, levels, or fix.
 - DROP: remove and note in Dropped Findings.
-- PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a Tier-1 finding PROMOTEd to Critical carries into Step 7 as Critical; nothing downstream gets to talk it back down without new evidence.
+- PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a finding PROMOTEd to Critical carries into Step 7 as Critical, and nothing downstream talks it back down without new evidence.
 - `requires clarification`: surface as a Targeted Question naming the exact query a human should run. Never silently drop it, and never fill the gap with a guess presented as verified.
 
-After Tier 1 and Tier 2 both resolve, run `/this-important strict` (unless the user explicitly asked for a broader sweep) on **Tier 2 only** — Tier 1 already went through per-finding verification and does not get re-filtered here. `/this-important` has no PROMOTE verdict and doesn't need one (that's Tier 1's job); it also must not downgrade a Tier-1 KEEP or PROMOTE.
+Then run `/this-important strict` (unless the user asked for a broader sweep) on **low-tier findings only**. High-tier findings already got the deep per-finding pass and are not re-filtered here. `/this-important` has no PROMOTE verdict and must not downgrade any high-tier KEEP or PROMOTE.
 
 Before Step 7, confirm:
 
+- every finding got its own verifier dispatch — none was batched or skipped
 - no finding duplicates an existing PR thread
 - every finding is grounded in the diff or verified source
 - every Critical finding truly blocks merge
 - dropped findings have one-line reasons
+- every escalation was re-dispatched, not silently resolved or dropped
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
 
 ## Step 7 — Verdict
 
-The verdict is a **mechanical function of Step 6's Tier 1 results**, not a fresh judgment call layered on top.
+The verdict is a **mechanical function of Step 6's verifier results**, not a fresh judgment call layered on top.
 
-- If any Tier-1 finding's post-verification status is Critical (KEPT Critical, or PROMOTEd to Critical) → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it's "genuinely" merge-blocking — Step 6's per-finding dispatch already independently verified it with cited evidence, which is exactly what a fresh challenge here would just redo with less scrutiny (single shared context, not an isolated dispatch). The one exception: if a finding is Critical *only* because its verification returned `requires clarification` (couldn't be checked, not confirmed), don't auto-`REQUEST_CHANGES` on an unverified claim — surface it as a blocking question and let the user decide.
-- If no Tier-1 finding survives as Critical, choose between **APPROVE** and **COMMENT**:
-  - **APPROVE** — requirements are satisfied, and only minor nits or clearly optional Tier-2 suggestions remain.
+- If any finding's post-verification status is Critical (KEPT Critical, or PROMOTEd to Critical) → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it's "genuinely" merge-blocking — Step 6's per-finding dispatch already independently verified it with cited evidence, which is exactly what a fresh challenge here would just redo with less scrutiny (single shared context, not an isolated dispatch). The one exception: if a finding is Critical *only* because its verification returned `requires clarification` (couldn't be checked, not confirmed), don't auto-`REQUEST_CHANGES` on an unverified claim — surface it as a blocking question and let the user decide.
+- If nothing survives as Critical, choose between **APPROVE** and **COMMENT**:
+  - **APPROVE** — requirements are satisfied, and only minor nits or clearly optional suggestions remain.
   - **COMMENT** — several substantive inline comments, unresolved requirements questions, insufficient context, stale/already-merged PR state, or the user explicitly asks not to approve.
 
 ### Challenge the APPROVE/COMMENT choice
 
-`REQUEST_CHANGES` is not up for debate in this pass — it isn't a judgment call anymore once Step 6 has verified it. This adversarial pass is scoped to the one choice that's still discretionary. Spawn `adversarial-debate` with:
+`REQUEST_CHANGES` is not up for debate in this pass — it isn't a judgment call anymore once Step 6 has verified it. This adversarial pass is scoped to the one choice that's still discretionary, and it reasons over the review as a whole rather than one finding, so it uses `adversarial-debate` rather than a per-finding verifier. Spawn `adversarial-debate` with:
 
 - proposed APPROVE/COMMENT verdict
-- final surviving Tier-2 findings
+- the final surviving non-Critical findings, with their risk and confidence levels
 - triage context and active lenses
 
 Ask it to challenge:
@@ -492,6 +512,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 
 ## References
 
+- `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
 - `references/cross-service-contracts.md` - checklist for cross-service changes. Read by `general-reviewer`.
 - `references/learned-misses.md` - active pattern queue. Auto-promote check runs top invocation; triage block reports promotions.
