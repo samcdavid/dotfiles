@@ -133,6 +133,18 @@ def check_codex_agents(errors: list[str]) -> None:
             if data.get("model_reasoning_effort") != "xhigh":
                 errors.append(f"{rel(path)} should set model_reasoning_effort = \"xhigh\"")
 
+        # A per-agent `codex-model` is the only way a tiered agent pair gets two
+        # different Codex models, so a silent mismatch here would collapse both
+        # tiers onto one model without any visible symptom.
+        codex_model = re.search(r"^codex-model:\s*(\S+)\s*$", source_text, re.M)
+        if codex_model:
+            expected_model = codex_model.group(1).strip().strip("\"'")
+            if data.get("model") != expected_model:
+                errors.append(
+                    f"{rel(path)} should set model = \"{expected_model}\" "
+                    f"to match source codex-model"
+                )
+
 
 def check_budget(errors: list[str]) -> None:
     files = list((ROOT / "claude" / "skills").glob("**/SKILL.md"))

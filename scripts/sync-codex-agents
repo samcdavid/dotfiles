@@ -65,7 +65,10 @@ EFFORT_TO_CODEX = {
 
 
 def codex_model_fields(
-    agent_name: str, claude_model: str | None, claude_effort: str | None
+    agent_name: str,
+    claude_model: str | None,
+    claude_effort: str | None,
+    codex_model: str | None = None,
 ) -> list[str]:
     """Map Claude reasoning intent to optional Codex agent config.
 
@@ -73,6 +76,11 @@ def codex_model_fields(
     fall back to the legacy signal: Claude's `opus` means "use the expensive/
     high-judgment model", which Codex cannot run, so we preserve the intent as
     elevated reasoning effort. Set CODEX_CRITICAL_MODEL to pin a Codex model too.
+
+    A per-agent `codex-model` pins one agent's Codex model directly and takes
+    precedence over CODEX_CRITICAL_MODEL. That is the only way a tiered pair of
+    agents can land on two different Codex models — a single repo-wide env var
+    cannot express "this one on the deep model, that one on the cheap one".
     """
 
     effort = (claude_effort or "").strip().lower()
@@ -82,11 +90,14 @@ def codex_model_fields(
             f"expected one of {', '.join(sorted(EFFORT_TO_CODEX))}"
         )
 
+    pinned_model = (codex_model or "").strip()
     is_critical = claude_model == "opus" or agent_name in CRITICAL_AGENT_NAMES
-    if not effort and not is_critical:
+    if not effort and not is_critical and not pinned_model:
         return []
 
-    critical_model = os.environ.get("CODEX_CRITICAL_MODEL", "").strip()
+    if not pinned_model and is_critical:
+        pinned_model = os.environ.get("CODEX_CRITICAL_MODEL", "").strip()
+
     if effort:
         reasoning_effort = EFFORT_TO_CODEX[effort]
         note = f"# Reasoning effort mirrors the source agent's `effort: {effort}`."
@@ -96,9 +107,16 @@ def codex_model_fields(
         ).strip()
         note = "# Generated with elevated Codex reasoning effort for critical/high-judgment work."
 
-    fields = ["# Critical/high-judgment agent.", note]
-    if critical_model:
-        fields.append(f"model = {toml_string(critical_model)}")
+    fields: list[str] = []
+    # A deliberately cheap agent (e.g. `model: sonnet` + `effort: medium`) reaches
+    # here too, so don't label everything high-judgment.
+    if is_critical:
+        fields.append("# Critical/high-judgment agent.")
+    fields.append(note)
+    if pinned_model:
+        if codex_model:
+            fields.append("# Model pinned by the source agent's `codex-model`.")
+        fields.append(f"model = {toml_string(pinned_model)}")
     if reasoning_effort:
         fields.append(f"model_reasoning_effort = {toml_string(reasoning_effort)}")
     return fields
@@ -116,6 +134,7 @@ def render_agent(source_path: Path, frontmatter: dict[str, str], body: str) -> s
             frontmatter["name"],
             frontmatter.get("model"),
             frontmatter.get("effort"),
+            frontmatter.get("codex-model"),
         )
     )
     lines.append(f"developer_instructions = {toml_string(body)}")
