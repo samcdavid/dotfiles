@@ -191,6 +191,7 @@ PR Mode Hard Constraints. The PR diff is the source of truth; the local working 
 - NEVER read PR-changed files from disk (Read/cat/grep) and treat the result as the PR's code — that reads main, not the PR.
 - NEVER compare the PR against local main as a substitute for the diff.
 - Read PR code ONLY via: the supplied diff_text, and `gh api repos/{repo}/contents/{path}?ref={pr_head_sha}` for full file contents at PR HEAD.
+- NEVER fetch or report CI/check status — no `gh pr checks`, GitHub Actions runs, or RWX/CircleCI pipelines. CI reports its own findings; your job is the diff.
 ```
 
 ### Wave 1 — Research subagents (parallel, one message)
@@ -503,6 +504,8 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 | Rationalization | Reality |
 |---|---|
 | "The tests pass, so it's fine" | Green tests are necessary, not sufficient — they don't catch architecture, security, or requirements gaps. Read the diff itself. |
+| "CI is red, I should dig into why" | Out of scope. CI reports its own findings on its own surface, and `ci-babysit` owns pipeline triage. Checking `gh pr checks` feels diligent but spends the review's budget re-deriving what the author already sees. |
+| "Another reviewer blocked on red CI, so CI state is decision-relevant" | Their blocker, not yours. Note it from `existing_comments_index` and move on. This is the specific rationalization that has actually triggered a CI rabbit hole — see `gotchas.md`. |
 | "It's a small PR, a light pass is enough" | Diff size doesn't predict risk. A five-line change to auth or a migration deserves the same scrutiny as a five-hundred-line refactor. |
 | "This finding is annoying but not really Critical" | Match severity to `review-finding-format.md`'s bar, not to how strongly it feels in the moment. If it doesn't meet a Critical criterion, it's non-blocking — say so plainly instead of inflating it to force a fix. |
 | "The author clearly knows what they're doing" | Author competence isn't evidence the diff is correct. Review the code in front of you, not your prior of the author. |
