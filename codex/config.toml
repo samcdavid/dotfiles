@@ -4,8 +4,8 @@ approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 notify = ["/Users/sammcdavid/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
-model = "gpt-5.6-sol"
-model_reasoning_effort = "xhigh"
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
 
 [projects."/Users/sammcdavid/.dotfiles"]
 trust_level = "trusted"
