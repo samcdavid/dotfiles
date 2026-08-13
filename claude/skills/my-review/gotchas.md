@@ -137,3 +137,12 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Re-dispatch that finding to `finding-verifier-high` and use the high-tier verdict. If it escalates again or returns `requires clarification`, surface it as a question rather than looping.
 - **Why:** `requires escalation` means the low tier honestly reported that verification needed depth it didn't have — that is the escalation hatch working correctly. Reading it as a negative verdict inverts its meaning and quietly discards exactly the findings the two-tier split was built to catch: the ones too costly for a cheap pass to confirm. Resolving it in the main window defeats the isolation that makes per-finding verification worth anything, since the main window has every other finding in context.
 - **Source:** Introduced with the two-tier per-finding verifier split; the escalation path is the one direction where a cheap verdict can silently lose a real defect
+
+### Read the workflow ledger before raising scope or decision findings
+
+- **Category:** failure-mode
+- **Context:** Reviewing work produced by a durable workflow with a ledger and linked spec, plan, eval, or prior-review artifacts
+- **Wrong:** Treating stale ticket wording, deliberate technical non-goals, user-overridden scope, or previously importance-filtered findings as fresh defects or unresolved product questions without reading the ledger.
+- **Right:** Discover and read the workflow ledger before requirements triage, then follow its latest user-confirmed decisions and explicit non-goals. Cross-check linked artifacts for genuine inconsistencies, and only resurrect a previously dropped finding when new evidence makes it clear the importance bar now changes.
+- **Why:** The ticket may predate later user decisions. Skipping the ledger creates false findings, can invert an explicit scope decision, and wastes review effort debating choices that were already settled.
+- **Source:** MCP-704 review correction, 2026-08-13 — PD-1 and PD-4 resolved the product questions, `mcp.outcome` was an explicit non-goal, while the confirmation contract remained a real cross-artifact inconsistency.
