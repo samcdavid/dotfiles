@@ -53,20 +53,8 @@ url = "https://mcp.notion.com/mcp"
 [mcp_servers.notion.tools.notion-update-page]
 approval_mode = "approve"
 
-[mcp_servers.sequential-thinking]
-command = "npx"
-args = ["@modelcontextprotocol/server-sequential-thinking"]
-
-[mcp_servers.sequential-thinking.tools.sequentialthinking]
-approval_mode = "approve"
-
 [mcp_servers.datadog-mcp]
 url = "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp"
-
-[mcp_servers.circleci-mcp-server]
-command = "npx"
-args = ["-y", "@circleci/mcp-server-circleci@latest"]
-env_vars = ["CIRCLECI_TOKEN"]
 
 [mcp_servers.linear-server]
 url = "https://mcp.linear.app/mcp"
@@ -93,23 +81,22 @@ url = "http://localhost:8000/mcp/"
 url = "https://staging-20.app.dscout.com/astro/mcp"
 
 [mcp_servers.node_repl]
-args = []
 command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
-startup_timeout_sec = 120
+startup_timeout_sec = 120.0
 
 [mcp_servers.node_repl.env]
-NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
-NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
-NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
-NODE_REPL_TRUSTED_CODE_PATHS = "/Users/sammcdavid/.codex"
-CODEX_HOME = "/Users/sammcdavid/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "97669f77b3ca7114a2df05d55646416ea34b28100c07213ef9f643803449ef2f"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
-NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
-NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
 BROWSER_USE_CODEX_APP_VERSION = "26.623.141536"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+CODEX_HOME = "/Users/sammcdavid/.codex"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "97669f77b3ca7114a2df05d55646416ea34b28100c07213ef9f643803449ef2f"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/sammcdavid/.codex"
 
 [plugins."gmail@openai-curated"]
 enabled = true
