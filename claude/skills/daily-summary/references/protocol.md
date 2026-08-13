@@ -20,13 +20,15 @@ If either is missing, ask the user before proceeding. Once you have both:
 
 Fetch all of the following in parallel:
 
+For Google Workspace access, prefer the `gws` CLI when `command -v gws` succeeds and `gws auth status` reports usable existing authentication. Use `gws schema <service.resource.method>` before constructing an unfamiliar request. Fall back to the corresponding Google Workspace MCP tools only when `gws` is absent, unauthenticated, lacks the required capability, or the CLI call still fails after correcting its inputs once. Do not start `gws auth login` / `gws auth setup` implicitly or print/export credentials.
+
 1. **Notion**: Fetch the Daily ToDo database in **view mode** (sorted descending by Date, `page_size: 10` — per the `Notion SQL date-filter` gotcha; do not use SQL mode). From the returned entries, identify **every day that needs reviewing**:
    - **The previous workday** — the most recent entry before today whose `Day Type` is a normal working day (`Workday`). This is **always** reviewed, even if on-call days sit between it and today.
    - **On-call days since then** — every entry dated *after* that previous workday and *before* today whose `Day Type` is `On Call`. These are off-hours incident days (e.g., a weekend page) logged by the `log-on-call` skill, and must be reviewed too. There may be zero, one, or several.
    Fetch each identified page (the previous workday **plus** any on-call days) in full to read all activities, actions, decisions, and notes. If `page_size: 10` does not reach back far enough to include the previous workday (e.g., a long holiday/PTO gap), increase it until it does.
 2. **Linear**: List issues assigned to me. List the Linear projects I am a member of, and for each project with an active milestone, also list its **open issues regardless of assignee** (`state.type` in `unstarted` or `started`) — not just mine. This gives the project-wide priority view (what the team is gating on, what's grabbable) rather than only my queue. Scope each query per the `list_issues` gotcha to keep results bounded.
-3. **Google Calendar**: Use Google Calendar to review my calendar for today — meetings, events, and time blocks. Also fetch the next 7 calendar days and look for **PTO / time-off**: any all-day events whose title contains words like "PTO", "OOO", "Vacation", "Off", "Out of Office", "Holiday", or similar. Include company-wide holidays (they will appear as all-day events on my calendar). If I have consecutive days off, extend the lookup until you find the first day I'm back in office.
-4. **Gmail**: Search Gmail for messages in my inbox. Focus on unread and recent messages that are work-related and require action — replies needed, requests, approvals, follow-ups, or deadlines. Ignore marketing emails, newsletters, promotional content, and automated notifications that don't require a response.
+3. **Google Calendar**: Prefer `gws calendar events list` against the primary calendar; fall back to Google Calendar MCP. Review my calendar for today — meetings, events, and time blocks. Also fetch the next 7 calendar days and look for **PTO / time-off**: any all-day events whose title contains words like "PTO", "OOO", "Vacation", "Off", "Out of Office", "Holiday", or similar. Include company-wide holidays (they will appear as all-day events on my calendar). If I have consecutive days off, extend the lookup until you find the first day I'm back in office.
+4. **Gmail**: Prefer `gws gmail users messages list` plus `gws gmail users messages get`; fall back to Gmail MCP. Search my inbox, focusing on unread and recent messages that are work-related and require action — replies needed, requests, approvals, follow-ups, or deadlines. Ignore marketing emails, newsletters, promotional content, and automated notifications that don't require a response.
 
 ## Phase 2 — Enrich
 
@@ -82,7 +84,7 @@ T:
 
 Apply every correction the agent surfaces before continuing. Do not publish a draft the agent has open contradictions on.
 
-Then copy the standup to my clipboard using `pbcopy` and post it to the Slack channel/thread resolved in Phase 0 using the Slack MCP `send_message` tool. If a thread URL was provided, reply in that thread. If just a channel URL, post as a new message.
+Then copy the standup to my clipboard using `pbcopy` and post it to the Slack channel/thread resolved in Phase 0. Prefer the `slack` CLI when `command -v slack` succeeds and an existing non-interactive API authentication can complete `slack api auth.test`; use `slack api chat.postMessage --json ...` with `channel`, `text`, and `thread_ts` when replying in a thread. Let a JSON encoder escape the real multi-line standup text rather than hand-building escaped newlines. Fall back to the Slack MCP `send_message` tool only when the CLI is absent, unauthenticated, lacks the required scope, or the API call still fails after correcting its inputs once. Do not initiate `slack auth login` or pass tokens on the command line. If just a channel URL was provided, omit `thread_ts` and post a new message. Read the posted message back with the CLI (`conversations.replies` for a thread, otherwise `conversations.history`) or the equivalent Slack MCP read tool and verify the rendered line breaks before continuing.
 
 ## Phase 5 — Build Today's Checklist
 

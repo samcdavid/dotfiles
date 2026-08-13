@@ -30,7 +30,7 @@ For complex investigations, Datadog/Braintrust searches, or workflow-stage runs,
    - `codebase-analyzer` for deep implementation reading.
    - `codebase-pattern-finder` for conventions and similar implementations.
    - `requirements-tracer` only for change-impact or regression-risk questions.
-4. Search Linear, Notion, Google Drive, and prior thought artifacts when product intent or prior decisions may live there.
+4. Search Linear, Notion, Google Drive, and prior thought artifacts when product intent or prior decisions may live there. For Drive, prefer an installed, authenticated `gws` CLI and fall back to Google Drive MCP only when the CLI is unavailable or unusable.
 5. Resolve contradictions by reading primary code or source artifacts.
 6. Run adversarial challenge before finalizing.
 7. Save a research document in `~/.claude/thoughts/shared/research/NNN_topic.md`.
@@ -50,4 +50,3 @@ Include:
 ## Output
 
 Return a concise summary and the research artifact path. Do not present unverified claims as findings.
-

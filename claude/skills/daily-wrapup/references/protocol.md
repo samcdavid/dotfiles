@@ -20,13 +20,15 @@ If missing, ask the user before proceeding. Once present:
 
 Fetch all of the following in parallel:
 
+For Google Workspace access, prefer the `gws` CLI when `command -v gws` succeeds and `gws auth status` reports usable existing authentication. Use `gws schema <service.resource.method>` before constructing an unfamiliar request. Fall back to the corresponding Google Workspace MCP tools only when `gws` is absent, unauthenticated, lacks the required capability, or the CLI call still fails after correcting its inputs once. Do not start `gws auth login` / `gws auth setup` implicitly or print/export credentials.
+
 1. **Notion — today's own entry**: Fetch today's entry from the Daily ToDo database using **view mode** (sorted descending by Date, `page_size: 5`, pick the top result whose `date:Date:start` matches today — per the daily-summary `Notion SQL date-filter` gotcha; do not use SQL mode). Then fetch the page contents in full — Checklist, Actions and decisions, Notes — that is the raw state we will consolidate.
 
 2. **The four activity sources** (`references/activity-sources.md`) — GitHub, Linear, Notion (workspace-wide), and Slack. These replace manually logging work throughout the day: run each source's procedure for today's date and treat the combined output as the raw material for Phases 3-5, the same way today's Notion bullets are used.
 
-3. **Google Calendar**: Today's events — which ran, which were canceled, what was added late. This tells us what consumed today's focus time.
+3. **Google Calendar**: Prefer `gws calendar events list` against the primary calendar; fall back to Google Calendar MCP. Gather today's events — which ran, which were canceled, what was added late. This tells us what consumed today's focus time.
 
-4. **Gmail**: Messages I sent today (Sent folder, today's date) and notable inbound replies that completed an action.
+4. **Gmail**: Prefer `gws gmail users messages list` plus `gws gmail users messages get`; fall back to Gmail MCP. Gather messages I sent today (Sent folder, today's date) and notable inbound replies that completed an action.
 
 ## Phase 2 — Enrich Linear
 

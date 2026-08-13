@@ -24,10 +24,11 @@ Notion's search does not expose a "last edited by me" filter, so this source onl
 
 ## 4. Slack
 
-`slack_search_public_and_private` searches messages across public channels, private channels, and DMs the user can see — it requires user consent (the runtime will prompt).
+Prefer the `slack` CLI when `command -v slack` succeeds and an existing non-interactive API authentication can complete `slack api auth.test`. Use `slack api search.all --json ...` to search messages across the conversations the authenticated user can see. Do not initiate `slack auth login` or pass tokens on the command line.
 
-1. Read the acting user's Slack `user_id` from the tool's own description at call time (it states "Current logged in user's user_id is U…" directly) — do not hardcode an ID in this file, it is environment-specific and can change across reconnects.
-2. Call with `query: "from:<@USER_ID> on:<DATE>"`, `sort: "timestamp"`, `sort_dir: "asc"`, `include_context: false` (reduce noise — we want a list of what was said, not surrounding threads), `limit: 20`.
-3. If the day's message count looks truncated at the limit, note that in the wrapup rather than silently treating the 20 as complete.
+1. Read the acting user's Slack `user_id` from the CLI's `auth.test` response — do not hardcode it; it is environment-specific and can change across workspaces or reconnects.
+2. Call `search.all` with `query: "from:<@USER_ID> on:<DATE>"`, `sort: "timestamp"`, `sort_dir: "asc"`, no surrounding highlights/context, and a count of 20.
+3. If the CLI is absent, unauthenticated, lacks search scope, or the API call still fails after correcting its inputs once, fall back to `slack_search_public_and_private`. Read the acting user's `user_id` from the MCP tool description, then use the same query/sort with `include_context: false` and `limit: 20`; the runtime may prompt for consent.
+4. If the day's message count looks truncated at the limit, note that in the wrapup rather than silently treating the 20 as complete.
 
 This surfaces messages *sent* today. It does not catch threads where others acted on something I said earlier, or DMs sent to me — those aren't "my work log" and are out of scope here.

@@ -31,7 +31,7 @@ Gather in parallel where possible:
 - **Linear**: the linked issue, its comments, linked issues, and project, for product intent and prior decisions
 - **Codebase** (if the spec touches existing code): spawn `codebase-locator` (relevant modules/boundaries) and `codebase-analyzer` (current behavior, data flow, surrounding constraints) in parallel
 - **Notion**: `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes
-- **Google Drive**: `Google_Drive__search_files` + `read_file_content` (and `download_file_content` for non-Docs files) for specs, PRDs, and design docs that live in Drive
+- **Google Drive**: prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
 - **Prior conversation context**: if `/my-spec` was invoked mid-session, re-read what's already been said — don't make the user re-state it
 - **Adjacent specs/research**: check `~/.claude/thoughts/shared/research/` and `~/.claude/thoughts/shared/plans/` for related artifacts, plus the issue's workflow ledger
 

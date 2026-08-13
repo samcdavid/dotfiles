@@ -9,6 +9,8 @@ disable-model-invocation: false
 
 Create the daily work summary and planning brief. Prefer connected tools over memory.
 
+For Google Workspace and Slack, prefer the installed, already-authenticated `gws` and `slack` CLIs; use the corresponding MCP tools only as fallback. Never start interactive CLI authentication implicitly.
+
 ## Load Rules
 
 Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For unusual calendars, off-hours on-call handling, or Notion formatting details, read `references/protocol.md`.
@@ -25,4 +27,3 @@ Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoin
 ## Output
 
 Return the Notion entry updated, standup text, top priorities, calendar conflicts, and any follow-ups that need user attention.
-

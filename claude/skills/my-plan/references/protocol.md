@@ -32,7 +32,7 @@ Determine the task without a blank prompt:
    - **requirements-tracer** (conditional — see triggers below): Map blast radius for intended surfaces, discover related Linear issues, evaluate regression risk on shipped features. Pass `mode: plan`, `scope: wide`, the primary Linear issue ID, and `intended_surfaces` derived from the user's task description.
    - **Linear**: the linked issue, its comments, linked issues, and project, for product intent and prior decisions
    - **Notion**: `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes
-   - **Google Drive**: `Google_Drive__search_files` + `read_file_content` (and `download_file_content` for non-Docs files) for specs, PRDs, and design docs that live in Drive
+   - **Google Drive**: prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
 3. Check for existing research/specs in `~/.claude/thoughts/shared/research/` and `/specs/` that's relevant
 4. Wait for all sub-agents to complete
 

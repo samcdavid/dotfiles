@@ -9,6 +9,8 @@ disable-model-invocation: false
 
 Produce a concise end-of-day record from today's work artifacts.
 
+For Google Workspace and Slack, prefer the installed, already-authenticated `gws` and `slack` CLIs; use the corresponding MCP tools only as fallback. Never start interactive CLI authentication implicitly.
+
 ## Load Rules
 
 Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact Notion formatting or edge cases, read `references/protocol.md`. Always read `references/activity-sources.md` before Phase 1 — it's what replaces manual per-task `log-work` calls with an automated pull of the day's real activity.
@@ -24,4 +26,3 @@ Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rule
 ## Output
 
 Return what changed in Notion, a short accomplishment summary, open actions, blockers, and tomorrow carry-over.
-

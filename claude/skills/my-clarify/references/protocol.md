@@ -41,7 +41,7 @@ Spawn / search in parallel (skip whichever doesn't apply):
 - **Codebase** — `codebase-analyzer` (trace the actual behavior of any claim the document makes about existing code) and `codebase-locator` (confirm referenced files, modules, and boundaries exist as described)
 - **Linear** — referenced issues, their comments, linked PRs, and projects
 - **Notion** — `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes the document leans on
-- **Google Drive** — `Google_Drive__search_files` + `read_file_content` (and `download_file_content` for non-Docs files) for specs, PRDs, and design docs that live in Drive
+- **Google Drive** — prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
 - **Thoughts artifacts** — prior research/specs/plans the source points at, plus the workflow ledger
 
 Flag any claim that doesn't match reality — those are the most dangerous ambiguities because they look precise. But also: every claim that research *confirms* is a candidate question you no longer need to ask the user. Only a genuine **decision** that no source can settle should reach the user.

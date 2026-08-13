@@ -20,10 +20,10 @@ Known failure patterns and lessons learned. Read before starting work with this 
 
 ### Slack standup message posted with literal `\n` instead of real line breaks
 - **Category:** failure-mode
-- **Context:** Phase 4 (Generate Standup) — posting the Y:/T: standup via `slack_send_message`.
-- **Wrong:** Building the `message` argument with two-character `\n` escape sequences (as if writing a JSON-escaped string or shell heredoc) instead of an actual multi-line string with real newline characters. The tool posts exactly what it's given — Slack rendered the whole standup as one line with literal visible `\n` text instead of paragraph/bullet breaks.
-- **Right:** Pass `message` as a real multi-line string (actual embedded newlines), the same way you'd write it in a text editor — not an escaped one-liner. Immediately after posting, call `slack_read_thread` (or equivalent read-back) to confirm the message rendered with real line breaks before moving on, since Phase 4 has no other checkpoint that would catch this.
-- **Why:** There is no message-edit or message-delete tool in this Slack MCP integration. A malformed post can't be fixed in place — the only recovery is a follow-up "reposting, previous had a formatting glitch" reply, which clutters the thread and requires the user to manually delete the bad one. Verifying formatting before considering Phase 4 done is much cheaper than that cleanup.
+- **Context:** Phase 4 (Generate Standup) — posting the Y:/T: standup through the Slack CLI or MCP fallback.
+- **Wrong:** Turning the standup into an escaped one-liner before handing it to the transport, so the API receives literal two-character `\n` sequences and Slack renders one line with visible escapes.
+- **Right:** Keep the source as a real multi-line string. With `slack api chat.postMessage --json ...`, let a JSON encoder convert those real newlines into valid JSON escapes; with the MCP fallback, pass actual embedded newlines directly. Immediately read the posted message back with `slack api conversations.replies` / `conversations.history` or the equivalent MCP read tool and confirm the rendered line breaks before moving on.
+- **Why:** A CLI token may not have `chat:write` / update scopes, and the MCP fallback may not expose edit or delete. A malformed post can therefore still require a noisy corrective reply or manual cleanup; read-back is the cheapest reliable checkpoint.
 - **Source:** Observed 2026-07-29 — the daily-summary standup posted to the MCP daily-standup thread with literal `\n` sequences; only caught because the user flagged the formatting after the fact.
 
 ### `list_issues` without filters can exceed the token cap
