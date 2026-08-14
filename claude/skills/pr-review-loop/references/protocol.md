@@ -14,6 +14,12 @@ Record it in the run's ledger header. Shell state does not persist between tool 
 
 The id is what makes claims attributable: it lets this session re-claim its own PR after a transient failure instead of blocking itself, and it stops a release call from tearing down a claim another session is actively working. A run that skips this step still functions (the scripts fall back to `unknown-$$`, a per-process value), but loses both properties — do not skip it.
 
+## Three-Review Cap — Stop for a Fresh Context
+
+Each invocation may start `my-review` for **at most three PRs**. Maintain a `reviews_started` count for the run and increment it immediately before Per-PR Loop Step 4. A PR therefore consumes one of the three slots even if its review or publishing step later fails; the work has already loaded its PR context. PRs skipped before Step 4 — claimed elsewhere, merged, closed, or already reviewed — do **not** consume a slot.
+
+Before claiming the next PR, check the count. At three, stop immediately: finish the current PR's mark/release and ledger entry first, do not claim another PR, and produce the final report. Do not re-discover or start a fourth review in the same context. Auto-discovery will find remaining eligible PRs in the next fresh-context run; explicit-mode output must list any named PRs that were not reached.
+
 ## Getting Started — Resolve the PR List
 
 Two modes, chosen by whether `$ARGUMENTS` names PRs:
@@ -66,9 +72,9 @@ Re-shuffle every iteration rather than shuffling once and reusing the order: eac
 
 `claimed-elsewhere` belongs in the processed set for the same reason it counts as processed in the ledger: another session owns that PR. Leaving it out would make the loop re-discover it, re-attempt the claim, and — once the other session finishes and releases — review a PR that was just reviewed.
 
-This still picks up PRs newly requested mid-run and still drops PRs this run itself just approved, without ever reprocessing something already handled. As a safety net against anything unexpected keeping this from converging (e.g. review requests arriving faster than they can be processed), cap outer-loop iterations at 25; if the cap is hit, stop and report what's left rather than spinning indefinitely.
+This still picks up PRs newly requested mid-run and still drops PRs this run itself just approved, without ever reprocessing something already handled — until the three-review cap is reached. At that point, stop even if new unprocessed tuples remain, report them as deferred to the next fresh-context run, and do not re-discover. As a safety net against anything unexpected keeping this from converging before the review cap, cap outer-loop iterations at 25; if the cap is hit, stop and report what's left rather than spinning indefinitely.
 
-Explicit mode does not use this loop — it processes its fixed list once, in order, with no re-discovery.
+Explicit mode does not use this loop — it processes its fixed list once, in order, with no re-discovery, subject to the same three-review cap.
 
 ### Build the Working List — Then Shuffle It
 
@@ -178,7 +184,7 @@ Markers older than `PR_REVIEW_DONE_TTL_DAYS` (default 14) are pruned on each wri
 
 ## Per-PR Loop
 
-For each `(owner, repo, number)` tuple, in shuffled order:
+For each `(owner, repo, number)` tuple, in shuffled order, while `reviews_started < 3`:
 
 ### Step 1 — Claim
 
@@ -212,7 +218,7 @@ On `"reviewed": true`, another session (or an earlier run) already reviewed this
 
 ### Step 4 — Review
 
-Invoke `my-review` (via the `Skill` tool) in PR mode, targeting this PR. Let it run its full flow — mode routing, lens fan-out, adversarial-debate on findings, verdict. Do not shortcut or summarize its inputs; it needs the real PR context to build its `existing_comments_index` and dedupe correctly.
+Increment `reviews_started`, then invoke `my-review` (via the `Skill` tool) in PR mode, targeting this PR. Let it run its full flow — mode routing, lens fan-out, adversarial-debate on findings, verdict. Do not shortcut or summarize its inputs; it needs the real PR context to build its `existing_comments_index` and dedupe correctly. Once this step starts, the PR counts toward the run's three-review cap regardless of its eventual outcome.
 
 ### Step 5 — Publish
 
@@ -263,7 +269,7 @@ A failure must never leave a claim behind. If the run itself aborts mid-PR, the 
 
 ## Final Report
 
-After the last PR (or after the list is exhausted, however many were skipped/failed), print the full ledger as a table, plus counts: processed / published / skipped / failed. Call out every skip and failure by number so nothing silently drops off the list. Report the run's session id, and break out `claimed-elsewhere` and `already-reviewed` skips separately from `merged`/`closed` ones — the first two mean another session covered the PR, not that it needed no review. Confirm no claim from this session is left in the claims directory.
+After the last PR (or after the list is exhausted, the three-review cap is reached, or however many were skipped/failed), print the full ledger as a table, plus counts: reviews started / processed / published / skipped / failed. If the cap ended the run, explicitly state that it stopped after three reviews and list every known unprocessed PR as deferred to the next fresh-context run. Call out every skip and failure by number so nothing silently drops off the list. Report the run's session id, and break out `claimed-elsewhere` and `already-reviewed` skips separately from `merged`/`closed` ones — the first two mean another session covered the PR, not that it needed no review. Confirm no claim from this session is left in the claims directory.
 
 A run in which most PRs come back `claimed-elsewhere` or `already-reviewed` is not a failed run: it means the other sessions got there first, which is the coordination working. Say so plainly rather than reporting it as zero work done.
 
