@@ -1,15 +1,15 @@
 ---
 model: opus
-name: daily-summary
-description: Build a daily work brief from yesterday/off-hours activity plus today's Linear, Calendar, Gmail, and Notion context; update Notion and produce standup/checklist.
+name: start-day
+description: Build a daily work brief from yesterday/off-hours activity plus today's Linear, Calendar, Gmail, and Notion context; update Notion with a reviewable daily update and checklist.
 disable-model-invocation: false
 ---
 
-# Daily Summary
+# Start Day
 
 Create the daily work summary and planning brief. Prefer connected tools over memory.
 
-For Google Workspace and Slack, prefer the installed, already-authenticated `gws` and `slack` CLIs; use the corresponding MCP tools only as fallback. Never start interactive CLI authentication implicitly.
+For Google Workspace, prefer the installed, already-authenticated `gws` CLI; use the corresponding MCP tools only as fallback. Never start interactive CLI authentication implicitly.
 
 ## Load Rules
 
@@ -22,8 +22,8 @@ Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoin
 3. Identify accomplishments, decisions, blockers, follow-ups, and on-call incidents.
 4. Gather today's meetings, deadlines, Linear priorities, unread/relevant Gmail, and calendar conflicts.
 5. Update or create the daily Notion entry.
-6. Produce a standup-ready summary and prioritized checklist.
+6. Add a reviewable daily update at the top of the Notion entry and a prioritized checklist below it.
 
 ## Output
 
-Return the Notion entry updated, standup text, top priorities, calendar conflicts, and any follow-ups that need user attention.
+Return the updated Notion entry, daily-update text, top priorities, calendar conflicts, and any follow-ups that need user attention. Do not post the update to Slack.

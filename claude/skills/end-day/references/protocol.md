@@ -1,12 +1,12 @@
-# Protocol — daily-wrapup
+# Protocol — end-day
 
 Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
 
-## Daily Wrapup
+## End Day
 
 End-of-day workflow that closes out today's Daily ToDo page. Read-only on Linear — does not transition ticket states, just summarizes what changed. Read/write on the Notion page — rewrites Actions/Decisions and Notes for clarity and adds a Linear Updates block.
 
-Tomorrow's daily-summary will still own writing the **Summary** section and setting the page **Status** to Complete. This skill stays out of those.
+Tomorrow's start-day will still own writing the **Summary** section and setting the page **Status** to Complete. This skill stays out of those.
 
 ## Phase 0 — Resolve Arguments
 
@@ -22,7 +22,7 @@ Fetch all of the following in parallel:
 
 For Google Workspace access, prefer the `gws` CLI when `command -v gws` succeeds and `gws auth status` reports usable existing authentication. Use `gws schema <service.resource.method>` before constructing an unfamiliar request. Fall back to the corresponding Google Workspace MCP tools only when `gws` is absent, unauthenticated, lacks the required capability, or the CLI call still fails after correcting its inputs once. Do not start `gws auth login` / `gws auth setup` implicitly or print/export credentials.
 
-1. **Notion — today's own entry**: Fetch today's entry from the Daily ToDo database using **view mode** (sorted descending by Date, `page_size: 5`, pick the top result whose `date:Date:start` matches today — per the daily-summary `Notion SQL date-filter` gotcha; do not use SQL mode). Then fetch the page contents in full — Checklist, Actions and decisions, Notes — that is the raw state we will consolidate.
+1. **Notion — today's own entry**: Fetch today's entry from the Daily ToDo database using **view mode** (sorted descending by Date, `page_size: 5`, pick the top result whose `date:Date:start` matches today — per the start-day `Notion SQL date-filter` gotcha; do not use SQL mode). Then fetch the page contents in full — Daily Update, Checklist, Actions and decisions, Notes — that is the raw state we will consolidate.
 
 2. **The four activity sources** (`references/activity-sources.md`) — GitHub, Linear, Notion (workspace-wide), and Slack. These replace manually logging work throughout the day: run each source's procedure for today's date and treat the combined output as the raw material for Phases 3-5, the same way today's Notion bullets are used.
 
@@ -70,7 +70,7 @@ Do not fabricate. If the day's Actions section was empty or sparse, the rewrite 
 
 Rewrite the **## Notes** section:
 - **Keep**: observations, things-to-remember, unresolved threads, learnings worth carrying forward to tomorrow.
-- **Drop the morning's milestone-review block**: it was written by daily-summary as forward-looking planning context for *today*. At EOD it is stale and belongs in the day's history (the page itself), not in tomorrow-facing Notes. Strip it out unless an item is still actively relevant tomorrow.
+- **Drop the morning's milestone-review block**: it was written by start-day as forward-looking planning context for *today*. At EOD it is stale and belongs in the day's history (the page itself), not in tomorrow-facing Notes. Strip it out unless an item is still actively relevant tomorrow.
 - **Drop**: items that got resolved during the day (those belong in Actions and Decisions or Linear Updates).
 - **Promote** out: items that became Actions/Decisions (move them up to Phase 4's section).
 - **Add**: brief end-of-day reflections worth carrying forward — patterns spotted, things to revisit tomorrow, open questions that surfaced.
@@ -103,8 +103,8 @@ Update today's Notion page using `notion-update-page` with `update_content`:
 
 Do **not** touch:
 - **## Checklist** — today's historical record of what was planned. Stands as-is.
-- **## Summary** — tomorrow morning's daily-summary writes this in performance-review tone.
-- Page `Status` property — tomorrow's daily-summary flips it to `Complete` after the Summary is written.
+- **## Summary** — tomorrow morning's start-day writes this in performance-review tone.
+- Page `Status` property — tomorrow's start-day flips it to `Complete` after the Summary is written.
 
 ## References
 

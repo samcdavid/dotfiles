@@ -21,7 +21,7 @@ Do not invent timestamps or causes. If a time or root cause is unknown, say so (
 
 ## Step 2 — Find or Create the Day's Page
 
-Fetch the Daily ToDo database in **view mode** (sorted descending by Date, `page_size: 5`, pick the entry whose `date:Date:start` matches the incident date — per the daily-summary `Notion SQL date-filter` gotcha; do not use SQL mode).
+Fetch the Daily ToDo database in **view mode** (sorted descending by Date, `page_size: 5`, pick the entry whose `date:Date:start` matches the incident date — per the start-day `Notion SQL date-filter` gotcha; do not use SQL mode).
 
 - **If no page exists for that date**, create it with `notion-create-pages` using the resolved data source ID:
   - Properties: `Day` = "<DayOfWeek>, <Month> <Day>, <Year>", `date:Date:start` = "<YYYY-MM-DD>", `Status` = "Active", `Day Type` = "On Call".
@@ -50,7 +50,7 @@ Rules:
 - **End with the resolution line and any follow-ups.** Follow-ups deferred to business hours each get their own `follow-up:` line so they're easy to lift into a ticket later.
 - Keep each line scannable — what happened, not a paragraph on how.
 
-Leave `## Notes` and `## Summary` empty. Tomorrow's `daily-summary` reviews this page, writes the post-mortem-flavored `## Summary`, and flips `Status` to Complete.
+Leave `## Notes` and `## Summary` empty. Tomorrow's `start-day` reviews this page, writes the post-mortem-flavored `## Summary`, and flips `Status` to Complete.
 
 ## Step 4 — Confirm
 

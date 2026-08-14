@@ -1,20 +1,17 @@
-# Protocol — daily-summary
+# Protocol — start-day
 
 Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
 
-## Daily Summary
+## Start Day
 
 You are helping me with my daily planning workflow. Follow these phases in order.
 
 ## Phase 0 — Resolve Arguments
 
-`$ARGUMENTS` should contain two things:
-1. A **Notion database URL** for the Daily ToDo database (e.g., `https://www.notion.so/...`)
-2. A **Slack channel or thread URL** where the standup should be posted (e.g., `https://app.slack.com/client/...`)
+`$ARGUMENTS` should contain a **Notion database URL** for the Daily ToDo database (e.g., `https://www.notion.so/...`).
 
-If either is missing, ask the user before proceeding. Once you have both:
+If it is missing, ask the user before proceeding. Once present:
 - **Fetch the Notion database** using the URL to discover its data source ID (look for the `<data-source url="collection://...">` tag in the fetch result). Use this data source ID for all subsequent Notion queries and page creation.
-- **Parse the Slack URL** to extract the channel ID (and thread timestamp, if present) for posting the standup in Phase 4.
 
 ## Phase 1 — Gather Context
 
@@ -35,7 +32,7 @@ For Google Workspace access, prefer the `gws` CLI when `command -v gws` succeeds
 For every Linear issue referenced in the reviewed Notion entries (the previous workday **and** any on-call days):
 - Get the full issue details from Linear (status, description, comments, PR links).
 
-This context is needed for writing the summaries and standup.
+This context is needed for writing the summaries and daily update.
 
 ## Phase 3 — Write Summaries
 
@@ -52,9 +49,9 @@ Write a **## Summary** for **each** reviewed page — the previous workday and e
 - Note follow-ups created (tickets to file, fixes deferred to business hours).
 - Keep it concise; the page's Actions and decisions already hold the timeline detail.
 
-## Phase 4 — Generate Standup
+## Phase 4 — Draft Daily Update
 
-Write an async standup update using the format below. Use concise bullet points per item — each bullet should include the **Linear issue ID**, its **current status**, and a **PR link** if one exists. Do not include issue titles, only the ID (e.g., ABC-123). Use natural, human language — brief but not robotic.
+Write a concise daily update using the format below. It will be placed at the top of today's Notion entry for the user to review and edit. Use concise bullet points per item — each bullet should include the **Linear issue ID**, its **current status**, and a **PR link** if one exists. Do not include issue titles, only the ID (e.g., ABC-123). Use natural, human language — brief but not robotic.
 
 ```
 Y:
@@ -75,16 +72,14 @@ T:
 
 **Parking Lot** — only include a `PL:` section if there is something that genuinely needs to be discussed with the entire team. If nothing qualifies, omit the section entirely.
 
-**Adversarial verification — before publishing.** Dispatch the `adversarial-debate` agent (via the `Agent` tool, `subagent_type: "adversarial-debate"`) with the drafted Y:/T:/OOO:/PL: text and the list of Linear ticket IDs cited. The agent must independently re-fetch each cited ticket with `get_issue` and challenge:
+**Adversarial verification — before saving.** Dispatch the `adversarial-debate` agent (via the `Agent` tool, `subagent_type: "adversarial-debate"`) with the drafted Y:/T:/OOO:/PL: text and the list of Linear ticket IDs cited. The agent must independently re-fetch each cited ticket with `get_issue` and challenge:
 - Every status word ("merged", "in review", "shipped", "blocked") against current Linear state.
 - Every PR link — does it resolve, and is it actually linked to the cited ticket?
 - Every T: item — is the ticket still open (`state.type` not `completed` or `canceled`)?
 - Any OOO claim — does it match a real calendar event found in Phase 1?
 - Every On-call: bullet — does it trace to a real `On Call` page reviewed in Phase 1, and does its date and resolution match that page's content (no invented incidents, no misattributed dates)?
 
-Apply every correction the agent surfaces before continuing. Do not publish a draft the agent has open contradictions on.
-
-Then copy the standup to my clipboard using `pbcopy` and post it to the Slack channel/thread resolved in Phase 0. Prefer the `slack` CLI when `command -v slack` succeeds and an existing non-interactive API authentication can complete `slack api auth.test`; use `slack api chat.postMessage --json ...` with `channel`, `text`, and `thread_ts` when replying in a thread. Let a JSON encoder escape the real multi-line standup text rather than hand-building escaped newlines. Fall back to the Slack MCP `send_message` tool only when the CLI is absent, unauthenticated, lacks the required scope, or the API call still fails after correcting its inputs once. Do not initiate `slack auth login` or pass tokens on the command line. If just a channel URL was provided, omit `thread_ts` and post a new message. Read the posted message back with the CLI (`conversations.replies` for a thread, otherwise `conversations.history`) or the equivalent Slack MCP read tool and verify the rendered line breaks before continuing.
+Apply every correction the agent surfaces before continuing. Do not save a draft the agent has open contradictions on. Do not copy the update to the clipboard or post it to Slack.
 
 ## Phase 5 — Build Today's Checklist
 
@@ -96,9 +91,10 @@ Using the gathered context from Linear (assigned issues **and project-wide open 
 
 1. **Filter completed work before write.** For every Linear ticket that is a candidate for today's checklist (yesterday's leftovers, assigned issues, email/calendar mentions), call `get_issue` and **drop any whose `state.type` is `completed` or `canceled`**. A ticket that closed yesterday — even one that appeared in Phase 4's Y: block — must not be written as today's T: item or checklist row. This is a hard gate, not a heuristic.
 
-2. **Create today's page** using `notion-create-pages` with the data source ID resolved in Phase 0:
+2. **Create or update today's page.** If an entry for today already exists, update that page rather than creating a duplicate. Otherwise, create it using `notion-create-pages` with the data source ID resolved in Phase 0:
    - Properties: `Day` = "<DayOfWeek>, <Month> <Day>, <Year>", `date:Date:start` = "<YYYY-MM-DD>", `Status` = "Active", `Day Type` = "Workday" (or "PTO"/"Holiday" if applicable)
-   - Content: Start with `## Checklist` section containing prioritized items, then empty `## Actions and decisions`, `## Notes`, and `## Summary` sections.
+   - Content: Start with `## Daily Update` containing the Phase 4 draft, then `## Checklist` containing prioritized items, followed by empty `## Actions and decisions`, `## Notes`, and `## Summary` sections. Keep the daily update at the top so the user can review and edit it in Notion.
+   - For an existing page, add or replace `## Daily Update` with the Phase 4 draft and position it before every other section; preserve its historical sections except for the checklist and Notes content this workflow regenerates.
 
 3. **Order checklist items** from highest to lowest priority. Include meetings at the appropriate priority level based on their importance and timing. For email-sourced items, include enough context to act on them (sender, subject, what's needed) without needing to re-read the email.
 

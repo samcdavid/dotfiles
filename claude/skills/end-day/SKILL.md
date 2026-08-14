@@ -1,11 +1,11 @@
 ---
 model: sonnet
-name: daily-wrapup
+name: end-day
 description: Consolidate today's Notion entry, summarize Linear/work activity, and rewrite actions, decisions, and notes into a clean end-of-day record.
 disable-model-invocation: false
 ---
 
-# Daily Wrapup
+# End Day
 
 Produce a concise end-of-day record from today's work artifacts.
 
