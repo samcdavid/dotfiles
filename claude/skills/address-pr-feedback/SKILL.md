@@ -8,14 +8,14 @@ when_to_use: "Use when the user asks to address, respond to, or work through rev
 
 # Address Review Feedback
 
-Work through pending review feedback without blindly accepting or rejecting it — a condensed research -> plan -> implement -> validate loop.
+Address pending review feedback through a verified fix loop.
 
 ## Modes
 
-Establish the mode first — it decides the feedback source and whether triage gates.
+Establish the mode first; it determines the feedback source and triage gate.
 
-- **PR mode** (a PR exists): feedback is GitHub comments; triage confirmation is the only gate, authorizing the rest of the run unattended.
-- **Local mode** (`local` in `$ARGUMENTS`, findings passed inline, or no PR): feedback is `my-review`'s findings on the working tree; no gate. Used by `my-workflow`'s fix loop.
+- **PR mode**: GitHub comments; triage confirmation gates the run.
+- **Local mode**: `my-review` findings on the working tree; no gate.
 
 Read `references/mode-semantics.md` before acting on either.
 
@@ -39,7 +39,7 @@ Use `~/.agents/rules/` when running through Codex.
 
 Always read `references/pushback-patterns.md` and `references/workflow-ledger-context.md`.
 
-Load as needed: `references/feedback-triage.md` before classifying, `references/fix-planning.md` before dispatching phases, `references/replies-and-publishing.md` before replies, `references/self-audit-checklist.md` before self-audit.
+Read the relevant triage, planning, reply, and self-audit references before each step.
 
 ## Flow
 
@@ -48,10 +48,10 @@ Load as needed: `references/feedback-triage.md` before classifying, `references/
 3. PR mode only: fetch PR metadata, diff, reviews, inline comments, review bodies, and issue comments with filtered payloads. Local mode: skip — you have the findings and the diff already.
 4. Build a pending-feedback index: reviewer, location, comment text, comment ID and type, addressed/resolved status.
 5. Fetch linked Linear requirements and build a requirements map for regression checks, merged with the ledger's spec/plan requirements from step 2.
-6. Investigate every pending comment in code context — trace the concern, verify suggested utilities and patterns, check docs for framework claims, check the ledger for a settled decision it revisits.
-7. Classify each with evidence: Confirmed Fix, Partially Correct, Question Requiring Response, Valid Deferral, Disagree / Push Back, Already Addressed.
+6. Investigate every pending comment in code context, including suggestions, docs claims, and settled decisions it revisits.
+7. Classify each with evidence: Confirmed Fix, Partially Correct, Question, Scope Decision Required, Valid Deferral, Disagree / Push Back, or Already Addressed.
 8. Run adversarial challenge on classifications before acting.
-9. PR mode: present triage, wait for confirmation (only gate). Local mode: state it and proceed.
+9. PR mode: present triage and wait for confirmation. `Scope Decision Required` needs a separate explicit decision. Local mode: act only in scope.
 10. Plan fixes: behavioral -> `implementation-executor` TDD phases; non-behavioral -> `quick-implement-agent` direct-edit phases.
 11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits once its validation passes; otherwise use the `commit` skill, scoped to that fix's files.
 12. Validate against tests, requirements map, and reviewer concerns.

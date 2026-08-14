@@ -8,7 +8,7 @@ Default when a PR exists for the branch, or when `$ARGUMENTS` names one.
 
 - Feedback source: GitHub review comments, review bodies, and issue comments, fetched with the filtered payloads in `pr-cost-control.md`.
 - Truth: the PR diff at `pr_head_sha`, never the local working tree. `pr-mode-readonly.md` applies in full.
-- Gate: **present triage and wait for confirmation** before changing code. Real reviewers are on the other end; pushing back on a colleague's comment is a judgment call the user owns. This is the *only* gate — per `no-outward-actions.md`, it is the explicit ask that authorizes everything downstream (implement, commit, push, publish replies, resolve threads, re-request review) to run to completion without a second confirmation.
+- Gate: **present triage and wait for confirmation** before changing code. Real reviewers are on the other end; pushing back on a colleague's comment is a judgment call the user owns. A `Scope Decision Required` item is a separate decision gate: the user must explicitly choose to implement the current requirement or rely on a formal requirement amendment. A generic triage confirmation never authorizes a scope reduction. Once those decisions are made, confirmation authorizes the remaining in-scope work (implement, commit, push, publish replies, resolve threads, re-request review) to run to completion.
 - Output: evidence-backed replies drafted per comment, then pushed, posted, their threads resolved, and non-approving reviewers re-requested — all automatic once verification (Step 9) and self-audit (Step 10) pass.
 
 ## Local mode
@@ -23,6 +23,11 @@ Active when `$ARGUMENTS` says `local`, when findings are handed to you inline, o
 ### What to act on in local mode
 
 Fix Critical findings and non-blocking findings substantive enough that shipping them would be sloppy. Do not spend a fix cycle on nits, style preferences, or clearly optional suggestions — carry those forward as deferred items so the caller can report them.
+
+If fixing a finding would remove or materially weaken a stated acceptance criterion,
+classify it as `Scope Decision Required` rather than implementing the workaround.
+Only an explicit decision recorded in the applicable spec, plan, or ticket lets the
+fix loop proceed with that reduced scope.
 
 This matters because local mode usually runs inside `my-workflow`'s automatic fix loop, which is capped at 3 iterations. Burning an iteration on nits wastes a pass that a real finding may need.
 

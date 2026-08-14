@@ -12,11 +12,20 @@ Load this after lens reviewers return.
 6. Ask targeted questions only when user-only context determines whether a finding is valid.
 7. Run `/this-important strict` on **low-tier findings only** — high-tier findings already got the deep per-finding pass and aren't re-filtered here.
 8. Apply KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification` verdicts before presenting. PROMOTE and DOWNGRADE both require the same cited evidence (`file:line`, or `source`+`query`+`retrieved-at`) — neither is a bare severity opinion.
+9. For every Critical requirements finding, record the clearing condition in the
+   blocker ledger. A feature gate, dark implementation, or related follow-up
+   ticket may remove runtime risk but does **not** clear omitted acceptance
+   criteria without an explicit requirement amendment. Mark this `Scope Decision
+   Required`; do not translate it into repeated implementation requests.
 
 Verdict rule:
 
 - `REQUEST_CHANGES` if any finding survives (or is PROMOTEd to) Critical after its per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. Exception: a finding that's Critical only because verification returned `requires clarification` (couldn't be checked, not confirmed) surfaces as a blocking question instead of an automatic `REQUEST_CHANGES`.
 - `APPROVE` when requirements are satisfied, nothing survives as Critical, and only minor nits or clearly optional suggestions remain.
 - `COMMENT` when nothing survives as Critical but approval would overstate confidence: several substantive inline comments, unresolved requirements questions, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve.
+
+For a re-review, report the blocker ledger delta: cleared, still open, regressed,
+or newly verified. Do not repeat a prior blocking finding verbatim when its state
+has not changed.
 
 Output findings first, ordered by severity then risk, with file:line evidence and concrete fixes. Make non-critical issues clearly non-blocking. There is no "What's Good" section — lens reviewers no longer return grounded positives, so writing one would mean inventing unverified praise.

@@ -30,6 +30,11 @@ Use these patterns as templates. Each one names the trigger (the kind of comment
 
 **Do NOT use as a generic dismissal** — if the reviewer's concern is *intrinsic* to the PR's stated intent, the answer is to fix it here.
 
+**A follow-up does not amend the current requirement.** If deferring an intrinsic
+concern would remove a must-have acceptance criterion, classify it as `Scope
+Decision Required` and obtain an explicit amendment before treating the PR as
+complete.
+
 **Do NOT use for low-effort work.** A ticket reference doesn't make a cheap fix expensive. If the change is mechanical, touches one location, and requires no real design decision, fix it in this PR even if a ticket could be opened — "meaningfully grow the diff" means the fix itself is substantial, not that a follow-up mechanism happens to exist.
 
 ---

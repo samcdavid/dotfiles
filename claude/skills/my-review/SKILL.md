@@ -60,12 +60,17 @@ For learned-miss maintenance, read `references/learned-misses.md` (active queue)
 
 1. Determine mode: capture/promote, PR, branch/range, local, or local issue (a local branch review associated with an explicitly supplied Linear issue).
 2. Build the diff source of truth. In PR mode, use filtered GitHub payloads from `pr-cost-control.md`. In local mode the scope is the **whole branch** — `git diff $(git merge-base <base_ref> HEAD)`, covering every commit since the base branch plus staged and unstaged changes. Never the last commit alone, never the working tree alone.
-3. Identify active lenses and requirements source.
+3. Identify active lenses and requirements source. For an existing PR review,
+   build or update the blocker ledger from prior Critical findings and record the
+   last reviewed SHA before looking for new concerns.
 4. Fan out research agents, then active lens reviewers.
 5. Merge and dedupe the lens reviewers' flat findings, preserving each one's severity, risk, and confidence.
 6. Verify **every** finding independently — one verifier dispatch per finding, in parallel, never batched. The three levels pick the tier: `finding-verifier-high` (Opus) for Critical, High risk, or low-confidence non-trivial claims; `finding-verifier-low` (Sonnet) for the rest. Re-dispatch any low-tier `requires escalation` to the high tier.
-7. Compute the verdict mechanically from the findings that survive as Critical, then adversarially challenge only the remaining APPROVE/COMMENT choice.
-8. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
+7. Reconcile every proposed workaround with the requirements source. A scope
+   reduction clears a Critical requirements finding only with an explicit
+   amendment, not a related follow-up ticket or a code comment.
+8. Compute the verdict mechanically from the findings that survive as Critical, then adversarially challenge only the remaining APPROVE/COMMENT choice.
+9. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
 
 ## Output
 

@@ -15,3 +15,19 @@ Hard constraints:
 - Reviewing CI configuration the diff actually changes (a workflow file, pipeline config, build script) is fully in scope — that is code. The boundary is on querying run/check **status**, not on reading CI config the PR touches.
 
 Every subagent prompt in PR mode must receive the same constraints and PR HEAD SHA.
+
+## Re-review discipline
+
+Before re-reviewing a PR, record the prior reviewed SHA and a blocker ledger of
+surviving Critical findings. Verify those findings against the new HEAD before
+running broad lenses. Then review the delta since that SHA for regressions.
+
+A requirement-changing workaround (for example, disabling a capability or moving
+the work to a related ticket) is not a fix unless the linked requirement has an
+explicit amendment from its owner. Surface that as `Scope Decision Required` and
+do not ask the author to repeatedly iterate on code until the decision is made.
+
+Do not publish repeated blocking reviews that merely restate an unchanged blocker.
+Use one concise update identifying the clearing condition; publish a new blocking
+review only when the blocker remains after a claimed fix, regresses, or a newly
+verified Critical finding appears.
