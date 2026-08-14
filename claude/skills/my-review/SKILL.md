@@ -50,6 +50,7 @@ Load targeted references as needed:
 - `references/mode-routing.md` when choosing local, branch, PR, capture, or promote mode.
 - `references/pr-mode.md` for GitHub PR reviews.
 - `references/lens-routing.md` before spawning research and lens reviewers.
+- `references/project-context.md` when a linked or explicitly supplied Linear issue has a project; it defines the bounded project-context and duplicate-follow-up check.
 - `references/finding-axes.md` before spawning lens reviewers and again before routing findings to verifiers — it defines severity, risk, and confidence, and the tier rule.
 - `references/finding-finalization.md` before presenting findings.
 
@@ -57,7 +58,7 @@ For learned-miss maintenance, read `references/learned-misses.md` (active queue)
 
 ## Flow
 
-1. Determine mode: capture/promote, PR, branch/range, or local.
+1. Determine mode: capture/promote, PR, branch/range, local, or local issue (a local branch review associated with an explicitly supplied Linear issue).
 2. Build the diff source of truth. In PR mode, use filtered GitHub payloads from `pr-cost-control.md`. In local mode the scope is the **whole branch** — `git diff $(git merge-base <base_ref> HEAD)`, covering every commit since the base branch plus staged and unstaged changes. Never the last commit alone, never the working tree alone.
 3. Identify active lenses and requirements source.
 4. Fan out research agents, then active lens reviewers.

@@ -14,6 +14,7 @@ Determine what to review:
 - If `$ARGUMENTS` is `capture` → **Capture Mode** — queue a Learned Miss (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
 - If `$ARGUMENTS` is `promote` → **Promote Mode** — walk the pending queue (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
 - If `$ARGUMENTS` contains a PR number or URL → **PR Mode** (fetch the PR diff via `gh`).
+- If `$ARGUMENTS` contains a Linear issue identifier or URL → **Local Issue Mode** — review the local branch-wide diff with that issue's context.
 - If `$ARGUMENTS` is empty or `local` → **Local Mode** (review the whole branch: every commit since the base branch, plus staged and unstaged changes).
 - If `$ARGUMENTS` contains a branch name → same as Local Mode, with that branch as the base instead of the detected default.
 
@@ -125,9 +126,13 @@ If the change has no obvious lens fit, default to **Backend + Security + QA**.
 
 ### Requirements checklist (if a ticket is linked)
 
-If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it via the Linear MCP and build a `requirements_checklist`: title, description, acceptance criteria, sub-issues. Pass this to the `requirements-reviewer` (and activate the PM lens).
+If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), or Local Issue Mode supplied one, fetch it via the Linear MCP and build a `requirements_checklist`: title, description, acceptance criteria, sub-issues. Pass this to the `requirements-reviewer` (and activate the PM lens).
 
 If a caller supplies a **spec or requirements document** directly (e.g. `my-workflow` passes the stage-2 spec path, or `$ARGUMENTS` names a spec/PRD), read it and build the `requirements_checklist` from its acceptance criteria the same way — a spec is an equally valid requirements source, and takes precedence when both a spec and a ticket are present. Activate the PM lens whenever any requirements source exists.
+
+### Linear project context
+
+For a project ticket, read `references/project-context.md` and build `project_context` before fan-out. It informs duplicate non-Critical follow-ups only; planned work never accepts a current gap or Critical defect.
 
 ### Tracer triggers
 
@@ -149,6 +154,7 @@ Produce a short triage block and show it to me before going deep:
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
 - **Requirements checklist:** built from <ticket ID> | none linked
+- **Project context:** <project name> — <N> active/upcoming siblings checked; <N> exact follow-up matches | none
 - **Tracer triggers:** <list which fired, or "none">
 - **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
 - **Auto-promoted since last review:** <count> · <target file(s) + Shape one-liner(s)> (or "none")
@@ -207,7 +213,7 @@ Collect their outputs into a **compact `research_notes` summary** — the load-b
 
 ### Wave 2 — Lens reviewer subagents (parallel, one message)
 
-For each active lens from Step 2, spawn its reviewer. Send them all in a single message so they run concurrently. Pass each the bundle: `mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, the PR-mode constraints block, plus any lens-specific extras.
+For each active lens from Step 2, spawn its reviewer. Send them all in a single message so they run concurrently. Pass each the bundle: `mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `project_context`, the PR-mode constraints block, plus any lens-specific extras.
 
 In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and `diff_text` is `git diff "$fork"`. Passing both means a reviewer that widens its own diff reproduces the branch-wide range instead of falling back to the working tree or the last commit. Research subagents get the same two values for the same reason.
 
@@ -313,6 +319,9 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 ### Related-Issue Regression Risks
 [Only if the compiled findings include this block — skip otherwise]
 
+### Upcoming Project Work
+[Only if an active/upcoming project issue exactly covers a duplicate non-blocking follow-up — cite the issue, status, and owned concern. This is context, not a finding.]
+
 ### Questions
 - [Genuine clarifying questions — things where the author has context you don't]
 
@@ -370,7 +379,9 @@ Verifier agents can accidentally read the local working tree. If any DROP or REV
 - PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a finding PROMOTEd to Critical carries into Step 7 as Critical, and nothing downstream talks it back down without new evidence.
 - `requires clarification`: surface as a Targeted Question naming the exact query a human should run. Never silently drop it, and never fill the gap with a guess presented as verified.
 
-Then run `/this-important strict` (unless the user asked for a broader sweep) on **low-tier findings only**. High-tier findings already got the deep per-finding pass and are not re-filtered here. `/this-important` has no PROMOTE verdict and must not downgrade any high-tier KEEP or PROMOTE.
+Before `/this-important`, use `references/project-context.md` to remove only exact non-Critical follow-ups in **Upcoming Project Work**. Title-only/partial matches, gaps, and Critical findings remain.
+
+Then run `/this-important strict` (unless the user asked for a broader sweep) on the remaining **low-tier findings only**. `/this-important` has no PROMOTE verdict and must not downgrade any high-tier KEEP or PROMOTE.
 
 Before Step 7, confirm:
 
@@ -518,6 +529,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
 - `references/cross-service-contracts.md` - checklist for cross-service changes. Read by `general-reviewer`.
+- `references/project-context.md` - bounded Linear project context and exact-match follow-up calibration.
 - `references/learned-misses.md` - active pattern queue. Auto-promote check runs top invocation; triage block reports promotions.
 - `references/promoted-misses.md` - audit archive of promoted/discarded entries, split out of `learned-misses.md` to stay under the reference word-budget cap.
 - `references/team-review-patterns.md` - team-and-community review patterns distilled from multi-developer PR mining pass. Created by separate mining pass; pass into lens reviewers (or fold relevant patterns into briefs) when present.
