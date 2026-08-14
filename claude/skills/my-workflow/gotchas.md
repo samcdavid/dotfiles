@@ -65,3 +65,11 @@ Commits are expected: every validated implementation phase and every validated f
 ## Treating "no separate stop" at stage 9 as authorization to dispatch my-implement
 
 The protocol says a clean pre-implementation-check (stage 9, no sibling overlap) flows straight into the atomic block with no separate stop — that line describes when the *pipeline* is allowed to proceed, not when *this user* has actually authorized code to be written. Caught on MCP-523: Decisions Checkpoint was confirmed, stage 9 passed clean, phase tasks were staged, and the first `implementation-executor` dispatch was about to fire — the user interrupted: "You didn't have approval to implement yet, just approval of decisions." Confirming the Decisions Checkpoint approves the *decisions*; it is a separate question whether the user is also greenlighting `my-implement` right now. Stop and ask explicitly before dispatching the first executor, even on a clean stage 9 pass — do not treat "the protocol allows continuing" as "the user told me to continue." Same shape as the `my-quick` approval gotcha above, at a different transition point in the same pipeline.
+
+## Cargo-culting `:follower_db` from a ticket into Axon read paths
+
+When a ticket says to route a projector or comparable persisted-definition read through `:follower_db`, do not treat that as an established platform convention. For this class of platform read, Axon does not use `:follower_db`; research the actual local routing convention before planning. Otherwise a workflow turns a ticket-level assumption into unnecessary or incorrect infrastructure coupling.
+
+## Letting ticket wording override a workflow gotcha without reconciling it
+
+Before carrying a ticket's operational directive into a spec or architecture plan, read the invoked workflow's `gotchas.md`. If it conflicts with a local gotcha (for example, `:follower_db` routing for an Axon projector), the gotcha is a discovered repository correction: use the current local convention and record the ticket conflict as a provisional decision instead of repeating the retired pattern.

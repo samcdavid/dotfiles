@@ -155,3 +155,21 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Independently verify the substance of each unresolved thread against the current PR head and the approval bar. Let it affect the verdict only when it remains important enough to resolve — e.g. it risks a real correctness, security, data, or required-behavior failure. Duplicate, low-impact, or merely stale threads should not block approval; acknowledge them only when useful.
 - **Why:** Thread state records discussion progress, not severity or current validity. Using it as a verdict proxy turns harmless review residue into an artificial merge gate and makes approvals less meaningful.
 - **Source:** PR #106 re-review correction, 2026-08-14 — unresolved non-blocking documentation/workflow threads were allowed to drive a `COMMENT` verdict without first applying an importance bar to whether they genuinely needed resolution.
+
+### `REQUEST_CHANGES` requires immediate customer or operational harm
+
+- **Category:** verdict-calibration
+- **Context:** Choosing the GitHub review event after a PR review, especially when the diff violates a documented contract or future-facing acceptance criterion.
+- **Wrong:** Escalating a contract mismatch, future UX divergence, or dark/unreachable-path concern to `REQUEST_CHANGES` solely because it is an explicit requirement, without showing likely near-term user-visible breakage, on-call impact, or customer complaints.
+- **Right:** Use `REQUEST_CHANGES` only for a confirmed defect that is likely to create immediate customer-facing workflow harm or operational fallout if merged. Keep other real concerns as non-blocking comments (or approve when they do not clear that bar), even if they warrant follow-up before a future capability launch.
+- **Why:** A merge-blocking review is a high-cost intervention. Treating speculative future impact or contract purity as an immediate blocker creates false urgency and weakens the signal of a real production-risk review.
+- **Source:** PR #28007 review calibration, 2026-08-14 — ID-based artifact ordering differed from a frozen native-ordering contract, but the reader was dark and the divergence could not cause current customer or on-call impact.
+
+### Do not turn accepted cross-cutting risk into a PR-local merge gate
+
+- **Category:** verdict-calibration
+- **Context:** A PR exposes a data-lifecycle, PII, observability, or capacity concern that is real, but its remediation belongs to an active shared programme rather than the PR's feature boundary.
+- **Wrong:** Leave `REQUEST_CHANGES` or `COMMENT` in place because the PR lacks a one-off mitigation, without first establishing that it newly violates policy, causes immediate harm, or can be safely fixed only within this PR.
+- **Right:** Separate the feature's local behaviour from the shared risk. Confirm whether the user/team has explicitly accepted and is actively addressing the cross-cutting concern; if the feature is non-load-bearing and the local rollout design protects its user flow, record the rollout/retention follow-up but approve the PR unless a concrete PR-local defect still clears the blocking or comment bar.
+- **Why:** A review should not create a false merge gate for a broader programme whose correct fix is centralized. The remaining action may be canary monitoring or policy confirmation, not feature rework.
+- **Source:** PR #28064 review correction, 2026-08-14 — response-quality PII retention and shared async-capacity concerns were real but accepted cross-cutting work; Axon's background queue kept Diary completion non-blocking.
