@@ -146,3 +146,12 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Discover and read the workflow ledger before requirements triage, then follow its latest user-confirmed decisions and explicit non-goals. Cross-check linked artifacts for genuine inconsistencies, and only resurrect a previously dropped finding when new evidence makes it clear the importance bar now changes.
 - **Why:** The ticket may predate later user decisions. Skipping the ledger creates false findings, can invert an explicit scope decision, and wastes review effort debating choices that were already settled.
 - **Source:** MCP-704 review correction, 2026-08-13 — PD-1 and PD-4 resolved the product questions, `mcp.outcome` was an explicit non-goal, while the confirmation contract remained a real cross-artifact inconsistency.
+
+### Unresolved threads are not, by themselves, a reason to withhold approval
+
+- **Category:** failure-mode
+- **Context:** Re-reviewing a PR with open GitHub threads, especially threads carried over from an earlier review pass.
+- **Wrong:** Treating the presence of unresolved threads as sufficient reason to submit `COMMENT` or withhold `APPROVE`, even when the current review has no confirmed approval-relevant finding.
+- **Right:** Independently verify the substance of each unresolved thread against the current PR head and the approval bar. Let it affect the verdict only when it remains important enough to resolve — e.g. it risks a real correctness, security, data, or required-behavior failure. Duplicate, low-impact, or merely stale threads should not block approval; acknowledge them only when useful.
+- **Why:** Thread state records discussion progress, not severity or current validity. Using it as a verdict proxy turns harmless review residue into an artificial merge gate and makes approvals less meaningful.
+- **Source:** PR #106 re-review correction, 2026-08-14 — unresolved non-blocking documentation/workflow threads were allowed to drive a `COMMENT` verdict without first applying an importance bar to whether they genuinely needed resolution.
