@@ -13,8 +13,8 @@ Report:
 - Files changed.
 - Tests and validation commands.
 - Final review verdict.
+- When migrations were in scope: the migration-history matrix, validation result for each history, release-health evidence, and any explicit override of a blocked gate.
 - Post-review loop iterations, if any.
 - Suggested next command.
 
 End by stating that no git outward actions were taken unless explicitly requested.
-

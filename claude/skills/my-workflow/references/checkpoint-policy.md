@@ -18,6 +18,7 @@ Re-run `references/cross-workflow-coordination.md` when the task is a Linear iss
 - every stage 1-8 completed, with artifact path(s)
 - every provisional decision: stage, question, options considered, recommendation chosen, evidence — for the user to confirm or override
 - factual assumptions recorded along the way
+- when migrations are in scope: the migration-history artifact, every environment/history in the compatibility matrix, validation status, and any user-directed override
 - cross-workflow status from intake (siblings checked, or "no Linear issue") — the pre-implementation gate itself hasn't run yet
 - next stage (stage 9, the pre-implementation coordination check) and the exact resume command
 - that this is a safe point to clear context

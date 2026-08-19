@@ -7,11 +7,13 @@ disable-model-invocation: false
 
 # My Workflow
 
-Run the complete delivery pipeline as resumable stage work while keeping decisions user-owned and factual work agent-owned. Stages 1-8 (research through analyze) run back-to-back, no stop: factual questions are researched, genuine decisions get the pipeline's own recommendation and log as provisional instead of asked live. It stops once after stage 8 — the **Decisions Checkpoint** — presenting every artifact and provisional decision for confirm/override; this is the intended point to clear context. Only after resume does stage 9 (pre-implementation coordination check) run; it stops again only on a sibling overlap, else flows into the atomic execution/review block: `my-implement` -> `my-validate` -> `my-review`. Details: `references/protocol.md`.
+Run the delivery pipeline as resumable stages. Stages 1-8 run back-to-back: research facts and log decisions provisionally. Stop after stage 8 at the **Decisions Checkpoint**. On confirmation, run stage 9; absent overlap, run `my-implement` -> `my-validate` -> `my-review`. Details: `references/protocol.md`.
 
-Default to `my-research` on a new workflow. Do not infer permission to implement from task wording, an existing plan-looking file, or confidence. Implementation requires research/spec/clarify/architecture-plan/plan/observe/analyze complete, eval-plan complete or `not_applicable`, every provisional decision confirmed at the Decisions Checkpoint, and the pre-implementation coordination check `passed` — run fresh, after confirmation, never before.
+Default to `my-research` on a new workflow. Do not infer permission to implement from task wording, an existing plan-looking file, or confidence. Implementation requires research/spec/clarify/architecture-plan/plan/observe/analyze complete, eval-plan complete or `not_applicable`, every provisional decision confirmed at the Decisions Checkpoint, and the pre-implementation coordination check `passed` — run fresh, after confirmation, never before. When migrations are in scope, it also requires a passed migration safety gate.
 
 If intake identifies the work belongs in `my-quick` instead of the full pipeline, create/update the workflow ledger first. Record `route: my-quick`, the reason, the expected scope, and the exact handoff command before invoking or recommending `my-quick`.
+
+Migration work uses the full pipeline, never `my-quick`. Read `references/migration-safety.md` at intake and before implementation; its audit and matrix are a hard gate.
 
 ## Load Rules
 
@@ -33,6 +35,7 @@ Load targeted references as needed:
 - `references/autonomy-boundaries.md` when a stage wants to ask questions.
 - `references/post-review-loop.md` after `my-review`.
 - `references/final-report.md` before final handoff.
+- `references/migration-safety.md` at intake and before implementation when migrations are in scope.
 
 ## Pipeline
 
@@ -55,6 +58,8 @@ Stages 1-8 run back-to-back, no stop; every decision gets a recommendation, logs
 7. Update the ledger silently after each stage: status, artifacts, assumptions, provisional decisions.
 8. Stop once, after stage 8, with the consolidated Decisions Checkpoint.
 9. On resume: confirmed decisions run stage 9, then (if clear) the atomic block; an override re-runs only invalidated stages; a stage-9 overlap stops separately for that one decision.
+
+For migration work, the ledger records `migration_safety: required`, audit path, matrix, and validation. A missing, failed, or blocked gate blocks action absent an explicit, recorded override.
 
 Factual questions are researched; decisions get a recommendation, logged provisional, confirmed at the checkpoint rather than asked live. Validated phases/fixes commit locally; no pushes, PRs, or remote changes unless requested.
 

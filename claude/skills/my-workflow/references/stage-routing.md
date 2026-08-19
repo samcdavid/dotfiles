@@ -4,6 +4,10 @@ Load when starting or resuming `my-workflow`.
 
 Read the workflow ledger first — detected primarily by the current git branch, per `references/protocol.md`'s Step 0. The ledger is the source of truth for completed stages. Loose artifacts can support a stage, but they do not mark that stage complete and they never authorize implementation by themselves.
 
+## Migration Routing
+
+Before choosing a route, inspect the task and any available diff for migration paths, version changes, schema/data migrations, or requests to repair a deployment database. If any are present — or if the impact on persisted data is uncertain — this is migration work. Read `migration-safety.md`, set `migration_safety: required` in the ledger, and route to the full pipeline. Never route migration work to `my-quick`, including a filename-only rename or retimestamp.
+
 Default:
 
 - No ledger (no branch match, and no Linear ID/ticket-slug/topic match): create one, recording the current branch, and run `my-research`, then continue into the next stage without stopping.
@@ -15,7 +19,7 @@ Quick handoff:
 - Record `route: my-quick`, concise reason, expected scope, skipped full-pipeline rationale, and exact handoff command.
 - Do not silently invoke `my-quick` without this ledger note.
 
-Route to `my-quick` when the change is a refactor (restructuring, extraction, inlining, reordering with no behavior change), a rename with no semantic change, a simplification or cleanup (dead code, verbose patterns, consistency), or a targeted fix in a clearly scoped, well-understood function. The test: an experienced engineer could predict the full before/after state without research.
+Route to `my-quick` only when the change is a refactor (restructuring, extraction, inlining, reordering with no behavior change), a rename with no semantic change, a simplification or cleanup (dead code, verbose patterns, consistency), or a targeted fix in a clearly scoped, well-understood function. Migration work is excluded even if it otherwise looks like a rename. The test: an experienced engineer could predict the full before/after state without research.
 
 Route to the full pipeline when the change adds new functionality, alters observable behavior callers depend on in ways needing contract analysis, fixes a bug that wants a new failing test to specify correct behavior, has significant blast radius (many callers, multiple modules, data migrations), or is architecturally significant (new pattern, changed module boundary, new dependency).
 
@@ -49,6 +53,7 @@ Implementation gate:
 - The ledger must contain artifact paths for the research, spec, architecture plan, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
 - Every entry under `## Provisional Decisions` must be confirmed or overridden at the Decisions Checkpoint — an unconfirmed provisional decision blocks stage 9 and implementation the same way an incomplete stage does.
 - `cross_workflow.pre_implementation_check` must be `passed` for the current plan version, checked fresh *after* the Decisions Checkpoint — `not_run`, unset, or `overlap_pending` all block implementation the same way an incomplete stage does. A check run before the Decisions Checkpoint (or reused from an earlier one) does not satisfy this gate.
+- When `migration_safety: required`, the ledger must link a completed migration-history audit and compatibility matrix, and record successful validation for every planned database history. `blocked`, `failed`, `unrun`, or missing validation blocks implementation. A user-directed override may permit an action, but does not change the gate to passed.
 - The current invocation must be a resume after the user confirmed or overrode every provisional decision at the Decisions Checkpoint, or must explicitly say to proceed with implementation.
 
 If any gate is missing, do not implement. Run the earliest missing stage or checkpoint with the missing ledger/artifact requirement.
