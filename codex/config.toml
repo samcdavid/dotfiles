@@ -99,6 +99,9 @@ NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/n
 NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "97669f77b3ca7114a2df05d55646416ea34b28100c07213ef9f643803449ef2f"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/sammcdavid/.codex"
 
+[mcp_servers.dscout-staging-18]
+url = "https://staging-18.app.dscout.com/astro/mcp"
+
 [plugins."gmail@openai-curated"]
 enabled = true
 
