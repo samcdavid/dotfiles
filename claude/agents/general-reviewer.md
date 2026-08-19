@@ -44,7 +44,7 @@ When `mode == "local"`, `diff_text` spans every commit since `fork_sha` plus unc
 - **Frontend** — ARIA + keyboard nav on interactive elements; unnecessary re-renders; design-system token usage; async-state coverage (loading/error/empty).
 - **Full-stack** — Backend + Frontend, plus cross-layer wiring (resolver ↔ context, API ↔ client, types crossing the boundary).
 - **Ops** — observability for new paths; config externalization; unbounded resource use; rollback and migration safety.
-- **Migration safety** — lock risk on large tables; down-migration safety; column types match domain semantics; advisory locks / backfillers.
+- **Migration safety** — lock risk on large tables; down-migration safety; column types match domain semantics; advisory locks / backfillers. Treat any migration `CREATE` that omits an available `IF NOT EXISTS` clause as Critical.
 - **Dependency** — new packages' maintenance, license, advisories; what existing functionality they duplicate.
 
 Lazy (function-level) imports are **blocking**, not a nit, unless genuinely expensive — "avoids circular imports" only counts if the cycle actually exists.

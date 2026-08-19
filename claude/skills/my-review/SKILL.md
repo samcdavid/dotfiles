@@ -1,7 +1,7 @@
 ---
 effort: xhigh
 name: my-review
-description: "Rigorous code review for local diffs or GitHub PRs. Uses a high bar for REQUEST_CHANGES: only Critical merge-blocking issues should block a PR; approve only when requirements are satisfied."
+description: "Rigorous local and PR review. REQUEST_CHANGES needs a Critical issue; approve only when requirements are satisfied."
 when_to_use: "Use when the user asks to review their changes, diff, branch, or a GitHub PR."
 ---
 
@@ -18,6 +18,7 @@ In GitHub, `REQUEST_CHANGES` blocks merge. Use it only for **Critical** findings
 - exploitable security/privacy risk
 - likely runtime break in a cross-service/API/persistence contract
 - omitted must-have acceptance criterion that makes the feature objectively incomplete
+- migration `CREATE` missing an available `IF NOT EXISTS` clause
 
 Important does not automatically mean merge-blocking. Non-Critical findings may still make the right GitHub verdict `COMMENT` rather than `APPROVE` when they are substantive or numerous.
 
