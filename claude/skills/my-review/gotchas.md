@@ -29,6 +29,15 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Why:** Prompt changes without eval coverage are high-risk — small wording changes can cause significant behavior regressions that aren't caught by traditional tests
 - **Source:** Recurring pattern in AI-powered applications
 
+### Shared access helpers need allow-path and wrapper-contract review
+
+- **Category:** failure-mode
+- **Context:** A PR adds or changes a registration decorator, authorization/rollout gate, or injected account/resource resolver.
+- **Wrong:** Approve because hidden/denied behavior is covered, without tracing the successful call, resolver authorization responsibility, or composition with required telemetry/session/context wrappers.
+- **Right:** Verify the allowed path forwards authenticated identity and arguments, invokes the handler once, returns its result, and has a test that would fail if that call is removed. Confirm membership/ownership is enforced by the resolver rather than inferred from a later rollout gate; inspect wrapper order and focused static analysis for typed forwarding/JSON assertions.
+- **Why:** A locally correct denial can conceal a broken permitted path, an authorization bypass, missing telemetry, precondition work in the wrong order, or reusable type-check noise.
+- **Source:** MCP-727 human review
+
 ### Reviews are read-only — never edit code
 
 - **Category:** failure-mode
@@ -173,3 +182,48 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Separate the feature's local behaviour from the shared risk. Confirm whether the user/team has explicitly accepted and is actively addressing the cross-cutting concern; if the feature is non-load-bearing and the local rollout design protects its user flow, record the rollout/retention follow-up but approve the PR unless a concrete PR-local defect still clears the blocking or comment bar.
 - **Why:** A review should not create a false merge gate for a broader programme whose correct fix is centralized. The remaining action may be canary monitoring or policy confirmation, not feature rework.
 - **Source:** PR #28064 review correction, 2026-08-14 — response-quality PII retention and shared async-capacity concerns were real but accepted cross-cutting work; Axon's background queue kept Diary completion non-blocking.
+
+### Resource labels do not prove workspace ownership
+
+- **Category:** failure-mode
+- **Context:** Reviewing lifecycle, cleanup, migration, cache-reset, or other destructive resource operations
+- **Wrong:** Accepting a project/namespace label, config lookup, or resource-name prefix as sufficient evidence that existing resources belong to the current workspace.
+- **Right:** Trace selection through stale, unregistered, and orphaned resources. Require persistent workspace provenance on every resource that may outlive its creator, and fail closed when ownership is missing or mismatched.
+- **Why:** Project-scoped teardown can remove another workspace's containers, networks, or volumes after the original config disappears.
+- **Source:** ENA-590 PR review — project-only Compose lifecycle selection could cross worktree ownership boundaries.
+
+### Review host endpoints separately from internal service health
+
+- **Category:** failure-mode
+- **Context:** A command or native process consumes `localhost`/published-port endpoints while validating services through an internal runtime network
+- **Wrong:** Treating a successful internal health check or container exec as proof that the consumer's host URL reaches that same service.
+- **Right:** Verify service identity, exact published binding, and every consumer connection string. Check each stateful endpoint a command uses, including secondary dependencies such as Redis.
+- **Why:** Port drift or a sibling stack can make the consumer mutate an unrelated service even while the selected container is healthy.
+- **Source:** ENA-590 PR review — `test-axon`, database delegation, and Redis each needed published-endpoint ownership checks.
+
+### Ambient context and test fixtures are part of the runtime contract
+
+- **Category:** failure-mode
+- **Context:** Reviewing tools that derive behavior from environment variables, client config, PATH, or test stubs
+- **Wrong:** Reviewing only the explicit config file or accepting tests that inherit machine state and fixture tools.
+- **Right:** Trace effective precedence through environment, persisted client context, and subprocess invocation. Ensure tests clear conflicting ambient state and deliberately hide unavailable tools/endpoints.
+- **Why:** Docker/client context and inherited endpoint variables can bypass the intended safety guard; a fixture can claim a dependency is absent while still making a stub reachable.
+- **Source:** ENA-590 PR review — active Docker context and restricted-PATH test gaps.
+
+### Test the causal path, not only the final assertion
+
+- **Category:** failure-mode
+- **Context:** Reviewing regression tests for a command path, configuration boundary, or split behavior
+- **Wrong:** Accepting a test whose setup short-circuits before the target code, bypasses the shipped entrypoint, or uses identical values for source and destination paths.
+- **Right:** Check that the fixture reaches the intended branch, exercises the public entrypoint, uses discriminating values, and asserts the undesired side effect did not occur.
+- **Why:** Such tests can pass while the protected behavior regresses, creating false confidence precisely at the boundary under review.
+- **Source:** ENA-590 PR review — missing-jq entrypoint, prerequisite-seeding, and storage-vs-presign test-quality fixes.
+
+### Treat CI wiring and developer instructions as behavioral surfaces
+
+- **Category:** failure-mode
+- **Context:** Reviewing new fixtures, local CLI dependencies, profile selection, or documented native/dependency-only workflows
+- **Wrong:** Approving implementation code without checking CI discovery/materialization, direct-command dependencies, or whether docs describe the configuration source the CLI actually consumes.
+- **Right:** Verify the changed CI filters include required fixtures, required tools fail with actionable diagnostics, and instructions name the effective config/endpoint overrides for supported consumers.
+- **Why:** The feature can be correct in isolation yet fail in CI or silently route developers to a default stack in real use.
+- **Source:** ENA-590 PR review — RWX fixture filter, jq dependency, profile precedence, and native isolated-stack documentation gaps.

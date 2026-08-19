@@ -63,14 +63,15 @@ For learned-miss maintenance, read `references/learned-misses.md` (active queue)
 3. Identify active lenses and requirements source. For an existing PR review,
    build or update the blocker ledger from prior Critical findings and record the
    last reviewed SHA before looking for new concerns.
-4. Fan out research agents, then active lens reviewers.
-5. Merge and dedupe the lens reviewers' flat findings, preserving each one's severity, risk, and confidence.
-6. Verify **every** finding independently — one verifier dispatch per finding, in parallel, never batched. The three levels pick the tier: `finding-verifier-high` (Opus) for Critical, High risk, or low-confidence non-trivial claims; `finding-verifier-low` (Sonnet) for the rest. Re-dispatch any low-tier `requires escalation` to the high tier.
-7. Reconcile every proposed workaround with the requirements source. A scope
+4. For every new or changed registration, authorization, rollout, or injected-resolver helper, trace: its permitted and denied paths; whether tests prove the handler/result/argument forwarding rather than only rejection; where membership/ownership authorization happens; and its composition with mandatory telemetry, session, and context wrappers. Run focused static analysis where typed kwargs or decoded JSON cross a library boundary.
+5. Fan out research agents, then active lens reviewers.
+6. Merge and dedupe the lens reviewers' flat findings, preserving each one's severity, risk, and confidence.
+7. Verify **every** finding independently — one verifier dispatch per finding, in parallel, never batched. The three levels pick the tier: `finding-verifier-high` (Opus) for Critical, High risk, or low-confidence non-trivial claims; `finding-verifier-low` (Sonnet) for the rest. Re-dispatch any low-tier `requires escalation` to the high tier.
+8. Reconcile every proposed workaround with the requirements source. A scope
    reduction clears a Critical requirements finding only with an explicit
    amendment, not a related follow-up ticket or a code comment.
-8. Compute the verdict mechanically from the findings that survive as Critical, then adversarially challenge only the remaining APPROVE/COMMENT choice.
-9. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
+9. Compute the verdict mechanically from the findings that survive as Critical, then adversarially challenge only the remaining APPROVE/COMMENT choice.
+10. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
 
 ## Output
 

@@ -2,6 +2,14 @@
 
 Known failure patterns and lessons learned. Read before starting work with this skill.
 
+### Run and verify the full relevant lint suite before completing implementation
+- **Category:** validation
+- **Context:** Completing an implementation phase or the final implementation run after focused tests and local checks pass
+- **Wrong:** Treating focused lint, partial output, or progress through a lint command as evidence that linting passes; declaring work done without running the repository's full relevant lint command.
+- **Right:** Run the full relevant lint suite required by the project or CI before declaring the implementation complete, and verify its final zero exit status. If output is truncated or the status is unavailable, mark lint validation inconclusive and resolve that before completion; targeted checks are supplementary only.
+- **Why:** A single static-analysis violation can appear late in a whole-repository scan and otherwise survive local validation until CI fails.
+- **Source:** Axon RWX CI failure after a source-read test alias ordering violation was missed by incomplete local lint validation
+
 ### Test isolation / fixture pollution
 - **Category:** anti-pattern
 - **Context:** Modifying test fixtures that touch singletons, registries, or global state
