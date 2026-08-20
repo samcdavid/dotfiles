@@ -1,5 +1,6 @@
 ---
 model: opus
+codex-model: gpt-5.6-sol
 name: runtime-investigator
 description: Investigates production, runtime, CI, or test failures. Builds timeline, verifies blast radius, gathers evidence, ranks hypotheses, and stays read-only.
 disallowedTools: Edit, Write, NotebookEdit
@@ -76,4 +77,3 @@ Use exact timestamps, metric values, trace IDs, log lines, stack traces, file:li
 ### Suggested Next Steps
 - Read-only checks only; mitigation is the user's call.
 ```
-

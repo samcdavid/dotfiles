@@ -101,18 +101,22 @@ def codex_model_fields(
     if effort:
         reasoning_effort = EFFORT_TO_CODEX[effort]
         note = f"# Reasoning effort mirrors the source agent's `effort: {effort}`."
-    else:
+    elif is_critical:
         reasoning_effort = os.environ.get(
             "CODEX_CRITICAL_REASONING_EFFORT", "xhigh"
         ).strip()
         note = "# Generated with elevated Codex reasoning effort for critical/high-judgment work."
+    else:
+        reasoning_effort = ""
+        note = ""
 
     fields: list[str] = []
     # A deliberately cheap agent (e.g. `model: sonnet` + `effort: medium`) reaches
     # here too, so don't label everything high-judgment.
     if is_critical:
         fields.append("# Critical/high-judgment agent.")
-    fields.append(note)
+    if note:
+        fields.append(note)
     if pinned_model:
         if codex_model:
             fields.append("# Model pinned by the source agent's `codex-model`.")

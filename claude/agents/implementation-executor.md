@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: implementation-executor
 description: Executes one implementation-plan phase in isolated context using RED -> GREEN -> VALIDATE TDD. Returns a compact report; does not own cross-phase loop control.
 ---
@@ -84,4 +85,3 @@ Result: DONE | ESCALATE
 ### Escalation
 - Omit unless `Result: ESCALATE`; include reason, output, and root-cause theory.
 ```
-

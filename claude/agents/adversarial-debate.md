@@ -1,5 +1,6 @@
 ---
 model: opus
+codex-model: gpt-5.6-sol
 name: adversarial-debate
 description: Challenges findings before presentation. Verifies references, stress-tests causality and severity, checks contradictions, and returns KEEP/DOWNGRADE/DROP/REVISE/PROMOTE verdicts.
 disallowedTools: Edit, Write, NotebookEdit, Agent

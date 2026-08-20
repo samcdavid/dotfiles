@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: autoresearch-iteration
 description: "Runs one autoresearch iteration: inspect state, choose one scoped experiment, commit, verify, keep or rollback, and return structured result."
 ---
@@ -50,4 +51,3 @@ One iteration means one atomic change. Do not ask the user. Do not touch `read_o
 - description: <one sentence>
 - notes: <one or two lines>
 ```
-

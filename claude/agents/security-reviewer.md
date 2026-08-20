@@ -1,5 +1,6 @@
 ---
 model: opus
+codex-model: gpt-5.6-sol
 name: security-reviewer
 description: Security lens reviewer for the `my-review` orchestrator. Extracts the security-audit skill's checklist and applies it to a diff — auth/authz, input validation, injection, secrets, token exposure. Returns a structured findings fragment plus a security deep-dive. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent

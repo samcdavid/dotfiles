@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: codebase-analyzer
 description: Deep-reads and analyzes codebase implementation details — traces data flow, maps dependencies, and documents how components actually work.
 disallowedTools: Edit, Write, NotebookEdit

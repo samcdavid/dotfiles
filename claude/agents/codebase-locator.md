@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: codebase-locator
 description: Locates files, directories, and components relevant to a feature or task. Returns structured file listings grouped by purpose — never reads file contents.
 disallowedTools: Edit, Write, NotebookEdit

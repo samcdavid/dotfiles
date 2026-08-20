@@ -1,5 +1,6 @@
 ---
 model: opus
+codex-model: gpt-5.6-sol
 name: arch-reviewer
 description: Architecture lens reviewer for the `my-review` orchestrator. Extracts the my-arch-review skill's criteria and applies them to a diff — coupling, cohesion, dependency direction, module boundaries, desirable-vs-undesirable deviations. Returns a structured findings fragment plus an architecture assessment. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent

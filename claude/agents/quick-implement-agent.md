@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: quick-implement-agent
 description: Executes one small implementation phase. Supports TDD phases and direct-edit phases, validates mechanically, and escalates instead of spinning.
 ---
@@ -89,4 +90,3 @@ Phase Type: TDD | DIRECT EDIT
 ### Escalation
 - only when escalated
 ```
-

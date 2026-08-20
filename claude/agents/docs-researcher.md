@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: docs-researcher
 description: Searches for and retrieves documentation for dependencies, libraries, frameworks, and observability products. Returns relevant docs content with source URLs.
 disallowedTools: Edit, Write, NotebookEdit

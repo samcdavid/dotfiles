@@ -1,5 +1,6 @@
 ---
 model: sonnet
+codex-model: gpt-5.6-terra
 name: pulse-aggregator
 description: Gathers and synthesizes recent project activity for the pulse skill from git, GitHub, migrations, dependencies, Linear, and Notion. Read-only.
 disallowedTools: Edit, Write, NotebookEdit
@@ -58,4 +59,3 @@ Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-acti
 ```
 
 Omit empty sections.
-
