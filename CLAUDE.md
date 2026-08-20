@@ -30,6 +30,7 @@ When changing skills or agents:
 4. Keep longer skill instructions in one `references/protocol.md` per skill, and keep genuinely standalone material (gotchas, checklists, templates, mined patterns) as separate files in `references/`. Do not reintroduce the `protocol-index.md` + `protocol-sections/` split: the extra hop cost a serial read per section, its index rows carried no routing signal, and it let the same instruction drift between the index label and the section body. `check-agent-drift` caps reference files at 6000 words — split by topic when one outgrows that.
 5. Run `scripts/check-agent-drift` before finishing larger instruction changes. It checks symlinks, generated Codex agents, critical-agent reasoning effort, home links, entrypoint budgets, cited-file existence, and dangling `$HOME` symlinks.
 6. Run `rcup` after changing RCM-managed directories or `rcrc`, then verify the relevant `$HOME` symlinks. Renaming or deleting a file leaves a dangling `$HOME` symlink that `rcup` cannot clean up — remove it explicitly; `check-agent-drift` will flag it.
+7. For a user-visible skill/agent behavior, safety, workflow, or model-routing change, add a concise entry with its commit SHA to `claude/skills/CHANGELOG.md`. This is the regression and known-good-point index; skip typo-only or formatting-only edits.
 
 Git boundary for skills and agents:
 
