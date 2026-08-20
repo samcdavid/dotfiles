@@ -1,6 +1,6 @@
-# Protocol — my-plan
+# Protocol — skill-my-plan
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-plan` runner. The `my-plan` wrapper normalizes request context, preserves the user-facing decision boundary, and presents the compact result. Shared planning templates, stack checklists, and gotchas remain under the skill directory.
 
 ## Create Plan
 
@@ -12,13 +12,13 @@ This skill runs both standalone and as a stage inside `/my-workflow`. Before any
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the research doc, spec, and `my-architecture-plan` artifact this plan builds on), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — consume the linked research, spec, and architecture plan by path rather than re-discovering them, and honor decisions the ledger already records. When an architecture plan exists, its `## Architectural Constraints` section is the source for this plan's own — copy it forward rather than re-deriving constraints from scratch.
-- **When you finish, if a ledger exists, append this stage's outcome to it**: the plan path and any assumptions/decisions recorded here.
+- **When you finish, if a ledger exists, append this stage's outcome only in standalone mode**: the plan path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
 ## Getting Started
 
 Determine the task without a blank prompt:
-- If `$ARGUMENTS` names a task, ticket, spec, or file paths → use them.
+- If the input `task` names a task, ticket, spec, or file paths → use it.
 - If empty → read the conversation context, the workflow ledger, and any adjacent spec/research first, then open with a concrete proposal of what you're about to plan.
 - Only fall back to "Ready to plan. Describe the task, provide any relevant context, links, or file paths." when there is genuinely nothing to go on.
 
@@ -203,7 +203,7 @@ If the change is mixed (e.g. product code + tests), apply the product code rule 
 
 ### When triggered
 
-Run the `my-observe` skill, passing the current plan file path as context. Save the resulting observability plan to `~/.claude/thoughts/shared/plans/NNNa_{ticket}_observability.md` (same number as the main plan, with `a` suffix) and add `parent_plan: [path to main plan]` to its frontmatter.
+Do not invoke `my-observe` from this runner. Return whether the plan needs an observability companion and the main plan path in the output envelope. `my-workflow` owns stage 6 and dispatches `skill-my-observe`; standalone callers receive `/my-observe` as the recommended next command.
 
 ---
 
@@ -241,7 +241,7 @@ If any check fails, fix it before presenting to the user.
 
 ## Step 7 — Review and Iterate
 
-Present the plan. Incorporate user feedback. Update the saved plan file with changes. The plan is not final until the user approves it. Once approved, if a workflow ledger exists for this issue, append the plan path and any logged assumptions to it.
+Present the plan. Incorporate user feedback. Update the saved plan file with changes. The plan is not final until the user approves it. Once approved, append the plan path and logged assumptions only in standalone mode. In embedded mode, return the outcome for `my-workflow` to record.
 
 ## Important
 
@@ -254,9 +254,27 @@ Present the plan. Incorporate user feedback. Update the saved plan file with cha
 
 ## References
 
-This skill has reference files in `references/` — consult them during planning:
-- `references/stack-checklists.md` — per-stack planning considerations
-- `references/plan-template.md` — copy-paste plan template
+Shared planning references remain under `~/.claude/skills/my-plan/references/` (or `~/.agents/skills/my-plan/references/` under Codex) — consult them during planning:
+- `~/.claude/skills/my-plan/references/stack-checklists.md` — per-stack planning considerations
+- `~/.claude/skills/my-plan/references/plan-template.md` — copy-paste plan template
 
 ## Gotchas
-If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
+Read `~/.claude/skills/my-plan/gotchas.md` (or `~/.agents/skills/my-plan/gotchas.md` under Codex) before starting work. These are known failure patterns — avoid them.
+
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: implementation_plan, path: <path> }
+summary: <phase and scope summary>
+architectural_constraints: [<constraint copied from architecture artifact>]
+assumptions: [<factual assumption>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+observability: { needed: true | false, plan_path: <main plan path>, rationale: <why> }
+recommended_next: /my-observe | /my-implement | <other>
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, resolve factual questions from evidence and return only genuine scope or approach choices as recommended `provisional_decisions`; do not pause for user confirmation. The coordinator owns the Decisions Checkpoint, stage 6 dispatch, and ledger updates.

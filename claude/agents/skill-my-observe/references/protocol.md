@@ -1,6 +1,6 @@
-# Protocol — my-observe
+# Protocol — skill-my-observe
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-observe` runner. The `my-observe` wrapper normalizes request context, preserves the user-facing decision boundary, and presents the compact result.
 
 ## Observability & Monitoring Design
 
@@ -9,8 +9,8 @@ Identify what to monitor and how to alert for code changes — pragmatically. Mo
 ## Getting Started
 
 Determine scope:
-- If `$ARGUMENTS` references a plan, PR, or file path → analyze those specific changes
-- If empty → ask the user what changes or system to design monitoring for
+- If the input `task` or `artifact_inputs` references a plan, PR, or file path → analyze those specific changes
+- If no target is supplied, inspect the workflow ledger and conversation before asking the user what changes or system to design monitoring for
 
 Establish the observability stack:
 - Ask what platforms are available (Datadog, Grafana, Prometheus, CloudWatch, Honeycomb, New Relic, etc.)
@@ -158,3 +158,22 @@ Keep it to ONE dashboard with the critical signals — not a sprawling collectio
 - Include context in alerts — trace IDs, affected resource identifiers, links to relevant dashboards
 - Start with fewer, high-signal monitors. More can be added after baseline is established.
 - When unsure about the platform, write the logic in plain language and let the user translate to their tool's query syntax
+
+## Workflow Ledger and Output Envelope
+
+When working from a workflow plan, save a companion observability plan to `~/.claude/thoughts/shared/plans/NNNa_{ticket}_observability.md`, using the main plan's number with an `a` suffix and `parent_plan: <main-plan-path>` in frontmatter. Append its outcome to an existing ledger only in standalone mode. In embedded mode return it for `my-workflow` to record.
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: observability_plan, path: <path> | null }
+summary: <signals and operational risks>
+signals: { metrics, traces, logs, dashboards, alerts }
+validation_checks: [<mechanical or reviewable check>]
+assumptions: [<factual assumption>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, default to platform-agnostic guidance where the repository supplies no evidence. Return unresolved platform or threshold choices as recommended `provisional_decisions`; do not configure external monitors or pause the pipeline.

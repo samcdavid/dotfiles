@@ -1,6 +1,6 @@
-# Protocol — my-architecture-plan
+# Protocol — skill-my-architecture-plan
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-architecture-plan` runner. The `my-architecture-plan` wrapper normalizes request context, preserves the user-facing decision boundary, and presents the compact result. Retained standalone gotchas remain under the skill directory.
 
 ## Architecture Plan
 
@@ -12,13 +12,13 @@ This skill runs both standalone and as a stage inside `/my-workflow`, positioned
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by current git branch first, then Linear ID, ticket slug, or topic — same detection order `my-workflow` itself uses).
 - **If one exists, read it fully.** Consume the linked research doc and clarified spec by path rather than re-discovering them — the problem statement, acceptance criteria, and scope decisions are already settled there. This skill only adds the *structural* design layer on top.
-- **When you finish, if a ledger exists, append this stage's outcome to it**: the architecture-plan path and any assumptions/decisions recorded here.
+- **When you finish, if a ledger exists, append this stage's outcome only in standalone mode**: the architecture-plan path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
 ## Getting Started
 
 Determine the task without a blank prompt:
-- If `$ARGUMENTS` names a task, ticket, spec, or file paths → use them.
+- If the input `task` names a task, ticket, spec, or file paths → use it.
 - If empty → read the conversation context, the workflow ledger, and any adjacent spec/research first, then open with a concrete proposal of what you're about to design.
 - Only fall back to "Ready to plan the architecture. Describe the change, or point me at a spec/ticket." when there is genuinely nothing to go on.
 
@@ -158,7 +158,7 @@ Apply every correction before presenting. Then confirm:
 
 ## Step 7 — Review and Iterate
 
-Present the plan. Incorporate user feedback on the proposed structure — this is exactly the kind of judgment call (architectural direction, acceptable trade-off) the user owns, not something to self-approve. Update the saved artifact with changes. Once approved, if a workflow ledger exists, append the artifact path and any logged assumptions/decisions to it, and recommend `/my-plan` as the next command, naming this artifact so `my-plan` reads it rather than re-deriving architectural constraints from scratch.
+Present the plan. Incorporate user feedback on the proposed structure — this is exactly the kind of judgment call (architectural direction, acceptable trade-off) the user owns, not something to self-approve. Update the saved artifact with changes. Once approved, append the artifact path and logged assumptions/decisions only in standalone mode. In embedded mode return the outcome for `my-workflow` to record, including a recommended provisional decision for each genuine trade-off. Recommend `/my-plan`, naming this artifact so it reads the constraints rather than re-deriving them.
 
 ## Guidelines
 
@@ -176,3 +176,20 @@ Present the plan. Incorporate user feedback on the proposed structure — this i
 
 ## Gotchas
 If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
+
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: architecture_plan, path: <path> }
+summary: <proposed structural placement>
+architectural_constraints: [<falsifiable constraint>]
+flagged_deviations: [{ deviation, classification, rationale }]
+assumptions: [<factual assumption>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, resolve factual questions from evidence and return only genuine structural trade-offs as recommended `provisional_decisions`; do not pause for user confirmation. The coordinator owns the Decisions Checkpoint and ledger updates.

@@ -1,6 +1,6 @@
-# Protocol — my-eval-plan
+# Protocol — skill-my-eval-plan
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-eval-plan` runner. The `my-eval-plan` wrapper normalizes request context, preserves the user-facing decision boundary, and presents the compact result.
 
 ## Eval Plan
 
@@ -8,7 +8,7 @@ Design a rigorous evaluation plan for an AI or LLM feature. This is the thinking
 
 ## Getting Started
 
-If `$ARGUMENTS` describes a feature or links to a ticket/spec, use that as the starting point. Otherwise, ask: **"What AI feature are you evaluating, and what does it do?"**
+If the input `task` or `artifact_inputs` describes a feature or links to a ticket/spec, use that as the starting point. Otherwise, inspect the workflow ledger and conversation before asking: **"What AI feature are you evaluating, and what does it do?"**
 
 Before designing evals, understand:
 1. **What does the feature do?** (summarize, generate, classify, extract, route, etc.)
@@ -136,3 +136,24 @@ Deliver the plan as a structured document with:
 - Don't over-engineer. Start with the 2-3 most important dimensions and expand later. A simple eval that runs is better than a comprehensive one that doesn't.
 - Every scorer needs a failure example — if you can't describe what failure looks like, the scorer isn't well-defined.
 - Flag when human review is genuinely needed vs. when an LLM judge would suffice. Human review is expensive — use it for calibration, not bulk scoring.
+
+## Workflow Ledger and Output Envelope
+
+When working from a workflow plan, save a companion evaluation plan under `~/.claude/thoughts/shared/plans/` and include `parent_plan: <main-plan-path>` in frontmatter. Append its outcome to an existing ledger only in standalone mode. In embedded mode return it for `my-workflow` to record.
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: evaluation_plan, path: <path> | null }
+summary: <quality dimensions and launch bar>
+scorers: [<scorer definition>]
+dataset_plan: <sources, coverage, refresh>
+baselines_and_targets: [<metric target>]
+instrumentation_needs: [<signal>]
+assumptions: [<factual assumption>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, return genuine quality-bar or launch choices as recommended `provisional_decisions`; do not create remote datasets, configure vendors, or pause the pipeline.

@@ -1,26 +1,25 @@
 ---
-model: opus
+model: sonnet
+effort: high
 name: my-observe
+runner: skill-my-observe
 description: "Design observability and monitoring for planned code changes: metrics, traces, spans, logs, dashboards, and actionable alerts."
 ---
 
 # Observe
 
-Add an observability companion plan for a feature or implementation plan.
+Use `skill-my-observe` for the substantive observability-design procedure. This wrapper resolves the target, preserves user-facing decisions and external-action boundaries, and presents the runner's compact companion-plan envelope.
 
-## Load Rules
+## Dispatch
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For platform-specific guidance, read `references/protocol.md`.
+Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-observe`.
 
-## Flow
+- For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
+- For `/my-workflow`, preserve supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode.
+- If no target plan, change, or system can be inferred, ask the user what to observe before dispatching.
 
-1. Read the plan/spec and existing observability conventions.
-2. Identify user journeys, failure modes, business events, and operational risks.
-3. Recommend metrics, traces/spans, logs, dashboards, and alerts.
-4. Prefer actionable alerts over noisy symptoms.
-5. Save a companion observability plan when working in the workflow.
+The runner may create a local observability companion artifact. In embedded mode it returns the stage outcome for `my-workflow` to record; in standalone mode it may append to an existing ledger. It must return any external configuration, publication, or notification request to this wrapper for explicit authorization.
 
-## Output
+## Present
 
-Return observability plan path if saved, recommended signals, alert criteria, dashboard ideas, and validation checks.
-
+Return the observability-plan path, recommended signals, alert criteria, dashboard ideas, validation checks, assumptions, provisional decisions, and compact decision/artifact envelope.

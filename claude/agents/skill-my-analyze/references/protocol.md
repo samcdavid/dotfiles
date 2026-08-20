@@ -1,6 +1,6 @@
-# Protocol — my-analyze
+# Protocol — skill-my-analyze
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-analyze` runner. The `my-analyze` wrapper normalizes request context, preserves the user-facing decision boundary, and presents the compact result.
 
 ## Analyze
 
@@ -14,14 +14,14 @@ This skill runs both standalone and as a stage inside `/my-workflow`. Before any
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: it lists which stages have run and the artifacts they produced (with paths). Use it to discover exactly which research, spec, and plan to compare — don't re-hunt for them — and honor the decisions it already records when judging whether a deviation is intentional.
-- **When you finish, if a ledger exists, append the analysis report path and any decisions reached while resolving issues** to it.
+- **When you finish, if a ledger exists, append the analysis report path and any decisions reached while resolving issues only in standalone mode**. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
 ## Getting Started
 
 Determine what to compare:
-- If `$ARGUMENTS` lists specific file paths → use those
-- If `$ARGUMENTS` names a feature or topic → search `~/.claude/thoughts/shared/plans/` and `~/.claude/thoughts/shared/research/` for related artifacts
+- If the input `artifact_inputs` or `task` lists specific file paths → use those
+- If the input `task` names a feature or topic → search `~/.claude/thoughts/shared/plans/` and `~/.claude/thoughts/shared/research/` for related artifacts
 - If empty → use the workflow ledger to identify this issue's artifacts; otherwise list recent artifacts from both directories and propose the most likely set rather than asking blankly.
 
 You need at least two artifacts to compare. If only one exists, tell the user and suggest running `/my-clarify` on it instead.
@@ -197,7 +197,7 @@ If the user wants to resolve issues:
 2. State the resolution
 3. Offer to update the affected artifacts
 4. Re-run the traceability check after updates to confirm alignment
-5. If a workflow ledger exists for this issue, append the resolutions to it as decisions
+5. If a workflow ledger exists for this issue, append the resolutions only in standalone mode; in embedded mode return them for `my-workflow` to record as decisions
 
 ## Guidelines
 
@@ -207,3 +207,20 @@ If the user wants to resolve issues:
 - Be precise about which artifact says what. Vague claims like "these don't align" are useless without specific references.
 - The traceability matrix is the most valuable output. A requirement with no plan coverage WILL be forgotten during implementation.
 - When research and code disagree, code wins. When spec and plan disagree, the user decides.
+
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: analysis_report, path: <path> | null }
+summary: <overall alignment and implementation readiness>
+findings: { blocking, important, minor }
+traceability_gaps: [<missing requirement or risk coverage>]
+assumptions: [<factual assumption>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, resolve factual discrepancies from evidence and return only genuine artifact conflicts as recommended `provisional_decisions`; do not pause the pipeline. The coordinator owns the Decisions Checkpoint and ledger updates.
