@@ -319,6 +319,21 @@ def check_budget(errors: list[str]) -> None:
                 " — split it by topic"
             )
 
+    # Runner procedures live below their flat agent entrypoint (for example,
+    # claude/agents/skill-example/references/protocol.md). They are loaded on
+    # demand just like skill references, so enforce the reference budget on all
+    # nested agent markdown resources without relaxing the entrypoint cap.
+    agents = ROOT / "claude" / "agents"
+    for path in sorted(agents.glob("**/*.md")):
+        if path.parent == agents:
+            continue
+        words = word_count(path)
+        if words > REFERENCE_LIMIT:
+            errors.append(
+                f"{rel(path)} has {words} words; reference limit is {REFERENCE_LIMIT}"
+                " — split it by topic"
+            )
+
 
 def skill_root_of(path: Path) -> Path | None:
     """Return the claude/skills/<name> directory containing path, if any."""
@@ -330,11 +345,31 @@ def skill_root_of(path: Path) -> Path | None:
     return skills / parts[0] if parts else None
 
 
+def agent_root_of(path: Path) -> Path | None:
+    """Return the runner resource directory containing path, if any.
+
+    Canonical agent entrypoints remain flat so the Codex generator can discover
+    them. A runner's private resources instead live at
+    ``claude/agents/<runner>/references/``; relative citations from those files
+    should resolve from that runner directory before falling back to a shared
+    agents path.
+    """
+    agents = ROOT / "claude" / "agents"
+    try:
+        parts = path.relative_to(agents).parts
+    except ValueError:
+        return None
+    if len(parts) < 2 or parts[0] == "references":
+        return None
+    return agents / parts[0]
+
+
 def resolve_link(citing: Path, raw: str) -> Path | None:
     """Map a cited markdown path to the repo file it should point at."""
     for prefix, target_dir in (
         ("~/.claude/skills/", ROOT / "claude" / "skills"),
         ("~/.agents/skills/", ROOT / "claude" / "skills"),
+        ("~/.claude/agents/", ROOT / "claude" / "agents"),
         ("~/.claude/rules/", ROOT / "claude" / "rules"),
         ("~/.agents/rules/", ROOT / "claude" / "rules"),
     ):
@@ -343,12 +378,16 @@ def resolve_link(citing: Path, raw: str) -> Path | None:
     if raw.startswith("~"):
         return None  # some other home path; not ours to validate
 
-    # Relative citation: try the citing file's directory, then the skill root,
-    # then the skills dir (cross-skill citations like `my-review/references/x.md`).
+    # Relative citation: try the citing file's directory, then its runner or
+    # skill root, followed by shared cross-agent/cross-skill locations.
     candidates = [citing.parent / raw]
+    agent_root = agent_root_of(citing)
+    if agent_root is not None:
+        candidates.append(agent_root / raw)
     root = skill_root_of(citing)
     if root is not None:
         candidates.append(root / raw)
+    candidates.append(ROOT / "claude" / "agents" / raw)
     candidates.append(ROOT / "claude" / "skills" / raw)
     for candidate in candidates:
         if candidate.is_file():
@@ -359,7 +398,7 @@ def resolve_link(citing: Path, raw: str) -> Path | None:
 def check_links(errors: list[str]) -> None:
     """Every concrete markdown path cited by a skill or agent must resolve."""
     files = sorted((ROOT / "claude" / "skills").glob("**/*.md"))
-    files += sorted((ROOT / "claude" / "agents").glob("*.md"))
+    files += sorted((ROOT / "claude" / "agents").glob("**/*.md"))
 
     for path in sorted(files):
         for raw in LINK_PATTERN.findall(path.read_text(errors="replace")):
@@ -378,6 +417,7 @@ def check_home_links(errors: list[str], skip_home: bool) -> None:
     expected = {
         HOME / ".codex" / "agents": ROOT / "codex" / "agents",
         HOME / ".agents" / "rules": ROOT / "agents" / "rules",
+        HOME / ".claude" / "agents": ROOT / "claude" / "agents",
         HOME / ".claude" / "rules": ROOT / "claude" / "rules",
     }
     for path, target in expected.items():
@@ -398,7 +438,11 @@ def check_home_links(errors: list[str], skip_home: bool) -> None:
     # Removing a repo file leaves its $HOME symlink dangling; rcup cannot clean
     # these up, and a dangling reference file is visible to the agent as a
     # readable path that then fails.
-    for root in (HOME / ".claude" / "skills", HOME / ".claude" / "hooks"):
+    for root in (
+        HOME / ".claude" / "agents",
+        HOME / ".claude" / "skills",
+        HOME / ".claude" / "hooks",
+    ):
         if not root.is_dir():
             continue
         for path in sorted(root.rglob("*")):

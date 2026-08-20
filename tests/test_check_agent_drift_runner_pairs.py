@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import importlib.machinery
+import importlib.util
 import subprocess
 import tempfile
 import textwrap
@@ -12,6 +14,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CHECKER = ROOT / "scripts" / "check-agent-drift"
+
+
+def load_checker_module():
+    loader = importlib.machinery.SourceFileLoader("check_agent_drift", str(CHECKER))
+    spec = importlib.util.spec_from_loader("check_agent_drift", loader)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+CHECKER_MODULE = load_checker_module()
 
 
 class RunnerPairValidationTest(unittest.TestCase):
@@ -126,6 +140,90 @@ class RunnerPairValidationTest(unittest.TestCase):
         agent.write_text("---\nname: specialist\nmodel: sonnet\n---\n")
         result = self.run_checker()
         self.assertEqual(result.returncode, 0, result.stdout)
+
+
+class RecursiveAgentResourceValidationTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        self.agents = self.root / "claude" / "agents"
+        self.agents.mkdir(parents=True)
+        self.old_root = CHECKER_MODULE.ROOT
+        self.old_home = CHECKER_MODULE.HOME
+        CHECKER_MODULE.ROOT = self.root
+
+    def tearDown(self) -> None:
+        CHECKER_MODULE.ROOT = self.old_root
+        CHECKER_MODULE.HOME = self.old_home
+        self.tempdir.cleanup()
+
+    def test_nested_agent_reference_over_budget_is_reported(self) -> None:
+        reference = self.agents / "skill-example" / "references" / "protocol.md"
+        reference.parent.mkdir(parents=True)
+        reference.write_text("word " * 6001)
+
+        errors: list[str] = []
+        CHECKER_MODULE.check_budget(errors)
+
+        self.assertIn(
+            "claude/agents/skill-example/references/protocol.md has 6001 words; "
+            "reference limit is 6000",
+            "\n".join(errors),
+        )
+
+    def test_missing_nested_agent_reference_citation_is_reported(self) -> None:
+        protocol = self.agents / "skill-example" / "references" / "protocol.md"
+        protocol.parent.mkdir(parents=True)
+        protocol.write_text("Read `references/missing-resource.md`.\n")
+
+        errors: list[str] = []
+        CHECKER_MODULE.check_links(errors)
+
+        self.assertIn(
+            "claude/agents/skill-example/references/protocol.md cites missing file: "
+            "references/missing-resource.md",
+            "\n".join(errors),
+        )
+
+    def test_agent_relative_and_home_agent_citations_resolve(self) -> None:
+        reference = self.agents / "skill-example" / "references" / "protocol.md"
+        helper = self.agents / "skill-example" / "references" / "helper.md"
+        reference.parent.mkdir(parents=True)
+        helper.write_text("helper\n")
+        reference.write_text(
+            "Read `references/helper.md` and "
+            "`~/.claude/agents/skill-example/references/helper.md`.\n"
+        )
+
+        errors: list[str] = []
+        CHECKER_MODULE.check_links(errors)
+
+        self.assertEqual(errors, [])
+
+    def test_home_agent_link_and_nested_dangling_reference_are_checked(self) -> None:
+        home = self.root / "home"
+        CHECKER_MODULE.HOME = home
+        for path, target in (
+            (home / ".codex" / "agents", self.root / "codex" / "agents"),
+            (home / ".agents" / "rules", self.root / "agents" / "rules"),
+            (home / ".claude" / "rules", self.root / "claude" / "rules"),
+            (home / ".claude" / "agents", self.agents),
+        ):
+            target.mkdir(parents=True, exist_ok=True)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.symlink_to(target, target_is_directory=True)
+
+        dangling = self.agents / "skill-example" / "references" / "missing.md"
+        dangling.parent.mkdir(parents=True)
+        dangling.symlink_to("does-not-exist.md")
+
+        errors: list[str] = []
+        CHECKER_MODULE.check_home_links(errors, skip_home=False)
+
+        self.assertIn(
+            f"dangling home symlink: {home / '.claude' / 'agents' / 'skill-example' / 'references' / 'missing.md'}",
+            errors,
+        )
 
 
 if __name__ == "__main__":
