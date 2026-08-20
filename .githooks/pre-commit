@@ -2,4 +2,4 @@
 set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
-scripts/check-agent-drift
+python3.11 scripts/check-agent-drift

@@ -35,6 +35,8 @@ EFFORT_TO_CODEX = {
 LINK_PATTERN = re.compile(r"`([~\w][^`\s]*\.md)`")
 # Placeholder-ish citations that are illustrative, not real files.
 LINK_PLACEHOLDER = re.compile(r"[<>{}*|]|/step-N\.md$|<name>|\.\.\.")
+FRONTMATTER_PATTERN = re.compile(r"\A---\s*\n(.*?)\n---\s*(?:\n|\Z)", re.DOTALL)
+RUNNER_NAME_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]*\Z")
 
 
 def rel(path: Path) -> str:
@@ -61,6 +63,158 @@ def run(cmd: list[str]) -> tuple[int, str]:
         stderr=subprocess.STDOUT,
     )
     return proc.returncode, proc.stdout.strip()
+
+
+def frontmatter(path: Path) -> tuple[dict[str, str], str | None]:
+    """Parse the simple scalar frontmatter used by canonical instructions."""
+    text = path.read_text(errors="replace")
+    match = FRONTMATTER_PATTERN.match(text)
+    if not match:
+        return {}, "missing or malformed frontmatter"
+
+    fields: dict[str, str] = {}
+    for raw_line in match.group(1).splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if ":" not in line:
+            return {}, f"frontmatter line is not key/value: {line!r}"
+        key, value = line.split(":", 1)
+        key = key.strip()
+        if not key:
+            return {}, "frontmatter key is empty"
+        fields[key] = value.strip().strip("\"'")
+    return fields, None
+
+
+def valid_runner_name(value: str) -> bool:
+    return bool(RUNNER_NAME_PATTERN.fullmatch(value))
+
+
+def check_runner_pairs(
+    errors: list[str], skills_root: Path | None = None, agents_root: Path | None = None
+) -> None:
+    """Validate only explicitly declared skill/runner pairs.
+
+    Unpaired skills and specialist agents deliberately remain outside this
+    contract. Runner sources stay flat because ``sync-codex-agents`` only
+    generates TOML from ``claude/agents/*.md``.
+    """
+    skills_root = skills_root or ROOT / "claude" / "skills"
+    agents_root = agents_root or ROOT / "claude" / "agents"
+    if not skills_root.is_dir() or not agents_root.is_dir():
+        errors.append(
+            "runner-pair root must contain skills/ and agents/ directories"
+        )
+        return
+
+    skills: dict[str, tuple[Path, dict[str, str]]] = {}
+    declared_skill_runners: dict[str, tuple[Path, str]] = {}
+    for path in sorted(skills_root.glob("*/SKILL.md")):
+        fields, parse_error = frontmatter(path)
+        if "runner" not in fields:
+            continue
+        if parse_error:
+            errors.append(f"{rel(path)} has malformed runner metadata: {parse_error}")
+            continue
+
+        skill_name = fields.get("name", path.parent.name).strip()
+        runner = fields["runner"].strip()
+        if not valid_runner_name(runner):
+            errors.append(
+                f"{rel(path)} has malformed runner metadata: "
+                "runner must be a non-empty agent name"
+            )
+            continue
+        if not valid_runner_name(skill_name):
+            errors.append(
+                f"{rel(path)} has malformed runner metadata: "
+                "skill name must be a non-empty skill name"
+            )
+            continue
+        if skill_name in skills:
+            errors.append(
+                f"{rel(path)} duplicates paired skill name '{skill_name}' "
+                f"from {rel(skills[skill_name][0])}"
+            )
+            continue
+        skills[skill_name] = (path, fields)
+        declared_skill_runners[skill_name] = (path, runner)
+
+    agents: dict[str, tuple[Path, dict[str, str]]] = {}
+    declared_agent_runners: dict[str, tuple[Path, dict[str, str]]] = {}
+    for path in sorted(agents_root.glob("*.md")):
+        fields, parse_error = frontmatter(path)
+        if parse_error or not fields.get("name", "").strip():
+            continue
+        agent_name = fields["name"].strip()
+        if not valid_runner_name(agent_name):
+            if "runner-for" in fields:
+                errors.append(
+                    f"{rel(path)} has malformed runner metadata: "
+                    "name must be a non-empty agent name"
+                )
+            continue
+        if agent_name not in agents:
+            agents[agent_name] = (path, fields)
+        if "runner-for" not in fields:
+            continue
+        runner_for = fields["runner-for"].strip()
+        if not valid_runner_name(runner_for):
+            errors.append(
+                f"{rel(path)} has malformed runner metadata: "
+                "runner-for must be a non-empty skill name"
+            )
+            continue
+        if agent_name in declared_agent_runners:
+            errors.append(
+                f"{rel(path)} duplicates paired runner name '{agent_name}' "
+                f"from {rel(declared_agent_runners[agent_name][0])}"
+            )
+            continue
+        declared_agent_runners[agent_name] = (path, fields)
+        for field in ("model", "effort", "codex-model"):
+            if not fields.get(field, "").strip():
+                errors.append(f"{rel(path)} missing required runner field: {field}")
+
+    for skill_name, (skill_path, runner_name) in declared_skill_runners.items():
+        runner = agents.get(runner_name)
+        if runner is None:
+            errors.append(
+                f"{rel(skill_path)} declares runner '{runner_name}', but no flat "
+                "agent source has that name"
+            )
+            continue
+
+        runner_path, runner_fields = runner
+        if "runner-for" not in runner_fields:
+            errors.append(
+                f"{rel(runner_path)} is runner '{runner_name}' for "
+                f"{rel(skill_path)} but is missing runner-for metadata"
+            )
+            continue
+        runner_for = runner_fields["runner-for"].strip()
+        if runner_for != skill_name:
+            errors.append(
+                f"{rel(runner_path)} runner-for '{runner_for}' does not "
+                f"reciprocate skill '{skill_name}' declared by {rel(skill_path)}"
+            )
+
+    for agent_name, (agent_path, agent_fields) in declared_agent_runners.items():
+        runner_for = agent_fields["runner-for"].strip()
+        skill = skills.get(runner_for)
+        if skill is None:
+            errors.append(
+                f"{rel(agent_path)} declares runner-for '{runner_for}', but no "
+                "paired skill wrapper has that name"
+            )
+            continue
+        skill_path, skill_fields = skill
+        if skill_fields["runner"].strip() != agent_name:
+            errors.append(
+                f"{rel(skill_path)} runner '{skill_fields['runner'].strip()}' "
+                f"does not reciprocate runner '{agent_name}' for skill '{runner_for}'"
+            )
 
 
 def check_repo_links(errors: list[str]) -> None:
@@ -255,14 +409,28 @@ def check_home_links(errors: list[str], skip_home: bool) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check local Claude/Codex instruction drift.")
     parser.add_argument("--skip-home", action="store_true", help="skip $HOME symlink checks")
+    parser.add_argument(
+        "--runner-pairs-root",
+        type=Path,
+        metavar="DIR",
+        help=(
+            "validate only skill/runner metadata in a fixture containing "
+            "skills/ and agents/ directories"
+        ),
+    )
     args = parser.parse_args()
 
     errors: list[str] = []
-    check_repo_links(errors)
-    check_codex_agents(errors)
-    check_budget(errors)
-    check_links(errors)
-    check_home_links(errors, args.skip_home)
+    if args.runner_pairs_root:
+        fixture_root = args.runner_pairs_root.resolve()
+        check_runner_pairs(errors, fixture_root / "skills", fixture_root / "agents")
+    else:
+        check_repo_links(errors)
+        check_codex_agents(errors)
+        check_runner_pairs(errors)
+        check_budget(errors)
+        check_links(errors)
+        check_home_links(errors, args.skip_home)
 
     if errors:
         print("agent drift detected:")
