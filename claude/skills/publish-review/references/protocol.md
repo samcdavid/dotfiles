@@ -61,12 +61,12 @@ If resolution/outdated state matters, use the GraphQL `reviewThreads` query from
 
 ### Validate Line Numbers
 
-For every inline comment, confirm `line` appears in PR diff:
+For every inline comment, confirm `line` appears in the aggregate PR diff:
 
 1. Find file's diff hunks in `gh pr diff` output.
 2. Parse `@@` headers: `@@ -oldStart,oldCount +newStart,newCount @@`.
 3. Verify target line is within the hunk, including context lines.
-4. If line is not in diff, API will reject comment 422. Adjust to nearest valid line or convert to PR-level comment.
+4. If line is not in the aggregate PR diff, do **not** adjust it to a nearby line or convert it to a PR-level comment. It is an invalid new finding for this PR review; omit it and report the scope failure to the user. Stop before publishing if the review body or verdict depends on that finding.
 
 ### Validate Reply Targets
 
@@ -144,9 +144,9 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
   -f body="Reply text"
 ```
 
-### PR-level comment payloads (fallback)
+### PR-level comment payloads (replies only)
 
-For comments that can't be posted inline (line not in diff) or replies where the target comment no longer exists:
+For replies where the target comment no longer exists. Never use this for a new finding that lacks an aggregate-diff anchor:
 ```bash
 gh api repos/{owner}/{repo}/issues/{number}/comments \
   -f body="> Quoted original text
@@ -174,7 +174,7 @@ Show a brief summary of what will be published, then proceed immediately:
    > {original comment, truncated}
    {reply text}
 
-### PR-Level Comments ({N}) [fallback]
+### PR-Level Comments ({N}) [reply fallback only]
 1. Quoting {user}:
    > {quoted text}
    {response text}
@@ -238,7 +238,7 @@ Response"
 
 | Error | Cause | Recovery |
 |-------|-------|----------|
-| 422 on review | Line not in diff, invalid path, or malformed JSON | Report which comment failed. Convert to PR-level comment. |
+| 422 on review | Line not in aggregate diff, invalid path, or malformed JSON | Stop and report which finding is invalid. Do not convert a new finding to a PR-level comment. |
 | 404 on thread reply | Comment ID doesn't exist | Fall back to PR-level quoted comment. |
 | 403 | Insufficient permissions or locked PR | Stop and report to user. |
 | 422 "was submitted too quickly" | Secondary rate limit | Wait 60 seconds and retry once. |
@@ -279,7 +279,7 @@ After publishing:
 
 ### Critical
 - **Use `line`, not `position`.** The `position` field is deprecated. `line` is the actual file line number on the specified `side`.
-- **`line` must be in the diff.** The API rejects comments on lines not shown in the diff (including context). Always validate against `gh pr diff` first.
+- **`line` must be in the aggregate PR diff.** The API rejects comments on lines not shown in the diff (including context). Always validate against `gh pr diff` first; omit an invalid new finding rather than moving it to a PR-level comment.
 - **All inline comments are atomic.** You cannot add comments to a review after creation. Build the entire `comments` array before posting.
 - **Replies target top-level comments only.** If a comment has `in_reply_to_id`, use that ID instead — replying to a reply doesn't work.
 - **One pending review per user per PR.** If you omit `event`, a pending review is created. Creating a second will fail. Always include `event` to submit immediately.

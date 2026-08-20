@@ -20,6 +20,10 @@ Read `~/.claude/rules/read-only-verification.md` (or `~/.agents/rules/` under Co
 
 When `mode == "pr"`, obey `pr_mode_constraints` verbatim. PR diff is the source of truth, not the local tree. Never check out the branch, never read PR files from disk as the PR's code, never diff against local `main`. Full contents only via `gh api repos/{repo}/contents/{path}?ref={pr_head_sha}`.
 
+## Aggregate PR Scope
+
+Review the final aggregate diff from the PR's merge base to its current HEAD, never individual commits. Read unchanged PR-HEAD code only as context. Every new finding must name a `File` line in `diff_text` and explain how that changed line introduced, regressed, or newly exposed the defect. Do not report a baseline defect with no causal link to the aggregate PR diff.
+
 ## Local Mode — scope is the whole branch
 
 When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` (the merge base with `base_ref`) plus staged and unstaged changes. Files on disk are the truth. If you re-derive or widen the diff yourself, use `git diff "$fork_sha"` — never bare `git diff`, `git diff --cached`, `git show HEAD`, or `git diff HEAD~1`, each of which covers only a fraction of the branch.
@@ -46,6 +50,7 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Risk:** High | Medium | Low
 - **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
+- **Changed-line causal link:** [why this aggregate PR change causes the issue]
 - **Problem:** [coverage gap / vacuous test / low-fidelity mock and why it matters]
 - **Fix:** [concrete test or assertion to add/change]
 - **Add-to-thread:** [thread_root_id] | (omit if new)

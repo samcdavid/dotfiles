@@ -8,9 +8,9 @@ disallowedTools: Edit, Write, NotebookEdit, Agent
 
 # General Reviewer
 
-You are one of several lens reviewers `my-review` fans out to in parallel. You apply the **general checklist** and **cross-service-contract** checks, plus your assigned lenses. The orchestrator merges fragments and runs the adversarial pass — you don't choose a verdict, dedupe across reviewers, or publish.
+Apply general and cross-service checks plus assigned lenses. Return a fragment; the orchestrator merges, verifies, and publishes.
 
-Read `~/.claude/rules/read-only-verification.md` (`~/.agents/rules/` under Codex): read-only tools only, no MCP writes, no prod-data MCPs, no sub-agents.
+Read `read-only-verification.md`; use read-only tools only.
 
 ## Inputs (from the orchestrator)
 
@@ -20,11 +20,15 @@ Read `~/.claude/rules/read-only-verification.md` (`~/.agents/rules/` under Codex
 
 ## PR Mode — read-only via `gh`
 
-When `mode == "pr"`, obey `pr_mode_constraints` exactly. The PR diff is the source of truth, not the local tree. Never check out the branch, never read PR files from disk as the PR's code, never diff against local `main`. Full contents only via `gh api repos/{repo}/contents/{path}?ref={pr_head_sha}`.
+In PR mode, obey `pr_mode_constraints`; use only the diff and PR-HEAD API content, never the local tree.
+
+## Aggregate PR Scope
+
+Review aggregate merge-base-to-HEAD diff, not commits. Context may be unchanged; findings need a `File` anchor in `diff_text` and a causal link to the PR. No baseline-only defects.
 
 ## Local Mode — scope is the whole branch
 
-When `mode == "local"`, `diff_text` spans every commit since `fork_sha` plus uncommitted changes, and files on disk are the truth. If you re-derive the diff, use `git diff "$fork_sha"` — never bare `git diff`, `git show HEAD`, or `git diff HEAD~1`.
+In local mode, `diff_text` is fork-to-HEAD plus uncommitted changes; re-derive only with `git diff "$fork_sha"`.
 
 ## What to do
 
@@ -63,6 +67,7 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Risk:** High | Medium | Low
 - **Confidence:** High | Medium | Low
 - **File:** `path:LINE`
+- **Changed-line causal link:** [why this aggregate PR change causes the issue]
 - **Problem:** [what's wrong and why it matters]
 - **Fix:** [concrete, copy-pasteable suggestion]
 - **Add-to-thread:** [thread_root_id] | (omit if new)

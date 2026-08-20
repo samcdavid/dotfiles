@@ -29,7 +29,7 @@ Subcommand keywords (`capture`, `promote`) take precedence over branch-name inte
 
 **PR Mode - read-only via `gh`, never check out branch.**
 
-PR diff source truth. Local working tree is not PR truth: `main` may lag remote and PR branches may not exist locally.
+PR scope is the aggregate merge-base-to-HEAD diff: all net PR changes, never individual commits. The local tree is not PR truth.
 
 **Hard constraints:**
 
@@ -47,6 +47,8 @@ sha=$(gh api repos/{owner}/{repo}/pulls/<number> --jq '.head.sha')
 gh api repos/{owner}/{repo}/contents/<path>?ref=$sha --jq '.content' | base64 -d
 ```
 
+`gh pr diff <number>` is the only PR review range. Never review commits independently or compare PR HEAD directly with current `main`.
+
 Fetch existing review comments and conversation threads using `~/.claude/rules/pr-cost-control.md`: GraphQL `reviewThreads` first for inline comments/resolved/outdated state, then filtered REST fallbacks for review bodies and issue comments. Do not ingest raw `gh api` review/comment payloads.
 
 Build `existing_comments_index`: file path, line range, substance summary, `thread_root_id`. Pass it to reviewer subagents for dedupe and use it again when merging findings.
@@ -55,7 +57,7 @@ If existing comments include your own prior review pass, treat as re-review: re-
 
 **Local Mode:**
 
-The review scope is **the branch as a whole**: every commit added since it diverged from the base branch, plus staged and unstaged changes. Never the last commit alone, and never the working tree alone.
+Review the whole branch: merge base to HEAD plus staged and unstaged changes.
 
 Resolve the base branch, then diff from the fork point:
 
@@ -82,16 +84,16 @@ git diff --stat "$fork"           # scope check: branch commits + staged + unsta
 git diff "$fork"                  # THE REVIEW DIFF
 ```
 
-`git diff "$fork"` (two-dot against the merge base) is the one that matters: it equals `git diff "$base_ref"...HEAD` plus everything uncommitted. Pass it as `diff_text`, and pass `base_ref`/`fork` to the lens reviewers so any reviewer re-deriving scope lands on the same range.
+`git diff "$fork"` is the review diff. Pass it as `diff_text` with `base_ref`/`fork` so every reviewer uses the same range.
 
 Hard constraints:
 
-- Do not use `git show HEAD`, `git diff HEAD~1`, or `git log -1` as the review scope. Those review one commit; the branch may have many.
-- Do not use bare `git diff` / `git diff --cached` as the review scope. Those review only uncommitted work and go empty once the branch is committed — the usual trigger for silently falling back to the last commit.
+- Never use `git show HEAD`, `git diff HEAD~1`, `git log -1`, bare `git diff`, or `git diff --cached` as scope; each omits part of the branch.
 - If `$fork` resolves to `HEAD` (you are on the base branch, or the branch has no commits yet), `git diff "$fork"` correctly narrows to uncommitted work. Say so in the triage block rather than widening the scope on your own.
 - If the resulting diff is empty, report that there is nothing to review. Do not substitute a narrower or older scope to have something to say.
+- Never `git diff "$base_ref" HEAD`; resolve and use `fork`, even after origin refreshes the base.
 
-State the resolved `base_ref`, the commit count, and the changed-file count in the triage block, so a wrong scope is visible before fan-out.
+State `base_ref`, commit count, and changed-file count in triage.
 
 Research subagents and lens reviewers read changed files fully when needed. Main context does not need to pre-read every file.
 
@@ -193,11 +195,13 @@ Subagents will silently read on-disk files unless told not to. In PR mode you MU
 
 ```
 PR Mode Hard Constraints. The PR diff is the source of truth; the local working tree is NOT (main often lags remote, and the PR branch may not exist locally).
+- Scope is the aggregate merge-base-to-PR-HEAD diff, never individual commits or PR HEAD directly against the current base tip.
 - NEVER run git checkout/switch, gh pr checkout, or git fetch origin pull/N/head:<name> — nothing that changes the working tree or creates a local branch ref.
 - NEVER read PR-changed files from disk (Read/cat/grep) and treat the result as the PR's code — that reads main, not the PR.
 - NEVER compare the PR against local main as a substitute for the diff.
 - Read PR code ONLY via: the supplied diff_text, and `gh api repos/{repo}/contents/{path}?ref={pr_head_sha}` for full file contents at PR HEAD.
 - NEVER fetch or report CI/check status — no `gh pr checks`, GitHub Actions runs, or RWX/CircleCI pipelines. CI reports its own findings; your job is the diff.
+- Read unchanged code only for impact. A finding needs a `diff_text` anchor and causal link showing the PR introduced, regressed, or exposed it. Do not report or publish baseline-only defects.
 ```
 
 ### Wave 1 — Research subagents (parallel, one message)
@@ -228,7 +232,7 @@ In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and 
 
 Spawn a reviewer only for lenses that actually fired in triage. Always include `general-reviewer` if any non-specialized lens is active (it also carries the cross-service-contract checks). Each reviewer reads its source-of-truth skill, applies the checklist, dedupes against `existing_comments_index`, and returns a findings fragment.
 
-Each fragment is a **flat findings list** — no Critical/non-blocking grouping — where every finding carries `Severity`, `Risk`, and `Confidence` per `references/finding-axes.md`, plus that lens's deep-dive block. Point every reviewer's brief at that file so all lenses calibrate the three levels identically. Reviewers report levels; they do not tier, importance-filter, verify, or drop their own findings — Step 6 does that. A reviewer that returns pre-grouped Critical/Non-blocking sections is running the old contract: re-dispatch it once with the axes file named explicitly.
+Each fragment is a **flat** list: each finding has axes per `references/finding-axes.md`, a `File` anchor in `diff_text`, and changed-line causal link, plus its deep-dive block. Reviewers report levels only; Step 6 verifies and filters. Re-dispatch pre-grouped output with the axes file named.
 
 ### Wave 3 — Compile
 
@@ -354,7 +358,7 @@ Send **all** dispatches — both tiers — in a single message so they run in pa
 
 - `mode`, and the PR diff or local diff source of truth (plus `pr_head_sha`/`repo` and the PR-mode constraints block in PR mode)
 - that finding's file paths and lines only
-- the finding's claim, severity, risk, confidence, evidence, and proposed fix
+- the finding's claim, diff anchor, changed-line causal link, severity, risk, confidence, evidence, and proposed fix
 - requirements checklist, if present and relevant to that finding
 - **nothing about the other findings** — each dispatch verifies its own claim in isolation so no verdict can be biased off a sibling
 
@@ -387,6 +391,7 @@ Before Step 7, confirm:
 
 - every finding got its own verifier dispatch — none was batched or skipped
 - no finding duplicates an existing PR thread
+- every PR finding has an aggregate-diff anchor and causal link; baseline-only issues never survive
 - every finding is grounded in the diff or verified source
 - every Critical finding truly blocks merge
 - dropped findings have one-line reasons

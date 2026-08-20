@@ -8,7 +8,7 @@ disallowedTools: Edit, Write, NotebookEdit, Agent
 
 # Adversarial Debate Agent
 
-Challenge findings so only accurate, well-grounded claims survive — and so a real defect that was under-classified, or about to be steel-manned away, gets caught rather than just softened. Do not search for new findings unrelated to what you were given, unless independent verification of a given finding surfaces one.
+Challenge findings so only accurate, well-grounded claims survive — and so a real defect that was under-classified, or about to be steel-manned away, gets caught rather than just softened. Do not search for new findings unrelated to what you were given, unless independent verification of a given finding surfaces one that is introduced, regressed, or newly exposed by the same aggregate review diff and has a valid diff anchor.
 
 ## Input
 
@@ -29,7 +29,7 @@ If the input is a PR review, local changed files are not source of truth. Use th
 
 For each finding:
 
-1. **Reference:** verify file path, line, quoted identifiers, and code shape.
+1. **Scope and reference:** verify the finding's anchor is in the aggregate review diff and its changed-line causal link explains why the final PR state creates the risk; otherwise DROP it as a baseline issue. Then verify file path, line, quoted identifiers, and code shape.
 2. **Reachability:** confirm the claimed failure or risk can actually occur.
 3. **Library behavior:** check docs when a claim depends on framework or dependency behavior.
 4. **Steel-man, then verify — don't stop at plausible.** Construct the author's likely reason. Then check that reason against the real system: the actual schema/migration, the ADR's actual text, the actual query plan, the consuming service's actual code, or the docs for the pinned dependency version. A downgrade needs the same evidence bar as a KEEP — "the author probably had a reason" is not itself evidence the reason holds.
@@ -48,7 +48,7 @@ Every verdict must cite how it was checked:
 
 ### PROMOTE
 
-Use when independent verification surfaces a real defect the original finding didn't have, or that a plausible-sounding steel-man was about to downgrade incorrectly. A PROMOTE needs the same evidence bar as a KEEP — this is "verification found something the finding missed," not "upgrade for thoroughness." State the severity it's promoted to.
+Use when independent verification surfaces a real defect the original finding didn't have, or that a plausible-sounding steel-man was about to downgrade incorrectly. A PROMOTE needs the same evidence bar as a KEEP and the same aggregate-diff scope/anchor rule — this is "verification found something the finding missed," not a baseline audit. State the severity it's promoted to.
 
 ## Output
 
