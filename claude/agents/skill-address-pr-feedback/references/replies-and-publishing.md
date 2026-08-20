@@ -1,6 +1,6 @@
-# Replies and Publishing
+# Replies and Publishing — skill-address-pr-feedback
 
-Load this when drafting or publishing reviewer replies.
+Load this when drafting reviewer replies and constructing the wrapper's external-action envelope. The runner never executes these commands.
 
 Reply shape:
 
@@ -9,23 +9,23 @@ Reply shape:
 - Cite evidence: tests, files, docs, requirements, or command output.
 - Keep pushback falsifiable and respectful.
 
-Publishing rules:
+External-action envelope rules:
 
 - Inline review comments reply in-thread using the original comment ID.
 - Review-body or issue comments get a normal PR conversation reply with quoted context.
-- Push commits, publish replies, mark their threads resolved, and re-request review from the reviewers who left them — all automatically once verification and self-audit pass. The Step 2 triage confirmation is the explicit request (`no-outward-actions.md`) that authorizes this for the whole run. Never force CI.
+- Include pushes, replies, thread resolution, and review re-requests only as named proposed actions with the targets, drafts, evidence, and order below. The wrapper independently checks explicit authorization before it executes any of them. Never force CI.
 
-## Publish Mechanics
+## Wrapper action mechanics
 
-Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — Step 2's triage confirmation already authorized this. Push any new commits first, then post responses, then resolve threads, then re-request review.
+After Step 9 (validation/review) and Step 11 (self-audit) pass, return this exact ordering in `external_action_requested`; do not run it. The wrapper may push commits first, then post responses, resolve threads, then re-request review only after matching each item to explicit user authorization.
 
-### Push Commits
+### Push commits (wrapper only)
 
 ```bash
 git push
 ```
 
-### Post Thread Replies
+### Post thread replies (wrapper only)
 
 For each response targeting an inline review comment (has a `comment_id`):
 
@@ -35,7 +35,7 @@ gh api repos/{owner}/{repo}/pulls/{number}/comments \
   -F in_reply_to={comment_id}
 ```
 
-### Post PR-Level Replies
+### Post PR-level replies (wrapper only)
 
 For each response targeting a review body or issue comment (no `comment_id`):
 
@@ -46,7 +46,7 @@ gh api repos/{owner}/{repo}/issues/{number}/comments \
 Response text"
 ```
 
-### Resolve Threads
+### Resolve threads (wrapper only)
 
 For each `review_comment` item that just received a reply and has a `thread_id` (captured in Step 1's index), mark the thread resolved:
 
@@ -61,7 +61,7 @@ mutation($threadId: ID!) {
 
 `review_body` and `issue_comment` replies have no GraphQL review thread to resolve — skip them.
 
-### Re-request Reviews
+### Re-request reviews (wrapper only)
 
 Once every reply is posted and its thread resolved, re-request review from each unique reviewer who appears in Step 1's pending-feedback index — the same people who just got a reply, so they're the ones with something new to look at. This is the same action as GitHub's "Re-request review" button:
 
@@ -73,7 +73,7 @@ gh pr edit {number} --add-reviewer {login1},{login2}
 
 Also skip a reviewer if they're the PR author (can't review their own PR) or no longer has repo access — report and continue rather than failing the whole batch.
 
-### Publish Order
+### Required envelope order
 
 1. Push commits first — so commit SHA links in responses resolve correctly
 2. Thread replies next — these are the most targeted and expected
@@ -81,11 +81,10 @@ Also skip a reviewer if they're the PR author (can't review their own PR) or no 
 4. Resolve threads next — only after the reply addressing each thread has actually posted
 5. Re-request reviews last — reviewers should see the finished, resolved state when they get the notification
 
-### Error Handling
+### Wrapper error handling
 
 - If a thread reply fails (e.g. comment ID no longer exists), report the error and fall back to a PR-level comment quoting the original
 - If a push fails, do NOT post responses — commit SHAs in responses would be wrong
 - If resolving a thread fails (e.g. already resolved, stale ID), report it and continue — a resolve failure never blocks other replies or a prior push
 - If re-requesting a reviewer fails (e.g. no repo access, removed from the org), report it and continue with the rest
-- Report each posted response, resolved thread, and re-requested reviewer as it succeeds so the user can track progress
-
+- The wrapper reports each posted response, resolved thread, and re-requested reviewer as it succeeds so the user can track progress.

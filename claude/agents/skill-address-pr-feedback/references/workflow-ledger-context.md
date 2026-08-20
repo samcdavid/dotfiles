@@ -1,4 +1,4 @@
-# Workflow Ledger Context
+# Workflow Ledger Context — skill-address-pr-feedback
 
 Load at the very start of every run, before Step 1 (Gather All Feedback), in both PR mode and local mode. This skill can be invoked standalone on any branch, or from inside `my-workflow`'s automatic fix loop where a ledger already exists. Either way, check for it — the ledger carries the plan, spec, decisions, and requirements that produced the code under review, and working from the raw PR/diff alone risks re-litigating a decision the plan already made or missing an acceptance criterion the linked ticket alone wouldn't show.
 

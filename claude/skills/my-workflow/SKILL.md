@@ -1,17 +1,19 @@
 ---
-model: opus
+model: sonnet
+effort: high
 name: my-workflow
+skill-only: coordinator
 description: "Run research through analysis autonomously, resolving decisions with the pipeline's own recommendation, then stop once at a Decisions Checkpoint to present every artifact and provisional decision for confirm/override. Only after that confirmation does the pre-implementation coordination check run, followed by the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the ledger marks all prior stages complete and decisions confirmed."
 disable-model-invocation: false
 ---
 
 # My Workflow
 
-Run the delivery pipeline as resumable stages. Stages 1-8 run back-to-back: research facts and log decisions provisionally. Stop after stage 8 at the **Decisions Checkpoint**. On confirmation, run stage 9; absent overlap, run `my-implement` -> `my-validate` -> `my-review`. Details: `references/protocol.md`.
+Run the delivery pipeline as resumable stages. This is the explicit skill-only coordinator: it has no runner. Stages 1-8 run back-to-back: research facts and log decisions provisionally. Stop after stage 8 at the **Decisions Checkpoint**. On confirmation, run stage 9; absent overlap, run `my-implement` and its atomic validation/review/repair loop. Details: `references/protocol.md`.
 
-Default to `my-research` on a new workflow. Do not infer permission to implement from task wording, an existing plan-looking file, or confidence. Implementation requires research/spec/clarify/architecture-plan/plan/observe/analyze complete, eval-plan complete or `not_applicable`, every provisional decision confirmed at the Decisions Checkpoint, and the pre-implementation coordination check `passed` — run fresh, after confirmation, never before. When migrations are in scope, it also requires a passed migration safety gate.
+Default to `my-research` on a new workflow. Never infer implementation permission. It requires stages 1-8 complete, eval `completed`/`not_applicable`, confirmed Decisions Checkpoint decisions, and a fresh post-checkpoint coordination `passed` gate; migrations also require their safety gate.
 
-If intake identifies the work belongs in `my-quick` instead of the full pipeline, create/update the workflow ledger first. Record `route: my-quick`, the reason, the expected scope, and the exact handoff command before invoking or recommending `my-quick`.
+For `my-quick`, ledger route, reason, expected scope, and handoff command before invoking it.
 
 Migration work uses the full pipeline, never `my-quick`. Read `references/migration-safety.md` at intake and before implementation; its audit and matrix are a hard gate.
 
@@ -45,7 +47,7 @@ Stages 1-8 run back-to-back, no stop; every decision gets a recommendation, logs
 
 9. Pre-implementation coordination check (Linear issues only), run only after that checkpoint: fresh sibling scan against the finalized plan. Stop only on overlap; otherwise straight into the atomic block.
 10. Gated atomic block: `my-implement`, fix loop, then checkpoint.
-11. Fix loop (automatic): `my-validate` -> `my-review` -> `address-pr-feedback local` if warranted -> repeat, up to 3 iterations. Checkpoint after final review.
+11. Fix loop (automatic): `my-validate` -> `my-review` -> `address-pr-feedback local` if warranted -> repeat within 3 combined review passes. Checkpoint after final review.
 
 ## Flow
 
@@ -54,7 +56,7 @@ Stages 1-8 run back-to-back, no stop; every decision gets a recommendation, logs
 3. Read or create `~/.claude/thoughts/shared/workflows/<slug>.md`, recording the branch.
 4. Loose artifacts are evidence for a stage, never permission to skip it.
 5. Decide full pipeline vs. `my-quick`; ledger the decision before handoff.
-6. Run every incomplete stage from `references/stage-routing.md`, back-to-back through stage 8. Run stage 9 and the atomic block only after the checkpoint is confirmed.
+6. Run every incomplete stage from `references/stage-routing.md`, dispatching its runner in embedded mode when it exists and falling back to the stage skill entrypoint during rollout. Run stages 1-8 back-to-back. Run stage 9 and the atomic block only after the checkpoint is confirmed.
 7. Update the ledger silently after each stage: status, artifacts, assumptions, provisional decisions.
 8. Stop once, after stage 8, with the consolidated Decisions Checkpoint.
 9. On resume: confirmed decisions run stage 9, then (if clear) the atomic block; an override re-runs only invalidated stages; a stage-9 overlap stops separately for that one decision.

@@ -27,6 +27,25 @@ State the route and the one-sentence reason before running either path.
 
 Run stages in this order, based on ledger status. Stages 1-8 run back-to-back with no stop; each writes its artifact and any provisional decision to the ledger, then the pipeline moves straight to the next stage:
 
+## Embedded runner dispatch
+
+`my-workflow` remains the skill-level coordinator. For a migrated stage, dispatch its named runner in **embedded mode** with `{ task, artifact_inputs, ledger_path, stage, authority: local_only }`, consume only its compact result envelope, and update the ledger itself. During rollout, when a named runner does not exist, invoke the stage's normal Skill entrypoint with the same inputs instead. Never pass raw subagent transcripts between stages.
+
+| Stage wrapper | Runner when available | Fallback during rollout |
+| --- | --- | --- |
+| `my-research` | `skill-my-research` | `my-research` Skill entrypoint |
+| `my-spec` | `skill-my-spec` | `my-spec` Skill entrypoint |
+| `my-clarify` | `skill-my-clarify` | `my-clarify` Skill entrypoint |
+| `my-architecture-plan` | `skill-my-architecture-plan` | `my-architecture-plan` Skill entrypoint |
+| `my-plan` | `skill-my-plan` | `my-plan` Skill entrypoint |
+| `my-observe` | `skill-my-observe` | `my-observe` Skill entrypoint |
+| `my-eval-plan` | `skill-my-eval-plan` | `my-eval-plan` Skill entrypoint |
+| `my-analyze` | `skill-my-analyze` | `my-analyze` Skill entrypoint |
+| `my-implement` | `skill-my-implement` | `my-implement` Skill entrypoint |
+| `my-validate` | `skill-my-validate` | `my-validate` Skill entrypoint |
+| `my-review` | `skill-my-review` | `my-review` Skill entrypoint |
+| `address-pr-feedback local` | `skill-address-pr-feedback` | `address-pr-feedback` Skill entrypoint |
+
 - `my-research` not completed: run `my-research`, log the artifact, continue.
 - `my-spec` not completed: run `my-spec`, log the artifact and any provisional decision, continue.
 - `my-clarify` not completed: run `my-clarify`, feed resolutions into spec, log any provisional decision, continue.
@@ -40,10 +59,10 @@ Run stages in this order, based on ledger status. Stages 1-8 run back-to-back wi
 
 Fix loop (runs automatically, no checkpoint between iterations):
 
-1. `my-validate`.
-2. `my-review` in local mode against the base branch.
-3. Decide: if the review yields Critical findings, or non-blocking findings substantive enough that shipping them would be sloppy, run `address-pr-feedback local` with those findings passed inline, then go back to step 1. Otherwise exit the loop.
-4. Hard cap: 3 iterations. On the 3rd review still having Critical findings, stop and checkpoint with the surviving findings and a root-cause theory — that is a genuine blocker, not something to keep grinding on.
+1. Dispatch `my-validate` in embedded mode when available, otherwise its entrypoint.
+2. Dispatch `my-review` in local mode against the base branch, again preferring its embedded runner when available.
+3. Decide: if the review yields Critical findings, or non-blocking findings substantive enough that shipping them would be sloppy, dispatch `address-pr-feedback local` with findings, plan/base/ledger context, and the **remaining** shared review-pass budget. Its runner executes its repair loop and returns final review evidence; treat that as the next workflow review pass rather than re-running the same validation/review around it. Otherwise exit the loop.
+4. Hard cap: 3 combined review passes. On the 3rd review still having Critical or substantive findings, stop and checkpoint with the surviving findings and a root-cause theory — that is a genuine blocker, not something to keep grinding on.
 
 Nits and clearly optional suggestions never justify another iteration; carry them into the checkpoint as deferred items. Do not re-run earlier pipeline stages from inside this loop.
 

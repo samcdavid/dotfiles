@@ -1,4 +1,4 @@
-# Pushback Patterns
+# Pushback Patterns — skill-address-pr-feedback
 
 When `address-pr-feedback` is investigating a review comment, this file helps decide whether *pushing back* is the right move and how to frame the response. Patterns are distilled from the same ~2,000-PR mining pass that produced `my-review/references/team-review-patterns.md` — senior Elixir-ecosystem contributors across internal-monorepo work and major OSS libraries (Elixir core, Phoenix, Ash, Oban, Nerves, `req`, `phoenix_test`, `credo`, `ex_doc`).
 

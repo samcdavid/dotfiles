@@ -40,7 +40,7 @@ When checking whether a new capture matches an existing Shape, check this file i
   - `- {type: missed, ref: PR #27606, date: 2026-08-05}` — a RecursionError was deferred to two Linear tickets that never mention recursion.
   - `- {type: missed, ref: PR #27679, date: 2026-08-05}` — a `tach-ignore` deferral had no ticket at all while every sibling deferral in the PR did.
   - `- {type: missed, ref: PR #27713, date: 2026-08-05}` — stale dependency version targets left security advisories open that the PR read as closed.
-- **Proposed promotion** — `target: requirements-audit/references/protocol.md` (Gap Analysis, new "Deferral Verification" subsection) and `address-pr-feedback/references/protocol.md` (Valid Deferral classification); `wording:` "A deferral is only valid if the cited ticket is fetched, confirmed to exist, and confirmed to cover the specific gap by its actual text — not inferred from the ticket ID or title alone. No ticket, a nonexistent ticket, or a non-covering ticket means the item is genuinely missing, not deferred."
+- **Proposed promotion** — `target: requirements-audit/references/protocol.md` (Gap Analysis, new "Deferral Verification" subsection) and `~/.claude/agents/skill-address-pr-feedback/references/protocol.md` (Valid Deferral classification); `wording:` "A deferral is only valid if the cited ticket is fetched, confirmed to exist, and confirmed to cover the specific gap by its actual text — not inferred from the ticket ID or title alone. No ticket, a nonexistent ticket, or a non-covering ticket means the item is genuinely missing, not deferred."
 - **Status** — promoted (2026-08-05)
 
 ### A new guard/test that only exercises the current-good state doesn't prove it catches the drift it claims to

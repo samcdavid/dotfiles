@@ -9,7 +9,7 @@ There are three possible stops in the whole pipeline; only two are guaranteed. E
 - Stage 9, Pre-implementation coordination check -> runs only after the Decisions Checkpoint is confirmed. Stop only if it finds a sibling overlap (its own small checkpoint, just that one decision); if clear, continue straight into the atomic block with no further stop.
 - Atomic block (`my-implement` -> fix loop) -> stop after the final review output.
 
-The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 iterations elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.
+The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 combined review passes elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.
 
 Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 9 (after the Decisions Checkpoint), and the atomic block's own final checkpoint after review — not at every stage, since stages 1-8 no longer stop.
 

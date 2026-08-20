@@ -32,6 +32,8 @@ class RunnerPairValidationTest(unittest.TestCase):
     def setUp(self) -> None:
         self.tempdir = tempfile.TemporaryDirectory()
         self.fixture = Path(self.tempdir.name)
+        (self.fixture / "skills").mkdir()
+        (self.fixture / "agents").mkdir()
 
     def tearDown(self) -> None:
         self.tempdir.cleanup()
@@ -45,8 +47,8 @@ class RunnerPairValidationTest(unittest.TestCase):
     ) -> None:
         skill = self.fixture / "skills" / "example" / "SKILL.md"
         agent = self.fixture / "agents" / f"{runner}.md"
-        skill.parent.mkdir(parents=True)
-        agent.parent.mkdir(parents=True)
+        skill.parent.mkdir(parents=True, exist_ok=True)
+        agent.parent.mkdir(parents=True, exist_ok=True)
         skill.write_text(
             textwrap.dedent(
                 f"""\
@@ -134,12 +136,60 @@ class RunnerPairValidationTest(unittest.TestCase):
     def test_unpaired_definitions_remain_valid(self) -> None:
         skill = self.fixture / "skills" / "standalone" / "SKILL.md"
         agent = self.fixture / "agents" / "specialist.md"
-        skill.parent.mkdir(parents=True)
-        agent.parent.mkdir(parents=True)
+        skill.parent.mkdir(parents=True, exist_ok=True)
+        agent.parent.mkdir(parents=True, exist_ok=True)
         skill.write_text("---\nname: standalone\n---\n")
         agent.write_text("---\nname: specialist\nmodel: sonnet\n---\n")
         result = self.run_checker()
         self.assertEqual(result.returncode, 0, result.stdout)
+
+    def write_skill_only_coordinator(
+        self,
+        *,
+        name: str = "my-workflow",
+        fields: str = "model: sonnet\neffort: high\nskill-only: coordinator",
+    ) -> None:
+        skill = self.fixture / "skills" / name / "SKILL.md"
+        skill.parent.mkdir(parents=True, exist_ok=True)
+        skill.write_text(
+            "\n".join(
+                [
+                    "---",
+                    f"name: {name}",
+                    fields,
+                    "---",
+                    "",
+                ]
+            )
+        )
+
+    def test_named_skill_only_coordinator_passes(self) -> None:
+        self.write_skill_only_coordinator()
+        result = self.run_checker()
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_other_skill_cannot_be_a_skill_only_coordinator(self) -> None:
+        self.write_skill_only_coordinator(name="another-workflow")
+        result = self.run_checker()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(
+            "skill-only coordinator is reserved for 'my-workflow'", result.stdout
+        )
+
+    def test_skill_only_coordinator_requires_model_and_effort(self) -> None:
+        self.write_skill_only_coordinator(fields="skill-only: coordinator")
+        result = self.run_checker()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing required skill-only coordinator field: model", result.stdout)
+        self.assertIn("missing required skill-only coordinator field: effort", result.stdout)
+
+    def test_skill_only_coordinator_cannot_declare_runner(self) -> None:
+        self.write_skill_only_coordinator(
+            fields="model: sonnet\neffort: high\nskill-only: coordinator\nrunner: skill-workflow"
+        )
+        result = self.run_checker()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("skill-only coordinator cannot also declare runner", result.stdout)
 
 
 class RecursiveAgentResourceValidationTest(unittest.TestCase):

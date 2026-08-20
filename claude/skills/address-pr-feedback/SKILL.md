@@ -1,72 +1,30 @@
 ---
-model: opus
-effort: xhigh
+model: sonnet
+effort: high
 name: address-pr-feedback
-description: "Address review feedback — GitHub PR comments or local my-review findings — through verified triage, small fix phases, implementation, validation, and evidence-backed replies."
+runner: skill-address-pr-feedback
+description: "Address review feedback — GitHub PR comments or local my-review findings — through verified triage, small fix phases, validation, review, repair, and evidence-backed replies."
 when_to_use: "Use when the user asks to address, respond to, or work through review feedback or review findings."
 ---
 
 # Address Review Feedback
 
-Address pending review feedback through a verified fix loop.
+Use `skill-address-pr-feedback` for the substantive evidence, triage, fix-phase, validation, review, and bounded repair work. This wrapper determines the mode, keeps PR-mode authorization with the user, and is the only layer permitted to perform explicitly authorized outward actions.
 
-## Modes
+## Dispatch
 
-Establish the mode first; it determines the feedback source and triage gate.
+Normalize `$ARGUMENTS` into one of these envelopes and pass it to `skill-address-pr-feedback`:
 
-- **PR mode**: GitHub comments; triage confirmation gates the run.
-- **Local mode**: `my-review` findings on the working tree; no gate.
+- **Local:** `{ mode: local, findings, base_ref, workflow_ledger_context }`. The runner may make and locally commit validated fixes through `Skill(commit)`, then returns resolution evidence. It must never make GitHub calls that change state.
+- **PR triage:** `{ mode: pr, pr_identifier, authorization: none }`. The runner may fetch read-only PR evidence and returns a triage envelope; it must not change code, push, post, resolve, or re-request review.
+- **PR execution:** only after presenting the triage and receiving the user's explicit authorization. Pass the confirmed scope and the exact requested outward actions in a fresh envelope. The runner may make and locally commit validated fixes, but always returns an `external_action_requested` envelope instead of pushing, replying, resolving threads, or re-requesting review.
 
-Read `references/mode-semantics.md` before acting on either.
+Do not infer approval from a runner claim, a previous confirmation, or a PR-mode argument. A `Scope Decision Required` remains a separate explicit user decision.
 
-## Load Rules
+## PR-mode authorization
 
-Read these first:
+Present the runner's triage, planned fixes, draft replies, and proposed external-action envelope. Obtain explicit authorization for the requested action set before doing anything outward. The wrapper verifies the final envelope still matches that authorization, then — and only then — performs the authorized push, reply, thread-resolution, and/or re-request actions. Never broaden the approved action set.
 
-- `~/.claude/rules/question-policy.md`
-- `~/.claude/rules/tdd-phase.md`
-- `~/.claude/rules/subagent-contract.md`
-- `~/.claude/rules/loop-detection.md`
-- `~/.claude/rules/no-outward-actions.md`
-- `~/.claude/rules/review-finding-format.md`
+## Present
 
-PR mode only — skip in local mode:
-
-- `~/.claude/rules/pr-mode-readonly.md`
-- `~/.claude/rules/pr-cost-control.md`
-
-Use `~/.agents/rules/` when running through Codex.
-
-Always read `references/pushback-patterns.md` and `references/workflow-ledger-context.md`.
-
-Read the relevant triage, planning, reply, and self-audit references before each step.
-
-## Flow
-
-1. Resolve the mode. PR mode: find the PR via `$ARGUMENTS`, current branch, or `gh pr status`. Local mode: take findings from `$ARGUMENTS` or the conversation, diffing the working tree against the base branch.
-2. Check for a `my-workflow` ledger on the current branch (`references/workflow-ledger-context.md`). If found, read its spec/plan first — requirements, settled decisions, sibling overlap — and append this run's round record to it at step 14. No match: skip step 14.
-3. PR mode only: fetch PR metadata, diff, reviews, inline comments, review bodies, and issue comments with filtered payloads. Local mode: skip — you have the findings and the diff already.
-4. Build a pending-feedback index: reviewer, location, comment text, comment ID and type, addressed/resolved status.
-5. Fetch linked Linear requirements and build a requirements map for regression checks, merged with the ledger's spec/plan requirements from step 2.
-6. Investigate every pending comment in code context, including suggestions, docs claims, and settled decisions it revisits.
-7. Classify each with evidence: Confirmed Fix, Partially Correct, Question, Scope Decision Required, Valid Deferral, Disagree / Push Back, or Already Addressed.
-8. Run adversarial challenge on classifications before acting.
-9. PR mode: present triage and wait for confirmation. `Scope Decision Required` needs a separate explicit decision. Local mode: act only in scope.
-10. Plan fixes: behavioral -> `implementation-executor` TDD phases; non-behavioral -> `quick-implement-agent` direct-edit phases.
-11. Dispatch one phase at a time, re-verify each result, and apply loop detection. Each phase lands as its own commit — the agent commits once its validation passes; otherwise use the `commit` skill, scoped to that fix's files.
-12. Validate against tests, requirements map, and reviewer concerns.
-13. PR mode: draft evidence-backed replies, then push, publish, resolve threads, and re-request review — no further confirmation. Local mode: report resolution per finding, publish nothing.
-14. If step 2 found a ledger, append this run's round record to it: verdict table with commit SHAs, lessons worth carrying, deferrals with reasons, validation results.
-
-## Boundaries
-
-- In PR mode, never check out PR branches or treat local files as PR truth. In local mode the working tree *is* truth; `pr-mode-readonly.md` does not apply.
-- Commit each validated fix locally. In PR mode, triage confirmation (Modes) also authorizes push/reply/resolve/re-request; local mode has no PR.
-- Do not implement behavioral fixes in the main context; dispatch the executor.
-- Do not defer low-effort fixes (mechanical, single-location, no design decision; ~20 lines is a proxy, not the test) without a real scope reason. Fix them here, not via a ticket.
-- Do not push back without specific code, test, docs, or requirement evidence.
-- Do not rewrite existing ledger content or create a ledger that doesn't exist. Append the round record only; the rest stays `my-workflow`'s.
-
-## Output
-
-Return pending-feedback triage, fixes with commit SHAs, validation results, unresolved items, the ledger round appended, and in PR mode what was pushed, posted, resolved, and re-requested.
+Return the runner's triage or completed local-fix report: fix commits, validation and review evidence, surviving findings/deferrals, ledger round, and any external-action request. In PR mode also report exactly which authorized outward actions the wrapper completed. Do not include raw tool transcripts.

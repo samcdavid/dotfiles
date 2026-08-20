@@ -1,4 +1,4 @@
-# Mode Semantics
+# Mode Semantics — skill-address-pr-feedback
 
 Read before acting on feedback. The mode determines the feedback source, whether triage has a human gate, and which rules apply.
 
@@ -8,8 +8,8 @@ Default when a PR exists for the branch, or when `$ARGUMENTS` names one.
 
 - Feedback source: GitHub review comments, review bodies, and issue comments, fetched with the filtered payloads in `pr-cost-control.md`.
 - Truth: the PR diff at `pr_head_sha`, never the local working tree. `pr-mode-readonly.md` applies in full.
-- Gate: **present triage and wait for confirmation** before changing code. Real reviewers are on the other end; pushing back on a colleague's comment is a judgment call the user owns. A `Scope Decision Required` item is a separate decision gate: the user must explicitly choose to implement the current requirement or rely on a formal requirement amendment. A generic triage confirmation never authorizes a scope reduction. Once those decisions are made, confirmation authorizes the remaining in-scope work (implement, commit, push, publish replies, resolve threads, re-request review) to run to completion.
-- Output: evidence-backed replies drafted per comment, then pushed, posted, their threads resolved, and non-approving reviewers re-requested — all automatic once verification (Step 9) and self-audit (Step 10) pass.
+- Gate: **return evidence-backed triage to the wrapper and wait for its confirmed execution envelope** before changing code. Real reviewers are on the other end; pushing back on a colleague's comment is a judgment call the user owns. A `Scope Decision Required` item is a separate decision gate: the user must explicitly choose to implement the current requirement or rely on a formal requirement amendment. A generic triage confirmation never authorizes a scope reduction.
+- Output: evidence-backed replies drafted per comment plus an `external_action_requested` envelope for the wrapper. The runner never pushes, posts, resolves, or re-requests review.
 
 ## Local mode
 
@@ -39,8 +39,8 @@ Push back exactly as rigorously as in PR mode — `references/pushback-patterns.
 
 Each validated fix lands as its own local commit via the `commit` skill, scoped to that fix's files. A fix that fails validation stays uncommitted.
 
-In PR mode, pushing, publishing replies, resolving threads, and re-requesting review all run automatically after the Step 2 triage confirmation — no further gate. In local mode there is no PR, so none of those four ever apply.
+In PR mode, pushing, publishing replies, resolving threads, and re-requesting review are always returned to the wrapper as explicit external-action intent. In local mode there is no PR, so none of those four ever apply.
 
 ## Ledger append in both modes
 
-Whenever the branch has a `my-workflow` ledger, the run ends by appending its round record (Step 13, `references/workflow-ledger-context.md`). The mode only changes what the record says: PR mode names the reviewer and PR number and reports what was pushed/replied/resolved; local mode names the fix-loop iteration and reports resolution per finding. Append-only in both — never rewrite an existing section, and never create a ledger that isn't there.
+Whenever the branch has a `my-workflow` ledger, the run ends by appending its round record (Step 13, `references/workflow-ledger-context.md`). The mode only changes what the record says: PR mode names the reviewer and PR number and records the pending external-action envelope; local mode names the fix-loop iteration and reports resolution per finding. Append-only in both — never rewrite an existing section, and never create a ledger that isn't there.

@@ -1,6 +1,6 @@
-# Protocol — address-pr-feedback
+# Protocol — skill-address-pr-feedback
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-address-pr-feedback` runner. The `address-pr-feedback` wrapper normalizes mode, owns the PR-mode approval boundary, and renders or performs any explicitly authorized outward action. Retained standalone gotchas remain at `~/.claude/skills/address-pr-feedback/gotchas.md`, or `~/.agents/skills/address-pr-feedback/gotchas.md` under Codex.
 
 ## Address PR Feedback
 
@@ -8,9 +8,9 @@ Systematically work through all pending review feedback on a PR. This skill is a
 
 - **Act I — Research** (condensed `my-research`): gather every comment and turn it into a **verified, classified finding** — substantiated by code you actually read, challenged adversarially, importance-filtered.
 - **Act II — Plan** (condensed `my-plan`): split confirmed fixes into **test-drivable behavioral phases** (sized one fix per phase, with RED tests and mechanical success criteria) versus **non-behavioral direct edits**.
-- **Act III — Implement** (condensed `my-implement`): dispatch each behavioral phase to a fresh **`implementation-executor`** subagent (the same agent `my-implement` uses), re-verify each independently, and own loop detection. Apply direct edits yourself.
+- **Act III — Implement** (condensed `my-implement`): dispatch each behavioral phase to a fresh **`implementation-executor`** subagent (the same agent `my-implement` uses), dispatch each non-behavioral edit to `quick-implement-agent`, re-verify each independently, and own loop detection.
 
-Then commit with feedback references, draft responses, verify, and publish.
+Then commit locally through `Skill(commit)`, draft responses, validate and review the combined work, repair substantive findings within a three-pass cap, and return any outward work to the wrapper as an envelope.
 
 **You orchestrate; the executor implements the behavioral fixes.** You do not write production code or tests for a behavioral fix in the main context — you slice the work, dispatch it, and re-verify what comes back as a skeptical reviewer. The exception is non-behavioral trivia, which you apply directly because it has no honest failing test.
 
@@ -197,9 +197,9 @@ Present the triage to the user **with your investigation findings**:
    Evidence: [what you found that contradicts the suggestion]
 ```
 
-Get user confirmation before proceeding. The user may reclassify items, add context, or challenge your investigation findings. **The confirmed triage is the research output of this skill — it is held inline, not written to a research doc.**
+In PR mode, return the evidence-backed triage to the wrapper and wait for its explicit execution envelope. The user may reclassify items, add context, or challenge investigation findings. **The confirmed triage is held inline, not written to a research doc.** A `Scope Decision Required` remains a separate explicit decision.
 
-This confirmation is the *only* gate in this skill (PR mode) — it doubles as the explicit outward-action approval `~/.claude/rules/no-outward-actions.md` requires. Once given, proceed through planning, implementation, commit, push, reply-publishing, and thread-resolution without pausing for another ask. The sole exceptions are loop-detection stops on repeated failure (Step 6) and major plan deviations (Step 6's "Plan deviations") — both are correctness stops, not approval stops.
+The runner may only continue with local planning, implementation, and commits when the wrapper returns confirmed scope. It never treats that envelope as authority to push, reply, resolve, or re-request review; those always return to the wrapper after validation.
 
 ---
 
@@ -253,7 +253,7 @@ These are the standards every fix — executor phase or direct edit — must mee
 **Lint discipline** — no checks disabled/suppressed; no formatter violations; no new warnings.
 **Existing patterns** — reuse existing utilities; if the reviewer pointed you to a function, actually use it.
 
-State the fix plan — the behavioral phases (with what each RED test will assert) and the direct-edit list — for visibility, then proceed directly to Act III. Step 2's triage confirmation already covers *how* you'll fix, not just *whether* — do not stop for a second approval here.
+State the fix plan — the behavioral phases (with what each RED test will assert) and the direct-edit list — for visibility, then proceed directly to Act III once the wrapper has supplied the confirmed execution envelope.
 
 ---
 
@@ -307,9 +307,9 @@ Re-verify independently: read the diff, confirm the edit addressed the reviewer'
 
 If reality differs from the plan (reported by an executor or found on re-verify): **minor** — accept the adaptation, note it, continue; **major** (a file the plan assumed doesn't exist, an API changed, the fix needs files outside every `allowed_paths`) — STOP and discuss.
 
-## Step 7 — Commit
+## Step 7 — Local commits
 
-Unlike `my-implement` (which commits nothing — executors only produce working-tree changes), this skill **does** commit, because responses reference commit SHAs. Group related fixes into logical commits; each message references the feedback:
+Each validated phase must be committed through `Skill(commit)`, scoped to that phase's files. The executor/direct-edit agent normally invokes it itself; if a valid phase remains uncommitted, invoke `Skill(commit)` rather than `git commit`. Keep one concern per commit where practical because drafted responses reference its SHA:
 
 ```
 Address review: [brief description of what changed]
@@ -322,7 +322,7 @@ After each commit, note the short SHA — you'll use it in responses.
 
 ---
 
-## Tail — Respond, Verify, Publish
+## Tail — Respond, Validate, Review, Return
 
 ## Step 8 — Draft Responses
 
@@ -419,11 +419,17 @@ When a compile/lint warning appears, first check whether its path intersects `gi
 
 If any check fails, fix the issue before proceeding. Do not leave the branch in a broken state.
 
-## Step 10 — Self-Audit Against my-review
+## Step 10 — Review and bounded repair loop
 
-Before presenting the final result, work through `references/self-audit-checklist.md` — the blocking and non-blocking checks on your own fixes, the `adversarial-debate` output-validation pass over your response drafts and claimed SHAs, the requirements re-check, and the meta-check for scope creep and self-contradiction.
+After Step 9 passes, run `my-review` in local mode against the same base branch. If it reports Critical or substantive non-blocking findings, feed only those findings into the next repair iteration: dispatch the appropriate `implementation-executor` or `quick-implement-agent` phase, validate again, then review again. Count every `my-review` pass, including the first; cap the sequence at **3 review passes**.
 
-## Step 11 — Summary
+Nits and clearly optional suggestions do not trigger a repair. If substantive findings remain after pass 3, stop with the surviving findings, iteration deltas, and a root-cause theory. Do not start a fourth pass. This loop is local-only: no push, reply, thread resolution, or re-request action happens here.
+
+## Step 11 — Self-audit and external-action envelope
+
+Work through `references/self-audit-checklist.md` — the blocking and non-blocking checks on your own fixes, the `adversarial-debate` output-validation pass over response drafts and claimed SHAs, the requirements re-check, and the meta-check for scope creep and self-contradiction. In PR mode, construct but do not execute an `external_action_requested` envelope containing only the proposed push, replies, thread resolutions, and review re-requests, their targets, order, drafts, and evidence.
+
+## Step 12 — Summary
 
 Present the final result:
 
@@ -470,23 +476,19 @@ Present the final result:
 - Lint: pass/fail
 - Tests: pass/fail
 
-### Publishing Next
+### External Action Requested
 
-[State that commits are being pushed, responses posted, their threads resolved, and reviews re-requested next — status line, not a question]
+[PR mode only: list the exact actions, targets, drafts, order, and evidence returned for the wrapper. State that the runner performed none of them.]
 ```
-
-## Step 12 — Publish Responses
-
-Runs automatically once Step 9 (verification) and Step 10 (self-audit) pass — Step 2's triage confirmation already authorized this. Read `references/replies-and-publishing.md`'s "Publish Mechanics" section for the exact commands and order: push commits, post thread/PR-level replies, resolve threads, then re-request review from the reviewers who left them.
 
 ## Step 13 — Append the Round Record to the Ledger
 
-Skip if Getting Started found no ledger. Otherwise this runs last — after Step 11 in local mode, after Step 12 in PR mode — so the record states what landed. Append one dated `## Feedback Round N` section per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Report the path and round number in Step 11's output.
+Skip if Getting Started found no ledger. Otherwise this runs last — after local validation/review, or after returning the PR external-action request — so the record states what landed locally and what the wrapper still owns. Append one dated `## Feedback Round N` section per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Report the path and round number in Step 12's output.
 
 ## Guidelines
 
 - **Research, then plan, then implement.** Don't jump to editing code — investigate every comment into a verified finding (Act I), slice the confirmed fixes (Act II), then execute (Act III).
-- **You orchestrate; the executor implements behavioral fixes.** Don't write a behavioral fix's tests or production code in the main context — dispatch it to `implementation-executor` and re-verify. Only non-behavioral trivia is yours to edit directly.
+- **You orchestrate; the executor implements behavioral fixes.** Don't write a behavioral fix's tests or production code in the main context — dispatch it to `implementation-executor` and re-verify. Dispatch non-behavioral work to `quick-implement-agent` as a direct-edit phase.
 - **One executor at a time.** Fixes are sequential; they share the working tree and may touch overlapping files.
 - **TDD for behavioral fixes is not optional.** A behavioral phase with no honest RED test either gets a real test or moves to the direct-edit track — never a vacuous test to satisfy the executor.
 - **Investigate first, act second.** Every comment — agree or disagree — deserves investigation before you decide how to respond.
@@ -497,15 +499,15 @@ Skip if Getting Started found no ledger. Otherwise this runs last — after Step
 - **Deferred is not forgotten.** Every deferral needs a concrete follow-up plan, or it's not a deferral — just do it.
 - **Don't fix what wasn't flagged.** Address the feedback, nothing more — no refactoring surrounding code while you're in the file.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
-- **One gate, not several.** PR mode confirms triage once (Step 2); everything after — planning, fixes, commits, push, reply-publishing, thread-resolution, re-requesting review, the ledger append — runs to completion without asking again. Only a loop-detection stop or a major plan deviation interrupts it.
+- **The wrapper owns external authority.** In PR mode, return triage first, then run only the confirmed local scope. Return outward work in an `external_action_requested` envelope; never push, publish, reply, resolve, or re-request from this runner.
 - **The round outlives the session.** When a ledger exists, the run isn't done until Step 13 appended its record.
 
 ## References
 
 - `references/pushback-patterns.md` — 12 pushback shapes distilled from a 24-developer PR mining pass. Used during Step 2 (investigate) to pick a response shape; includes a "When to push back vs. when to accept" decision table and per-person pushback fingerprints.
 - `references/workflow-ledger-context.md` — checked in Getting Started, before anything else. Detects a `my-workflow` ledger tied to the current branch, folds its spec/plan/decisions into the requirements map and investigation, and holds the append-only round-record template and write boundaries for Step 13.
-- `references/replies-and-publishing.md` — reply shape/publishing rules plus "Publish Mechanics": the exact `gh` commands and order for Step 12 (push, post replies, resolve threads, re-request review).
-- `references/self-audit-checklist.md` — Step 10's full checklist: blocking/non-blocking checks, output validation, requirements re-check, meta-check.
+- `references/replies-and-publishing.md` — reply shape and the external-action envelope's exact commands and order for the wrapper.
+- `references/self-audit-checklist.md` — Step 11's full checklist: blocking/non-blocking checks, output validation, requirements re-check, meta-check.
 - The plan and implement acts mirror `my-plan` and `my-implement`; `my-implement/references/verification-commands.md` is the source for per-stack `verification_commands` passed into each slice.
 
 ## Gotchas

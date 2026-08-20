@@ -1,4 +1,4 @@
-# Self-Audit Checklist
+# Self-Audit Checklist — skill-address-pr-feedback
 
 Load at Step 10, before presenting the final result. Run your changes through the full `/my-review` checklist — the point is to catch anything that would be flagged on re-review. Your fixes should not create new findings.
 
