@@ -51,6 +51,23 @@ Parse the linked ticket from:
 2. Commit messages (look for `ENG-123`, `Closes #N`, Linear URLs, "Related Cards" trailers)
 3. Existing PR body (if updating)
 
+### Gather implementation decisions
+
+The PR must carry a concise, auditable record of decisions made while the change was delivered. Find the branch-matched workflow ledger first, using the same branch-first lookup as `my-workflow`:
+
+```bash
+branch=$(git branch --show-current)
+rg -l -F -e "branch: ${branch}" -e "branch: \"${branch}\"" ~/.claude/thoughts/shared/workflows/ 2>/dev/null
+```
+
+Open candidates and compare the `branch:` scalar exactly, including its optional YAML quotes; do not select a similarly named branch.
+
+When a ledger exists, read it completely. Extract decisions and outcomes from its decision/assumption, `## Provisional Decisions`, Decisions Checkpoint, implementation/phase-note, and `## Feedback Round N` sections, including a user override when one occurred. Then read the implementation plan named by the ledger (or otherwise associated with the branch) for recorded deviations. Commit messages are a supplementary source only when their body records a choice and rationale.
+
+Include only an evidenced **choice** that affected product behavior, scope, design, compatibility, test contract, rollout, or a plan deviation. For each, preserve its outcome and a short rationale or source reference. Do not turn ordinary task completion, test commands, refactors without a stated trade-off, or an inference from the diff into a decision.
+
+When no decision record is available, state that plainly in the PR body: `No decision record was found for this branch; the diff is not enough to reconstruct why choices were made.` Never claim that no decisions were made merely because no record was found.
+
 ## Step 3 — RISC Scoring Analysis
 
 Reason carefully over the diff + commit messages in one pass, using `references/review-categories.md` as the rubric. Produce:
@@ -87,11 +104,12 @@ Any focus area whose claimed behavior has **no matching test** becomes a candida
 
 ## Step 5 — Compose the Description
 
-Render `references/pr-template.md`, filling each section from Steps 3 and 4.
+Render `references/pr-template.md`, filling each section from Steps 2 through 4.
 
 The template is **two-level by design**: every section is a terse scannable top half (one-phrase bullets, lens names, paths) plus a collapsed `<details>` block carrying the deeper rationale. When composing:
 
 - **Summary top half:** 1–2 sentences of plain language. Frame from a user-visible angle. No file paths, no module names, no implementation detail — those go inside the `What changed` details block.
+- **Implementation Decisions:** always render the dedicated collapsed block after Summary. List every evidenced implementation decision from Step 2 as a compact bullet: the choice, outcome, and brief rationale/source. Keep it a decision log, not an implementation tour.
 - **Review Guidance top half:** two lines — `Lens: …` and `Triggered specialty reviews: …`. Names only, comma-separated. Rationale goes in the details block.
 - **Focus Areas top half:** `path:line` + one-phrase what to verify. The longer "why this matters" goes in the details block.
 - **QA Instructions:** user-facing actions only — clicks, URLs, curl calls, MCP tool invocations, reproduction steps. **Never** include `mix test`, `pytest`, `npm test`, lint, or build commands. CI runs those.
@@ -138,6 +156,7 @@ Show me the PR URL after.
 ## Guidelines
 
 - **Do not fabricate.** Describe only what the diff shows. If you didn't read it, don't claim it. RISC scores must come from the actual change, not pattern-match against the diff size.
+- **Implementation decisions are evidence-backed.** Read the branch-matched workflow ledger and linked plan before writing the decisions block. Include every recorded choice that meets Step 2's bar, including confirmed recommendations, user overrides, and implementation/review deviations. A missing record is not evidence that no decision was made; say the record is unavailable rather than reverse-engineering intent from code.
 - **Two-level density.** Every section is a terse scannable top half plus a collapsed `<details>` block for the deep context. Top halves are one-phrase bullets or comma-separated names. File paths, internals, and rationale live inside `<details>`. If a reviewer has to expand `<details>` to know what the PR is about, the top half is doing the wrong job.
 - **Summary is plain language.** 1–2 sentences. Frame from a user-visible angle. No file paths, no module names, no implementation detail in the Summary itself — those go inside the `What changed` details block.
 - **QA Instructions are user-facing.** No `mix test` / `pytest` / `npm test`, no lint, no build commands — CI handles those. QA is click-paths and UI observations, curl / MCP / API calls and expected response shapes, reproduction steps for bug fixes, or trigger + observable side-effect for async work.

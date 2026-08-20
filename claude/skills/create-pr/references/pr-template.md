@@ -35,6 +35,16 @@ The fenced block below is the literal body Markdown — copy its structure when 
 
 <!-- Omit the entire Resources <details> block when no ticket is linked and no other resources are found. -->
 
+<details>
+<summary><b>Implementation decisions</b></summary>
+
+- **<Decision or trade-off>:** <chosen outcome> — <brief rationale and source, such as workflow stage, phase, or feedback round>
+- **<User override, when applicable>:** <final outcome> — <why it superseded the recommendation>
+
+<!-- Always render this block. Include every evidenced decision from the branch's workflow ledger, implementation plan deviations, and decision-bearing commit notes. Omit example bullets that do not apply. If no decision record is available, write: "No decision record was found for this branch; the diff is not enough to reconstruct why choices were made." -->
+
+</details>
+
 ## Review Guidance
 
 **Lens:** <Primary>[, <Secondary>]
@@ -110,6 +120,7 @@ The fenced block below is the literal body Markdown — copy its structure when 
 
 - **Summary** is 1–2 sentences of plain language. Frame from a user-visible angle. The implementation tour goes inside the `What changed` details block, not in the Summary.
 - **Resources** stays collapsed by default. Always include the Linear link when a ticket was detected; add other URLs only when they surfaced in commits or the diff. Omit the block when there's truly nothing to link.
+- **Implementation decisions** is always a collapsed audit trail immediately after Summary. Use the branch-matched workflow ledger as the primary source; include its confirmed recommendations, user overrides, implementation deviations, and feedback-loop choices, then supplement with plan deviations and decision-bearing commit notes. Each bullet names the decision, final outcome, and brief rationale/source. Never infer a decision from the diff; when the record is absent, say so rather than claiming no decisions occurred.
 - **Review Guidance** top half is two short lines — the lens names and the triggered-review names. Save the *why* for the details block.
 - **Focus Areas** top half is paths + one-phrase whats. The deeper explanation (invariants, boundaries, test coverage) goes in the details.
 - **Where I'm Uncertain** is a humility signal, not a confessional. Name the claim, where it lives, and the test that *would* have verified it. Omit the section when every focus area is grounded.
