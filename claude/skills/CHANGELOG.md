@@ -22,6 +22,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
+| `1941829` | Calibrated `my-review` for default-off, per-user Eppo rollout gates. | Treat an entitlement-gated rollout as an intended cohort boundary; evaluate concrete enabled-cohort behavior and reserve merge blocks for immediate policy violations or harm. |
 | `7851ecc` | Scoped PR review and publication to the aggregate merge-base-to-HEAD diff. | Reviewers may use unchanged code as context, but every finding needs a changed-line causal link; baseline-only defects and out-of-diff findings are withheld rather than converted to PR-level comments. |
 | `bf2c6c0` | Added an evidence-backed, collapsed implementation-decisions section to `create-pr` descriptions. | PR bodies must source recorded choices from the branch workflow ledger and implementation artifacts, preserve outcomes and rationale, and say when no record exists rather than infer intent from the diff. |
 | `340d41a` | Added `my-test-strategy` and made behavior-first TDD planning a gated `my-workflow` stage. | Full workflows must create a behavior-to-test strategy before `my-plan`; embedded implementation requires its observable contracts and isolation controls, and review rejects tests coupled to queries, call sequences, or supervisor mechanics. |
