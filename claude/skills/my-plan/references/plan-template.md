@@ -8,6 +8,7 @@ date: [ISO timestamp]
 feature: [Feature name]
 research: [path to research doc if exists]
 architecture: [path to my-architecture-plan artifact if exists]
+test_strategy: [path to my-test-strategy artifact if exists]
 status: approved
 ---
 
@@ -35,9 +36,9 @@ status: approved
 
 ### Tests First (RED)
 Define the tests that will be written BEFORE any production code in this phase.
-Each test encodes one behavioral expectation from the spec.
-- [ ] `test/path/test_file.ext` — [test description: what behavior it asserts]
-- [ ] `test/path/test_file.ext` — [test description: what behavior it asserts]
+Each test encodes one observable behavioral expectation from the spec and test strategy—not an implementation step.
+- [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
+- [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 
 ### Changes Required (GREEN)
 Production code changes that make the failing tests pass.
@@ -69,7 +70,7 @@ Each phase is one small unit of behavior (a single function/method where possibl
 3. **VALIDATE** — Confirm the implementation meets the phase's requirements. Run the mechanical success criteria and the relevant suite as evidence, and verify the behavior actually matches what the phase asked for. The phase is done only when it conforms.
 
 ## Testing Strategy
-[How to verify the complete feature works end-to-end]
+[Link to the `my-test-strategy` artifact. Summarize the unit/integration split, behavior contracts, known-good recovery checks, and isolation/flakiness controls the implementation must preserve.]
 
 ## Migration Notes
 [If applicable — data migrations, feature flags, rollback plan]

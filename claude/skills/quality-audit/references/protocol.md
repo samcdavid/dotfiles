@@ -60,6 +60,12 @@ For every test, read the test name/description and compare to what the test actu
 - Are there tests that describe one behavior but assert another?
 - Are there tests that pass due to setup side effects rather than the action under test?
 
+### Behavior-First Assertions
+- Does each test assert an observable result, stable postcondition, public error, or externally visible contract that a caller depends on?
+- Is a test asserting that a query ran, a repository/mock method was called, a private helper was reached, or an internal call order occurred instead of validating the returned/persisted outcome? Flag it unless that interaction itself is the documented boundary contract.
+- For supervised-process recovery, does the test prove the restarted component serves its known-good state through its public interface, rather than merely asserting a supervisor callback or restart policy?
+- Would a refactor that preserves the behavior force the test to change? If so, recommend the smallest outcome-oriented assertion that would survive it.
+
 ### Test Isolation
 - Do tests depend on execution order? (shared state between tests)
 - Do tests depend on database state from other tests? (missing cleanup, shared fixtures)
@@ -205,6 +211,7 @@ Date: [ISO timestamp]
 ## Guidelines
 
 - A test that passes when the code is broken is WORSE than no test — it creates false confidence
+- A test coupled to a private implementation is a maintenance liability even when it is green; prefer the caller-visible result over the route used to produce it
 - Focus on tests that catch real bugs, not checkbox coverage — 80% meaningful coverage beats 100% vacuous coverage
 - Flaky tests erode trust in the entire suite — flag flakiness risk aggressively
 - Test architecture matters — wrong-level tests are expensive to maintain and slow to run

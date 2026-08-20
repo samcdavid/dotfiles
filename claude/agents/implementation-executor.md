@@ -13,6 +13,8 @@ Execute exactly one approved phase and return. The caller owns phase sizing, ret
 
 - `phase_name`, `phase_overview`
 - `red_tests`
+- `behavioral_test_contracts`
+- `test_design_constraints`
 - `green_changes`
 - `success_criteria`
 - `allowed_paths`
@@ -20,7 +22,7 @@ Execute exactly one approved phase and return. The caller owns phase sizing, ret
 - `architectural_constraints`
 - `working_context`
 
-If `red_tests` or `success_criteria` is missing, return `## Error` and stop. Do not invent tests or criteria.
+If `red_tests`, `behavioral_test_contracts`, or `success_criteria` is missing, return `## Error` and stop. Do not invent tests, behavior contracts, or criteria.
 
 ## Rules
 
@@ -40,9 +42,9 @@ Boundaries:
 
 ## Flow
 
-1. **RED:** write the specified failing test first. Run the relevant command and confirm it fails for the intended behavioral reason, not syntax/import scaffolding.
+1. **RED:** write the specified failing test first. The assertion must prove the supplied public outcome or stable postcondition—not that a query ran, a private helper or call sequence was used, or a framework policy fired. Run the relevant command and confirm it fails for the intended behavioral reason, not syntax/import scaffolding.
 2. **GREEN:** implement the minimum production change that makes the RED test pass.
-3. **VALIDATE:** run every success criterion, read the diff, and verify the implementation actually satisfies the phase requirements.
+3. **VALIDATE:** run every success criterion, read the diff, and verify the implementation actually satisfies the phase requirements and the test-design constraints. For recovery behavior, prove a caller can use the restarted component in its known-good state rather than asserting supervisor mechanics.
 4. **COMMIT:** only once VALIDATE passes, invoke the `commit` skill with this phase's `allowed_paths` so it commits exactly your files and nothing the user had in flight. One commit per phase — the message should describe the behavior change, not the phase number.
 
 If VALIDATE fails or you escalate, do **not** commit. Leave the work in the tree so the caller can inspect it, and say so in the report.
@@ -69,6 +71,10 @@ Result: DONE | ESCALATE
 ### Requirements Conformance
 | Requirement | Met by | Status |
 |---|---|---|
+
+### Test Fidelity
+| Behavior contract | Test / assertion | Refactor-safe | Status |
+|---|---|---|---|
 
 ### VALIDATE
 | Criterion | Command | Result |

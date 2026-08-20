@@ -7,6 +7,7 @@ Report:
 - Task and entry point.
 - Stages run and skipped with reasons.
 - Artifacts produced.
+- Behavior-first test strategy and its implementation handoff.
 - User decisions.
 - Factual assumptions.
 - Cross-workflow coordination — sibling ledgers/issues checked on the same Linear project (or "no Linear issue"), any overlap found, and how it was resolved.

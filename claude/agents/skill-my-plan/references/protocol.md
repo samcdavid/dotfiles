@@ -11,7 +11,7 @@ Create a detailed, verified implementation plan through interactive collaboratio
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
-- **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the research doc, spec, and `my-architecture-plan` artifact this plan builds on), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — consume the linked research, spec, and architecture plan by path rather than re-discovering them, and honor decisions the ledger already records. When an architecture plan exists, its `## Architectural Constraints` section is the source for this plan's own — copy it forward rather than re-deriving constraints from scratch.
+- **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the research doc, spec, `my-architecture-plan`, and `my-test-strategy` artifacts this plan builds on), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — consume the linked research, spec, architecture plan, and test strategy by path rather than re-discovering them, and honor decisions the ledger already records. When an architecture plan exists, its `## Architectural Constraints` section is the source for this plan's own; when a test strategy exists, its behavior-to-test matrix is the source for this plan's RED tests and isolation controls.
 - **When you finish, if a ledger exists, append this stage's outcome only in standalone mode**: the plan path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
@@ -87,6 +87,8 @@ If a unit of work would require touching many files, holding lots of repo contex
 
 Every phase runs the same three subphases: **RED** (write the failing test), **GREEN** (minimum code to pass), **VALIDATE** (run the phase's mechanical success criteria). Plan all three for each phase.
 
+When a `my-test-strategy` artifact is available, it is binding for test design: every behavioral phase must cite its strategy ID, preserve its test level and isolation controls, and assert the observable outcome it names. Do not replace a strategy assertion with a query/call-count/private-helper/framework-policy assertion. If the plan needs to deviate from the strategy, record the reason and send the strategy back for revision before implementation.
+
 If the **requirements-tracer** ran in Step 1 and surfaced `At-risk` related issues, factor them in:
 - Related-issue regression risks shape the `What We're NOT Doing` boundary (e.g., "do NOT alter the return shape of `X` — issue ENG-1234 depends on the current shape").
 - Each `At-risk` finding becomes a candidate entry in the relevant phase's `What Could Go Wrong` section.
@@ -105,6 +107,7 @@ date: [ISO timestamp]
 feature: [Feature name]
 research: [path to research doc if exists]
 architecture: [path to my-architecture-plan artifact if exists]
+test_strategy: [path to my-test-strategy artifact if exists]
 status: approved
 ---
 
@@ -136,9 +139,9 @@ status: approved
 
 ### Tests First (RED)
 Define the tests that will be written BEFORE any production code in this phase.
-Each test encodes one behavioral expectation from the spec.
-- [ ] `test/path/test_file.ext` — [test description: what behavior it asserts]
-- [ ] `test/path/test_file.ext` — [test description: what behavior it asserts]
+Each test encodes one observable behavioral expectation from the spec and test strategy, not an implementation step.
+- [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
+- [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 
 ### Changes Required (GREEN)
 Production code changes that make the failing tests pass.
@@ -164,7 +167,7 @@ RED criteria run first (tests exist and FAIL), then GREEN criteria (tests PASS):
 ...
 
 ## Testing Strategy
-[How to verify the complete feature works end-to-end]
+[Link to the `my-test-strategy` artifact. Summarize the unit/integration split, behavior contracts, known-good recovery checks, and isolation/flakiness controls the implementation must preserve.]
 
 ## TDD Discipline
 Every phase is one small unit of behavior (a single function/method where possible) and follows red/green/validate:
@@ -203,7 +206,7 @@ If the change is mixed (e.g. product code + tests), apply the product code rule 
 
 ### When triggered
 
-Do not invoke `my-observe` from this runner. Return whether the plan needs an observability companion and the main plan path in the output envelope. `my-workflow` owns stage 6 and dispatches `skill-my-observe`; standalone callers receive `/my-observe` as the recommended next command.
+Do not invoke `my-observe` from this runner. Return whether the plan needs an observability companion and the main plan path in the output envelope. `my-workflow` owns stage 7 and dispatches `skill-my-observe`; standalone callers receive `/my-observe` as the recommended next command.
 
 ---
 
@@ -231,6 +234,7 @@ Apply the agent's verdicts — adjust phases, add missing "What Could Go Wrong" 
 After applying verdicts, confirm:
 - [ ] Every success criterion is a RUNNABLE COMMAND (no prose-only criteria)
 - [ ] Every phase has a "Tests First (RED)" section with at least one test defined
+- [ ] Every behavioral RED test traces to a `my-test-strategy` ID or an explicit, reviewed deviation and asserts an observable outcome rather than an implementation detail
 - [ ] Every phase has RED and GREEN success criteria in that order
 - [ ] Every phase is small enough for a single implementation subagent — one function / narrow behavior, a bounded file set, no whole-repo reading required. Split any oversized phase before presenting.
 - [ ] No open questions remain — all resolved or explicitly deferred with rationale
@@ -247,7 +251,7 @@ Present the plan. Incorporate user feedback. Update the saved plan file with cha
 
 - Do NOT write code during planning — only specification
 - Prefer the simplest design that satisfies the spec — see Simplicity Bias in Step 2; justify any added complexity against a concrete, stated requirement
-- Every phase MUST define tests before production code changes — TDD is mandatory, not optional
+- Every phase MUST define behavior-first tests before production code changes — TDD is mandatory, not optional
 - Success criteria must be MECHANICAL — if a human has to subjectively judge it, rewrite it as something runnable
 - Be skeptical of your own assumptions — verify against actual code
 - Track all decisions and their rationale
@@ -277,4 +281,4 @@ recommended_next: /my-observe | /my-implement | <other>
 external_action_requested: null | { actions, targets, rationale }
 ```
 
-In embedded workflow mode, resolve factual questions from evidence and return only genuine scope or approach choices as recommended `provisional_decisions`; do not pause for user confirmation. The coordinator owns the Decisions Checkpoint, stage 6 dispatch, and ledger updates.
+In embedded workflow mode, resolve factual questions from evidence and return only genuine scope or approach choices as recommended `provisional_decisions`; do not pause for user confirmation. The coordinator owns the Decisions Checkpoint, stage 7 dispatch, and ledger updates.

@@ -13,7 +13,7 @@ Individual artifact quality is NOT your concern — that's what `/my-clarify` is
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
-- **If one exists, read it fully.** It is the plan-of-record for the whole issue: it lists which stages have run and the artifacts they produced (with paths). Use it to discover exactly which research, spec, and plan to compare — don't re-hunt for them — and honor the decisions it already records when judging whether a deviation is intentional.
+- **If one exists, read it fully.** It is the plan-of-record for the whole issue: it lists which stages have run and the artifacts they produced (with paths). Use it to discover exactly which research, spec, test strategy, and plan to compare — don't re-hunt for them — and honor the decisions it already records when judging whether a deviation is intentional.
 - **When you finish, if a ledger exists, append the analysis report path and any decisions reached while resolving issues only in standalone mode**. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
@@ -64,6 +64,12 @@ From each artifact, extract every concrete commitment — things the artifact sa
 - File paths and components targeted
 - Dependencies between phases
 
+**From test strategies:**
+- Behavior-to-test IDs and their observable assertions
+- Test-level and isolation/flakiness constraints
+- Recovery and integration postconditions
+- Explicit exclusions of implementation-detail assertions
+
 List these as structured items with references back to the source document and section.
 
 ## Step 3 — Cross-Reference Matrix
@@ -99,6 +105,12 @@ Research findings that may have been invalidated since the research was conducte
 - Research references code paths that the plan modifies — are the findings still valid post-change?
 - Research was conducted before spec was finalized — does it answer the right questions?
 
+### 3f. Test-strategy drift
+- A spec requirement or regression risk has no behavior-to-test entry.
+- A plan phase has no matching strategy ID in its RED tests.
+- A RED test asserts an implementation detail the test strategy excluded.
+- The plan's test level or fixture design weakens the strategy's outcome or isolation guarantee.
+
 ## Step 4 — Ground the Comparison (Research Before Flagging)
 
 Resolve what you can resolve yourself before raising it — always answer your own question first across every source the artifacts lean on:
@@ -114,7 +126,8 @@ Build a requirements traceability matrix:
 For each spec requirement:
 1. Is there a plan phase that addresses it?
 2. Is there a mechanical success criterion that verifies it?
-3. Is there research that informed it?
+3. Is there a behavior-first test-strategy entry and matching RED test?
+4. Is there research that informed it?
 
 For each research finding:
 1. Did it influence the spec or plan?
@@ -176,11 +189,11 @@ Findings that may no longer hold.
 
 ### Requirements Traceability
 
-| Spec Requirement | Research Basis | Plan Phase | Success Criterion |
-|-----------------|----------------|------------|-------------------|
-| Req 1: ... | Research finding X | Phase 2 | `command` |
-| Req 2: ... | — | **MISSING** | — |
-| Req 3: ... | Research finding Y | Phase 1 | **MISSING** |
+| Spec Requirement | Research Basis | Test Strategy | Plan Phase / RED Test | Success Criterion |
+|-----------------|----------------|---------------|-----------------------|-------------------|
+| Req 1: ... | Research finding X | TS-1 | Phase 2 / TS-1 | `command` |
+| Req 2: ... | — | **MISSING** | **MISSING** | — |
+| Req 3: ... | Research finding Y | TS-3 | Phase 1 / **MISSING** | **MISSING** |
 
 ### Overall Assessment
 [1-2 sentences: are these artifacts aligned enough to proceed, or do contradictions/gaps need resolution first?]

@@ -11,7 +11,7 @@ Before choosing a route, inspect the task and any available diff for migration p
 Default:
 
 - No ledger (no branch match, and no Linear ID/ticket-slug/topic match): create one, recording the current branch, and run `my-research`, then continue into the next stage without stopping.
-- Ledger exists: pick the earliest stage not marked `completed`. If it's stage 1-8, continue running from there through stage 8 without stopping, then stop at the Decisions Checkpoint. If stages 1-8 are already complete and confirmed but stage 9 hasn't run yet, run stage 9 next (not stages 1-8 again).
+- Ledger exists: pick the earliest stage not marked `completed`. If it's stage 1-9, continue running from there through stage 9 without stopping, then stop at the Decisions Checkpoint. If stages 1-9 are already complete and confirmed but stage 10 hasn't run yet, run stage 10 next (not stages 1-9 again).
 
 Quick handoff:
 
@@ -25,7 +25,7 @@ Route to the full pipeline when the change adds new functionality, alters observ
 
 State the route and the one-sentence reason before running either path.
 
-Run stages in this order, based on ledger status. Stages 1-8 run back-to-back with no stop; each writes its artifact and any provisional decision to the ledger, then the pipeline moves straight to the next stage:
+Run stages in this order, based on ledger status. Stages 1-9 run back-to-back with no stop; each writes its artifact and any provisional decision to the ledger, then the pipeline moves straight to the next stage:
 
 ## Embedded runner dispatch
 
@@ -37,6 +37,7 @@ Run stages in this order, based on ledger status. Stages 1-8 run back-to-back wi
 | `my-spec` | `skill-my-spec` | `my-spec` Skill entrypoint |
 | `my-clarify` | `skill-my-clarify` | `my-clarify` Skill entrypoint |
 | `my-architecture-plan` | `skill-my-architecture-plan` | `my-architecture-plan` Skill entrypoint |
+| `my-test-strategy` | `skill-my-test-strategy` | `my-test-strategy` Skill entrypoint |
 | `my-plan` | `skill-my-plan` | `my-plan` Skill entrypoint |
 | `my-observe` | `skill-my-observe` | `my-observe` Skill entrypoint |
 | `my-eval-plan` | `skill-my-eval-plan` | `my-eval-plan` Skill entrypoint |
@@ -50,12 +51,13 @@ Run stages in this order, based on ledger status. Stages 1-8 run back-to-back wi
 - `my-spec` not completed: run `my-spec`, log the artifact and any provisional decision, continue.
 - `my-clarify` not completed: run `my-clarify`, feed resolutions into spec, log any provisional decision, continue.
 - `my-architecture-plan` not completed: run `my-architecture-plan`, log the artifact and any provisional decision, continue.
-- `my-plan` not completed: run `my-plan`, passing the architecture plan's path so it seeds `## Architectural Constraints` from it, log the artifact and any provisional decision, continue.
+- `my-test-strategy` not completed: run `my-test-strategy`, passing the clarified spec, research, and architecture artifacts; log its behavior-to-test artifact and any provisional decision, continue.
+- `my-plan` not completed: run `my-plan`, passing the architecture and test-strategy paths so it seeds `## Architectural Constraints` and behavior-first `Tests First (RED)` from them; log the artifact and any provisional decision, continue.
 - `my-observe` not completed: run `my-observe`, log the artifact, continue.
 - `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan` and log the artifact. Otherwise mark it `not_applicable` with a one-line reason. Either way, continue without stopping.
-- `my-analyze` not completed: run `my-analyze`, log the artifact, then **stop here** at the Decisions Checkpoint — present every stage 1-8 artifact plus every accumulated provisional decision for the user to confirm or override. This is the point to clear context; do not run stage 9 yet.
+- `my-analyze` not completed: run `my-analyze`, including the test-strategy artifact, log the artifact, then **stop here** at the Decisions Checkpoint — present every stage 1-9 artifact plus every accumulated provisional decision for the user to confirm or override. This is the point to clear context; do not run stage 10 yet.
 - Decisions Checkpoint confirmed (every provisional decision resolved), and `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, stop with just that decision (options, recommendation, evidence) — a small checkpoint of its own. If clear, ledger `passed` and continue straight into the atomic block with no separate stop. Not a Linear issue: ledger `passed` (not applicable) and continue straight into the atomic block.
-- Implementation not reviewed, and implementation gate is satisfied (Decisions Checkpoint confirmed, pre-implementation check `passed`): run the atomic block — `my-implement`, then the fix loop — then checkpoint.
+- Implementation not reviewed, and implementation gate is satisfied (Decisions Checkpoint confirmed, pre-implementation check `passed`): run the atomic block — dispatch `my-implement` with the approved plan and test-strategy artifact, then the fix loop — then checkpoint.
 
 Fix loop (runs automatically, no checkpoint between iterations):
 
@@ -68,9 +70,9 @@ Nits and clearly optional suggestions never justify another iteration; carry the
 
 Implementation gate:
 
-- The ledger must explicitly mark `my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-plan`, `my-observe`, and `my-analyze` as `completed`, and `my-eval-plan` as either `completed` or `not_applicable`.
-- The ledger must contain artifact paths for the research, spec, architecture plan, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
-- Every entry under `## Provisional Decisions` must be confirmed or overridden at the Decisions Checkpoint — an unconfirmed provisional decision blocks stage 9 and implementation the same way an incomplete stage does.
+- The ledger must explicitly mark `my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-test-strategy`, `my-plan`, `my-observe`, and `my-analyze` as `completed`, and `my-eval-plan` as either `completed` or `not_applicable`.
+- The ledger must contain artifact paths for the research, spec, architecture plan, test strategy, plan, observability, and analysis outputs, plus the eval plan when `my-eval-plan` is `completed`.
+- Every entry under `## Provisional Decisions` must be confirmed or overridden at the Decisions Checkpoint — an unconfirmed provisional decision blocks stage 10 and implementation the same way an incomplete stage does.
 - `cross_workflow.pre_implementation_check` must be `passed` for the current plan version, checked fresh *after* the Decisions Checkpoint — `not_run`, unset, or `overlap_pending` all block implementation the same way an incomplete stage does. A check run before the Decisions Checkpoint (or reused from an earlier one) does not satisfy this gate.
 - When `migration_safety: required`, the ledger must link a completed migration-history audit and compatibility matrix, and record successful validation for every planned database history. `blocked`, `failed`, `unrun`, or missing validation blocks implementation. A user-directed override may permit an action, but does not change the gate to passed.
 - The current invocation must be a resume after the user confirmed or overrode every provisional decision at the Decisions Checkpoint, or must explicitly say to proceed with implementation.

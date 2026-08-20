@@ -4,31 +4,31 @@ Load before ending any `my-workflow` stage.
 
 There are three possible stops in the whole pipeline; only two are guaranteed. Everything else runs straight through:
 
-- Stages 1-8 (`my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-plan`, `my-observe`, `my-eval-plan` when applicable, `my-analyze`) -> continue automatically. Update the ledger silently: status, artifact path, factual assumptions, and any provisional decision (options, recommendation chosen, evidence). Do not stop.
-- **Decisions Checkpoint**, after stage 8 -> always stop, guaranteed. Present every artifact from stages 1-8 and every provisional decision logged along the way together, so the user can confirm or override. This is the deliberate point to clear context — resuming reads the ledger and continues from here. Nothing runs stage 9 or touches `my-implement` before this stop happens and the user resumes past it.
-- Stage 9, Pre-implementation coordination check -> runs only after the Decisions Checkpoint is confirmed. Stop only if it finds a sibling overlap (its own small checkpoint, just that one decision); if clear, continue straight into the atomic block with no further stop.
+- Stages 1-9 (`my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-test-strategy`, `my-plan`, `my-observe`, `my-eval-plan` when applicable, `my-analyze`) -> continue automatically. Update the ledger silently: status, artifact path, factual assumptions, and any provisional decision (options, recommendation chosen, evidence). Do not stop.
+- **Decisions Checkpoint**, after stage 9 -> always stop, guaranteed. Present every artifact from stages 1-9 and every provisional decision logged along the way together, so the user can confirm or override. This is the deliberate point to clear context — resuming reads the ledger and continues from here. Nothing runs stage 10 or touches `my-implement` before this stop happens and the user resumes past it.
+- Stage 10, Pre-implementation coordination check -> runs only after the Decisions Checkpoint is confirmed. Stop only if it finds a sibling overlap (its own small checkpoint, just that one decision); if clear, continue straight into the atomic block with no further stop.
 - Atomic block (`my-implement` -> fix loop) -> stop after the final review output.
 
 The fix loop is **not** checkpointed per iteration. `my-validate` -> `my-review` -> `address-pr-feedback local` repeats without stopping until the review comes back clean of Critical and substantive non-blocking findings, or 3 combined review passes elapse. Stop once, after the final review output, and report every iteration's verdict plus the commits each produced.
 
-Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 9 (after the Decisions Checkpoint), and the atomic block's own final checkpoint after review — not at every stage, since stages 1-8 no longer stop.
+Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 10 (after the Decisions Checkpoint), and the atomic block's own final checkpoint after review — not at every stage, since stages 1-9 no longer stop.
 
 ## The Decisions Checkpoint must report
 
-- every stage 1-8 completed, with artifact path(s)
+- every stage 1-9 completed, with artifact path(s), including the behavior-first test strategy
 - every provisional decision: stage, question, options considered, recommendation chosen, evidence — for the user to confirm or override
 - factual assumptions recorded along the way
 - when migrations are in scope: the migration-history artifact, every environment/history in the compatibility matrix, validation status, and any user-directed override
 - cross-workflow status from intake (siblings checked, or "no Linear issue") — the pre-implementation gate itself hasn't run yet
-- next stage (stage 9, the pre-implementation coordination check) and the exact resume command
+- next stage (stage 10, the pre-implementation coordination check) and the exact resume command
 - that this is a safe point to clear context
 
-If the user overrides a provisional decision, update the ledger and re-run only the stages that decision invalidates before returning to this same checkpoint. Do not restart from stage 1. Do not run stage 9 before this checkpoint is confirmed, even if it would be convenient to front-load it.
+If the user overrides a provisional decision, update the ledger and re-run only the stages that decision invalidates before returning to this same checkpoint. Do not restart from stage 1. Do not run stage 10 before this checkpoint is confirmed, even if it would be convenient to front-load it.
 
-## The stage-9 overlap stop (only if overlap is found) must report
+## The stage-10 overlap stop (only if overlap is found) must report
 
 - the specific sibling overlap: issue, files/requirement, options, recommendation, evidence
-- that everything else (stages 1-8, Decisions Checkpoint) is already confirmed and unaffected
+- that everything else (stages 1-9, Decisions Checkpoint) is already confirmed and unaffected
 - next stage (the atomic block, once resolved) and the exact resume command
 
 ## The atomic block's final checkpoint must report
