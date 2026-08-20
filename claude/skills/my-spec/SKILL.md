@@ -1,39 +1,25 @@
 ---
 model: sonnet
+effort: high
 name: my-spec
+runner: skill-my-spec
 description: Refine vague ideas, bugs, or rough requests into scoped technical-product specs with problem statement, boundaries, acceptance criteria, and open decisions.
 ---
 
 # Spec
 
-Act as a technical product manager. Define the problem and acceptance criteria; do not plan implementation or write code.
+Use `skill-my-spec` for the substantive product-spec procedure. This wrapper normalizes context, keeps user decisions and outward actions at the user-facing boundary, and presents the runner's decision/artifact envelope.
 
-## Load Rules
+## Dispatch
 
-Read:
+Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-spec`.
 
-- `~/.claude/rules/question-policy.md`
-- `~/.claude/rules/context-checkpoint.md`
+- For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
+- For `/my-workflow`, preserve the supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. The runner records genuine unresolved choices as provisional decisions instead of stopping the pipeline.
+- If no task can be inferred from arguments or context, ask the user for the subject before dispatching.
 
-Use `~/.agents/rules/` when running through Codex. For complex product scope or workflow-stage runs, read `references/protocol.md` and local `gotchas.md` when present.
+The runner may create a local spec artifact. In embedded mode it returns the stage outcome for `my-workflow` to record in the ledger; in standalone mode it may append to an existing ledger. It must return any request to create or update a remote issue, post, send, publish, or push to this wrapper for explicit user authorization.
 
-## Flow
+## Present
 
-1. Resolve the starting point from `$ARGUMENTS`, conversation, Linear, URL, or workflow ledger.
-2. Read linked research, ticket comments, project context, and prior artifacts before asking questions.
-3. Separate facts from decisions.
-4. Draft the spec:
-   - problem statement
-   - goals and non-goals
-   - users/workflows affected
-   - acceptance criteria
-   - constraints and dependencies
-   - open decisions
-5. Ask only unresolved decision questions, one at a time, each with a stated confidence and a guessed answer attached; update confidence as answers land and restate the ask for explicit confirmation before drafting.
-6. Save the spec under `~/.claude/thoughts/shared/specs/`.
-7. Append spec path and decisions/assumptions to workflow ledger when present.
-
-## Output
-
-Return the spec path, concise spec summary, acceptance criteria, open decisions, and recommended next command.
-
+Return the spec path, concise summary, acceptance criteria, assumptions, open or provisional decisions, recommended next command, and compact decision/artifact envelope.

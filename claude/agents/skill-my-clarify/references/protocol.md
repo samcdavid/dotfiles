@@ -1,6 +1,6 @@
-# Protocol — my-clarify
+# Protocol — skill-my-clarify
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-clarify` runner. The `my-clarify` wrapper resolves the target, preserves the user-facing decision and edit-approval boundary, and presents the compact result.
 
 ## Clarify
 
@@ -14,7 +14,7 @@ This skill runs both standalone and as a stage inside `/my-workflow`. Before any
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the spec being clarified), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — an ambiguity the ledger already resolves is not an ambiguity; drop it.
-- **When you finish, if a ledger exists, append the resolved blocking issues to it** as decisions so the next stage doesn't reopen them.
+- **When you finish, if a ledger exists, append resolved blocking issues only in standalone mode** as decisions so the next stage does not reopen them. In embedded mode, return them in the output envelope so `my-workflow` records them itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
 ## Getting Started
@@ -175,7 +175,23 @@ Work through each issue the user wants to resolve. For each:
 2. State the resolution explicitly
 3. Offer to update the source document with the resolution
 
-When all blocking issues are resolved, confirm: **"Blocking issues resolved. This is ready for /my-plan."** (or whatever the next step is) If a workflow ledger exists for this issue, append the resolutions to it as decisions.
+When all blocking issues are resolved, confirm: **"Blocking issues resolved. This is ready for /my-plan."** (or whatever the next step is). In standalone mode, append resolutions to an existing workflow ledger as decisions. In embedded mode, return them in the output envelope for `my-workflow` to record.
+
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: clarification_report, path: <path> | null }
+summary: <high-signal ambiguity summary>
+issues: { blocking, clarifying, informational }
+assumptions: [<confirmed context>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, resolve factual ambiguity from evidence and return only genuine unresolved choices as recommended `provisional_decisions`; do not pause the pipeline. The coordinator owns the Decisions Checkpoint and ledger updates. Do not edit the source document unless the wrapper supplies explicit local authorization.
 
 ## Guidelines
 

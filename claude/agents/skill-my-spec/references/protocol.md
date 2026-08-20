@@ -1,6 +1,6 @@
-# Protocol — my-spec
+# Protocol — skill-my-spec
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-spec` runner. The `my-spec` wrapper normalizes request context, preserves the user-facing decision and approval boundary, and presents the compact result. Retained standalone gotchas live at `~/.claude/skills/my-spec/gotchas.md`, or `~/.agents/skills/my-spec/gotchas.md` under Codex.
 
 ## Spec
 
@@ -12,7 +12,7 @@ This skill runs both standalone and as a stage inside `/my-workflow`. Before any
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the stage-1 research doc), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — never re-ask or re-derive what it already settles, and consume the linked research doc by path rather than re-researching.
-- **When you finish, if a ledger exists, append this stage's outcome to it**: the spec path and any assumptions/decisions recorded here.
+- **When you finish, if a ledger exists, append this stage's outcome to it only in standalone mode**: the spec path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
 ## Step 1 — Intake
@@ -122,7 +122,7 @@ When the user is satisfied with the spec:
 - If the user wants new Linear issues → create them with the spec content, confirm team/project first
 - Otherwise → present the final spec for the user to use however they want
 
-If a workflow ledger exists for this issue, append the spec path and any logged assumptions to it.
+In standalone mode, append the spec path and any logged assumptions to an existing workflow ledger. In embedded mode, return them in the output envelope for `my-workflow` to record.
 
 Do NOT create or update issues without explicit approval.
 
@@ -135,5 +135,22 @@ Do NOT create or update issues without explicit approval.
 - A good spec is one that a different engineer could pick up and know exactly what to build (and what NOT to build) without further clarification.
 - Scope creep is the enemy. Every "while we're at it..." should be scrutinized.
 
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: spec, path: <path> }
+summary: <scope and acceptance-criteria summary>
+assumptions: [<assumption>]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+open_questions: [<unresolved decision>]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, resolve factual questions from available evidence and record genuine scope or product decisions as recommended `provisional_decisions`; do not pause the pipeline for user confirmation. The coordinator owns the Decisions Checkpoint and updates the ledger from this envelope. Standalone runs may return `needs_input` for a genuinely load-bearing decision, but never create or update a remote issue without explicit authorization returned through the wrapper.
+
 ## Gotchas
-If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
+
+Read `~/.claude/skills/my-spec/gotchas.md` (or `~/.agents/skills/my-spec/gotchas.md` under Codex) before starting work. These are known failure patterns — avoid them.

@@ -1,6 +1,6 @@
-# Protocol — my-research
+# Protocol — skill-my-research
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-research` runner. The `my-research` wrapper normalizes request context, preserves the user-facing boundary, and presents the compact result. Retained standalone gotchas live at `~/.claude/skills/my-research/gotchas.md`, or `~/.agents/skills/my-research/gotchas.md` under Codex.
 
 ## Research Codebase
 
@@ -12,7 +12,7 @@ This skill runs both standalone and as a stage inside `/my-workflow`. Before any
 
 - Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — never re-ask or re-derive what it already settles, and prefer its artifact paths over re-discovering them.
-- **When you finish, if a ledger exists, append this stage's outcome to it**: the research doc path and any assumptions/decisions recorded here. This keeps a single-skill run consistent with the overall workflow.
+- **When you finish, if a ledger exists, append this stage's outcome to it only in standalone mode**: the research doc path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
 
 ## Getting Started
@@ -45,7 +45,7 @@ Research every source before concluding anything is unknown — always answer yo
 
 External context (Linear/Notion/Drive) is the starting point for the question, not a substitute for reading code — per the **"Don't stop at external context"** gotcha, every open question or "verify against code" reference it surfaces must be chased into the codebase, not handed back.
 
-If the research touches **Datadog logs/spans** or **Braintrust project logs**, see `gotchas.md` first — attribute-prefixed queries (`@session_id:...`) for Datadog and a `list_recent_objects` discovery step for Braintrust are non-obvious requirements that cause silent 0-result returns or access errors otherwise.
+If the research touches **Datadog logs/spans** or **Braintrust project logs**, read `~/.claude/skills/my-research/gotchas.md` (or `~/.agents/skills/my-research/gotchas.md` under Codex) first — attribute-prefixed queries (`@session_id:...`) for Datadog and a `list_recent_objects` discovery step for Braintrust are non-obvious requirements that cause silent 0-result returns or access errors otherwise.
 
 ### Available but situational: `requirements-tracer`
 
@@ -134,7 +134,24 @@ status: complete
 [Anything that remains unclear — be explicit]
 ```
 
-Present the summary to the user and provide the file path. If a workflow ledger exists for this issue, append the research doc path and any logged assumptions to it.
+Present the summary to the user and provide the file path. In standalone mode, append the research doc path and any logged assumptions to an existing workflow ledger. In embedded mode, return them in the output envelope for `my-workflow` to record.
+
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifact: { kind: research, path: <path> }
+summary: <verified findings only>
+assumptions: [<factual assumption>]
+provisional_decisions: []
+open_questions: [<remaining uncertainty>]
+external_action_requested: null | { actions, targets, rationale }
+```
+
+In embedded workflow mode, return unresolved uncertainty and any decision that cannot be settled from evidence in `provisional_decisions` with a recommendation; do not interrupt the stage for user input. The coordinator updates the ledger from this envelope. Standalone runs may return `needs_input` only when the research subject is genuinely indeterminate.
 
 ## Gotchas
-If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
+
+Read `~/.claude/skills/my-research/gotchas.md` (or `~/.agents/skills/my-research/gotchas.md` under Codex) before starting work. These are known failure patterns — avoid them.

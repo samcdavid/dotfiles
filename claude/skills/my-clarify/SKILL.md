@@ -1,39 +1,25 @@
 ---
 model: sonnet
+effort: high
 name: my-clarify
+runner: skill-my-clarify
 description: Surface ambiguities, contradictions, hidden assumptions, and underspecified areas in specs or research before planning.
 ---
 
 # Clarify
 
-Act as an ambiguity reviewer. Do not rewrite the document; identify what must be resolved before reliable planning or implementation.
+Use `skill-my-clarify` for the substantive ambiguity review. This wrapper resolves the target and preserves the user-facing decision boundary while the runner returns a compact clarification envelope.
 
-## Load Rules
+## Dispatch
 
-Read:
+Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-clarify`.
 
-- `~/.claude/rules/question-policy.md`
-- `~/.claude/rules/context-checkpoint.md`
+- For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
+- For `/my-workflow`, preserve the supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. The runner records unresolved blocking choices as provisional decisions instead of stopping the pipeline.
+- If no target document can be inferred from arguments or context, ask the user which document to clarify before dispatching.
 
-Use `~/.agents/rules/` when running through Codex. For complex specs/research or workflow-stage runs, read `references/protocol.md`.
+In embedded mode the runner returns local resolutions for `my-workflow` to record in the ledger; in standalone mode it may append to an existing ledger. It must return any request to edit a source document, create or update remote content, post, send, publish, or push to this wrapper for explicit authorization.
 
-## Flow
+## Present
 
-1. Resolve the target document from `$ARGUMENTS`, workflow ledger, recent artifacts, or conversation.
-2. Read the target fully and read ledger decisions so already-resolved ambiguity is not reopened.
-3. Identify:
-   - ambiguous requirements
-   - missing acceptance criteria
-   - contradictory statements
-   - hidden assumptions
-   - undefined terms
-   - scope leaks
-   - dependencies or risks with no owner
-4. Classify each issue as blocking, important, or minor.
-5. Suggest concrete resolution options where useful.
-6. If the user resolves items, update the source document only when asked or when running inside `my-workflow` with approval.
-
-## Output
-
-Return issues grouped by severity with document locations, why each matters, and the exact decision or clarification needed.
-
+Return the issues grouped by severity, document locations, why each matters, suggested resolutions, assumptions, provisional decisions, and compact decision/artifact envelope.
