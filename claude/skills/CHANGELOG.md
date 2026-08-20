@@ -22,6 +22,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
+| `6ad33b8` | Expanded `team-plan` from milestone sequencing into project discovery, codebase-gap research, job stories, PR-backed issue design, and approval-gated Linear creation. | Team plans must trace requirements through researched gaps to one-PR issues, isolate Ecto migration-only work from functional delivery, and target six to eight safe parallel issues when scope permits. |
 | `922d52f` | Added pinned runners for investigation and audit skills. | `my-investigate` is Sol/xhigh; security/perf are Sol/high; other audit orchestration is Terra/high. Shared audit criteria stay under skills for lens-agent consumers. |
 | `7579906` | Added delivery-stage runners. | `my-implement`, `my-validate`, and `my-review` delegate execution; review remains a Terra/high mechanical router over specialized reviewers. |
 | `e4afd3d` | Added planning-stage runners. | Architecture, planning, and analysis use Sol/high; observe/eval use Terra/high. |
