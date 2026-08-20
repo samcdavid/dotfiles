@@ -1,6 +1,6 @@
-# Protocol — my-investigate
+# Protocol — skill-my-investigate
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-my-investigate` runner. The `my-investigate` wrapper normalizes the incident context, preserves the user-facing mitigation boundary, and presents this runner's compact evidence envelope.
 
 ## Investigate Issue
 

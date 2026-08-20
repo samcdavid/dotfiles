@@ -1,62 +1,23 @@
 ---
 model: sonnet
+effort: high
 name: prove-it
+runner: skill-prove-it
 description: Lightweight fact-check of the current conversation. Separates verified facts from unverified assumptions, cites evidence for each, and flags trust debt. Use when findings feel uncertain or before acting on research.
 disable-model-invocation: false
 ---
 
 # Prove It
 
-Stop and audit everything you've stated or concluded in this conversation so far.
+Use `skill-prove-it` for the substantive conversation fact-check. This wrapper defines the target claims, preserves the user-facing correction boundary, and presents the runner's compact evidence ledger.
 
-## Step 1 — Inventory Claims
+## Dispatch
 
-Review your previous responses. Extract every factual claim, conclusion, and recommendation. Categorize each as:
+Normalize the request into `{ target_claims, conversation_scope, authority: local_only }` and dispatch it to `skill-prove-it`.
 
-- **Verified Fact**: You read the actual code, ran a command, or have direct evidence
-- **Unverified Assumption**: You inferred, extrapolated, or assumed based on patterns
+- With a specific quoted claim or topic, restrict the audit to that target; otherwise audit the most recent substantive response.
+- The runner independently verifies available evidence, clearly retracts unsupported claims, and returns any request for access or an external action instead of performing it.
 
-## Step 2 — Show Evidence
+## Present
 
-For every verified fact, cite the evidence:
-- File path and line number you read
-- Command output you observed
-- Documentation you referenced
-
-For every unverified assumption, state:
-- What you assumed
-- Why you assumed it (what pattern or heuristic led you here)
-- How to verify it (a specific command, file read, or check)
-
-## Step 3 — Flag Trust Debt
-
-Identify any claims that:
-- You stated confidently but haven't actually verified
-- Could be stale (code may have changed since you read it)
-- Depend on assumptions about behavior you didn't trace
-
-## Step 4 — Verify or Retract
-
-For each piece of trust debt:
-1. Verify it now if possible (read the file, run the check)
-2. If verified — move it to the verified facts list with evidence
-3. If wrong — retract it clearly and state what's actually true
-4. If unverifiable right now — flag it explicitly so neither of us forgets
-
-## Output
-
-```
-## Verified Facts
-- [claim] — evidence: [file:line / command output / doc reference]
-
-## Assumptions (now verified)
-- [claim] — was assumed, now confirmed: [evidence]
-
-## Retracted
-- [original claim] — actually: [correction]
-
-## Still Unverified
-- [claim] — needs: [what would verify this]
-```
-
-Be honest. The point is accuracy, not defending previous statements.
+Return verified facts, formerly assumed facts now verified, retractions, still-unverified claims with exact next checks, and the compact evidence envelope. Do not defend earlier claims or include raw verifier transcripts.

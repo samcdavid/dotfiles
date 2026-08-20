@@ -1,28 +1,24 @@
 ---
 model: opus
-effort: xhigh
+effort: high
 name: perf-review
+runner: skill-perf-review
 description: "Deep performance review: query plans, index coverage, load impact, caching strategy, resource use, and scaling risks."
 disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Performance Review
 
-Find performance issues that plausibly matter under real load.
+Use `skill-perf-review` for the substantive dedicated performance audit. This wrapper resolves the scope and review mode, keeps the user-facing boundary, and presents the runner's evidence-backed audit envelope.
 
-## Load Rules
+## Dispatch
 
-Read `~/.claude/rules/review-finding-format.md` and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol.md`.
+Normalize the request into `{ target, mode, workload_context, artifact_inputs, authority: local_only }` and dispatch it to `skill-perf-review`.
 
-## Flow
+- Derive `mode` as PR, diff/range, local path, or feature area. Ask for a target only when none can be inferred.
+- Preserve supplied load, cardinality, latency, or deployment context without inventing production facts.
+- The runner uses the retained shared checklist at `references/protocol.md`, delegates substantive assessment to `perf-reviewer`, and returns any external-action intent rather than performing it.
 
-1. Identify hot paths, data size assumptions, query surfaces, loops, jobs, requests, caches, and external calls.
-2. Read code and tests around changed behavior.
-3. Inspect indexes, query shape, batching, concurrency, memory, timeout, and retry behavior.
-4. Estimate impact using code evidence, schema, and expected cardinality.
-5. Drop theoretical findings without reachable load impact.
+## Present
 
-## Output
-
-Return findings with path, bottleneck, scale condition, evidence, expected impact, and concrete remediation.
-
+Return material findings with bottleneck, reachable scale condition, code evidence, expected impact, concrete remediation, dismissed concerns, residual unknowns, and the compact audit envelope. Do not include raw subagent transcripts.

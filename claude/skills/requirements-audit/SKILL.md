@@ -1,29 +1,23 @@
 ---
-model: opus
-effort: xhigh
+model: sonnet
+effort: high
 name: requirements-audit
+runner: skill-requirements-audit
 description: Audit a PR, ticket, spec, or local change against stated requirements and acceptance criteria.
 disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Requirements Audit
 
-Trace requirements to implementation and tests. Focus on missing, partial, excessive, or contradictory behavior.
+Use `skill-requirements-audit` for the substantive dedicated traceability audit. This wrapper resolves the implementation target and requirements source, keeps the user-facing boundary, and presents the runner's evidence-backed audit envelope.
 
-## Load Rules
+## Dispatch
 
-Read `~/.claude/rules/question-policy.md`, `~/.claude/rules/review-finding-format.md`, and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full audit procedure, read `references/protocol.md`.
+Normalize the request into `{ target, mode, requirements_source, artifact_inputs, authority: local_only }` and dispatch it to `skill-requirements-audit`.
 
-## Flow
+- Derive `mode` as PR, diff/range, ticket, spec, plan, or local target. Ask for a source of truth only when it cannot be found in supplied context or linked artifacts.
+- The runner uses the retained shared checklist at `references/protocol.md`, delegates substantive traceability to `requirements-reviewer`, and returns any external-action intent rather than performing it.
 
-1. Identify source of requirements: Linear, PR body, spec, plan, or user-provided text.
-2. Build an acceptance-criteria checklist.
-3. Read relevant implementation, tests, and diffs.
-4. Classify each criterion as Covered, Partial, Missing, Excess, or Unclear.
-5. Verify tests would catch important regressions.
-6. Run adversarial challenge for non-obvious findings.
+## Present
 
-## Output
-
-Findings first, with requirement reference, implementation evidence, test evidence, severity, and concrete fix.
-
+Return the requirements map, traceability matrix, findings with requirement/code/test evidence, scope analysis, dismissed concerns, residual unknowns, and the compact audit envelope. Do not include raw subagent transcripts.

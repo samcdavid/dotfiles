@@ -1,28 +1,23 @@
 ---
-model: opus
-effort: xhigh
+model: sonnet
+effort: high
 name: quality-audit
+runner: skill-quality-audit
 description: Deep audit of test quality, coverage fidelity, flakiness risk, assertions, mocks, and whether tests actually catch intended bugs.
 disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # Quality Audit
 
-Evaluate whether the test suite meaningfully protects the behavior under review.
+Use `skill-quality-audit` for the substantive dedicated test-quality audit. This wrapper resolves the scope and review mode, keeps the user-facing boundary, and presents the runner's evidence-backed audit envelope.
 
-## Load Rules
+## Dispatch
 
-Read `~/.claude/rules/review-finding-format.md` and `~/.claude/rules/pr-mode-readonly.md` when applicable. Use `~/.agents/rules/` under Codex. For full checklist, read `references/protocol.md`.
+Normalize the request into `{ target, mode, artifact_inputs, authority: local_only }` and dispatch it to `skill-quality-audit`.
 
-## Flow
+- Derive `mode` as PR, diff/range, local path, plan/spec, or feature area. Ask for a target only when none can be inferred.
+- The runner uses the retained shared checklist at `references/protocol.md`, delegates substantive assessment to `quality-reviewer`, and returns any external-action intent rather than performing it.
 
-1. Identify behavior under test from PR, plan, spec, or diff.
-2. Read changed tests and relevant production code.
-3. Check assertion fidelity, negative paths, boundaries, fixtures, mocks/stubs, async behavior, and regression coverage.
-4. Look for vacuous tests, over-mocking, brittle timing, hidden coupling, and missing integration coverage.
-5. Calibrate findings by whether a realistic bug would escape.
+## Present
 
-## Output
-
-Return blocking and non-blocking findings with file:line evidence, why the current test would miss the bug, and the exact stronger test to add.
-
+Return material findings with file:line evidence, escape path, stronger-test recommendation, coverage/fidelity assessment, dismissed concerns, residual unknowns, and the compact audit envelope. Do not include raw subagent transcripts.
