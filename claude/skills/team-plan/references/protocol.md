@@ -1,195 +1,141 @@
 # Protocol — team-plan
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+`SKILL.md` is the entrypoint. This protocol turns a proposal or an existing Linear project into a researched, reviewable delivery draft, and only creates Linear records after explicit approval.
 
-## Team Plan
+## Outcome and boundaries
 
-You are a principal architect coordinating parallel work across a team. Given a Linear milestone, you produce:
-1. A per-issue surface analysis — just enough to identify which files and functions each issue will touch
-2. A conflict matrix showing where issues overlap
-3. A wave-by-wave assignment where each wave can be merged atomically and each developer within a wave works without interfering with others
+Act as the project-discovery and delivery-planning lead. Produce these connected artifacts:
 
-**Do NOT make any code changes.** Save all artifacts to `~/.claude/thoughts/shared/` and update Linear issues with artifact locations.
+1. A requirements brief that distinguishes verified facts, assumptions, decisions, non-goals, and the new functionality.
+2. Codebase research and a requirement-to-gap map showing what exists, what is missing, and the evidence for each claim.
+3. Job stories that describe the user or operator outcome the project must deliver.
+4. PR-backed issue drafts, migration sequencing when applicable, milestones, dependencies, surfaces, conflicts, and parallel waves.
+5. An exact Linear creation/update manifest that remains a draft until the user approves it.
 
-## Inputs
+Do not change application code, create PRs, run test suites, or write to Linear during discovery and planning. Read-only Linear, repository, docs, and operational investigation is in scope. Save durable artifacts under `~/.claude/thoughts/shared/` (or the equivalent shared artifact root in the active runtime). Existing Done work is context, never something to reopen or rewrite.
 
-`$ARGUMENTS`:
-- Linear milestone URL or `project + milestone name` (required)
-- Team size (optional — default: 6)
+## Inputs and defaults
 
-## Hard Constraints
+Accept a product brief, a Linear project/milestone/issue URL, a project name, or a combination. Search Linear before assuming the project does not exist. Read linked issues, comments, projects, milestones, product documents, and prior completed work that could establish behavior or constraints.
 
-- No code changes, no PRs, no test runs
-- No two issues touching the same production files go in the same wave — unless an explicit coordination interface is defined
-- Done issues are read-only context; never modify them
-- Every wave must be completable and mergeable before the next wave begins
-- Update no Linear issues without explicit user confirmation
+Use the team size from the request or known assignees. If it is absent, use a planning capacity of eight. Aim for six to eight independently mergeable, PR-sized issues in a normal feature wave when the team has that capacity. A migration-readiness wave, a genuine dependency chain, or a small project may safely contain fewer; state why. Never manufacture tickets, abstractions, or split a coherent PR merely to reach a concurrency count.
 
-## Step 1 — Issue Inventory
+Ask only for a consequential product decision that cannot be resolved from the available evidence. Treat factual gaps as research work, record their evidence and result, and continue. If a decision must remain unresolved, preserve options, recommendation, and impact in the draft rather than hiding it.
 
-Fetch all issues in the milestone. Use `list_issues` filtered by milestone; if the list is large, save it and process with `jq`. For each issue, read the full description, comments, and linked issues.
+## Hard constraints
 
-Build a compact inventory:
+- Every implementation issue represents one coherent, independently reviewable PR. Include its planned PR boundary in the issue draft; do not create a PR while planning.
+- Do not create standalone issues for enabling, disabling, or flipping feature toggles. Put that work in the functional issue whose behavior it controls, with its rollback/rollout acceptance criteria.
+- Generated files alone do not count as a conflict. Shared handwritten source, contracts, migrations, schemas, configuration, or ownership boundaries do.
+- Two issues with a HIGH conflict cannot be concurrent unless an explicit, minimal coordination interface makes independent PRs possible. Prefer resequencing to creating a coordination interface.
+- A database migration must never share an issue or PR with the functional behavior it enables. The migration-only issue is an explicit predecessor and must be deployed before dependent functional work ships. Read `migration-planning.md` whenever this applies.
+- Every issue must trace to at least one job story and specific acceptance criteria. Remove or merge work that has no such trace.
+- No Linear create, update, comment, relationship change, or status change occurs until the final approval step. Do not use an early "inventory confirmation" as permission to mutate Linear.
 
-| ID | Title | Status | Priority | Surfaces Mentioned |
+## Step 1 — Requirements discovery
+
+Collect the proposal and all available product context from the conversation, Linear, Notion/Drive, existing documentation, related projects, and completed work. Produce a requirements brief with:
+
+| Area | Required content |
+|---|---|
+| Problem and audience | Who has the problem, why it matters, and the triggering situation |
+| New functionality | Observable capabilities and changed behavior, not implementation guesses |
+| Success and acceptance | User-visible outcomes, measurable success where available, failure/edge behavior |
+| Scope boundaries | Explicit non-goals, compatibility needs, rollout constraints, and dependencies |
+| Evidence and certainty | Source for each fact; clearly mark assumptions and unresolved decisions |
+
+If an existing milestone or issues were supplied, inventory them as proposed work, not as authoritative requirements. Identify stale, duplicate, or missing scope before designing the project around them. Save the brief as `plans/NNN_requirements_<project-slug>.md`.
+
+## Step 2 — Codebase and delivery-context research
+
+Research before breaking the work into issues. In parallel where useful, use focused discovery to establish:
+
+- Relevant entry points, modules, data models, APIs, UI or job flows, test coverage, configuration, and generated-code boundaries.
+- What currently happens for each requirement, with file/function/schema evidence.
+- Existing patterns that should be reused and prior work that already satisfies part of the request.
+- In-progress sibling work in Linear and completed work that constrains compatibility or ownership.
+- Whether persisted data/schema changes are needed, and any Ecto migration history or deployment constraints.
+
+Do not stop at file discovery. Trace the behavior sufficiently to say whether the requirement is already satisfied, partially satisfied, absent, or contradicted by existing behavior. Record a gap map:
+
+| Requirement / new functionality | Current evidence | Gap | Candidate delivery boundary | Confidence / unknown |
 |---|---|---|---|---|
 
-Also read Done issues from the same team — understand what patterns were established and what has already shipped.
+Save the evidence and gap map as `research/NNN_project_gap_<project-slug>.md`. Challenge material architectural or compatibility assumptions with an independent adversarial review and incorporate only evidence-supported corrections.
 
-Save to `~/.claude/thoughts/shared/plans/NNN_inventory_{milestone_slug}.md`.
+## Step 3 — Job stories and delivery units
 
-**Present the inventory and ask for confirmation before proceeding.** The user may correct priorities or surface details that the ticket descriptions miss.
+Turn each validated gap into job stories. Use outcome language:
 
-## Step 2 — Broad Codebase Research
+> When [situation], I want to [motivation], so I can [expected outcome].
 
-Before diving into individual issues, map the full surface area of the milestone in one pass. Spawn in parallel:
-- **codebase-locator**: find all files relevant to the surfaces mentioned across all issues
-- **codebase-analyzer**: understand the architecture — how affected modules connect, key interfaces, data models, ownership boundaries
-- **codebase-pattern-finder**: find existing patterns for the types of changes these issues require
+For every job story record the linked requirement(s), current gap, acceptance outcomes, non-goals, dependencies, and any risk to existing users/operators. Split a story only when its delivery can be independently reviewed and merged. Combine implementation details that only make sense together in one PR.
 
-Synthesize and save to `~/.claude/thoughts/shared/research/NNN_milestone_{milestone_slug}.md`.
+Then draft issues. Each issue must include:
 
-Run an **adversarial-debate** agent on any architectural assumptions before proceeding — apply verdicts.
+- Clear title, linked job story IDs, user/value statement, and why it is needed now.
+- In-scope and out-of-scope behavior; acceptance criteria that make the PR reviewable.
+- Current-state evidence, affected handwritten code/data surfaces, expected tests, and relevant local patterns.
+- Planned PR boundary: exactly one implementation PR, with generated files called out separately from handwritten overlap.
+- Dependencies, milestone, target wave/slot, and conflict/coordination notes.
+- Rollout, observability, compatibility, and toggle details only when they are needed to deliver that issue's behavior.
 
-## Step 3 — Per-Issue Surface Analysis
+Do not create tickets for task administration, toggles, broad research, vague layers, or speculative cleanup. Put genuinely prerequisite research into the affected issue's definition unless it warrants a distinct, independently mergeable PR with a job-story outcome.
 
-The goal of this step is **conflict detection only** — not full research, spec, or implementation planning. For each issue, answer two questions: which files will be written to, and which functions or data structures will be modified?
+## Step 4 — Migration-only planning
 
-Work through all issues in parallel. For each issue, spawn a **codebase-locator** + **codebase-analyzer** pair scoped tightly to that issue:
-- Read the issue description and any linked issues
-- Find the files that will need to change (use the broad research from Step 2 as a map)
-- Identify the specific functions, schemas, or interfaces that will be added or modified
-- Note any shared types, contracts, or module boundaries that other issues might also touch
+When Step 2 finds Ecto schema/data work, load `migration-planning.md`. Create one or more migration-only issues before their dependent functional issues. Their acceptance criteria must name the safe operation recipe, deployment/compatibility prerequisite, validation evidence, and the exact functional issue(s) they unblock.
 
-Record a compact surface profile per issue:
-```
-ENG-123: writes to [user.ex:changeset/2, user_controller.ex:create/2], touches [User schema]
-ENG-456: writes to [user.ex:validate/1, auth.ex:sign_in/2], touches [User schema]
-```
+The initial migration milestone/wave contains only forward-compatible schema preparation, indexes, constraints, data preparation, or backfill machinery; it deliberately ships no feature behavior. Mark dependent functional issues blocked until that migration is deployed and verified. For an expand/migrate/contract change, deferred cleanup or destructive contract work remains a separate, later migration-only issue after the compatibility interval. This is a required safety exception to "beginning of project," not permission to combine it with functional work.
 
-Do NOT invoke `/my-research`, `/my-spec`, or `/my-plan` here — that depth is for implementation time, not planning time. If a surface cannot be determined from the ticket and codebase locator, note it as "surface unclear — needs ticket refinement" and flag it for the user.
+## Step 5 — Surface, dependency, and conflict analysis
 
-## Step 4 — Conflict Analysis
+For each proposed issue, determine the likely handwritten files/modules, functions, schemas, contracts, configuration, and migration objects it will write. Use the broad research to avoid guesses. If the surface remains unclear, refine the issue before scheduling it; do not hide uncertainty in a wave assignment.
 
-Using the surface profiles from Step 3, identify every file written to by more than one issue.
+Build both a dependency graph and conflict matrix:
 
-Build a conflict matrix:
+- **HIGH:** same handwritten function, schema/migration object, contract, or ownership boundary would be edited incompatibly.
+- **MED:** same handwritten file/area with additive but merge-sensitive work.
+- **LOW:** shared read-only type or interface; no planned write overlap.
+- **NONE:** no meaningful handwritten overlap. Generated output by itself is `NONE`.
 
-```
-         ENG-1   ENG-2   ENG-3   ENG-4
-ENG-1      —     HIGH     —      LOW
-ENG-2    HIGH     —      MED      —
-ENG-3      —     MED      —      NONE
-ENG-4    LOW      —      NONE     —
-```
+For HIGH/MED pairs, include the merge order, most likely regression tests, and the smallest coordination interface only if resequencing cannot remove the conflict. Save the analysis as `plans/NNN_surface_conflicts_<project-slug>.md`.
 
-Conflict levels:
-- **HIGH**: Both issues write to overlapping functions or structures in the same file
-- **MED**: Both touch the same file in distinct sections; additive changes
-- **LOW**: Both read the same type/interface without modifying it
-- **NONE**: No file overlap
+## Step 6 — Milestones and parallel waves
 
-## Step 5 — Wave Assignment
+Organize issues by independently shippable user value and dependencies, not by arbitrary technical layers. A project may have:
 
-**Single developer (`team_size == 1`):** skip this step. Waves exist to prevent two developers colliding, which cannot happen here. Emit a critical-path sequence instead — issues in dependency order, with prerequisites and the coordination interfaces that still matter because they cross issue boundaries in time rather than between people.
+1. A migration-readiness milestone/wave, when required, before functional delivery.
+2. Feature milestones containing six to eight independent PR-backed issues per wave when feasible.
+3. Explicit later compatibility-cleanup migration milestones only when safe Ecto sequencing requires them.
 
-Group issues into waves. Hard rules:
-- Max `team_size` issues per wave (default 6)
-- No two HIGH-conflict issues in the same wave
-- Each issue in a wave is one developer's solo work — they own it atomically
+Within a wave, assign each issue to one developer/agent slot. Every PR must be mergeable independently; a wave may start only after its declared prerequisites are deployed or merged. Favor the fewest waves and coordination interfaces that satisfy real dependencies and HIGH conflicts. For a single developer, emit a critical-path order rather than pretending parallelism exists.
 
-### Simplicity Bias (default posture)
+For every milestone and wave, state its goal, included issues, prerequisites, intended parallelism, critical path, dependency links, and why any capacity is below the six-to-eight target. Save the draft as `plans/NNN_team_plan_<project-slug>.md`.
 
-Among wave structures that satisfy the hard rules above, prefer the simplest one: fewest waves, fewest coordination interfaces, fewest special-cased sequencing rules. Extra structure — an additional wave split, a new coordination interface, a cross-wave dependency note — must be justified by an actual conflict surfaced in Step 4's matrix, not by "this might reduce risk" or "this feels tidier." A milestone with no HIGH conflicts and few MED ones should usually resolve to one or two waves, not one wave per architectural layer out of habit.
+## Step 7 — Reviewable planning package
 
-Preferred (override only when the conflict matrix demands it):
-- Fewer waves over more, when the hard rules still hold with fewer
-- Grouping by architectural layer across waves (data-layer changes before API changes before feature work) is a tool for resolving a real ordering dependency, not a default structure to impose
-- Issues that establish shared interfaces go in the earliest possible wave
+Present a concise package containing:
 
-For any HIGH-conflict pair that must share a wave, define a **coordination interface**: a shared type, function, or contract both issues agree on before either starts. Add this as a Phase 0 in both plans. Reach for a coordination interface only when resequencing into different waves can't avoid the conflict — resequencing is simpler than adding a new interface both teams must maintain.
+- Requirements brief and unresolved decisions.
+- Requirement-to-gap map with evidence.
+- Job stories and traceability to issue drafts.
+- Proposed milestones, wave plan, PR ownership boundaries, dependency graph, conflict matrix, and critical path.
+- Migration-only sequencing and safety checks, or an explicit finding that no Ecto migration is required.
+- Existing Linear project/milestone/issue records that will be reused, and duplicates or stale draft records that will not be changed without direction.
 
-Document the assignment:
-```
-Wave 1: [ENG-1, ENG-3, ENG-7, ENG-9] — all merge independently before Wave 2 begins
-  Coordination note: ENG-1 and ENG-3 both extend UserParams; ENG-1 lands first per slot ordering
-Wave 2: ...
-```
+Also prepare an exact Linear manifest: project create-or-reuse decision, project description, milestones to create, issue titles/descriptions, membership, dependencies, and any planned comments. This is the sole approval boundary. Ask for explicit approval to apply that manifest; a general request to plan is not authorization.
 
-## Step 6 — Regression Risk Annotations
+## Step 8 — Create Linear records after approval
 
-Using the conflict matrix, identify the tests most likely to break when issues from the same wave (or adjacent waves) merge. For each HIGH or MED conflict pair, note what the implementer of one issue should watch for when the other lands:
+After the user explicitly approves the manifest:
 
-```markdown
-### ENG-123 × ENG-456 (HIGH — shared: user.ex:changeset/2)
-- ENG-123 implementer: re-run user creation tests after ENG-456 merges
-- ENG-456 implementer: if you change changeset/2's return shape, ENG-123's tests will fail
+1. Re-query Linear for the named project, milestones, and matching issues to avoid duplicates or changes since the draft.
+2. Reuse the existing project if it is the intended one; otherwise create it with the approved description and link to the planning artifacts.
+3. Create the approved milestones and PR-backed issues with their full descriptions, then set project/milestone membership and dependency relationships.
+4. Verify every created record, capture IDs/URLs, and compare the result with the approved manifest.
 
-### ENG-789 × ENG-234 (MED — shared: router.ex)
-- Both add routes in the same section; merge order matters, verify no duplicate paths
-```
-
-Save to `~/.claude/thoughts/shared/plans/NNN_regression_risks_{milestone_slug}.md`.
-
-## Step 7 — Linear Updates
-
-For each issue, prepare a comment containing:
-- Wave number and developer slot
-- Surface profile (which files/functions it will touch)
-- Known HIGH/MED conflict risks with other milestone issues
-- Link to the master plan and regression risk docs
-
-Confirm with the user: "I'll add artifact links as comments on [N] Linear issues. Proceed?"
-
-Then write the comments using `save_comment`.
-
-## Step 8 — Master Coordination Plan
-
-Save to `~/.claude/thoughts/shared/plans/NNN_team_plan_{milestone_slug}.md`:
-
-```markdown
----
-date: [ISO timestamp]
-milestone: [name]
-team_size: [N]
-issues: [count]
-waves: [count]
-status: ready
----
-
-# Team Plan: [Milestone Name]
-
-## Summary
-[Issue count, wave count, key architectural concerns, critical dependency chain]
-
-## Wave Breakdown
-
-### Wave 1
-| Slot | Issue | Plan | Notes |
-|-----|------|------|-------|
-| 1 | ENG-1 | plans/015_... | |
-...
-
-### Wave 2
-...
-
-## Conflict Matrix
-[Full matrix from Step 4]
-
-## Coordination Interfaces
-[Shared types/functions/contracts Wave N issues must agree on before parallel work begins]
-
-## Surface Profiles
-| Issue | Files Written | Functions/Structures Modified |
-|------|-------------|-------------------------------|
-| ENG-1 | user.ex, router.ex | changeset/2, POST /users |
-...
-
-## Regression Risk Summary
-See: plans/NNN_regression_risks_{milestone_slug}.md
-```
-
-Present the master plan as the final deliverable and ask: "What's wrong or missing?"
+If Linear rejects part of the manifest or current state makes it ambiguous, stop and report the exact completed records and remaining difference. Do not silently retry by creating duplicates or broaden the approved scope. Return the final URLs, created/reused status, and any follow-up that still needs explicit approval.
 
 ## Gotchas
 

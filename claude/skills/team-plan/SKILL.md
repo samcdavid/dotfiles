@@ -1,30 +1,29 @@
 ---
 model: opus
 name: team-plan
-description: Plan milestone work by analyzing issue surfaces, dependencies, sequencing, and merge-conflict risk. Handles multiple developers as parallel waves, or a single developer as a critical-path sequence.
+description: Discover and scope a project, research its codebase gap, then draft a low-overlap Linear milestone and issue plan for parallel PR delivery.
 disable-model-invocation: false
 ---
 
 # Team Plan
 
-Turn a milestone or issue set into an ordered execution plan.
+Turn a project proposal, an existing Linear project/milestone, or an issue set into an evidence-backed delivery plan. Start with product discovery and requirements, then research the codebase to identify the existing behavior and the gap. Define job stories, PR-sized issues, milestones, dependencies, and a parallel execution plan. The final plan is a draft until the user explicitly approves Linear creation or updates.
 
-Establish the developer count first — from `$ARGUMENTS`, the conversation, or Linear assignees. With several developers, produce parallel waves. With one, skip wave assignment and conflict analysis (a single developer cannot collide with themselves) and produce a critical-path sequence: dependency map, recommended order, prerequisites, and the Linear relationships that are missing or wrong.
+Use the stated team size when available. Otherwise plan for up to eight parallel PR-sized issues; target six to eight independent issues in a normal feature wave when the work supports it. Do not invent or split work merely to meet that target. If the safe parallelism is lower, explain the concrete dependency or shared surface that limits it.
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For full Linear/dependency workflow, read `references/protocol.md`.
+Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. Read `references/protocol.md` for the full discovery, research, issue-design, and Linear workflow. When the project may change persisted data or schema in an Ecto application, also read `references/migration-planning.md`.
 
 ## Flow
 
-1. Load milestone/issues and related Linear metadata.
-2. For each issue, identify likely code surfaces, dependencies, blockers, and unknowns.
-3. Detect conflicts by overlapping files/modules/data migrations.
-4. Sequence work into the simplest wave structure that maximizes parallelism without merge collisions — fewest waves and coordination interfaces that satisfy the hard constraints; add structure only when an actual detected conflict requires it, not speculatively.
-5. Identify critical path, prerequisites, and coordination points.
-6. Update issue relationships only when explicitly requested.
+1. Gather and verify requirements, including the new user-visible functionality, constraints, non-goals, and unresolved product decisions.
+2. Research the relevant codebase, deployed behavior, prior work, and existing Linear work; map each requirement to current evidence and a concrete gap.
+3. Express the work as job stories, then define one independently reviewable PR-backed issue for each coherent delivery unit.
+4. Isolate database migration work from functional work, and sequence every dependent functional issue after its migration-only issue is safely deployed.
+5. Identify surfaces, dependencies, and merge conflicts; arrange milestones and waves for the maximum safe parallelism with minimal overlap. Generated code alone is not an overlap.
+6. Present the complete draft and obtain explicit approval before creating or changing any Linear project, milestone, issue, relationship, or comment.
 
 ## Output
 
-Return wave plan, assignee-ready work packets, dependencies, conflict risks, and recommended first actions.
-
+Return the requirements brief, evidence-backed gap map, job stories, PR-backed issue drafts, migration plan where applicable, milestones/waves, dependency and conflict analysis, and the exact Linear changes awaiting approval.
