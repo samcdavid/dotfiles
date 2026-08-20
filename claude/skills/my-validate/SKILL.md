@@ -1,41 +1,25 @@
 ---
 model: sonnet
+effort: high
 name: my-validate
-description: Validate work against a plan or current session. Runs mechanical checks, verifies claims against code, repairs local failures when safe, and reports residual risk.
+runner: skill-my-validate
+description: Validate work against a plan or current session through a model-pinned runner that runs mechanical checks, verifies claims against code, repairs scoped local failures safely, and reports residual risk.
 ---
 
 # Validate
 
-Verify that implemented work matches the plan, claims, and expected behavior. Attempt safe local repair before escalating.
+Use `skill-my-validate` for the substantive validation and safe-local-repair procedure. This wrapper resolves plan or session mode, preserves authorization and workflow ledger ownership, and presents the runner's compact validation envelope.
 
-## Load Rules
+## Dispatch
 
-Read:
+Normalize the request into `{ mode, plan_path, artifact_inputs, base_ref, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-validate`.
 
-- `~/.claude/rules/context-checkpoint.md`
-- `~/.claude/rules/loop-detection.md`
-- `~/.claude/rules/no-outward-actions.md`
+- A plan path selects **plan** mode. Otherwise use **session** mode for current conversation claims and working-tree changes.
+- For `/my-workflow`, preserve its plan/base/ledger context and stage number, and dispatch in embedded mode. The runner returns its outcome for `my-workflow` to record rather than marking the workflow ledger complete itself.
+- Ask only when neither plan nor current-session evidence makes a mode safe to infer.
 
-Use `~/.agents/rules/` when running through Codex. For observability validation, session-mode claim audits, or ambiguous failures, read `references/protocol.md`.
+The runner may make only obvious, scoped local repairs and must validate each repair before committing it through `Skill(commit)`. It must return any request to push, publish, create or update a PR, send, or otherwise change a remote system to this wrapper for explicit authorization.
 
-## Modes
+## Present
 
-- **Plan Mode:** `$ARGUMENTS` contains a plan path.
-- **Session Mode:** validate current conversation claims and working-tree changes.
-
-Ask only if mode cannot be inferred.
-
-## Flow
-
-1. Inventory expected behavior, claims, files changed, commands already run, and artifact paths.
-2. Read the plan or session evidence.
-3. Run mechanical checks first: targeted tests, full relevant suite, lint/typecheck/format, grep checks.
-4. Cross-check code against requirements and acceptance criteria.
-5. If a local failure has an obvious scoped fix, repair and re-run checks.
-6. Apply loop detection for repeated failures.
-7. Save or append validation report when a workflow ledger exists.
-
-## Output
-
-Return checks run, pass/fail results, repairs made, requirement coverage, residual risks, and any blocker that needs user decision or deeper investigation.
-
+Return checks and coverage, repairs and local commit SHAs, residual risks, blockers, report/artifact paths, and the workflow-stage envelope when embedded. Do not include raw tool transcripts.

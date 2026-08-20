@@ -1,58 +1,25 @@
 ---
 model: sonnet
+effort: high
 name: my-implement
-description: Execute an approved plan phase by phase. Dispatches one implementation-executor at a time, enforces RED -> GREEN -> VALIDATE, re-verifies results, and stops on repeated failure.
+runner: skill-my-implement
+description: Execute an approved plan phase by phase through a model-pinned runner that dispatches one implementation executor at a time, enforces RED -> GREEN -> VALIDATE, and preserves the commit and workflow boundaries.
 ---
 
 # Implement Plan
 
-Orchestrate an approved implementation plan. The executor writes code; this skill slices phases, dispatches one executor at a time, re-verifies, updates the plan, and owns loop detection.
+Use `skill-my-implement` for the substantive, sequential plan-execution procedure. This wrapper resolves the approved plan and embedded workflow context, keeps authorization and presentation at the user-facing boundary, and returns the runner's compact execution envelope.
 
-## Load Rules
+## Dispatch
 
-Read these first:
+Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-implement`.
 
-- `~/.claude/rules/tdd-phase.md`
-- `~/.claude/rules/subagent-contract.md`
-- `~/.claude/rules/loop-detection.md`
-- `~/.claude/rules/no-outward-actions.md`
-- `~/.claude/rules/context-checkpoint.md`
+- For a standalone request, derive `plan_path` from `$ARGUMENTS`. If it is absent, list plans in `~/.claude/thoughts/shared/plans/` and ask the user which approved plan to execute.
+- For `/my-workflow`, preserve the approved plan path, supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. The runner returns the stage outcome for `my-workflow` to record; it does not claim workflow completion itself.
+- Do not dispatch if the plan has no RED tests or success criteria for its next unfinished phase.
 
-If running through Codex, use the same files under `~/.agents/rules/`.
+The runner may make locally validated implementation changes only through its `implementation-executor` / `Skill(commit)` path. It must return any external action request to this wrapper; never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
 
-For unusual or ambiguous implementation runs, read `references/protocol.md`.
+## Present
 
-## Flow
-
-1. Resolve the plan path from `$ARGUMENTS`; otherwise list plans in `~/.claude/thoughts/shared/plans/` and ask which one.
-2. Read the plan fully. Resume from the first unchecked phase.
-3. Create one todo per phase.
-4. For each phase, build a compact slice for `implementation-executor`:
-   - phase overview
-   - RED tests
-   - GREEN changes
-   - allowed paths
-   - success criteria
-   - verification commands
-   - architectural constraints
-   - relevant gotchas
-5. Dispatch exactly one executor.
-6. Re-run the phase success criteria yourself and read the diff. Read the phase's committed diff (`git show`) when the executor committed; otherwise read the working tree.
-7. If the phase conforms, confirm the executor committed it. If it did not — and validation passed — commit it yourself via the `commit` skill scoped to the phase's paths, so every green phase lands as its own commit. Then mark its checklist items complete in the plan and continue.
-8. If it fails, apply the loop-detection rule. Retry only with new information. Leave failed work uncommitted.
-9. After all phases, run the plan’s full validation strategy and mark the plan implemented. Report the commit series.
-
-## Stop Conditions
-
-Stop instead of dispatching when:
-
-- A phase has no RED tests or no success criteria.
-- The phase is too broad to fit a compact slice.
-- Required files or APIs differ from the plan in a major way.
-- The same failure reaches the loop-detection limit.
-- A fix requires an outward action or product/scope decision.
-
-## Output
-
-Summarize phases completed, deviations, tests run, failed checks if any, files changed, the commit SHA and subject for each phase, anything left uncommitted and why, and whether `/my-validate` should run next.
-
+Return completed phases, commit SHAs, verification evidence, deviations, uncommitted or escalated work, the workflow-stage envelope when embedded, and the recommended next command. Do not include raw executor transcripts.

@@ -1,81 +1,24 @@
 ---
-effort: xhigh
+model: sonnet
+effort: high
 name: my-review
-description: "Rigorous local and PR review. REQUEST_CHANGES needs a Critical issue; approve only when requirements are satisfied."
+runner: skill-my-review
+description: "Rigorous local and PR review through a model-pinned mechanical router/assembler. REQUEST_CHANGES needs a Critical issue; approve only when requirements are satisfied."
 when_to_use: "Use when the user asks to review their changes, diff, branch, or a GitHub PR."
 ---
 
 # Code Review
 
-Review local changes, branches, or GitHub PRs for correctness, requirements coverage, security, architecture, performance, operations, migration safety, dependencies, test quality, and unnecessary complexity.
+Use `skill-my-review` for substantive review routing, evidence assembly, per-finding verification, and verdict construction. This wrapper determines the source and authorization context, preserves the user-facing publication boundary, and renders the runner's structured review envelope.
 
-## Merge-Blocking Bar
+## Dispatch
 
-In GitHub, `REQUEST_CHANGES` blocks merge. Use it only for **Critical** findings:
+Normalize the request into `{ mode, target, base_ref, artifact_inputs, ledger_path, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
 
-- likely production or core workflow breakage
-- data loss, corruption, or exposure
-- exploitable security/privacy risk
-- likely runtime break in a cross-service/API/persistence contract
-- omitted must-have acceptance criterion that makes the feature objectively incomplete
-- migration `CREATE` missing an available `IF NOT EXISTS` clause
+- Infer `mode` as capture/promote, PR, branch/range, local, or local issue only from the supplied argument and current context; load the runner's retained shared routing references before resolving ambiguity.
+- For `/my-workflow`, pass the approved plan/base/ledger context and stage number in embedded local mode. The runner returns only a compact review envelope for `my-workflow` to record.
+- Do not invoke publication from this wrapper unless the user explicitly asks after reviewing the completed result. A runner may never publish a review, reply, resolve a thread, push, create/update a PR, or widen that authorization.
 
-Important does not automatically mean merge-blocking. Non-Critical findings may still make the right GitHub verdict `COMMENT` rather than `APPROVE` when they are substantive or numerous.
+## Present
 
-## Approval Bar
-
-Approve only when the PR satisfies the stated requirements and no Critical findings survive review.
-
-- Use `COMMENT` when there are several substantive inline comments, unresolved requirements questions, or enough non-blocking concerns that approval would overstate confidence.
-- Use `APPROVE` when requirements are satisfied and only minor nits or clearly optional suggestions remain.
-- Use `REQUEST_CHANGES` only for Critical findings.
-
-## Load Rules
-
-Read first:
-
-- `~/.claude/rules/review-finding-format.md`
-- `~/.claude/rules/subagent-contract.md`
-- `~/.claude/rules/model-escalation.md`
-- `~/.claude/rules/no-outward-actions.md`
-
-If reviewing a PR, also read:
-
-- `~/.claude/rules/pr-mode-readonly.md`
-- `~/.claude/rules/pr-cost-control.md`
-
-Under Codex, use the same files under `~/.agents/rules/`.
-
-Load targeted references as needed:
-
-- `references/mode-routing.md` when choosing local, branch, PR, capture, or promote mode.
-- `references/pr-mode.md` for GitHub PR reviews.
-- `references/lens-routing.md` before spawning research and lens reviewers.
-- `references/project-context.md` when a linked or explicitly supplied Linear issue has a project; it defines the bounded project-context and duplicate-follow-up check.
-- `references/finding-axes.md` before spawning lens reviewers and again before routing findings to verifiers — it defines severity, risk, and confidence, and the tier rule.
-- `references/finding-finalization.md` before presenting findings.
-
-For learned-miss maintenance, read `references/learned-misses.md` (active queue) and `references/promoted-misses.md` (promoted/discarded archive). Always read local `gotchas.md` when present.
-
-## Flow
-
-1. Determine mode: capture/promote, PR, branch/range, local, or local issue (a local branch review associated with an explicitly supplied Linear issue).
-2. Build the diff source of truth. In PR mode, use filtered GitHub payloads from `pr-cost-control.md`. In local mode the scope is the **whole branch** — `git diff $(git merge-base <base_ref> HEAD)`, covering every commit since the base branch plus staged and unstaged changes. Never the last commit alone, never the working tree alone.
-3. Identify active lenses and requirements source. For an existing PR review,
-   build or update the blocker ledger from prior Critical findings and record the
-   last reviewed SHA before looking for new concerns.
-4. For every new or changed registration, authorization, rollout, or injected-resolver helper, trace: its permitted and denied paths; whether tests prove the handler/result/argument forwarding rather than only rejection; where membership/ownership authorization happens; and its composition with mandatory telemetry, session, and context wrappers. Run focused static analysis where typed kwargs or decoded JSON cross a library boundary.
-5. Fan out research agents, then active lens reviewers.
-6. Merge and dedupe the lens reviewers' flat findings, preserving each one's severity, risk, and confidence.
-7. Verify **every** finding independently — one verifier dispatch per finding, in parallel, never batched. The three levels pick the tier: `finding-verifier-high` (Opus) for Critical, High risk, or low-confidence non-trivial claims; `finding-verifier-low` (Sonnet) for the rest. Re-dispatch any low-tier `requires escalation` to the high tier.
-8. Reconcile every proposed workaround with the requirements source. A scope
-   reduction clears a Critical requirements finding only with an explicit
-   amendment, not a related follow-up ticket or a code comment.
-9. Compute the verdict mechanically from the findings that survive as Critical, then adversarially challenge only the remaining APPROVE/COMMENT choice.
-10. Return findings and verdict. Do not edit code or publish review unless explicitly asked.
-
-## Output
-
-Findings first, ordered by severity, with file:line evidence and concrete fixes. Include targeted questions, residual risk, coverage summary, and verdict.
-
-For PRs: use `REQUEST_CHANGES` only for Critical findings. Use `APPROVE` only when the change satisfies requirements; use `COMMENT` for several substantive inline comments or unresolved non-blocking concerns.
+Return findings first with file:line evidence and concrete fixes, then verdict, questions, residual risk, requirements coverage, dropped findings, and the compact workflow-stage envelope when embedded. Use `REQUEST_CHANGES` only for verified Critical findings; use `COMMENT` instead of `APPROVE` when substantive non-blocking concerns or unresolved requirements remain. Do not include raw lens or verifier transcripts.

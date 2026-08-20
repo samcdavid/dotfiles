@@ -1,6 +1,9 @@
-# Protocol — my-implement
+# Protocol — my-implement runner
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full runner flow. The `my-implement` skill wrapper resolves the user-facing
+request and this runner owns sequential phase execution. Retained standalone
+references stay at `~/.claude/skills/my-implement/` (or
+`~/.agents/skills/my-implement/` under Codex).
 
 ## Implement Plan
 
@@ -31,7 +34,8 @@ Pull from the plan **only what this phase needs** — do not pass the whole plan
 - `green_changes` — the phase's "Changes Required (GREEN)" list
 - `success_criteria` — the phase's mechanical success criteria (RED ones first, then GREEN/checks)
 - `allowed_paths` — the files/dirs this phase may touch (derive from the change list)
-- `verification_commands` — how to run tests/checks in this stack (see `references/verification-commands.md`)
+- `verification_commands` — how to run tests/checks in this stack (see the
+  retained `verification-commands.md` reference)
 - `architectural_constraints` — the plan's constraints relevant to this phase
 - `working_context` — cwd, stack, any setup notes
 
@@ -91,13 +95,18 @@ When all phases are verified done:
 3. Present a summary: what was done, any deviations, any remaining concerns, and how many phases needed a re-dispatch (a signal for tuning future plan granularity).
 4. Suggest running `/my-validate` for a thorough post-implementation check.
 
+In embedded mode, return the compact phase/commit/verification outcome to
+`my-workflow`. Do not update its ledger or declare the pipeline complete.
+
 ## Guidelines
 
 - **You orchestrate; the executor implements.** Don't write the tests or production code in the main context — dispatch them. Your job is slicing, verifying, and loop control.
 - **Tests before code — always**, enforced inside every executor. A phase with no RED tests does not get dispatched.
 - One executor at a time; phases are sequential.
 - Keep each slice minimal — the executor's context should be small, which is the whole point.
-- Commit nothing and push nothing — this skill produces verified working-tree changes only. Outward git actions are the user's call.
+- Do not run raw git commit commands or any outward git action. Each validated
+  phase is committed locally through `Skill(commit)` by the executor or this
+  runner's recovery path; failed or escalated work remains uncommitted.
 - The plan is the WHAT; the executor decides the HOW for its phase, within `allowed_paths` and `architectural_constraints`.
 
 ## Common Rationalizations
@@ -113,8 +122,11 @@ When all phases are verified done:
 
 ## References
 
-This skill has reference files in `references/` — consult them while assembling slices:
-- `references/verification-commands.md` — common verification commands by stack (feeds `verification_commands` and your re-verify step).
+Consult the retained skill references while assembling slices:
+- `~/.claude/skills/my-implement/references/verification-commands.md` (or
+  `~/.agents/skills/my-implement/references/verification-commands.md` under
+  Codex) — common verification commands by stack (feeds
+  `verification_commands` and your re-verify step).
 
 ## Gotchas
 If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them. Pass any phase-relevant gotcha into the executor's slice so it doesn't rediscover it the hard way.

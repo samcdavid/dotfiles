@@ -1,6 +1,7 @@
-# Protocol — my-validate
+# Protocol — my-validate runner
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full runner flow. The `my-validate` skill wrapper resolves the user-facing
+request and this runner owns evidence collection and safe local repair.
 
 ## Validate
 
@@ -51,6 +52,10 @@ For anything INCORRECT or STALE:
 1. **Diagnose**: What's actually true vs. what was claimed?
 2. **Correct**: Update the finding, fix the code, or flag the discrepancy
 3. **Re-verify**: Confirm the correction is accurate
+
+When a scoped code repair is verified, invoke `Skill(commit)` with only its
+changed paths. Do not use a raw git commit command. Leave any unverified or
+escalated repair uncommitted.
 
 If a correction can't be made confidently, escalate to the user.
 
@@ -129,6 +134,9 @@ For each FAILURE from Step 2:
    - What actually happened
    - What you tried
    - Why you think it's failing
+
+After a verified scoped code repair, invoke `Skill(commit)` with only the
+repair paths. Do not commit a failed or escalated repair.
 
 ### Step 4 — Generate Validation Report
 
@@ -227,6 +235,10 @@ Add an **Observability** section to the validation report:
 ```
 
 Update the observability plan's `status` to `validated` or `needs-attention`.
+
+For an embedded workflow invocation, return the complete compact validation
+envelope to `my-workflow`; do not update its ledger or claim pipeline
+completion.
 
 ---
 
