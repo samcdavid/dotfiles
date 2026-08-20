@@ -14,6 +14,19 @@ Act as the project-discovery and delivery-planning lead. Produce these connected
 
 Do not change application code, create PRs, run test suites, or write to Linear during discovery and planning. Read-only Linear, repository, docs, and operational investigation is in scope. Save durable artifacts under `~/.claude/thoughts/shared/` (or the equivalent shared artifact root in the active runtime). Existing Done work is context, never something to reopen or rewrite.
 
+## Delegation and model routing
+
+Keep this coordinator, artifact assembly, and all Linear reads/writes on the caller's model. Use the named runners below for the high-judgment work; their generated agent configuration deliberately supplies the model and reasoning tier. Do not substitute a generic agent or in-context summary for a required runner.
+
+| Work | Required delegate | When / handoff |
+|---|---|---|
+| Product requirements and acceptance criteria | `skill-my-spec` (Terra/high) | Always for a new project proposal or materially incomplete existing scope. Give it the product context and `authority: local_only`; consume its spec artifact and provisional decisions. |
+| Codebase and delivery-context gap research | `skill-my-research` (Sol/xhigh) | Always when a repository or existing system is in scope. Give it the accepted/current spec artifact, relevant Linear/doc context, and the question "what exists, what gaps remain, and what constrains delivery?" Its own protocol fans out locator, analyzer, and pattern discovery and adversarially verifies findings. |
+| Structural design | `skill-my-architecture-plan` (Sol/high) | Required when the project crosses module boundaries, introduces or changes a public contract, or changes persisted data. Pass the spec and research artifacts; turn its falsifiable constraints into issue boundaries and conflict rules. Skip only when research demonstrates a contained, single-module change. |
+| Final plan challenge | `adversarial-debate` (Sol/xhigh) | Always. Give it the requirements/spec, verified gaps, architecture constraints where present, job stories, issue/milestone drafts, dependencies, and conflict matrix. Apply supported corrections before presentation. |
+
+Use targeted `codebase-locator`, `codebase-analyzer`, and `codebase-pattern-finder` calls only as scoped follow-ups to the research or architecture runner, or when they need one bounded missing fact. Their Terra routing makes them suitable for parallel evidence gathering; they do not replace Sol's research synthesis. If the research, specification, and architecture outputs conflict, return the conflicting evidence to `skill-my-research` for Sol-led resolution before defining issues.
+
 ## Inputs and defaults
 
 Accept a product brief, a Linear project/milestone/issue URL, a project name, or a combination. Search Linear before assuming the project does not exist. Read linked issues, comments, projects, milestones, product documents, and prior completed work that could establish behavior or constraints.
@@ -32,9 +45,11 @@ Ask only for a consequential product decision that cannot be resolved from the a
 - Every issue must trace to at least one job story and specific acceptance criteria. Remove or merge work that has no such trace.
 - No Linear create, update, comment, relationship change, or status change occurs until the final approval step. Do not use an early "inventory confirmation" as permission to mutate Linear.
 
-## Step 1 — Requirements discovery
+## Step 1 — Requirements discovery and specification
 
-Collect the proposal and all available product context from the conversation, Linear, Notion/Drive, existing documentation, related projects, and completed work. Produce a requirements brief with:
+Collect the proposal and all available product context from the conversation, Linear, Notion/Drive, existing documentation, related projects, and completed work. Dispatch `skill-my-spec` with that bounded context and `authority: local_only`. It owns requirements discovery, research-before-questioning, and the product-spec artifact; do not reproduce that work in the coordinator.
+
+Use its spec artifact to produce a requirements brief with:
 
 | Area | Required content |
 |---|---|
@@ -44,11 +59,13 @@ Collect the proposal and all available product context from the conversation, Li
 | Scope boundaries | Explicit non-goals, compatibility needs, rollout constraints, and dependencies |
 | Evidence and certainty | Source for each fact; clearly mark assumptions and unresolved decisions |
 
-If an existing milestone or issues were supplied, inventory them as proposed work, not as authoritative requirements. Identify stale, duplicate, or missing scope before designing the project around them. Save the brief as `plans/NNN_requirements_<project-slug>.md`.
+If an existing milestone or issues were supplied, inventory them as proposed work, not as authoritative requirements. Identify stale, duplicate, or missing scope before designing the project around them. If the spec runner returns a load-bearing `needs_input` result, obtain that decision before research. Otherwise carry its provisional decisions forward as visible planning risks. Save the brief as `plans/NNN_requirements_<project-slug>.md`, linked to the spec artifact.
 
 ## Step 2 — Codebase and delivery-context research
 
-Research before breaking the work into issues. In parallel where useful, use focused discovery to establish:
+Research before breaking the work into issues. Dispatch `skill-my-research` with the requirements/spec artifact, project context, and a bounded gap question. It owns verified discovery and its mandatory Sol/xhigh adversarial challenge. Do not replace its verified findings with a coordinator-only summary.
+
+Use its artifact to establish:
 
 - Relevant entry points, modules, data models, APIs, UI or job flows, test coverage, configuration, and generated-code boundaries.
 - What currently happens for each requirement, with file/function/schema evidence.
@@ -61,9 +78,11 @@ Do not stop at file discovery. Trace the behavior sufficiently to say whether th
 | Requirement / new functionality | Current evidence | Gap | Candidate delivery boundary | Confidence / unknown |
 |---|---|---|---|---|
 
-Save the evidence and gap map as `research/NNN_project_gap_<project-slug>.md`. Challenge material architectural or compatibility assumptions with an independent adversarial review and incorporate only evidence-supported corrections.
+Save the evidence and gap map as `research/NNN_project_gap_<project-slug>.md`, linked to the runner artifact. If the runner identifies conflicting evidence or scope that invalidates the spec, route that evidence back to `skill-my-spec` once for a revised spec before continuing.
 
 ## Step 3 — Job stories and delivery units
+
+Before defining delivery units, dispatch `skill-my-architecture-plan` with the spec and research artifacts when the routing table requires it. Treat its constraints, dependency directions, and contract decisions as binding issue-boundary inputs. If it is skipped, record the research evidence that the project is contained and why structural design is unnecessary.
 
 Turn each validated gap into job stories. Use outcome language:
 
@@ -124,7 +143,7 @@ Present a concise package containing:
 - Migration-only sequencing and safety checks, or an explicit finding that no Ecto migration is required.
 - Existing Linear project/milestone/issue records that will be reused, and duplicates or stale draft records that will not be changed without direction.
 
-Also prepare an exact Linear manifest: project create-or-reuse decision, project description, milestones to create, issue titles/descriptions, membership, dependencies, and any planned comments. This is the sole approval boundary. Ask for explicit approval to apply that manifest; a general request to plan is not authorization.
+Also prepare an exact Linear manifest: project create-or-reuse decision, project description, milestones to create, issue titles/descriptions, membership, dependencies, and any planned comments. Before presenting it, dispatch `adversarial-debate` with the complete evidence bundle described in the routing table. Apply its KEEP/REVISE/DROP/PROMOTE verdicts; do not present contradicted requirements, unverified gaps, or an issue that lacks traceability. This is the sole approval boundary. Ask for explicit approval to apply that manifest; a general request to plan is not authorization.
 
 ## Step 8 — Create Linear records after approval
 
