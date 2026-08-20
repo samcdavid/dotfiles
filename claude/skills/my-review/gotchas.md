@@ -227,3 +227,12 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Verify the changed CI filters include required fixtures, required tools fail with actionable diagnostics, and instructions name the effective config/endpoint overrides for supported consumers.
 - **Why:** The feature can be correct in isolation yet fail in CI or silently route developers to a default stack in real use.
 - **Source:** ENA-590 PR review — RWX fixture filter, jq dependency, profile precedence, and native isolated-stack documentation gaps.
+
+### Eppo rollout gates are intended cohort boundaries, not defects
+
+- **Category:** verdict-calibration
+- **Context:** A PR satisfies a readiness condition for tools that are already protected by a default-off, per-user Eppo entitlement.
+- **Wrong:** Treating the readiness change itself as unsafe or asking the author to delay the intended Eppo rollout because selected users can now use the feature.
+- **Right:** Confirm the entitlement and readiness conditions are ANDed, then keep any finding narrowly on the concrete behavior inside the enabled cohort. For observability of authored names, ask for redaction or the team's approved anonymized representation (for example, `Robert G.`); reserve a merge block for an explicit policy violation with immediate harm.
+- **Why:** A rollout flag deliberately limits access to the users the team selected. Conflating that control with a defect produces an overly broad review and obscures the actual remediation.
+- **Source:** PR #28214 review correction, 2026-08-20.
