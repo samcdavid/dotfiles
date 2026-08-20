@@ -1,13 +1,15 @@
 ---
 model: sonnet
+effort: medium
 name: pulse
+runner: pulse-aggregator
 description: Project pulse — digest of recent codebase activity across all contributors. Surfaces hot areas, significant changes (migrations, new modules, API shifts, dependency updates), and per-author summaries. Default 1 week, configurable via argument. Delegates gathering/synthesis to the `pulse-aggregator` agent.
 when_to_use: "Use when the user asks what changed recently in the repo, what is active, or what others have been working on."
 ---
 
 # Project Pulse
 
-Generate a concise briefing of recent project activity so I can stay current without reading every commit and PR. The gathering and synthesis runs inside the `pulse-aggregator` agent — this skill just parses the time range, checks tool availability, spawns the agent, and presents what it returns.
+Generate a concise briefing of recent project activity so I can stay current without reading every commit and PR. This wrapper normalizes the time range, checks available enrichment sources, dispatches `pulse-aggregator`, and presents its finished briefing.
 
 ## Step 1 — Parse arguments
 

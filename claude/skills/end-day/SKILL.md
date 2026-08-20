@@ -1,28 +1,24 @@
 ---
 model: sonnet
+effort: medium
 name: end-day
+runner: skill-end-day
 description: Consolidate today's Notion entry, summarize Linear/work activity, and rewrite actions, decisions, and notes into a clean end-of-day record.
 disable-model-invocation: false
 ---
 
 # End Day
 
-Produce a concise end-of-day record from today's work artifacts.
+Produce a concise end-of-day record from today's work artifacts through the `skill-end-day` runner. This wrapper supplies context, preserves the user-facing approval boundary, and renders the completed artifact.
 
-For Google Workspace and Slack, prefer the installed, already-authenticated `gws` and `slack` CLIs; use the corresponding MCP tools only as fallback. Never start interactive CLI authentication implicitly.
+## Dispatch
 
-## Load Rules
+Pass the Notion database URL from `$ARGUMENTS`, current date/context, and available connected-tool capabilities to `skill-end-day`.
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For exact Notion formatting or edge cases, read `references/protocol.md`. Always read `references/activity-sources.md` before Phase 1 — it's what replaces manual per-task `log-work` calls with an automated pull of the day's real activity.
+If the database URL is missing, ask the user for it. Do not infer one from unrelated context.
 
-## Flow
+The runner may update the requested Daily ToDo Notion entry, but it must return any request to post, send, publish, push, or otherwise act outside that entry to this wrapper for explicit user authorization.
 
-1. Locate or create today's Notion entry.
-2. Run the four activity sources (`references/activity-sources.md`): GitHub (`scripts/github-activity.sh`), Linear, Notion, and Slack — plus calendar context and today's raw Notion notes.
-3. Deduplicate and rewrite actions, decisions, blockers, and accomplishments.
-4. Preserve useful raw details only when they help tomorrow's handoff.
-5. Update Notion.
+## Present
 
-## Output
-
-Return what changed in Notion, a short accomplishment summary, open actions, blockers, and tomorrow carry-over.
+Return what changed in Notion, a short accomplishment summary, open actions, blockers, and tomorrow carry-over. Do not post the record to Slack.

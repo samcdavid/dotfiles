@@ -1,7 +1,9 @@
 ---
 model: sonnet
+effort: medium
 codex-model: gpt-5.6-terra
 name: pulse-aggregator
+runner-for: pulse
 description: Gathers and synthesizes recent project activity for the pulse skill from git, GitHub, migrations, dependencies, Linear, and Notion. Read-only.
 disallowedTools: Edit, Write, NotebookEdit
 ---

@@ -1,29 +1,24 @@
 ---
-model: opus
+model: sonnet
+effort: high
 name: start-day
+runner: skill-start-day
 description: Build a daily work brief from yesterday/off-hours activity plus today's Linear, Calendar, Gmail, and Notion context; update Notion with a reviewable daily update and checklist.
 disable-model-invocation: false
 ---
 
 # Start Day
 
-Create the daily work summary and planning brief. Prefer connected tools over memory.
+Create the daily work summary and planning brief through the `skill-start-day` runner. This wrapper supplies the request context, preserves the user-facing approval boundary, and renders the runner's completed artifact.
 
-For Google Workspace, prefer the installed, already-authenticated `gws` CLI; use the corresponding MCP tools only as fallback. Never start interactive CLI authentication implicitly.
+## Dispatch
 
-## Load Rules
+Pass the Notion database URL from `$ARGUMENTS`, current date/context, and available connected-tool capabilities to `skill-start-day`.
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For unusual calendars, off-hours on-call handling, or Notion formatting details, read `references/protocol.md`.
+If the database URL is missing, ask the user for it. Do not infer one from unrelated context.
 
-## Flow
+The runner may update the requested Daily ToDo Notion entry, but it must return any request to post, send, publish, push, or otherwise act outside that entry to this wrapper for explicit user authorization.
 
-1. Determine target day and previous workday.
-2. Gather yesterday/off-hours work from Notion, Linear, Gmail, Calendar, git, and current repo context.
-3. Identify accomplishments, decisions, blockers, follow-ups, and on-call incidents.
-4. Gather today's meetings, deadlines, Linear priorities, unread/relevant Gmail, and calendar conflicts.
-5. Update or create the daily Notion entry.
-6. Add a reviewable daily update at the top of the Notion entry and a prioritized checklist below it.
+## Present
 
-## Output
-
-Return the updated Notion entry, daily-update text, top priorities, calendar conflicts, and any follow-ups that need user attention. Do not post the update to Slack.
+Return the runner's updated Notion entry, daily-update text, top priorities, calendar conflicts, and follow-ups. Do not post the update to Slack.

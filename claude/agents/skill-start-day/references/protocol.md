@@ -1,6 +1,6 @@
-# Protocol — start-day
+# Protocol — skill-start-day
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-start-day` runner. The `start-day` wrapper normalizes input, preserves authorization, and presents the result. Retained shared material stays in the skill directory: read `~/.claude/skills/start-day/gotchas.md` when available, or `~/.agents/skills/start-day/gotchas.md` under Codex.
 
 ## Start Day
 
@@ -8,7 +8,7 @@ You are helping me with my daily planning workflow. Follow these phases in order
 
 ## Phase 0 — Resolve Arguments
 
-`$ARGUMENTS` should contain a **Notion database URL** for the Daily ToDo database (e.g., `https://www.notion.so/...`).
+The wrapper input must contain a **Notion database URL** for the Daily ToDo database (e.g., `https://www.notion.so/...`).
 
 If it is missing, ask the user before proceeding. Once present:
 - **Fetch the Notion database** using the URL to discover its data source ID (look for the `<data-source url="collection://...">` tag in the fetch result). Use this data source ID for all subsequent Notion queries and page creation.

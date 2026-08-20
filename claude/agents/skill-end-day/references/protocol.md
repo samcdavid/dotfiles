@@ -1,6 +1,6 @@
-# Protocol — end-day
+# Protocol — skill-end-day
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+Full private procedure for the `skill-end-day` runner. The `end-day` wrapper normalizes input, preserves authorization, and presents the result. The shared activity-source material remains at `~/.claude/skills/end-day/references/activity-sources.md`, or `~/.agents/skills/end-day/references/activity-sources.md` under Codex.
 
 ## End Day
 
@@ -10,7 +10,7 @@ Tomorrow's start-day will still own writing the **Summary** section and setting 
 
 ## Phase 0 — Resolve Arguments
 
-`$ARGUMENTS` should contain:
+The wrapper input must contain:
 1. A **Notion database URL** for the Daily ToDo database (e.g., `https://www.notion.so/...`)
 
 If missing, ask the user before proceeding. Once present:
@@ -24,7 +24,7 @@ For Google Workspace access, prefer the `gws` CLI when `command -v gws` succeeds
 
 1. **Notion — today's own entry**: Fetch today's entry from the Daily ToDo database using **view mode** (sorted descending by Date, `page_size: 5`, pick the top result whose `date:Date:start` matches today — per the start-day `Notion SQL date-filter` gotcha; do not use SQL mode). Then fetch the page contents in full — Daily Update, Checklist, Actions and decisions, Notes — that is the raw state we will consolidate.
 
-2. **The four activity sources** (`references/activity-sources.md`) — GitHub, Linear, Notion (workspace-wide), and Slack. These replace manually logging work throughout the day: run each source's procedure for today's date and treat the combined output as the raw material for Phases 3-5, the same way today's Notion bullets are used.
+2. **The four activity sources** (`~/.claude/skills/end-day/references/activity-sources.md`, or `~/.agents/skills/end-day/references/activity-sources.md` under Codex) — GitHub, Linear, Notion (workspace-wide), and Slack. These replace manually logging work throughout the day: run each source's procedure for today's date and treat the combined output as the raw material for Phases 3-5, the same way today's Notion bullets are used.
 
 3. **Google Calendar**: Prefer `gws calendar events list` against the primary calendar; fall back to Google Calendar MCP. Gather today's events — which ran, which were canceled, what was added late. This tells us what consumed today's focus time.
 
@@ -108,8 +108,8 @@ Do **not** touch:
 
 ## References
 
-- `references/activity-sources.md` — the four activity-gathering procedures (GitHub, Linear, Notion, Slack) used in Phase 1, including the GitHub script's invocation and each source's known limitations.
-- `scripts/github-activity.sh` — standalone script backing the GitHub activity source; runs independently of this skill for spot-checking (`scripts/github-activity.sh [YYYY-MM-DD]`).
+- `~/.claude/skills/end-day/references/activity-sources.md` — the four activity-gathering procedures (GitHub, Linear, Notion, Slack) used in Phase 1, including the GitHub script's invocation and each source's known limitations. Under Codex, use `~/.agents/skills/end-day/references/activity-sources.md`.
+- `~/.agents/skills/end-day/scripts/github-activity.sh` — standalone script backing the GitHub activity source; runs independently of this skill for spot-checking (`scripts/github-activity.sh [YYYY-MM-DD]`).
 
 ## Gotchas
 If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them.
