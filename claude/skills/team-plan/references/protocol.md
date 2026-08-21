@@ -29,7 +29,7 @@ Use targeted `codebase-locator`, `codebase-analyzer`, and `codebase-pattern-find
 
 ## Inputs and defaults
 
-Accept a product brief, a Linear project/milestone/issue URL, a project name, or a combination. Search Linear before assuming the project does not exist. Read linked issues, comments, projects, milestones, product documents, and prior completed work that could establish behavior or constraints.
+Accept a product brief, a Linear project/milestone/issue URL, a project name, or a combination. For Linear-backed work, use the wrapper's read-only inventory of the matching project, issues, comments, milestones, product documents, and prior completed work; return a bounded request if that inventory is insufficient. Do not query or mutate Linear yourself.
 
 Use the team size from the request or known assignees as an upper bound on concurrent slots. If it is absent, use a planning capacity of eight. Do not target a ticket count: plan as many very small, independently mergeable slices as genuinely deliver the MVP, and state why a wave uses fewer slots than capacity. Never manufacture tickets, abstractions, or split a coherent behavior merely to reach a concurrency count.
 
