@@ -1,6 +1,6 @@
 # Protocol — team-plan
 
-`SKILL.md` is the entrypoint. This protocol turns a proposal or an existing Linear project into a researched, reviewable delivery draft, and only creates Linear records after explicit approval.
+`SKILL.md` is the entrypoint. Its wrapper owns Linear reads, explicit approval, and approved Linear writes. The `skill-team-plan` runner owns this protocol's substantive discovery and planning work, returning a researched, reviewable delivery draft and never mutating Linear.
 
 ## Outcome and boundaries
 
@@ -9,14 +9,14 @@ Act as the project-discovery and delivery-planning lead. Produce these connected
 1. A requirements brief that distinguishes verified facts, assumptions, decisions, non-goals, and the new functionality.
 2. Codebase research and a requirement-to-gap map showing what exists, what is missing, and the evidence for each claim.
 3. Job stories that describe the user or operator outcome the project must deliver.
-4. PR-backed issue drafts, migration sequencing when applicable, milestones, dependencies, surfaces, conflicts, and parallel waves.
+4. MVP-first milestones with stakeholder demo definitions; PR-backed, 30-minute-target issue drafts; migration sequencing when applicable; dependencies, surfaces, conflicts, and parallel waves.
 5. An exact Linear creation/update manifest that remains a draft until the user approves it.
 
-Do not change application code, create PRs, run test suites, or write to Linear during discovery and planning. Read-only Linear, repository, docs, and operational investigation is in scope. Save durable artifacts under `~/.claude/thoughts/shared/` (or the equivalent shared artifact root in the active runtime). Existing Done work is context, never something to reopen or rewrite.
+Do not change application code, create PRs, run test suites, or write to Linear during discovery and planning. The wrapper supplies the relevant read-only Linear inventory; use it as planning evidence and return any missing factual inventory to the wrapper. Repository, docs, and operational investigation are in scope. Save durable artifacts under `~/.claude/thoughts/shared/` (or the equivalent shared artifact root in the active runtime). Existing Done work is context, never something to reopen or rewrite.
 
 ## Delegation and model routing
 
-Keep this coordinator, artifact assembly, and all Linear reads/writes on the caller's model. Use the named runners below for the high-judgment work; their generated agent configuration deliberately supplies the model and reasoning tier. Do not substitute a generic agent or in-context summary for a required runner.
+The wrapper handles request/Linear coordination and approval. This runner owns artifact assembly and delegates the high-judgment work below; its generated configuration deliberately supplies Sol/xhigh reasoning. Do not substitute generic in-context research for a required runner.
 
 | Work | Required delegate | When / handoff |
 |---|---|---|
@@ -31,18 +31,21 @@ Use targeted `codebase-locator`, `codebase-analyzer`, and `codebase-pattern-find
 
 Accept a product brief, a Linear project/milestone/issue URL, a project name, or a combination. Search Linear before assuming the project does not exist. Read linked issues, comments, projects, milestones, product documents, and prior completed work that could establish behavior or constraints.
 
-Use the team size from the request or known assignees. If it is absent, use a planning capacity of eight. Aim for six to eight independently mergeable, PR-sized issues in a normal feature wave when the team has that capacity. A migration-readiness wave, a genuine dependency chain, or a small project may safely contain fewer; state why. Never manufacture tickets, abstractions, or split a coherent PR merely to reach a concurrency count.
+Use the team size from the request or known assignees as an upper bound on concurrent slots. If it is absent, use a planning capacity of eight. Do not target a ticket count: plan as many very small, independently mergeable slices as genuinely deliver the MVP, and state why a wave uses fewer slots than capacity. Never manufacture tickets, abstractions, or split a coherent behavior merely to reach a concurrency count.
 
 Ask only for a consequential product decision that cannot be resolved from the available evidence. Treat factual gaps as research work, record their evidence and result, and continue. If a decision must remain unresolved, preserve options, recommendation, and impact in the draft rather than hiding it.
 
 ## Hard constraints
 
 - Every implementation issue represents one coherent, independently reviewable PR. Include its planned PR boundary in the issue draft; do not create a PR while planning.
+- An implementation issue must introduce only a few small, tightly related changes for one observable behavior and target 30 minutes or less from pickup through finished review, excluding an unavoidable deployment wait. If a draft would need broad investigation, multiple behavior paths, a cross-cutting refactor, or a reviewer to reconstruct several changes, split it into a thinner vertical slice or sequence the work. Record any safety-driven sizing exception and why it cannot be sliced further.
+- Each functional milestone must end with a stakeholder-demoable MVP outcome, a short demo path, and explicit proof that the included issues make that outcome work. A migration-readiness milestone is the only technical-only exception; it must name the first following functional demo milestone it unblocks.
 - Do not create standalone issues for enabling, disabling, or flipping feature toggles. Put that work in the functional issue whose behavior it controls, with its rollback/rollout acceptance criteria.
 - Generated files alone do not count as a conflict. Shared handwritten source, contracts, migrations, schemas, configuration, or ownership boundaries do.
 - Two issues with a HIGH conflict cannot be concurrent unless an explicit, minimal coordination interface makes independent PRs possible. Prefer resequencing to creating a coordination interface.
 - A database migration must never share an issue or PR with the functional behavior it enables. The migration-only issue is an explicit predecessor and must be deployed before dependent functional work ships. Read `migration-planning.md` whenever this applies.
 - Every issue must trace to at least one job story and specific acceptance criteria. Remove or merge work that has no such trace.
+- Do not make an issue wait on informal coordination. If concurrent work shares an interface, define the smallest stable contract and its owner in both issue drafts; otherwise sequence the issues.
 - No Linear create, update, comment, relationship change, or status change occurs until the final approval step. Do not use an early "inventory confirmation" as permission to mutate Linear.
 
 ## Step 1 — Requirements discovery and specification
@@ -90,13 +93,17 @@ Turn each validated gap into job stories. Use outcome language:
 
 For every job story record the linked requirement(s), current gap, acceptance outcomes, non-goals, dependencies, and any risk to existing users/operators. Split a story only when its delivery can be independently reviewed and merged. Combine implementation details that only make sense together in one PR.
 
-Then draft issues. Each issue must include:
+Then draft issues. Slice stories vertically: first deliver the smallest observable happy-path outcome, then add separately reviewable edge behavior, integrations, or follow-ons only when each slice remains useful and demonstrable. Do not create broad setup or cleanup tickets merely to make the graph look parallel.
+
+Each issue must include:
 
 - Clear title, linked job story IDs, user/value statement, and why it is needed now.
 - In-scope and out-of-scope behavior; acceptance criteria that make the PR reviewable.
 - Current-state evidence, affected handwritten code/data surfaces, expected tests, and relevant local patterns.
 - Planned PR boundary: exactly one implementation PR, with generated files called out separately from handwritten overlap.
+- Sizing proof: the few small planned changes, focused test evidence, expected pickup-to-finished-review time (target `≤30 minutes`), and a stated split point if the work expands.
 - Dependencies, milestone, target wave/slot, and conflict/coordination notes.
+- Coordination handoff: any prerequisite commit/contract, its owning issue, and the exact point at which this issue may start; say `none` when independent.
 - Rollout, observability, compatibility, and toggle details only when they are needed to deliver that issue's behavior.
 
 Do not create tickets for task administration, toggles, broad research, vague layers, or speculative cleanup. Put genuinely prerequisite research into the affected issue's definition unless it warrants a distinct, independently mergeable PR with a job-story outcome.
@@ -118,19 +125,19 @@ Build both a dependency graph and conflict matrix:
 - **LOW:** shared read-only type or interface; no planned write overlap.
 - **NONE:** no meaningful handwritten overlap. Generated output by itself is `NONE`.
 
-For HIGH/MED pairs, include the merge order, most likely regression tests, and the smallest coordination interface only if resequencing cannot remove the conflict. Save the analysis as `plans/NNN_surface_conflicts_<project-slug>.md`.
+For HIGH/MED pairs, include the merge order, most likely regression tests, and the smallest coordination interface only if resequencing cannot remove the conflict. Coordination must be explicit enough that an implementer can start and finish the issue without a synchronous design conversation. Save the analysis as `plans/NNN_surface_conflicts_<project-slug>.md`.
 
 ## Step 6 — Milestones and parallel waves
 
 Organize issues by independently shippable user value and dependencies, not by arbitrary technical layers. A project may have:
 
 1. A migration-readiness milestone/wave, when required, before functional delivery.
-2. Feature milestones containing six to eight independent PR-backed issues per wave when feasible.
+2. Feature milestones, each ending in a thin, stakeholder-demoable MVP. Add later small slices only after the milestone's first demo path is intact.
 3. Explicit later compatibility-cleanup migration milestones only when safe Ecto sequencing requires them.
 
-Within a wave, assign each issue to one developer/agent slot. Every PR must be mergeable independently; a wave may start only after its declared prerequisites are deployed or merged. Favor the fewest waves and coordination interfaces that satisfy real dependencies and HIGH conflicts. For a single developer, emit a critical-path order rather than pretending parallelism exists.
+Within a wave, assign each issue to one developer/agent slot. Every PR must be mergeable independently and target a 30-minute pickup-to-finished-review cycle; a wave may start only after its declared prerequisites are deployed or merged. Favor the fewest coordination interfaces that satisfy real dependencies and HIGH conflicts, but never combine unrelated small changes merely to reduce wave count. For a single developer, emit a critical-path order rather than pretending parallelism exists.
 
-For every milestone and wave, state its goal, included issues, prerequisites, intended parallelism, critical path, dependency links, and why any capacity is below the six-to-eight target. Save the draft as `plans/NNN_team_plan_<project-slug>.md`.
+For every milestone and wave, state its goal, MVP demo scenario and expected stakeholder-visible result, included issues, prerequisites, intended parallelism, critical path, dependency links, and why any capacity is below the available team capacity. Save the draft as `plans/NNN_team_plan_<project-slug>.md`.
 
 ## Step 7 — Reviewable planning package
 
@@ -138,16 +145,16 @@ Present a concise package containing:
 
 - Requirements brief and unresolved decisions.
 - Requirement-to-gap map with evidence.
-- Job stories and traceability to issue drafts.
-- Proposed milestones, wave plan, PR ownership boundaries, dependency graph, conflict matrix, and critical path.
+- Job stories and traceability to issue drafts, including each issue's 30-minute sizing proof and split point.
+- Proposed milestones with a demo scenario/result, wave plan, PR ownership boundaries, dependency graph, conflict matrix, critical path, and explicit coordination handoffs.
 - Migration-only sequencing and safety checks, or an explicit finding that no Ecto migration is required.
 - Existing Linear project/milestone/issue records that will be reused, and duplicates or stale draft records that will not be changed without direction.
 
-Also prepare an exact Linear manifest: project create-or-reuse decision, project description, milestones to create, issue titles/descriptions, membership, dependencies, and any planned comments. Before presenting it, dispatch `adversarial-debate` with the complete evidence bundle described in the routing table. Apply its KEEP/REVISE/DROP/PROMOTE verdicts; do not present contradicted requirements, unverified gaps, or an issue that lacks traceability. This is the sole approval boundary. Ask for explicit approval to apply that manifest; a general request to plan is not authorization.
+Also prepare an exact Linear manifest: project create-or-reuse decision, project description, milestones to create, issue titles/descriptions, membership, dependencies, and any planned comments. Before returning it, dispatch `adversarial-debate` with the complete evidence bundle described in the routing table. Ask it specifically to challenge oversized slices, false parallelism, missing milestone demos, and unresolved coordination. Apply its KEEP/REVISE/DROP/PROMOTE verdicts; do not return contradicted requirements, unverified gaps, an issue that lacks traceability, or an issue that fails the sizing target without a recorded safety exception. This is the sole approval boundary. The wrapper, not this runner, asks for explicit approval to apply the manifest; a general request to plan is not authorization.
 
-## Step 8 — Create Linear records after approval
+## Step 8 — Wrapper creates Linear records after approval
 
-After the user explicitly approves the manifest:
+After the user explicitly approves the manifest, the wrapper—not this runner—does the following:
 
 1. Re-query Linear for the named project, milestones, and matching issues to avoid duplicates or changes since the draft.
 2. Reuse the existing project if it is the intended one; otherwise create it with the approved description and link to the planning artifacts.
@@ -159,3 +166,19 @@ If Linear rejects part of the manifest or current state makes it ambiguous, stop
 ## Gotchas
 
 If a `gotchas.md` file exists in this skill's directory, read it before starting work.
+
+## Output Envelope
+
+Return a compact result, never raw tool or subagent transcripts:
+
+```markdown
+status: complete | needs_input | blocked
+artifacts: [{ kind, path }]
+summary: <MVP delivery plan>
+milestones: [{ name, demo_scenario, demo_result, issue_ids }]
+issue_sizing: [{ issue, estimated_review_cycle, exception }]
+coordination: [{ issues, handoff_or_sequence }]
+provisional_decisions: [{ question, options, recommendation, evidence }]
+linear_manifest: <draft only>
+external_action_requested: null | { actions, targets, rationale }
+```

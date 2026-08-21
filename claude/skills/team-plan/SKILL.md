@@ -1,31 +1,26 @@
 ---
-effort: high
+effort: xhigh
 name: team-plan
-description: Discover and scope a project, research its codebase gap, then draft a low-overlap Linear milestone and issue plan for parallel PR delivery.
+runner: skill-team-plan
+description: Draft MVP-first Linear milestones and very small, low-overlap issues for quick parallel implementation and review.
 disable-model-invocation: false
 ---
 
 # Team Plan
 
-Turn a project proposal, an existing Linear project/milestone, or an issue set into an evidence-backed delivery plan. Start with product discovery and requirements, then research the codebase to identify the existing behavior and the gap. Define job stories, PR-sized issues, milestones, dependencies, and a parallel execution plan. The final plan is a draft until the user explicitly approves Linear creation or updates.
+Use `skill-team-plan` for the substantive project-discovery and issue-design procedure. This wrapper owns request normalization, read-only Linear context, the approval boundary, and any approved Linear mutations; the runner produces the evidence-backed planning package and draft manifest.
 
-Use the stated team size when available. Otherwise plan for up to eight parallel PR-sized issues; target six to eight independent issues in a normal feature wave when the work supports it. Do not invent or split work merely to meet that target. If the safe parallelism is lower, explain the concrete dependency or shared surface that limits it.
+Every planned milestone must end in a stakeholder-demoable MVP slice. Every implementation issue targets a single, independently reviewable behavior with only a few small changes and a start-to-finished-review time of 30 minutes or less. This is a sizing target, not a reason to invent administrative work or split a coherent behavior across tickets. Preserve safe parallelism through clear boundaries and explicit prerequisites rather than broad tickets.
 
-Keep coordination and Linear operations on the caller's model. Delegate product specification, verified codebase research, architecture design, and adversarial challenges to their named runners as directed by the protocol; do not replace those escalations with generic in-context research.
+## Dispatch
 
-## Load Rules
+Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available, or their `~/.agents/rules/` equivalents under Codex. Read `references/protocol.md` for the complete workflow.
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. Read `references/protocol.md` for the full discovery, research, issue-design, and Linear workflow. When the project may change persisted data or schema in an Ecto application, also read `references/migration-planning.md`.
-
-## Flow
-
-1. Dispatch the specification runner to gather and verify requirements, including the new user-visible functionality, constraints, non-goals, and unresolved product decisions.
-2. Dispatch the research runner to map the relevant codebase, deployed behavior, prior work, and existing Linear work to evidence-backed gaps.
-3. Use the architecture runner for multi-module, persisted-data, or contract work; express the resulting constraints as job stories and independently reviewable PR-backed issues.
-4. Isolate database migration work from functional work, and sequence every dependent functional issue after its migration-only issue is safely deployed.
-5. Identify surfaces, dependencies, and merge conflicts; arrange milestones and waves for the maximum safe parallelism with minimal overlap. Generated code alone is not an overlap.
-6. Have the adversarial runner challenge the complete draft, then obtain explicit approval before creating or changing any Linear project, milestone, issue, relationship, or comment.
+1. Resolve the request from `$ARGUMENTS` and conversation. For a supplied project, milestone, or issue URL, collect the bounded, read-only Linear inventory needed to plan it. Do not write to Linear.
+2. Dispatch `skill-team-plan` with `{ task, linear_context, artifact_inputs, authority: local_only }`. The runner may create local artifacts and call the required spec, research, architecture, and adversarial runners; it must return a draft only.
+3. Present the runner's requirements/gap evidence, MVP milestones, micro-issue drafts, coordination plan, and exact Linear manifest. Ask for explicit approval before any Linear create, update, comment, relationship, or status change.
+4. Only after approval, re-query the affected Linear records, apply exactly the approved manifest, and verify the resulting records. If current state differs materially, stop and request direction rather than widening the change.
 
 ## Output
 
-Return the requirements brief, evidence-backed gap map, job stories, PR-backed issue drafts, migration plan where applicable, milestones/waves, dependency and conflict analysis, and the exact Linear changes awaiting approval.
+Return the requirements brief, evidence-backed gap map, job stories, micro-issue drafts, migration plan where applicable, milestone demo definitions and waves, dependency/conflict and coordination analysis, and the exact Linear changes awaiting approval.
