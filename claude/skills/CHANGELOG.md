@@ -22,6 +22,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
+| `98bc890` | Refined `team-plan` for demoable MVP milestones and very small reviewable issue slices, and moved its substantive planning into `skill-team-plan` (Sol/xhigh). | Every functional milestone must have a stakeholder demo path; implementation issues target a few tightly related changes and a 30-minute pickup-to-finished-review cycle, while the wrapper retains Linear coordination, approval, and writes. |
 | `1941829` | Calibrated `my-review` for default-off, per-user Eppo rollout gates. | Treat an entitlement-gated rollout as an intended cohort boundary; evaluate concrete enabled-cohort behavior and reserve merge blocks for immediate policy violations or harm. |
 | `7851ecc` | Scoped PR review and publication to the aggregate merge-base-to-HEAD diff. | Reviewers may use unchanged code as context, but every finding needs a changed-line causal link; baseline-only defects and out-of-diff findings are withheld rather than converted to PR-level comments. |
 | `bf2c6c0` | Added an evidence-backed, collapsed implementation-decisions section to `create-pr` descriptions. | PR bodies must source recorded choices from the branch workflow ledger and implementation artifacts, preserve outcomes and rationale, and say when no record exists rather than infer intent from the diff. |
