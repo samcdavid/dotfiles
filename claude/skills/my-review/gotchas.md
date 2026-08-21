@@ -2,6 +2,33 @@
 
 Known failure patterns and lessons learned. Read before starting work with this skill.
 
+### Re-check proposed findings against the current GitHub thread index immediately before returning
+
+- **Category:** failure-mode
+- **Context:** PR review has multiple reviewer passes or receives new comments while review lenses/verifiers run.
+- **Wrong:** Returning a publish-ready inline finding because it was independently verified in the diff, without matching it against the latest existing-thread index for the same underlying defect.
+- **Right:** Fetch current review threads after synthesis and before the final envelope; drop findings whose substance is already raised, even when their line anchor or severity wording differs. Recalibrate the verdict from only surviving findings.
+- **Why:** Reposting the same cancellation, enqueue-atomicity, or timeout defect creates noisy duplicate review threads and can overstate the reviewer’s independent concerns.
+- **Source:** PR #28281 review loop, 2026-08-20.
+
+### Rejections must name the PR-introduced defect and its causal path
+
+- **Category:** verdict-calibration
+- **Context:** Writing a `REQUEST_CHANGES` review body, particularly when an existing thread describes a related problem.
+- **Wrong:** State only the user impact (for example, “the participant is stuck”), call it an “existing state-machine issue,” or use a pre-existing defect as the reason to reject the PR.
+- **Right:** Explain what the current diff does incorrectly: identify the new branch/transition, the missing or incorrect state change, and the resulting behavior. Establish that the relevant path is in the current diff. If the defect is genuinely pre-existing, do not reject the PR for it; leave a non-blocking follow-up for the appropriate owning team instead.
+- **Why:** Authors need the concrete causal defect to fix and test. Treating unrelated existing debt as a merge blocker creates an invalid rejection and obscures ownership.
+- **Source:** User correction on PR #28281 review, 2026-08-20.
+
+### `REQUEST_CHANGES` requires an actionable inline comment
+
+- **Category:** publication-guardrail
+- **Context:** Preparing or publishing a GitHub review with the `REQUEST_CHANGES` event.
+- **Wrong:** Submit a body-only rejection, including one that merely reaffirms an existing thread.
+- **Right:** Publish `REQUEST_CHANGES` only when at least one verified, current-diff finding has a valid inline anchor and an actionable explanation/fix. If all concerns are duplicates or lack an inline anchor, publish `COMMENT` or do not publish a rejection.
+- **Why:** The author needs a precise, navigable merge blocker; a body-only rejection is opaque and can create an unjustified merge gate.
+- **Source:** User correction on PR #28281 review, 2026-08-20.
+
 ### Check all spec requirements, not just the code
 
 - **Category:** failure-mode
