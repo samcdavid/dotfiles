@@ -1,6 +1,6 @@
-ruby 3.2.2
-nodejs 23.11.1
-erlang 26.2.5
-elixir 1.16.3-otp-26
-python 3.11.5
-golang 1.18.1
+ruby 4.0.6
+nodejs 26.7.0
+erlang 29.0.5
+elixir 1.20.3-otp-29
+python 3.14.7
+golang 1.27.0
