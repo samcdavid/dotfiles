@@ -1,0 +1,120 @@
+# Plain apt packages — one per line, comments allowed.
+# Anything needing a vendor repo/key first lives in repos.sh instead.
+# Anything with no reliable apt package lives in manual-installs.sh instead.
+
+# Unix
+git
+git-lfs
+gnupg
+libssl-dev
+pass
+rcm
+tmux
+unzip
+zsh
+fish
+wl-clipboard
+
+# GitHub (repo added in repos.sh)
+gh
+
+# Terminal
+# Available directly from Ubuntu's own repos starting 26.04 — earlier
+# releases would need the community ghostty-ubuntu installer or a
+# --classic snap instead (see ghostty.org/docs/install/binary).
+ghostty
+
+# Image manipulation / processing
+imagemagick
+libvips-tools
+# jasper/libjasper was dropped from Ubuntu's repos over CVEs — no direct
+# replacement pulled in here; imagemagick's other codecs cover most needs.
+
+# Programming language prerequisites and package managers
+# (nodejs/npm are a system-level bootstrap only — asdf manages project
+# versions; needed early since claude-code/codex installs run before asdf.)
+nodejs
+npm
+ruby-full
+rubygems
+
+# Build dependencies for asdf's ruby-build/python-build/kerl (they compile
+# from source — field-tested: without these, ruby-build hard-fails on
+# readline/psych, and python-build silently produces a Python with no bz2/
+# readline/sqlite3/tkinter stdlib modules instead of failing loudly).
+autoconf
+bison
+build-essential
+libbz2-dev
+libdb-dev
+libffi-dev
+libgdbm-dev
+libgmp-dev
+libncurses-dev
+libreadline-dev
+libsqlite3-dev
+libxml2-dev
+libxmlsec1-dev
+libyaml-dev
+liblzma-dev
+patch
+rustc
+tk-dev
+uuid-dev
+xz-utils
+zlib1g-dev
+
+# Databases (repo added in repos.sh — tracks latest stable major, no pin)
+postgresql
+postgresql-contrib
+redis-server
+
+# Cloud / infrastructure (repos added in repos.sh)
+google-cloud-cli
+docker-ce
+docker-ce-cli
+containerd.io
+docker-buildx-plugin
+docker-compose-plugin
+gnome-shell-extension-appindicator
+ngrok
+
+# Dev tools
+cmake
+colordiff
+direnv
+ffmpeg
+fswatch
+fzf
+jq
+libxslt1-dev
+llvm
+mkcert
+miller
+pipx
+ripgrep
+shellcheck
+htop
+tree
+unixodbc-dev
+wget
+libwxgtk3.2-dev
+yt-dlp
+# websocat: confirmed NOT in apt or snap on 26.04 (field-tested) — see
+# manual-installs.sh for the GH-release binary install instead.
+
+# Fun
+cowsay
+figlet
+fortune-mod
+
+# GUI apps (repos added in repos.sh)
+1password
+1password-cli
+code
+
+# NVIDIA / CUDA is NOT installed from here — driver + cuda-toolkit (NOT the
+# `cuda` metapackage, to avoid fighting Ubuntu's own driver packaging) are
+# installed together as the very last step of install, so the whole setup
+# needs exactly one reboot at the end. cuda-keyring repo/key is still added
+# early in repos.sh (harmless, no reboot implication).

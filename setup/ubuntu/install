@@ -1,0 +1,347 @@
+#!/bin/bash
+
+# Laptop (or desktop) setup script for Ubuntu.
+# Mirrors setup/mac/install's flow and steps — see setup/README.md for how
+# the two are meant to stay in sync.
+
+# Manual Steps
+# ============
+# * Set up 1Password
+# * If Secure Boot is enabled, the NVIDIA driver install below will prompt
+#   for a MOK enrollment password mid-script — not fully unattended.
+# * Requires an active graphical (GNOME) session — SSH_AUTH_SOCK persistence
+#   and the preferences script both depend on it.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Keeps apt/dpkg from ever stopping to ask (package-manager confirmation,
+# conffile-diff prompts on upgrade, etc.) — exported so repos.sh and
+# manual-installs.sh, run as child processes below, inherit it too.
+export DEBIAN_FRONTEND=noninteractive
+
+# Auto-numbered log file: laptop.log, laptop1.log, laptop2.log, ...
+LOG_FILE="$HOME/laptop.log"
+if [ -f "$LOG_FILE" ]; then
+  n=1
+  while [ -f "$HOME/laptop${n}.log" ]; do
+    n=$((n + 1))
+  done
+  LOG_FILE="$HOME/laptop${n}.log"
+fi
+exec > >(tee "$LOG_FILE") 2>&1
+echo "Logging to $LOG_FILE"
+
+fancy_echo() {
+  local fmt="$1"; shift
+  # shellcheck disable=SC2059
+  printf "\n$fmt\n" "$@"
+}
+
+if [ ! -d "$HOME/.bin/" ]; then
+  mkdir "$HOME/.bin"
+fi
+
+# apt, falling back to snap for anything not in Ubuntu's apt repos.
+# Some snaps (code, google-cloud-cli, ...) refuse to install without
+# --classic; retry with it rather than silently skipping those packages.
+install_pkg() {
+  local pkg="$1"
+  if apt-cache show "$pkg" >/dev/null 2>&1; then
+    sudo apt install -y "$pkg"
+  elif snap info "$pkg" >/dev/null 2>&1; then
+    fancy_echo "  '$pkg' not in apt, installing via snap..."
+    local snap_output
+    if ! snap_output=$(sudo snap install "$pkg" 2>&1); then
+      echo "$snap_output"
+      if echo "$snap_output" | grep -q "classic confinement"; then
+        fancy_echo "  Retrying '$pkg' with --classic..."
+        sudo snap install "$pkg" --classic
+      else
+        fancy_echo "  Warning: snap install of '$pkg' failed. Skipping."
+      fi
+    fi
+  else
+    fancy_echo "  Warning: '$pkg' not found via apt or snap. Skipping."
+  fi
+}
+
+fancy_echo "Updating apt..."
+sudo apt update && sudo apt upgrade -y
+
+fancy_echo "Adding third-party apt repos..."
+if ! "$SCRIPT_DIR/repos.sh"; then
+  fancy_echo "Error: repos.sh failed partway through — apt repos after the failure point were"
+  fancy_echo "never added, so later apt installs in this run would silently be missing/wrong."
+  fancy_echo "Fix the error above and re-run before continuing."
+  exit 1
+fi
+
+fancy_echo "Installing packages from Aptfile..."
+while IFS= read -r pkg; do
+  # Skip blank lines and comments.
+  [ -z "$pkg" ] && continue
+  case "$pkg" in \#*) continue ;; esac
+  install_pkg "$pkg"
+done < <(grep -v '^\s*#' "$SCRIPT_DIR/Aptfile" | grep -v '^\s*$')
+
+fancy_echo "Running manual installs (asdf, uv, Claude Code, Codex, Docker Desktop, NordVPN, fonts, GNOME extensions...)..."
+if ! "$SCRIPT_DIR/manual-installs.sh"; then
+  fancy_echo "Error: manual-installs.sh failed partway through — whatever came after the failure"
+  fancy_echo "point (check the output above) was never installed. asdf in particular is required"
+  fancy_echo "by the check right below this, so this is very likely about to fail loudly too."
+  fancy_echo "Fix the error above and re-run before continuing."
+  exit 1
+fi
+
+# Refresh PATH so newly installed binaries are discoverable
+export PATH="$HOME/.local/bin:$HOME/.asdf/shims:$PATH"
+hash -r 2>/dev/null || true
+
+# Verify critical dependencies before proceeding
+for cmd in rcup fish gh asdf; do
+  if ! command -v "$cmd" >/dev/null; then
+    fancy_echo "Error: '$cmd' is required but was not installed."
+    fancy_echo "Check the apt/manual-install output above and install it manually."
+    exit 1
+  fi
+done
+
+# From here on, abort on errors — these steps depend on each other
+set -e
+
+# Set up git-lfs hooks
+if command -v git-lfs >/dev/null; then
+  git lfs install
+else
+  fancy_echo "Warning: git-lfs not found. Skipping git lfs setup."
+fi
+
+# Create dotfiles symlinks
+fancy_echo "Setting up dotfiles symlinks..."
+rcup -f
+
+# Authenticate with GitHub (after rcup so dotfiles gitconfig is in place first)
+if ! gh auth status >/dev/null 2>&1; then
+  fancy_echo "Authenticating with GitHub..."
+  fancy_echo "A browser window will open for you to sign in."
+  if gh auth login --web --git-protocol https -h github.com --scopes admin:public_key,admin:gpg_key; then
+    fancy_echo "GitHub authentication successful."
+  else
+    fancy_echo "Warning: GitHub authentication failed or was skipped."
+    fancy_echo "You can authenticate later with: gh auth login"
+  fi
+fi
+# Ensure git is configured to use gh as credential helper
+gh auth setup-git
+
+# Generate SSH key and add to GitHub
+SSH_KEY="$HOME/.ssh/id_ed25519"
+if [ ! -f "$SSH_KEY" ]; then
+  fancy_echo "Generating SSH key..."
+  ssh-keygen -t ed25519 -C "sam@mcdavid.us" -f "$SSH_KEY"
+fi
+
+# Register the key with GNOME Keyring's ssh-agent (the default $SSH_AUTH_SOCK
+# in a GNOME session) so it survives reboots without re-adding — GNOME
+# Keyring prompts once via GUI dialog to remember the passphrase, then keeps
+# it unlocked automatically as long as the login keyring auto-unlocks at
+# login (the default when its password matches your login password).
+ssh-add "$SSH_KEY" 2>/dev/null || fancy_echo "Warning: ssh-add failed — add the key manually via Seahorse or 'ssh-add ~/.ssh/id_ed25519'."
+
+# Upload public key to GitHub
+if gh auth status >/dev/null 2>&1; then
+  SSH_KEY_TITLE="$(hostname -s)"
+  if gh ssh-key add "${SSH_KEY}.pub" --title "$SSH_KEY_TITLE"; then
+    fancy_echo "SSH key added to GitHub as '$SSH_KEY_TITLE'."
+  else
+    fancy_echo "Warning: Could not add SSH key to GitHub (may already exist)."
+  fi
+else
+  fancy_echo "SSH key generated. Add to GitHub manually:"
+  fancy_echo "  gh ssh-key add ${SSH_KEY}.pub --title 'Your Key Name'"
+fi
+
+# Set fish as default shell
+update_shell() {
+  local shell_path;
+  shell_path="$(command -v fish)"
+
+  fancy_echo "Changing your shell to fish ..."
+  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
+    fancy_echo "Adding '$shell_path' to /etc/shells"
+    sudo sh -c "echo $shell_path >> /etc/shells"
+  fi
+  chsh -s "$shell_path"
+}
+
+# Check the actual passwd entry, not $SHELL — $SHELL reflects whatever
+# shell was active when this terminal session started, so on a re-run in
+# the same session it still shows the old shell even after chsh already
+# succeeded earlier, re-prompting for a password every time.
+case "$(getent passwd "$USER" | cut -d: -f7)" in
+  */fish)
+    fancy_echo "Already using fish shell."
+    ;;
+  *)
+    update_shell
+    ;;
+esac
+
+# Configure asdf version manager (installed as a GH-release binary in manual-installs.sh)
+fancy_echo "Configuring asdf version manager..."
+
+install_asdf_plugin() {
+  local name="$1"
+  local url="${2:-}"
+
+  if ! asdf plugin list 2>/dev/null | grep -Fq "$name"; then
+    if [ -n "$url" ]; then
+      asdf plugin add "$name" "$url" || {
+        fancy_echo "Warning: Failed to add asdf plugin '$name'. Retrying..."
+        asdf plugin add "$name" "$url"
+      }
+    else
+      asdf plugin add "$name" || {
+        fancy_echo "Warning: Failed to add asdf plugin '$name'. Retrying..."
+        asdf plugin add "$name"
+      }
+    fi
+  fi
+}
+
+install_asdf_plugin "ruby"
+install_asdf_plugin "nodejs"
+install_asdf_plugin "erlang"
+install_asdf_plugin "elixir"
+install_asdf_plugin "python"
+install_asdf_plugin "golang"
+install_asdf_plugin "terraform" "https://github.com/asdf-community/asdf-hashicorp"
+install_asdf_plugin "superdb" "https://github.com/chrismo/asdf-superdb.git"
+
+fancy_echo "Installing languages from ~/.tool-versions..."
+(cd "$HOME" && asdf install)
+
+# Install Oh My Fish
+if [ ! -d "$HOME/.local/share/omf" ]; then
+  fancy_echo "Installing Oh My Fish..."
+  curl -L https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install > /tmp/omf-install
+  fish /tmp/omf-install --noninteractive
+  rm /tmp/omf-install
+fi
+
+# Install Oh My Fish packages from bundle
+fancy_echo "Installing Oh My Fish packages..."
+fish -c "omf install"
+
+# Install Neovim plugins via Lazy
+fancy_echo "Installing Neovim plugins..."
+nvim --headless "+Lazy! sync" +qa
+
+# Install TPM (git-clone method — portable, matches setup/mac/install)
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+  fancy_echo "Installing TPM..."
+  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+fi
+
+# Install tmux plugins via TPM
+fancy_echo "Installing tmux plugins..."
+"$HOME/.tmux/plugins/tpm/bin/install_plugins"
+
+# Generate GPG key for commit signing
+GPG_EMAIL="sam@mcdavid.us"
+if ! gpg --list-secret-keys "$GPG_EMAIL" >/dev/null 2>&1; then
+  fancy_echo "Generating GPG key for commit signing..."
+  fancy_echo "You will be prompted to set a passphrase for the key."
+  if gpg --quick-generate-key "Sam McDavid <$GPG_EMAIL>" rsa4096 default 0; then
+    fancy_echo "GPG key generated successfully."
+  else
+    fancy_echo "Warning: GPG key generation failed. Set up manually later."
+  fi
+fi
+
+# Configure GPG signing in git and add key to GitHub
+GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long "$GPG_EMAIL" 2>/dev/null \
+  | awk '/^sec/{print $2}' | cut -d'/' -f2 | head -1)
+
+if [ -n "$GPG_KEY_ID" ]; then
+  # Machine-local, untracked file (see [include] in gitconfig) so each
+  # machine's independently-generated key never lands in the repo. Also
+  # carries user.email now that directory-based work/personal switching
+  # is gone — edit ~/.gitconfig.local by hand if you ever need a different
+  # email on a given machine.
+  git config --file "$HOME/.gitconfig.local" user.email "$GPG_EMAIL"
+  git config --file "$HOME/.gitconfig.local" user.signingkey "$GPG_KEY_ID"
+  # git's built-in in-memory cache (1hr default). Fine as a default; swap
+  # for git-credential-libsecret if you want it to survive past that.
+  git config --file "$HOME/.gitconfig.local" credential.helper cache
+
+  if gh auth status >/dev/null 2>&1; then
+    if gpg --armor --export "$GPG_KEY_ID" | gh gpg-key add - 2>/dev/null; then
+      fancy_echo "GPG key $GPG_KEY_ID added to GitHub."
+    else
+      fancy_echo "Warning: Could not add GPG key to GitHub (may already exist)."
+    fi
+  else
+    fancy_echo "GPG key configured locally. Add to GitHub manually:"
+    fancy_echo "  gpg --armor --export $GPG_KEY_ID | gh gpg-key add -"
+  fi
+
+  fancy_echo "GPG signing configured with key $GPG_KEY_ID"
+
+  # Docker Desktop's sign-in on Linux stores credentials via `pass` (GPG-
+  # encrypted files) and just warns/fails silently without it. Reuses the
+  # same key generated above rather than asking for a separate one.
+  if command -v pass >/dev/null && [ ! -d "$HOME/.password-store" ]; then
+    fancy_echo "Initializing pass for Docker Desktop credential storage..."
+    pass init "$GPG_KEY_ID"
+  fi
+else
+  fancy_echo "Warning: No GPG key found. Commit signing will need manual setup."
+fi
+
+# Configure GNOME preferences
+fancy_echo "Configuring GNOME preferences..."
+"$SCRIPT_DIR/preferences"
+
+# NVIDIA driver + CUDA toolkit — deliberately the very last step, so this is
+# the only reboot the whole setup needs. cuda-toolkit isn't in Aptfile for
+# the same reason: everything above it should be usable before that reboot.
+if lspci | grep -qi nvidia; then
+  fancy_echo "Installing NVIDIA driver + CUDA toolkit (last step)..."
+  sudo apt install -y ubuntu-drivers-common
+  # `autoinstall` was field-tested and doesn't exist on this ubuntu-drivers-
+  # common version (1:0.10.9) — bare `install` (no driver arg) is the current
+  # equivalent: it auto-selects the recommended driver for detected hardware.
+  sudo ubuntu-drivers install
+
+  # `ubuntu-drivers install` wraps apt and, field-tested, can return exit 0
+  # even when the underlying apt/dpkg transaction failed partway (e.g. a
+  # pre-existing, differently-packaged driver already owns some of the same
+  # files — dpkg can't resolve that without explicit Replaces: metadata
+  # between the two). set -e alone doesn't catch that, so check explicitly:
+  # any nvidia package left "unpacked but not configured" (dpkg status != ii)
+  # means the transaction didn't finish cleanly.
+  if dpkg -l | awk '$1 ~ /^i/ && $1 != "ii" {print}' | grep -qi nvidia; then
+    fancy_echo "Error: NVIDIA driver packages were left in an incomplete state — the install"
+    fancy_echo "didn't finish cleanly (commonly: a pre-existing driver from a different package"
+    fancy_echo "family already owned some of the same files). nvidia-smi may still work using"
+    fancy_echo "whatever was already loaded, but don't reboot into this yet."
+    fancy_echo "Run 'sudo apt --fix-broken install', confirm nvidia-smi still works, then re-run"
+    fancy_echo "this script."
+    exit 1
+  fi
+
+  sudo apt install -y cuda-toolkit
+  fancy_echo "NVIDIA driver + CUDA toolkit installed. REBOOT now — nvidia-smi/nvcc won't work until then."
+else
+  fancy_echo "No NVIDIA GPU detected, skipping driver/CUDA install."
+fi
+
+# GNOME Shell only picks up newly-installed extensions at login — this is a
+# real Wayland limitation (unlike X11, the shell can't be hot-restarted to
+# rescan them mid-session), not something this script can force. Applies
+# regardless of whether a reboot was already needed for NVIDIA above.
+fancy_echo "Log out and back in (or reboot), then re-run: $SCRIPT_DIR/preferences"
+fancy_echo "That finishes what couldn't take effect this session: the F6 mic-mute hotkey"
+fancy_echo "and the always-visible mic indicator both depend on extensions installed"
+fancy_echo "during this run, which GNOME Shell won't recognize until next login."

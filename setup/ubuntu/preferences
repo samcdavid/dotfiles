@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# GNOME preferences
+# Run on a fresh install to configure system defaults, and again after the
+# first login/reboot following install — see the note at the end of
+# `install`. GNOME Shell only recognizes newly-installed extensions at
+# login (a real Wayland limitation, not a timing bug), so the F6 hotkey and
+# mic indicator below silently no-op if run in the same session they were
+# installed in; re-running this script after logging back in fixes that.
+
+fancy_echo() {
+  local fmt="$1"; shift
+  # shellcheck disable=SC2059
+  printf "\n$fmt\n" "$@"
+}
+
+# Trackpad: tap to click
+fancy_echo "Configuring trackpad..."
+gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
+
+# Enables (if needed) and configures an extension, or skips with a clear
+# message instead of gsettings' raw "No such schema" if the running shell
+# doesn't know about it yet (see header comment).
+configure_extension() {
+  local uuid="$1"; shift
+  if ! gnome-extensions list 2>/dev/null | grep -Fq "$uuid"; then
+    fancy_echo "  Skipping — GNOME Shell doesn't see '$uuid' yet. Log out/in (or reboot), then re-run this script."
+    return 1
+  fi
+  gnome-extensions enable "$uuid" 2>/dev/null
+  # gsettings only searches the standard system/user glib schema paths, not
+  # ~/.local/share/gnome-shell/extensions/<uuid>/schemas/ — GNOME Shell
+  # itself resolves extension-local schemas through a different internal
+  # API, but the standalone gsettings CLI needs to be told explicitly.
+  # Field-tested: without this, "No such schema" even with the extension
+  # confirmed Enabled/ACTIVE and its schema already compiled.
+  GSETTINGS_SCHEMA_DIR="$HOME/.local/share/gnome-shell/extensions/$uuid/schemas" "$@"
+}
+
+# --- Global F6 mic-mute hotkey (Mute All Microphones extension) ----------
+# manage-gsd-mic-mute (default true) already clears GNOME's own mic-mute
+# binding on enable, so this is the only key that needs setting.
+fancy_echo "Binding F6 to mic mute/unmute..."
+configure_extension "mute-all-mics@VitalyOstanin" \
+  gsettings set org.gnome.shell.extensions.mute-all-mics mute-hotkey "['F6']"
+
+# --- Always-visible mic status indicator (Quick Settings Audio Panel) ----
+# Keeps GNOME's own mic slider/icon in the Quick Settings tray at all
+# times instead of only while actively recording.
+fancy_echo "Making the microphone indicator always visible..."
+configure_extension "quick-settings-audio-panel@rayzeq.github.io" \
+  gsettings set org.gnome.shell.extensions.quick-settings-audio-panel always-show-input-volume-slider true
+
+# --- Tiling Shell (Rectangle equivalent) ----------------------------------
+# No gsettings key to set here — just needs enabling. manual-installs.sh
+# already tries this, but that attempt always fails for the same reason as
+# the two above (GNOME Shell not seeing it yet), so it needs a real retry
+# here too, not just a warning message.
+fancy_echo "Enabling Tiling Shell..."
+configure_extension "tilingshell@ferrarodomenico.com" true
+
+fancy_echo "GNOME preferences configured."
