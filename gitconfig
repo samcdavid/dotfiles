@@ -1,7 +1,9 @@
 [user]
   name = Sam McDavid
-  email = sam@mcdavid.us
-	signingkey = 4B9AE2529DFD179C
+# user.email lives in ~/.gitconfig.local (written by setup/*/install), not
+# here — no more directory-based work/personal identity switching.
+[include]
+  path = ~/.gitconfig.local
 [filter "hawser"]
   clean = git hawser clean %f
   smudge = git hawser smudge %f
@@ -12,8 +14,6 @@
 [commit]
   template = ~/.gitmessage
   gpgsign = true
-[credential]
-  helper = osxkeychain
 [filter "lfs"]
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
@@ -23,13 +23,9 @@
   defaultBranch = main
 [pager]
   branch = false
-[includeIf "gitdir:~/Developer/work/"]
-  path = ~/.gitconfig-work
-[includeIf "gitdir:~/Developer/personal/"]
-  path = ~/.gitconfig-personal
 [credential "https://github.com"]
 	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	helper = !/usr/bin/gh auth git-credential
 [credential "https://gist.github.com"]
 	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	helper = !/usr/bin/gh auth git-credential
