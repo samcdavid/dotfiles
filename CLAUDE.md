@@ -4,7 +4,7 @@ This file provides guidance to Claude Code and Codex when working in this reposi
 
 ## Repository Overview
 
-Personal dotfiles managed through the [rcm suite](https://github.com/thoughtbot/rcm). Supports both Intel (`/usr/local`) and Apple Silicon (`/opt/homebrew`) Macs.
+Personal dotfiles managed through the [rcm suite](https://github.com/thoughtbot/rcm). Supports Intel (`/usr/local`) and Apple Silicon (`/opt/homebrew`) Macs, and Ubuntu (GNOME). OS-specific bootstrap lives under `setup/mac/` and `setup/ubuntu/` — see `setup/README.md` for how the two are kept in sync; everything else in the repo (`config/`, root dotfiles) is shared and OS-agnostic.
 
 - `rcup` creates symlinks from this repo into `$HOME`.
 - `rcdn` removes symlinks.
@@ -60,4 +60,4 @@ Automation:
 
 ## Portability
 
-`tmux.conf` uses `if-shell` to detect architecture and set the correct Fish and TPM paths. Fish config uses generic asdf shim detection (`$HOME/.asdf/shims`) that works on both architectures. `psqlrc` uses bare `nvim` from `PATH` rather than an absolute path.
+`tmux.conf` resolves fish via `command -v` and installs/runs TPM from a fixed `~/.tmux/plugins/tpm` (git-clone install, done identically by both `setup/mac/install` and `setup/ubuntu/install`) — no OS or Homebrew-prefix branching needed. Its copy-mode yank binding falls back through `pbcopy` → `wl-copy` → `xclip` at runtime. Fish config uses generic asdf shim detection (`$HOME/.asdf/shims`) that works on both. `psqlrc` uses bare `nvim` from `PATH` rather than an absolute path. `gitconfig`'s `gh auth git-credential` helper uses a bare `gh` from `PATH` rather than a hardcoded Homebrew path; anything genuinely machine/OS-specific (`user.email`, GPG signing key, credential helper) is written to the untracked `~/.gitconfig.local`, included from `gitconfig`, by each OS's install script — never committed. There's no directory-based work/personal identity switching (no `gitconfig-work`/`gitconfig-personal`) — a single `user.email` in `~/.gitconfig.local` covers it; edit that file by hand for a machine that needs a different one.
