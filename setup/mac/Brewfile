@@ -7,7 +7,6 @@ brew "openssl@3"
 brew "rcm"
 brew "tmux"
 brew "tmuxinator"
-brew "tpm"
 brew "watchman"
 brew "zsh"
 brew "fish"
@@ -23,9 +22,10 @@ brew "vips"
 # Programming language prerequisites and package managers
 brew "asdf"
 brew "yarn"
+brew "uv"
 
 # Databases
-brew "postgresql@17"
+brew "postgresql" # tracks latest stable major
 brew "redis"
 
 # Cloud / infrastructure

@@ -144,7 +144,11 @@ update_shell() {
   chsh -s "$shell_path"
 }
 
-case "$SHELL" in
+# Check the actual passwd/dscl record, not $SHELL — $SHELL reflects
+# whatever shell was active when this terminal session started, so on a
+# re-run in the same session it still shows the old shell even after chsh
+# already succeeded earlier, re-prompting for a password every time.
+case "$(dscl . -read "/Users/$(whoami)" UserShell 2>/dev/null | awk '{print $2}')" in
   */fish)
     fancy_echo "Already using fish shell."
     ;;
@@ -213,9 +217,15 @@ fish -c "omf install"
 fancy_echo "Installing Neovim plugins..."
 nvim --headless "+Lazy! sync" +qa
 
+# Install TPM (git-clone method — portable, not tied to a Homebrew prefix)
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+  fancy_echo "Installing TPM..."
+  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+fi
+
 # Install tmux plugins via TPM
 fancy_echo "Installing tmux plugins..."
-"$HOMEBREW_PREFIX/opt/tpm/share/tpm/bin/install_plugins"
+"$HOME/.tmux/plugins/tpm/bin/install_plugins"
 
 # Generate GPG key for commit signing
 GPG_EMAIL="sam@mcdavid.us"
@@ -234,9 +244,14 @@ GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long "$GPG_EMAIL" 2>/dev/null
   | awk '/^sec/{print $2}' | cut -d'/' -f2 | head -1)
 
 if [ -n "$GPG_KEY_ID" ]; then
-  git config --global user.signingkey "$GPG_KEY_ID"
-  git config --file "$HOME/.gitconfig-work" user.signingkey "$GPG_KEY_ID"
-  git config --file "$HOME/.gitconfig-personal" user.signingkey "$GPG_KEY_ID"
+  # Machine-local, untracked file (see [include] in gitconfig) so each
+  # machine's independently-generated key never lands in the repo. Also
+  # carries user.email now that directory-based work/personal switching
+  # is gone — edit ~/.gitconfig.local by hand if you ever need a different
+  # email on a given machine.
+  git config --file "$HOME/.gitconfig.local" user.email "$GPG_EMAIL"
+  git config --file "$HOME/.gitconfig.local" user.signingkey "$GPG_KEY_ID"
+  git config --file "$HOME/.gitconfig.local" credential.helper osxkeychain
 
   if gh auth status >/dev/null 2>&1; then
     if gpg --armor --export "$GPG_KEY_ID" | gh gpg-key add - 2>/dev/null; then
@@ -256,4 +271,4 @@ fi
 
 # Configure macOS preferences and text replacements
 fancy_echo "Configuring macOS preferences..."
-"$SCRIPT_DIR/macos"
+"$SCRIPT_DIR/preferences"
