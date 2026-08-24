@@ -25,6 +25,8 @@ Subcommand keywords (`capture`, `promote`) take precedence over branch-name inte
 - `gotchas.md` — known failure patterns for this skill.
 - `references/learned-misses.md` — active pattern queue. Auto-promote any pending entries whose Evidence has crossed threshold BEFORE producing the triage block, so the triage block can report what was promoted.
 
+When a workflow ledger is available, follow `references/finding-ledger.md`.
+
 ## Step 1 - Gather Diff Existing Feedback
 
 **PR Mode - read-only via `gh`, never check out branch.**

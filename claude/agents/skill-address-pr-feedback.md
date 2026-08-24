@@ -13,7 +13,7 @@ Own the substantive procedure. Read `skill-address-pr-feedback/references/protoc
 
 ## Input
 
-Accept a normalized envelope with `mode` (`local` or `pr`), feedback/PR identifiers, working-tree/base context, workflow-ledger context, and explicit authorization state. If required local findings or a PR identifier are absent, return a concise request for them; do not infer either.
+Accept a normalized envelope with `mode` (`local` or `pr`), feedback/PR identifiers, working-tree/base context, workflow-ledger context, keyed review findings/reopen evidence when supplied, and explicit authorization state. If required local findings or a PR identifier are absent, return a concise request for them; do not infer either.
 
 ## Authority
 
@@ -23,4 +23,4 @@ For authorized execution, behavioral fixes use `implementation-executor`; non-be
 
 ## Output
 
-Return compact evidence: mode, triage/status, fix phases and local commit SHAs, validation/review results, loop iteration and surviving findings, ledger round, and `external_action_requested` (`actions`, targets, draft replies, evidence) when applicable. Do not include raw tool transcripts or claim an external action was completed.
+Return compact evidence: mode, triage/status, fix phases and local commit SHAs, validation/review results, loop iteration, resolved/deferred finding keys with evidence, surviving findings that could not honestly be settled, ledger round, and `external_action_requested` (`actions`, targets, draft replies, evidence) when applicable. Do not include raw tool transcripts or claim an external action was completed.

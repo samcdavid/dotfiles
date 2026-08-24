@@ -2,7 +2,7 @@
 
 Load at the very start of every run, before Step 1 (Gather All Feedback), in both PR mode and local mode. This skill can be invoked standalone on any branch, or from inside `my-workflow`'s automatic fix loop where a ledger already exists. Either way, check for it — the ledger carries the plan, spec, decisions, and requirements that produced the code under review, and working from the raw PR/diff alone risks re-litigating a decision the plan already made or missing an acceptance criterion the linked ticket alone wouldn't show.
 
-The ledger is both an input and an output here: steps 1-3 read it, and step 4 appends this run's round record to it. A feedback round is the densest source of what the plan got wrong, and a round that only exists in a finished session's transcript is lost.
+The ledger is both an input and an output here: steps 1-3 read it, and step 4 appends this run's round record and final finding dispositions to it. A feedback round is the densest source of what the plan got wrong, and a round that only exists in a finished session's transcript is lost.
 
 ## Step 1 — Detect
 
@@ -10,7 +10,7 @@ Run `git branch --show-current`, then search `~/.claude/thoughts/shared/workflow
 
 ## Step 2 — Read
 
-If a matching ledger exists, read it and its recorded artifact paths — research doc, spec, architecture plan, plan, analysis report, and observability/eval companions, whichever exist. Read the plan and spec in full; skim the others for anything relevant to the feedback at hand.
+If a matching ledger exists, read it and its recorded artifact paths — research doc, spec, architecture plan, plan, analysis report, and observability/eval companions, whichever exist. Read the plan and spec in full; skim the others for anything relevant to the feedback at hand. Also read its `## Finding Register` using `~/.claude/skills/my-review/references/finding-ledger.md` (or the equivalent `~/.agents` path under Codex), retaining the latest row for each key.
 
 ## Step 3 — Fold into this skill's own steps
 
@@ -18,8 +18,9 @@ If a matching ledger exists, read it and its recorded artifact paths — researc
 - **Investigation (Step 2).** Treat a decision recorded in the ledger (spec scope call, plan architectural choice, an assumption logged during the pipeline) as settled — don't silently re-open it just because a reviewer's comment revisits it. Instead, use the recorded rationale as investigation evidence: if the comment conflicts with an explicit decision, that decision *is* your evidence for a **Disagree / Push Back** or **Valid Deferral**, per `references/pushback-patterns.md`'s Pattern 3 (evidence-backed pushback) — cite the plan/spec's stated reasoning, not just your own judgment.
 - **Deferral scope.** If the ledger has a `cross_workflow` section noting sibling overlap, a reviewer's suggestion that duplicates or belongs to a sibling issue's tracked work is stronger evidence for **Valid Deferral** — cite the sibling issue and its ledger/status.
 - **Fix Quality Bar / `architectural_constraints` (Act II).** Pull each relevant phase's `architectural_constraints` from the plan as a floor for this skill's own Fix Quality Bar (`references/fix-planning.md`) — a feedback fix should not violate a boundary the original plan explicitly called out. When a `my-architecture-plan` artifact exists, its own constraints are the deeper source the plan's were copied from — check a disputed structural comment against it directly if the plan's copy is ambiguous or the comment is about a boundary the plan didn't restate in full.
+- **Finding dedupe (Act I).** Match feedback to the latest Finding Register key before investigation. An unchanged `resolved` or `deferred` concern is already settled: do not re-plan it or spend another repair pass. Reopen only with the concrete trigger required by `finding-ledger.md`; otherwise report the prior disposition compactly if the reviewer needs a response.
 
-## Step 4 — Append the round record
+## Step 4 — Append the round record and finding dispositions
 
 Runs last, after the Step 11 summary in local mode and after Step 12 publishing in PR mode, so the record can state what actually landed. Append one dated section per run:
 
@@ -30,9 +31,9 @@ Runs last, after the Step 11 summary in local mode and after Step 12 publishing 
 number in PR mode, "self-run my-review, fix-loop iteration K" in local mode —
 and anything that reframes earlier ledger entries, e.g. a PR now existing.]
 
-| # | Finding | Verdict | Commit |
-|---|---|---|---|
-| 1 | [short description] | Fixed / Partially correct / Push back / Deferred / Already addressed | `[sha]` or — |
+| # | Key | Finding | Verdict | Commit |
+|---|---|---|---|---|
+| 1 | `subsystem.concern` | [short description] | Fixed / Partially correct / Push back / Deferred / Already addressed | `[sha]` or — |
 
 ### Things worth remembering from this round
 
@@ -45,6 +46,19 @@ and anything that reframes earlier ledger entries, e.g. a PR now existing.]
 **Validation:** [test/lint/build results.] [PR mode: what was pushed, replied to,
 resolved, re-requested.]
 ```
+
+After the round record, create `## Finding Register` if it does not yet exist,
+then append one row for every finding that has an honest final disposition using
+the exact schema in `my-review/references/finding-ledger.md`. `Fixed`, verified
+`Already addressed`, and evidence-backed `Push back` become `resolved` with
+their proof. A `Valid Deferral` becomes `deferred` only with its verified,
+specific follow-up/clearing condition. Reuse the review-supplied key, or derive
+one with that reference when feedback originated outside `my-review`.
+
+Do not add a row for `Scope Decision Required`, a failed/incomplete repair, or a
+finding left open by the review-pass cap. Surface those as unsettled instead of
+lying with a resolved/deferred label. When a key was reopened, append the new
+row with the same key and name the changed-code or new-evidence trigger.
 
 Number the round by counting existing `## Feedback Round` sections plus any hand-written review-round sections already in the file; continue that sequence rather than restarting at 1.
 

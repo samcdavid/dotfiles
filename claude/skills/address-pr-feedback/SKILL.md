@@ -15,7 +15,7 @@ Use `skill-address-pr-feedback` for the substantive evidence, triage, fix-phase,
 
 Normalize `$ARGUMENTS` into one of these envelopes and pass it to `skill-address-pr-feedback`:
 
-- **Local:** `{ mode: local, findings, base_ref, workflow_ledger_context }`. The runner may make and locally commit validated fixes through `Skill(commit)`, then returns resolution evidence. It must never make GitHub calls that change state.
+- **Local:** `{ mode: local, findings, base_ref, workflow_ledger_context }`. Preserve each review finding's stable key and any reopen evidence. The runner may make and locally commit validated fixes through `Skill(commit)`, then records a resolved/deferred ledger disposition with evidence. It must never make GitHub calls that change state.
 - **PR triage:** `{ mode: pr, pr_identifier, authorization: none }`. The runner may fetch read-only PR evidence and returns a triage envelope; it must not change code, push, post, resolve, or re-request review.
 - **PR execution:** only after presenting the triage and receiving the user's explicit authorization. Pass the confirmed scope and the exact requested outward actions in a fresh envelope. The runner may make and locally commit validated fixes, but always returns an `external_action_requested` envelope instead of pushing, replying, resolving threads, or re-requesting review.
 
@@ -27,4 +27,4 @@ Present the runner's triage, planned fixes, draft replies, and proposed external
 
 ## Present
 
-Return the runner's triage or completed local-fix report: fix commits, validation and review evidence, surviving findings/deferrals, ledger round, and any external-action request. In PR mode also report exactly which authorized outward actions the wrapper completed. Do not include raw tool transcripts.
+Return the runner's triage or completed local-fix report: fix commits, validation and review evidence, resolved/deferred finding keys, surviving findings that could not honestly be settled, ledger round, and any external-action request. In PR mode also report exactly which authorized outward actions the wrapper completed. Do not include raw tool transcripts.

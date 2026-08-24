@@ -22,7 +22,7 @@ Determine which PR to address:
 - Otherwise, check `gh pr status` for the current branch's PR.
 - If neither works, ask the user.
 
-Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its spec, plan, and decisions feed the Requirements Traceability Baseline below and the investigation in Step 2, and Step 13 appends this run's round record back to it. When none exists, this adds nothing — proceed as usual and skip Step 13.
+Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its spec, plan, decisions, and Finding Register feed the Requirements Traceability Baseline below and the investigation in Step 2, and Step 13 appends this run's round record plus resolved/deferred dispositions back to it. When none exists, this adds nothing — proceed as usual and skip Step 13.
 
 ---
 
@@ -84,7 +84,7 @@ For each pending comment:
 1. **Reproduce the concern.** Read the referenced code. Does the reviewer's claim hold? If they say there's a bug, can you construct the failing case? If they suggest an alternative, does it actually work in context? If they flag a missing edge case, trace the code path — does the value they're worried about actually reach this point?
 2. **Check the codebase.** If the reviewer suggests using an existing utility or pattern, verify it exists and does what they think it does. If they suggest a refactor, check whether it would break callers. If they flag a naming issue, check how the term is used elsewhere in the domain.
 3. **Check the docs.** If the feedback involves a library API, framework behavior, or Oban/Ecto pattern, verify against actual documentation — not memory.
-4. **Check the workflow ledger, if one was found.** Does the comment revisit a decision the spec or plan already made deliberately? Treat that decision as settled, not as a fresh question — its recorded rationale is evidence for your response, per `references/workflow-ledger-context.md`. Does a `cross_workflow` sibling-overlap note make the comment's suggestion someone else's tracked work rather than this PR's?
+4. **Check the workflow ledger, if one was found.** Does the comment match a resolved/deferred Finding Register key? If so, suppress re-planning unless a specific changed-code or new-evidence reopen trigger exists; preserve the prior disposition for any necessary reply. Does the comment revisit a decision the spec or plan already made deliberately? Treat that decision as settled, not as a fresh question — its recorded rationale is evidence for your response, per `references/workflow-ledger-context.md`. Does a `cross_workflow` sibling-overlap note make the comment's suggestion someone else's tracked work rather than this PR's?
 5. **Form a judgment with evidence.** You now know whether the reviewer is right, partially right, or mistaken. Classify accordingly — and consult `references/pushback-patterns.md` to pick the response shape that fits (e.g. Pattern 3 "evidence-backed pushback" for falsifiable bot claims, Pattern 1 "out-of-scope defer" for adjacent cleanup, Pattern 4 "acknowledge-and-fix" for clear bugs).
 
 ### Deduplication Requests
@@ -481,9 +481,9 @@ Present the final result:
 [PR mode only: list the exact actions, targets, drafts, order, and evidence returned for the wrapper. State that the runner performed none of them.]
 ```
 
-## Step 13 — Append the Round Record to the Ledger
+## Step 13 — Append the Round Record and Finding Dispositions to the Ledger
 
-Skip if Getting Started found no ledger. Otherwise this runs last — after local validation/review, or after returning the PR external-action request — so the record states what landed locally and what the wrapper still owns. Append one dated `## Feedback Round N` section per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Report the path and round number in Step 12's output.
+Skip if Getting Started found no ledger. Otherwise this runs last — after local validation/review, or after returning the PR external-action request — so the record states what landed locally and what the wrapper still owns. Append one dated `## Feedback Round N` section and resolved/deferred Finding Register rows per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Preserve each incoming `my-review` finding key. Report the path, round number, settled keys, and any unsettled findings in Step 12's output.
 
 ## Guidelines
 
@@ -497,6 +497,7 @@ Skip if Getting Started found no ledger. Otherwise this runs last — after loca
 - **One concern per commit when possible.** Makes it easy for reviewers to verify each fix maps to their feedback.
 - **Never argue style.** If a reviewer prefers a different but equally valid approach, adopt it. Reserve push back for correctness and constraints.
 - **Deferred is not forgotten.** Every deferral needs a concrete follow-up plan, or it's not a deferral — just do it.
+- **Settled is not rehashed.** Reuse Finding Register keys across review and feedback rounds. An unchanged `resolved` or `deferred` concern is context, not another fix phase; reopen it only with specific new evidence.
 - **Don't fix what wasn't flagged.** Address the feedback, nothing more — no refactoring surrounding code while you're in the file.
 - **Verify before declaring done.** A PR with addressed feedback that doesn't build is worse than unaddressed feedback.
 - **The wrapper owns external authority.** In PR mode, return triage first, then run only the confirmed local scope. Return outward work in an `external_action_requested` envelope; never push, publish, reply, resolve, or re-request from this runner.
