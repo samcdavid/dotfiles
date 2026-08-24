@@ -1,9 +1,12 @@
 # Finding Ledger
 
-Use this reference whenever a workflow ledger is available. It gives review and
-feedback work one durable, append-only record of a finding's final disposition.
-It is not a replacement for GitHub thread state: a thread may still need a
-reply or resolution after its underlying finding has been settled.
+Workflow ledgers live in Claude Thoughts at
+`~/.claude/thoughts/shared/workflows/`, never in the repository. Discover the
+matching ledger there before deciding whether one is available, then use this
+reference whenever one is found. It gives review and feedback work one durable,
+append-only record of a finding's final disposition. It is not a replacement for
+GitHub thread state: a thread may still need a reply or resolution after its
+underlying finding has been settled.
 
 ## Register shape
 

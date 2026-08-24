@@ -20,12 +20,13 @@ Determine what to review:
 
 Subcommand keywords (`capture`, `promote`) take precedence over branch-name interpretation.
 
-### Read these before producing any output
+### Read before output
 
 - `gotchas.md` — known failure patterns for this skill.
-- `references/learned-misses.md` — active pattern queue. Auto-promote any pending entries whose Evidence has crossed threshold BEFORE producing the triage block, so the triage block can report what was promoted.
+- `references/learned-misses.md` — active pattern queue. Auto-promote qualifying pending entries before the triage block.
 
-When a workflow ledger is available, follow `references/finding-ledger.md`.
+Before selecting scope, discover the ledger in Claude Thoughts and, when found,
+follow `references/finding-ledger.md`.
 
 ## Step 1 - Gather Diff Existing Feedback
 
