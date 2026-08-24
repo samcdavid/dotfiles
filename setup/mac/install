@@ -244,6 +244,18 @@ GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format long "$GPG_EMAIL" 2>/dev/null
   | awk '/^sec/{print $2}' | cut -d'/' -f2 | head -1)
 
 if [ -n "$GPG_KEY_ID" ]; then
+  # `--quick-generate-key ... default 0` above is documented to include an
+  # encryption subkey for "default" usage, but field-tested on Ubuntu: it
+  # produced sign+cert only, no subkey at all, on that system's GPG. Same
+  # command here, so check for it rather than trust the implicit default —
+  # a sign-only key can't be used for anything that needs to encrypt to it.
+  if ! gpg --list-secret-keys --with-colons "$GPG_EMAIL" 2>/dev/null | awk -F: '$1=="ssb" && $12 ~ /e/ {found=1} END{exit !found}'; then
+    fancy_echo "Adding an encryption subkey..."
+    GPG_FPR=$(gpg --list-secret-keys --with-colons "$GPG_EMAIL" 2>/dev/null | awk -F: '/^fpr/{print $10; exit}')
+    gpg --quick-add-key "$GPG_FPR" rsa4096 encr \
+      || fancy_echo "Warning: could not add an encryption subkey. Add manually: gpg --quick-add-key $GPG_FPR rsa4096 encr"
+  fi
+
   # Machine-local, untracked file (see [include] in gitconfig) so each
   # machine's independently-generated key never lands in the repo. Also
   # carries user.email now that directory-based work/personal switching
