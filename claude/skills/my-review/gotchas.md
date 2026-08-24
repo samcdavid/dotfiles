@@ -2,6 +2,15 @@
 
 Known failure patterns and lessons learned. Read before starting work with this skill.
 
+### Infer a linked issue from the branch name before declaring requirements unavailable
+
+- **Category:** requirements-triage
+- **Context:** A local branch name follows the repository convention of including an issue identifier, such as `mcp-796-m8-2-...`.
+- **Wrong:** Report that no linked ticket or spec is available because the user did not provide one explicitly.
+- **Right:** Extract the identifier from the current branch name, normalize it (for example, `MCP-796`), and use that issue as the default requirements source. State the inferred link and only say requirements are unavailable after the issue lookup fails.
+- **Why:** Branch naming is an intentional, durable link to the work's acceptance criteria; ignoring it causes an incomplete requirements review.
+- **Source:** User correction on MCP-796, 2026-08-21.
+
 ### Re-check proposed findings against the current GitHub thread index immediately before returning
 
 - **Category:** failure-mode

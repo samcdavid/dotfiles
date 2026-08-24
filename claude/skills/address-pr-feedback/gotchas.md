@@ -7,6 +7,20 @@
 - **Correct behavior:** Treat the PR-mode triage confirmation as authorization to push the validated commits, reply in every addressed thread, resolve those threads, and re-request eligible reviewers. Stop only when the user explicitly narrows or revokes that scope.
 - **Why it matters:** The feedback workflow's confirmation gate exists specifically to authorize the complete review round; treating it as local-only leaves the PR visibly unfinished.
 
+## Do not report a local feedback fix as complete before PR publication
+
+- **Trigger:** Addressing GitHub PR feedback after the user has authorized the full PR execution sequence.
+- **Wrong behavior:** Stop after committing and say the user must push or rerun CI.
+- **Correct behavior:** Push the validated fix, post the prepared replies, resolve every addressed thread, and re-request eligible reviewers who have not approved; report completion only after verifying those actions.
+- **Why it matters:** A local commit alone does not update the PR review state or let CI and reviewers evaluate the fix.
+
+## Publish only the authorized commit when local HEAD has advanced
+
+- **Trigger:** A validated feedback-fix commit is followed locally by a concurrent or unrelated commit before publication.
+- **Wrong behavior:** Run a normal branch push, which publishes both commits even though the user authorized only the feedback fix.
+- **Correct behavior:** Compare local HEAD with the PR remote head; when extra commits exist, push the exact authorized SHA to the PR branch (or obtain explicit authorization for the additional commits) before posting replies and resolving threads.
+- **Why it matters:** PR-mode confirmation authorizes a defined scope, not every commit that happens to be on the local branch at push time.
+
 ## Run and verify the full relevant lint suite before completing a fix
 
 - **Trigger:** Completing a PR-feedback fix, especially after a focused test or partial lint check passes.
@@ -62,3 +76,10 @@
 - **Wrong behavior:** Use `object` for forwarded options or generic JSON maps, then validate only tests and formatting.
 - **Correct behavior:** Inspect the concrete dependency signature, model allowed keyword options with `Unpack[TypedDict]` (or a justified narrower type), narrow decoded JSON before nested access, and run Ruff *check* plus focused BasedPyright.
 - **Why it matters:** Type noise masks real future errors and a format-only check misses lint violations in otherwise passing review fixes.
+
+## Export every contract needed to consume a public result wrapper
+
+- **Trigger:** A root facade exports a result/failure wrapper whose field is a concrete diagnostic or error union.
+- **Wrong behavior:** Export only the wrapper and force callers to import private modules for union members or phase/code discriminators.
+- **Correct behavior:** Export the union, concrete variants, and discriminators from the root facade; regenerate Tach and add root-only construction and narrowing coverage.
+- **Why it matters:** Callers otherwise cannot safely consume an advertised public result without violating the facade boundary.
