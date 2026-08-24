@@ -22,6 +22,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
+| `188a02c` | Made `my-review` discover workflow ledgers exclusively from Claude Thoughts. | Review dispatch matches `~/.claude/thoughts/shared/workflows/` by branch before issue/slug context, and only reports no ledger after that lookup. |
 | `2ac64fe` | Added an append-only Finding Register shared by `my-review` and `address-pr-feedback`. | Reviews assign stable finding keys and suppress unchanged settled concerns; feedback rounds record only evidence-backed `resolved` or concretely followed-up `deferred` outcomes, reopening a key only for specific new evidence. |
 
 ## 2026-08-20 — Cross-runtime runners and model routing
