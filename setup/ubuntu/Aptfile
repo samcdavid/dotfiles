@@ -11,9 +11,13 @@ pass
 rcm
 tmux
 unzip
+watchman
 zsh
 fish
 wl-clipboard
+# No libiconv equivalent needed — glibc's iconv already covers this on
+# Linux; it's only a separate Homebrew formula because macOS doesn't ship
+# a GNU-compatible one.
 
 # GitHub (repo added in repos.sh)
 gh
@@ -32,7 +36,8 @@ libvips-tools
 
 # Programming language prerequisites and package managers
 # (nodejs/npm are a system-level bootstrap only — asdf manages project
-# versions; needed early since claude-code/codex installs run before asdf.)
+# versions. Needed early for corepack, bundled with Node, which is how
+# manual-installs.sh gets yarn without a global `npm install -g`.)
 nodejs
 npm
 ruby-full
@@ -81,6 +86,7 @@ ngrok
 
 # Dev tools
 cmake
+cmake-doc
 colordiff
 direnv
 ffmpeg
@@ -107,10 +113,13 @@ yt-dlp
 cowsay
 figlet
 fortune-mod
+lolcat
 
 # GUI apps (repos added in repos.sh)
 1password
 1password-cli
+claude-code
+claude-desktop
 code
 
 # NVIDIA / CUDA is NOT installed from here — driver + cuda-toolkit (NOT the

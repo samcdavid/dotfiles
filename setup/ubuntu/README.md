@@ -13,12 +13,13 @@ see `../README.md` for how the two are kept in sync.
 1. `apt update && apt upgrade`
 2. `repos.sh` — add every third-party apt repo/key the package list needs
    (GitHub CLI, Docker, PostgreSQL/PGDG, Google Cloud CLI, 1Password,
-   VS Code, ngrok, NVIDIA CUDA)
+   VS Code, ngrok, NVIDIA CUDA, Claude Code, Claude Desktop)
 3. Install every package in `Aptfile` (apt first, snap fallback if apt
    doesn't have it)
-4. `manual-installs.sh` — everything with no apt package: asdf, uv, Claude
-   Code, Codex CLI, Docker Desktop, NordVPN, AWS CLI, CircleCI CLI, Google
-   Chrome, fonts, and three GNOME Shell extensions
+4. `manual-installs.sh` — everything with no apt package: asdf, uv, Codex
+   CLI, Docker Desktop, the AWS Session Manager plugin, yarn (via
+   corepack), NordVPN, AWS CLI, CircleCI CLI, Google Chrome, Neovim,
+   fonts, and three GNOME Shell extensions
 5. Symlink dotfiles via `rcup`
 6. Authenticate with GitHub (`gh auth login`)
 7. Generate an SSH key, register it with GNOME Keyring, upload it to GitHub
@@ -76,6 +77,41 @@ preferences            # GNOME trackpad, F6 mic-mute hotkey, mic indicator
 
 ## Notable decisions / departures from a literal cask→apt mapping
 
+- **Docker Desktop sign-in needs `pass`, initialized, and a GPG key with an
+  actual encryption subkey** — field-tested, three-layer bug: (1) `pass`
+  (in Aptfile now) is what Docker Desktop's Linux credential storage uses
+  internally, per Docker's own docs, but was never being initialized; (2)
+  `install` generates a GPG key for commit signing, and `pass init` reuses
+  it rather than asking for a separate one; (3) that generated key turned
+  out to have *no encryption subkey at all* — `gpg --quick-generate-key
+  ... default 0` is documented to include one for "default" usage, but
+  didn't here, so `pass`/anything that encrypts to the key failed with
+  "Unusable public key" until one was added explicitly. `install` now
+  checks for an encryption-capable subkey and adds one if missing, and
+  calls `pass init "$GPG_KEY_ID"` right after — don't assume the implicit
+  "default" GPG usage did what it's documented to.
+- **The original Brewfile→Aptfile mapping missed several formulae/casks
+  entirely** (`watchman`, `yarn`, `cmake-docs`, `lolcat`, `session-manager-plugin`,
+  and the `ghostty`/`claude` casks) — an oversight, not a deliberate drop
+  like the ones listed further down. Caught by a full line-by-line
+  cross-check against the Brewfile rather than spot-checking, after
+  `ghostty` turned up missing in practice. If a tool from the Mac side
+  ever seems to be silently absent on Ubuntu, that same full diff against
+  `setup/mac/Brewfile` is the reliable way to check — don't assume a gap
+  is deliberate just because it's undocumented.
+- **Claude Code and Claude Desktop both come from Anthropic's own apt
+  repos** (added in `repos.sh`), not npm/a one-off `.deb` — verified the
+  claude-code key's fingerprint against Anthropic's published one before
+  trusting it. This replaced an earlier `npm install -g @anthropic-ai/
+  claude-code` in `manual-installs.sh` for the same reason Codex avoids
+  npm: a signed, versioned apt package over a mutable install-time
+  dependency tree. No global npm installs remain anywhere in this setup.
+- **yarn comes from corepack** (bundled with Node), not `npm install -g
+  yarn` — same no-global-npm-installs reasoning. `corepack enable` needs
+  `sudo` (it symlinks shims into apt's root-owned bin dir), but
+  `corepack prepare yarn@stable --activate` deliberately runs as the
+  invoking user — under sudo it would cache the actual yarn package under
+  `/root`, unreadable the moment you invoke `yarn` normally afterward.
 - **Neovim** comes from a GitHub-release tarball (`manual-installs.sh`), not
   apt or a PPA — checked both official neovim-ppa options first: `stable`
   is abandoned (last upload 2022, v0.7.2, no 26.04 build), `unstable`

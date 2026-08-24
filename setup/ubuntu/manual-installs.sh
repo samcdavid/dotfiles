@@ -31,12 +31,10 @@ if ! command -v uv >/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
 
-# --- Claude Code CLI (npm — cross-platform, unaffected by the Codex
-#     decision below) -----------------------------------------------------
-if ! command -v claude >/dev/null; then
-  fancy_echo "Installing Claude Code CLI..."
-  sudo npm install -g @anthropic-ai/claude-code
-fi
+# Claude Code and Claude Desktop are both installed from Aptfile now —
+# Anthropic has first-party apt repos for both (added in repos.sh), which
+# is strictly better than a global npm install for the same reason Codex
+# avoids npm below: a signed apt package over a mutable dependency tree.
 
 # --- Codex CLI — GH-release binary + checksum verify, NOT npm ------------
 # Deliberately not `npm install -g @openai/codex`: pulling a single verified
@@ -103,6 +101,28 @@ if ! command -v aws >/dev/null; then
   unzip -q "$AWS_TMP/awscliv2.zip" -d "$AWS_TMP"
   sudo "$AWS_TMP/aws/install"
   rm -rf "$AWS_TMP"
+fi
+
+# --- AWS Session Manager plugin (for `aws ssm start-session`) -------------
+if ! command -v session-manager-plugin >/dev/null; then
+  fancy_echo "Installing AWS Session Manager plugin..."
+  SSM_TMP="$(mktemp -d)"
+  curl -fsSL -o "$SSM_TMP/session-manager-plugin.deb" \
+    "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb"
+  sudo dpkg -i "$SSM_TMP/session-manager-plugin.deb"
+  rm -rf "$SSM_TMP"
+fi
+
+# --- yarn (via corepack, bundled with Node — no global npm install) -------
+if ! command -v yarn >/dev/null; then
+  fancy_echo "Installing yarn..."
+  # `enable` needs sudo — it symlinks shims into apt's root-owned bin dir.
+  # `prepare --activate` deliberately runs as the invoking user, not sudo:
+  # it fetches/caches the actual yarn package into the user's own cache
+  # dir, which a sudo'd run would put under /root instead — unreadable
+  # the moment you actually invoke `yarn` afterward.
+  sudo corepack enable
+  corepack prepare yarn@stable --activate
 fi
 
 # --- CircleCI CLI -----------------------------------------------------

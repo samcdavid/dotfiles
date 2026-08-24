@@ -22,6 +22,25 @@ sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
   | sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
 
+# --- Claude Code + Claude Desktop -----------------------------------------
+# Both have first-party apt repos now — verified the claude-code key's
+# fingerprint (31DD DE24 DDFA B679 F42D 7BD2 BAA9 29FF 1A7E CACE) matches
+# Anthropic's published one. Using these instead of npm (claude-code) or a
+# one-off .deb (claude-desktop) for the same reason Codex avoids npm: a
+# signed apt repo over a mutable install-time dependency tree.
+fancy_echo "Adding Claude Code apt repo..."
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://downloads.claude.ai/keys/claude-code.asc \
+  | sudo tee /etc/apt/keyrings/claude-code.asc >/dev/null
+echo "deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude.ai/claude-code/apt/stable stable main" \
+  | sudo tee /etc/apt/sources.list.d/claude-code.list >/dev/null
+
+fancy_echo "Adding Claude Desktop apt repo..."
+curl -fsSL https://downloads.claude.ai/claude-desktop/key.asc \
+  | sudo tee /usr/share/keyrings/claude-desktop-archive-keyring.asc >/dev/null
+echo "deb [signed-by=/usr/share/keyrings/claude-desktop-archive-keyring.asc] https://downloads.claude.ai/claude-desktop/apt/stable stable main" \
+  | sudo tee /etc/apt/sources.list.d/claude-desktop.list >/dev/null
+
 # --- Docker (engine + Desktop's dependencies) --------------------------
 fancy_echo "Adding Docker apt repo..."
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
