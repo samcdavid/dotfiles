@@ -116,13 +116,19 @@ fi
 # --- yarn (via corepack, bundled with Node — no global npm install) -------
 if ! command -v yarn >/dev/null; then
   fancy_echo "Installing yarn..."
+  # Explicit /usr/bin/corepack, not a bare `corepack` call — field-tested:
+  # once asdf is set up (true for this script's own later steps, and for
+  # anyone re-running just this block by hand on an already-configured
+  # machine), asdf's shim intercepts the bare command and fails with "No
+  # version is set for command corepack", since the asdf-managed nodejs
+  # install it's pinned to doesn't have corepack wired up the same way.
   # `enable` needs sudo — it symlinks shims into apt's root-owned bin dir.
   # `prepare --activate` deliberately runs as the invoking user, not sudo:
   # it fetches/caches the actual yarn package into the user's own cache
   # dir, which a sudo'd run would put under /root instead — unreadable
   # the moment you actually invoke `yarn` afterward.
-  sudo corepack enable
-  corepack prepare yarn@stable --activate
+  sudo /usr/bin/corepack enable
+  /usr/bin/corepack prepare yarn@stable --activate
 fi
 
 # --- CircleCI CLI -----------------------------------------------------

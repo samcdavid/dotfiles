@@ -112,6 +112,12 @@ preferences            # GNOME trackpad, F6 mic-mute hotkey, mic indicator
   `corepack prepare yarn@stable --activate` deliberately runs as the
   invoking user — under sudo it would cache the actual yarn package under
   `/root`, unreadable the moment you invoke `yarn` normally afterward.
+  Both calls use the explicit `/usr/bin/corepack` path, not a bare
+  `corepack` — field-tested: once asdf is configured (true by the time
+  this script reaches its own later steps, and true for anyone re-running
+  just this block by hand on an already-set-up machine), asdf's shim
+  intercepts the bare command and fails with "No version is set for
+  command corepack" instead of resolving to the apt-bundled one.
 - **Neovim** comes from a GitHub-release tarball (`manual-installs.sh`), not
   apt or a PPA — checked both official neovim-ppa options first: `stable`
   is abandoned (last upload 2022, v0.7.2, no 26.04 build), `unstable`
