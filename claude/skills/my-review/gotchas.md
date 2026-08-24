@@ -272,3 +272,21 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Right:** Confirm the entitlement and readiness conditions are ANDed, then keep any finding narrowly on the concrete behavior inside the enabled cohort. For observability of authored names, ask for redaction or the team's approved anonymized representation (for example, `Robert G.`); reserve a merge block for an explicit policy violation with immediate harm.
 - **Why:** A rollout flag deliberately limits access to the users the team selected. Conflating that control with a defect produces an overly broad review and obscures the actual remediation.
 - **Source:** PR #28214 review correction, 2026-08-20.
+
+### Load the retained branch ledger before dispatching local review
+
+- **Category:** workflow-state
+- **Context:** Reviewing a branch with a durable workflow ledger, including a ledger retained by the review runner rather than committed in the worktree.
+- **Wrong:** Normalize the review request with `ledger_path: none`, rely only on a workspace file search, or report synthesized findings before matching them to the branch's resolved/deferred finding history.
+- **Right:** Load the runner's retained shared routing references and discover the branch ledger before dispatch. Pass its path/context into the review envelope, require stable-key/prior-ledger matching, and treat unmatched findings as new only after that reconciliation.
+- **Why:** Ignoring retained review state re-raises settled findings, makes each review look like a fresh audit, and creates an avoidable fix/review loop.
+- **Source:** User correction on MCP-796, 2026-08-24.
+
+### Workflow ledgers live in Claude Thoughts, never in the worktree
+
+- **Category:** workflow-state
+- **Context:** Any `my-review` invocation for a workflow-managed issue or branch.
+- **Wrong:** Search only the repository (including hidden files) for a ledger, set `ledger_path: null` when none is found, and report “no prior-ledger matches.”
+- **Right:** Before selecting review scope or routing lenses, resolve and read the issue ledger from `~/.claude/thoughts/**` (the durable Claude Thoughts store). Pass that path and its current branch/scope/status into the review envelope; a worktree search is not ledger discovery.
+- **Why:** The worktree can be a historical or superseded branch. Its code and locally passing tests are not current merge evidence, so reviewing it without the external ledger produces stale findings and an invalid verdict.
+- **Source:** User correction on MCP-734, 2026-08-24.
