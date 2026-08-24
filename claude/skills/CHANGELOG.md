@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-24 — Durable review-finding dispositions
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `2ac64fe` | Added an append-only Finding Register shared by `my-review` and `address-pr-feedback`. | Reviews assign stable finding keys and suppress unchanged settled concerns; feedback rounds record only evidence-backed `resolved` or concretely followed-up `deferred` outcomes, reopening a key only for specific new evidence. |
+
 ## 2026-08-20 — Cross-runtime runners and model routing
 
 | Commit | Change | Regression boundary / known-good meaning |
