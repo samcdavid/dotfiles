@@ -78,3 +78,23 @@ mkrc <file> # Add a new dotfile to the repo
 lsrc        # List all managed symlinks
 rcdn        # Remove symlinks
 ```
+
+## Migration Notes
+
+One-time fixups for machines set up before a given change — delete each
+entry once it's been run on every machine you use.
+
+- **2026-08-23 — `config/fish/fish_variables` is no longer synced.** It
+  used to be rcup-symlinked like everything else, but `fish_user_paths`
+  only ever grows (fish appends, never prunes) and `__fish_initialized`
+  is just fish's own version marker — the effect was every machine's
+  Homebrew/apt paths permanently accumulating in every other machine's
+  PATH. On each machine that had this repo set up before this note
+  existed, run once:
+  ```bash
+  rm ~/.config/fish/fish_variables
+  ```
+  Fish recreates it as a normal local file on next launch — nothing else
+  to do. New machines running `setup/mac/install` or
+  `setup/ubuntu/install` fresh never had the symlink, so they don't need
+  this.
