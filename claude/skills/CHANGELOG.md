@@ -24,6 +24,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 |---|---|---|
 | `053c983` | Added `implement-review` and routed `my-workflow`'s atomic delivery block through it. | One runner owns implementation, validation, whole-branch review, repair, and the five-pass cap; `clean` requires a clean terminal review, while `blocked` and `cap_reached` remain incomplete. `my-review` now emits a deterministic coverage manifest, performs a bounded whole-diff synthesis pass, and enforces requirements, causal-evidence, and final duplicate-detection gates. |
 | `f8b34a5` | Added review-first routing to `implement-review`. | A direct run without a plan, or a run whose ledger marks workflow delivery complete, starts with a whole-branch review and repairs verified findings within the existing five-pass cap; active approved plans still implement before review. |
+| `3f536ce` | Added the Axon Ecto pipe-style query gotcha across delivery skills. | Implementation, quick delivery, review, and PR-feedback repair treat practical `from(...)` query conversions as the project convention, while preserving documented construct-specific exceptions. |
 | `99a5a8d` | Moved review and feedback process reminders into explicit execution contracts. | Gotchas retain code/domain traps; review coverage, requirements mapping, publication boundaries, feedback validation, and PR execution sequencing are mandatory workflow contracts. |
 
 ## 2026-08-24 — Durable review-finding dispositions
