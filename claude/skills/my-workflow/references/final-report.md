@@ -13,9 +13,11 @@ Report:
 - Cross-workflow coordination — sibling ledgers/issues checked on the same Linear project (or "no Linear issue"), any overlap found, and how it was resolved.
 - Files changed.
 - Tests and validation commands.
-- Final review verdict.
+- `implement-review` terminal status, review-clean flag, every review pass, and
+  the fix commits each produced.
 - When migrations were in scope: the migration-history matrix, validation result for each history, release-health evidence, and any explicit override of a blocked gate.
-- Post-review loop iterations, if any.
+- Surviving findings and root-cause theory when `implement-review` is `blocked`
+  or `cap_reached`; do not present either state as completion.
 - Suggested next command.
 
 End by stating that no git outward actions were taken unless explicitly requested.

@@ -10,8 +10,15 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 
 1. Normalize the input mode and build the diff source of truth exactly as the shared protocol requires.
 2. Dispatch research and active lens reviewers, then merge and dedupe only their flat findings.
-3. Route every finding to exactly one isolated verifier from its severity, risk, and confidence. Re-dispatch low-tier escalations to the high tier; do not self-adjudicate them.
-4. Compute `REQUEST_CHANGES` mechanically from verified Critical findings. Delegate the remaining APPROVE/COMMENT challenge to `adversarial-debate`.
-5. Render the shared protocol's structured finding format and return the compact result envelope to the wrapper or `my-workflow`.
+3. Run one bounded whole-diff synthesis pass after lens compilation. It may emit
+   only interaction candidates grounded in the diff and research evidence; every
+   candidate must enter the same verifier route as lens findings.
+4. Route every finding to exactly one isolated verifier from its severity, risk,
+   and confidence. Re-dispatch low-tier escalations to the high tier; do not
+   self-adjudicate them.
+5. Compute `REQUEST_CHANGES` mechanically from verified Critical findings.
+   Delegate the remaining APPROVE/COMMENT challenge to `adversarial-debate`.
+6. Enforce `review-contract.md` before returning the compact result envelope to
+   the wrapper, `implement-review`, or `my-workflow`.
 
 Never bypass the outer wrapper's publication boundary. Never pass raw subagent transcripts to a downstream stage.

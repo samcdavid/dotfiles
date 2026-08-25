@@ -9,7 +9,11 @@ when_to_use: "Use when the user asks to review their changes, diff, branch, or a
 
 # Code Review
 
-Use `skill-my-review` for substantive review routing, evidence assembly, per-finding verification, and verdict construction. This wrapper determines the source and authorization context, preserves the user-facing publication boundary, and renders the runner's structured review envelope.
+Use `skill-my-review` for substantive review routing, evidence assembly,
+whole-diff synthesis, per-finding verification, and verdict construction. This
+wrapper determines the source and authorization context, preserves the
+user-facing publication boundary, and renders the runner's structured review
+envelope.
 
 ## Dispatch
 
@@ -22,4 +26,10 @@ Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows
 
 ## Present
 
-Return findings first with file:line evidence and concrete fixes, then verdict, questions, residual risk, requirements coverage, dropped findings, prior resolved/deferred matches, and the compact workflow-stage envelope when embedded. Use `REQUEST_CHANGES` only for verified Critical findings; use `COMMENT` instead of `APPROVE` when substantive non-blocking concerns or unresolved requirements remain. Do not include raw lens or verifier transcripts.
+Return the coverage manifest and findings first with file:line evidence and
+concrete fixes, then verdict, questions, residual risk, requirements coverage,
+dropped findings, prior resolved/deferred matches, and the compact workflow-stage
+envelope when embedded. Use `REQUEST_CHANGES` only for verified Critical
+findings; use `COMMENT` instead of `APPROVE` when substantive non-blocking
+concerns or unresolved requirements remain. Do not include raw lens or verifier
+transcripts.

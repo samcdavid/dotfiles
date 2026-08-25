@@ -3,13 +3,13 @@ model: sonnet
 effort: high
 name: my-workflow
 skill-only: coordinator
-description: "Run research through analysis autonomously, resolving decisions with the pipeline's own recommendation, then stop once at a Decisions Checkpoint to present every artifact and provisional decision for confirm/override. Only after that confirmation does the pre-implementation coordination check run, followed by the gated atomic implement -> validate -> review block. Never jump straight to implementation unless the ledger marks all prior stages complete and decisions confirmed."
+description: "Run research through analysis autonomously, resolving decisions with the pipeline's own recommendation, then stop once at a Decisions Checkpoint to present every artifact and provisional decision for confirm/override. Only after that confirmation does the pre-implementation coordination check run, followed by the gated implement-review block. Never jump straight to implementation unless the ledger marks all prior stages complete and decisions confirmed."
 disable-model-invocation: false
 ---
 
 # My Workflow
 
-Run the delivery pipeline as resumable stages. This is the explicit skill-only coordinator: it has no runner. Stages 1-9 run back-to-back: research facts and log decisions provisionally. Stop after stage 9 at the **Decisions Checkpoint**. On confirmation, run stage 10; absent overlap, run `my-implement` and its atomic validation/review/repair loop. Details: `references/protocol.md`.
+Run the delivery pipeline as resumable stages. This is the explicit skill-only coordinator: it has no runner. Stages 1-9 run back-to-back: research facts and log decisions provisionally. Stop after stage 9 at the **Decisions Checkpoint**. On confirmation, run stage 10; absent overlap, dispatch `implement-review` for the atomic implementation, validation, review, and repair loop. Details: `references/protocol.md`.
 
 Default to `my-research` on a new workflow. Never infer implementation permission. It requires stages 1-9 complete, a completed behavior-first `my-test-strategy`, eval `completed`/`not_applicable`, confirmed Decisions Checkpoint decisions, and a fresh post-checkpoint coordination `passed` gate; migrations also require their safety gate.
 
@@ -35,7 +35,6 @@ Load targeted references as needed:
 - `references/checkpoint-policy.md` before the Decisions Checkpoint and the atomic block's final checkpoint.
 - `references/cross-workflow-coordination.md` at intake, stage 10 (post-checkpoint), and the atomic block's final checkpoint, when the task is a Linear issue.
 - `references/autonomy-boundaries.md` when a stage wants to ask questions.
-- `references/post-review-loop.md` after `my-review`.
 - `references/final-report.md` before final handoff.
 - `references/migration-safety.md` at intake and before implementation when migrations are in scope.
 
@@ -46,8 +45,8 @@ Load targeted references as needed:
 Stages 1-9 run back-to-back, no stop; every decision gets a recommendation, logs as provisional, run continues. **Decisions Checkpoint** after stage 9: present every artifact and provisional decision for confirm/override — the point to clear context; resume re-enters via the ledger.
 
 10. Pre-implementation coordination check (Linear issues only), run only after that checkpoint: fresh sibling scan against the finalized plan. Stop only on overlap; otherwise straight into the atomic block.
-11. Gated atomic block: `my-implement`, fix loop, then checkpoint.
-12. Fix loop (automatic): `my-validate` -> `my-review` -> `address-pr-feedback local` if warranted -> repeat within 3 combined review passes. Checkpoint after final review.
+11. Gated atomic block: `implement-review`, then checkpoint.
+12. `implement-review` owns the automatic `my-implement` -> `my-validate` -> `my-review` -> repair loop, capped at 5 review passes. Checkpoint after its terminal result.
 
 ## Flow
 

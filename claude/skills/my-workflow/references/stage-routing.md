@@ -45,6 +45,7 @@ Run stages in this order, based on ledger status. Stages 1-9 run back-to-back wi
 | `my-implement` | `skill-my-implement` | `my-implement` Skill entrypoint |
 | `my-validate` | `skill-my-validate` | `my-validate` Skill entrypoint |
 | `my-review` | `skill-my-review` | `my-review` Skill entrypoint |
+| `implement-review` | `skill-implement-review` | `implement-review` Skill entrypoint |
 | `address-pr-feedback local` | `skill-address-pr-feedback` | `address-pr-feedback` Skill entrypoint |
 
 - `my-research` not completed: run `my-research`, log the artifact, continue.
@@ -57,16 +58,9 @@ Run stages in this order, based on ledger status. Stages 1-9 run back-to-back wi
 - `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan` and log the artifact. Otherwise mark it `not_applicable` with a one-line reason. Either way, continue without stopping.
 - `my-analyze` not completed: run `my-analyze`, including the test-strategy artifact, log the artifact, then **stop here** at the Decisions Checkpoint — present every stage 1-9 artifact plus every accumulated provisional decision for the user to confirm or override. This is the point to clear context; do not run stage 10 yet.
 - Decisions Checkpoint confirmed (every provisional decision resolved), and `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, stop with just that decision (options, recommendation, evidence) — a small checkpoint of its own. If clear, ledger `passed` and continue straight into the atomic block with no separate stop. Not a Linear issue: ledger `passed` (not applicable) and continue straight into the atomic block.
-- Implementation not reviewed, and implementation gate is satisfied (Decisions Checkpoint confirmed, pre-implementation check `passed`): run the atomic block — dispatch `my-implement` with the approved plan and test-strategy artifact, then the fix loop — then checkpoint.
+- Implementation not reviewed, and implementation gate is satisfied (Decisions Checkpoint confirmed, pre-implementation check `passed`): dispatch `implement-review` in embedded mode with the approved plan, test strategy, base, and ledger context. It owns implementation, validation, whole-branch review, and repair; do not wrap it in another loop.
 
-Fix loop (runs automatically, no checkpoint between iterations):
-
-1. Dispatch `my-validate` in embedded mode when available, otherwise its entrypoint.
-2. Dispatch `my-review` in local mode against the base branch, again preferring its embedded runner when available.
-3. Decide: if the review yields Critical findings, or non-blocking findings substantive enough that shipping them would be sloppy, dispatch `address-pr-feedback local` with findings, plan/base/ledger context, and the **remaining** shared review-pass budget. Its runner executes its repair loop and returns final review evidence; treat that as the next workflow review pass rather than re-running the same validation/review around it. Otherwise exit the loop.
-4. Hard cap: 3 combined review passes. On the 3rd review still having Critical or substantive findings, stop and checkpoint with the surviving findings and a root-cause theory — that is a genuine blocker, not something to keep grinding on.
-
-Nits and clearly optional suggestions never justify another iteration; carry them into the checkpoint as deferred items. Do not re-run earlier pipeline stages from inside this loop.
+`implement-review` has one shared cap of 5 review passes. A `clean` result proceeds to the final checkpoint. `blocked` or `cap_reached` stops with its surviving findings, iteration deltas, commits, and root-cause theory; neither is implementation completion. Nits and clearly optional suggestions are deferred without another pass.
 
 Implementation gate:
 

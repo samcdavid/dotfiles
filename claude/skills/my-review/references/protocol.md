@@ -98,11 +98,11 @@ Hard constraints:
 
 State `base_ref`, commit count, and changed-file count in triage.
 
-Research subagents and lens reviewers read changed files fully when needed. Main context does not need to pre-read every file.
+Research subagents and lenses read changed files fully when needed.
 
 ## Step 2 — Cursory Pass: Identify Review Lenses
 
-Do a quick triage to pick which review **lenses** apply. Lenses drive which reviewer subagents you spawn in Step 3 and which deep-dive subsections appear in the final review.
+Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sections.
 
 ### Inputs
 
@@ -110,6 +110,8 @@ Do a quick triage to pick which review **lenses** apply. Lenses drive which revi
 - Linked Linear issue(s), referenced specs / RFCs / design docs (fetch them — don't infer)
 - File-level scan of the diff: which areas changed? (backend / frontend / migrations / config / infra / tests / docs / dependency manifests)
 - Existing reviewer assignments or labels on the PR
+
+Read `references/review-contract.md` before choosing lenses.
 
 ### Lens catalog
 
@@ -127,11 +129,14 @@ Do a quick triage to pick which review **lenses** apply. Lenses drive which revi
 | **Migration safety** | Lock risk, down-migration safety, column types, advisory locks, backfillers | Migration files in the diff |
 | **Dependency** | License, maintenance, attack surface of new packages | Lockfile changes, new dependency manifests |
 
-If the change has no obvious lens fit, default to **Backend + Security + QA**.
+Security, QA, and a general-reviewer lens (Backend when none is obvious) are
+baseline for every non-empty code diff.
 
 ### Requirements checklist (if a ticket is linked)
 
-If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), or Local Issue Mode supplied one, fetch it via the Linear MCP and build a `requirements_checklist`: title, description, acceptance criteria, sub-issues. Pass this to the `requirements-reviewer` (and activate the PM lens).
+Fetch a supplied Linear ticket into `requirements_checklist`; otherwise infer an
+issue identifier from the branch name before declaring it unavailable. Activate
+the PM lens when a checklist exists.
 
 If a caller supplies a **spec or requirements document** directly (e.g. `my-workflow` passes the stage-2 spec path, or `$ARGUMENTS` names a spec/PRD), read it and build the `requirements_checklist` from its acceptance criteria the same way — a spec is an equally valid requirements source, and takes precedence when both a spec and a ticket are present. Activate the PM lens whenever any requirements source exists.
 
@@ -159,6 +164,7 @@ Produce a short triage block and show it to me before going deep:
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
 - **Requirements checklist:** built from <ticket ID> | none linked
+- **Coverage:** <required lenses and skip reasons>
 - **Project context:** <project name> — <N> active/upcoming siblings checked; <N> exact follow-up matches | none
 - **Tracer triggers:** <list which fired, or "none">
 - **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
@@ -244,7 +250,11 @@ Merge the lens reviewers' fragments into one findings set:
 1. **De-duplicate across reviewers.** Two lenses often flag the same line (e.g. security + general on the same input handler). Collapse to one finding, keeping the most precise framing and noting both lenses.
 2. **Re-check dedupe against `existing_comments_index`** — a reviewer may have missed a thread; drop or `add_to_thread` anything already raised.
 3. **Assemble** one flat findings set — each finding keeping its `Severity`, `Risk`, `Confidence`, and lens attribution — plus the lens deep-dive subsections each reviewer returned (Security Deep-Dive, Architecture Assessment, Performance Deep-Dive, Quality Deep-Dive, Requirements Traceability), and — if the tracer ran — Related-Issue Regression Risks. When collapsing a duplicate, keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the two: a finding two lenses read differently is one to verify harder, not one to average out.
-4. **Sanity-check coverage**: every active lens produced a fragment. If a reviewer returned an `## Error` (e.g. missing `requirements_checklist`) or came back empty for a lens that clearly applies, re-dispatch it once with a tightened brief before proceeding. Do not silently drop a lens.
+4. **Sanity-check coverage**: every required lens in the Coverage Manifest
+   produced a fragment. If a reviewer returned an `## Error` (e.g. missing
+   `requirements_checklist`) or came back empty for a lens that clearly applies,
+   re-dispatch it once with a tightened brief before proceeding. Do not silently
+   drop a lens.
 
 This compiled set is what Steps 4–8 operate on.
 
@@ -338,7 +348,11 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 
 There is deliberately no "What's Good" section. Lens reviewers no longer return grounded positives, so anything written here would be the orchestrator inventing praise it did not verify. Do not add one back from your own impression of the diff.
 
-## Step 6 — Per-Finding Verification
+## Step 6 — Whole-Diff Synthesis and Per-Finding Verification
+
+Read `references/review-contract.md` and run its bounded synthesis pass before
+verifier routing. Synthesis candidates enter the normal verifier route; they
+never change a verdict directly.
 
 **Every** finding is verified on its own, by its own agent, with no knowledge of the others. Nothing is batched. A shared-context batch pass is a one-way valve — it can talk a real defect down but rarely talks one up, because the cheap findings around it set the tone. Isolation is what lets an under-classified defect get promoted instead of steel-manned away.
 
@@ -400,6 +414,7 @@ Before Step 7, confirm:
 - dropped findings have one-line reasons
 - every escalation was re-dispatched, not silently resolved or dropped
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
+- the Coverage Manifest and final integrity gate in `review-contract.md` passed
 
 ## Step 7 — Verdict
 
@@ -535,6 +550,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 ## References
 
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
+- `references/review-contract.md` - deterministic coverage, evidence, and final-integrity requirements for every review.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
 - `references/cross-service-contracts.md` - checklist for cross-service changes. Read by `general-reviewer`.
 - `references/project-context.md` - bounded Linear project context and exact-match follow-up calibration.
