@@ -23,6 +23,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
 | `053c983` | Added `implement-review` and routed `my-workflow`'s atomic delivery block through it. | One runner owns implementation, validation, whole-branch review, repair, and the five-pass cap; `clean` requires a clean terminal review, while `blocked` and `cap_reached` remain incomplete. `my-review` now emits a deterministic coverage manifest, performs a bounded whole-diff synthesis pass, and enforces requirements, causal-evidence, and final duplicate-detection gates. |
+| `99a5a8d` | Moved review and feedback process reminders into explicit execution contracts. | Gotchas retain code/domain traps; review coverage, requirements mapping, publication boundaries, feedback validation, and PR execution sequencing are mandatory workflow contracts. |
 
 ## 2026-08-24 — Durable review-finding dispositions
 
