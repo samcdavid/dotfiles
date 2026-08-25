@@ -3,7 +3,7 @@ model: sonnet
 effort: high
 name: implement-review
 runner: skill-implement-review
-description: Execute an approved plan through implementation, validation, whole-branch review, and bounded repair until clean or a five-pass cap.
+description: Execute an approved plan, or review and repair completed/unplanned work, through bounded local delivery until clean or a five-pass cap.
 ---
 
 # Implement and Review
@@ -20,7 +20,14 @@ stage, authority: local_only }` and dispatch it to `skill-implement-review`.
 
 - `mode` is `standalone` or `embedded`. Embedded callers supply the approved
   plan, test strategy, base, ledger, and stage context.
-- Require an approved plan with RED tests and success criteria before dispatch.
+- The runner selects one route after reading the plan and ledger:
+  - **Plan delivery:** an approved plan has unfinished behavioral phases and
+    the workflow delivery stage is not complete. Require its RED tests and
+    success criteria, then implement before the first review.
+  - **Review-first:** no plan is available, or the supplied ledger records the
+    workflow/atomic delivery stage as completed. Start with a whole-branch
+    review, then repair only its verified substantive findings within the same
+    five-pass budget. Do not reject this route merely because no plan exists.
 - The runner may make only locally validated, committed changes through
   `implementation-executor` or `quick-implement-agent`. It never pushes,
   publishes, opens or updates a PR, or makes another outward action.
