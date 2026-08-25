@@ -3,7 +3,7 @@ model: sonnet
 effort: high
 name: my-review
 runner: skill-my-review
-description: "Rigorous local and PR review through a model-pinned mechanical router/assembler. REQUEST_CHANGES needs a Critical issue; approve only when requirements are satisfied."
+description: "Rigorous local and PR review through a model-pinned mechanical router/assembler. REQUEST_CHANGES needs a verified Critical, High-risk issue; otherwise use COMMENT for actionable feedback."
 when_to_use: "Use when the user asks to review their changes, diff, branch, or a GitHub PR."
 ---
 
@@ -29,7 +29,7 @@ Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows
 Return the coverage manifest and findings first with file:line evidence and
 concrete fixes, then verdict, questions, residual risk, requirements coverage,
 dropped findings, prior resolved/deferred matches, and the compact workflow-stage
-envelope when embedded. Use `REQUEST_CHANGES` only for verified Critical
-findings; use `COMMENT` instead of `APPROVE` when substantive non-blocking
-concerns or unresolved requirements remain. Do not include raw lens or verifier
-transcripts.
+envelope when embedded. Use `REQUEST_CHANGES` only for verified findings that
+are both `Critical` and `High` risk. Use `COMMENT` for all other actionable
+feedback; reserve `APPROVE` for reviews with only minor or clearly optional
+comments. Do not include raw lens or verifier transcripts.

@@ -397,7 +397,7 @@ Verifier agents can accidentally read the local working tree. If any DROP or REV
 - DOWNGRADE: apply the verifier's revised levels.
 - REVISE: update claim, levels, or fix.
 - DROP: remove and note in Dropped Findings.
-- PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a finding PROMOTEd to Critical carries into Step 7 as Critical, and nothing downstream talks it back down without new evidence.
+- PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a finding PROMOTEd to Critical carries into Step 7 at its verified risk level; it requests changes only when that risk is also High.
 - `requires clarification`: surface as a Targeted Question naming the exact query a human should run. Never silently drop it, and never fill the gap with a guess presented as verified.
 
 Before `/this-important`, use `references/project-context.md` to remove only exact non-Critical follow-ups in **Upcoming Project Work**. Title-only/partial matches, gaps, and Critical findings remain.
@@ -410,7 +410,7 @@ Before Step 7, confirm:
 - no finding duplicates an existing PR thread
 - every PR finding has an aggregate-diff anchor and causal link; baseline-only issues never survive
 - every finding is grounded in the diff or verified source
-- every Critical finding truly blocks merge
+- every `REQUEST_CHANGES` candidate is both Critical and High risk, and truly blocks merge
 - dropped findings have one-line reasons
 - every escalation was re-dispatched, not silently resolved or dropped
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
@@ -420,14 +420,14 @@ Before Step 7, confirm:
 
 The verdict is a **mechanical function of Step 6's verifier results**, not a fresh judgment call layered on top.
 
-- If any finding's post-verification status is Critical (KEPT Critical, or PROMOTEd to Critical) → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it's "genuinely" merge-blocking — Step 6's per-finding dispatch already independently verified it with cited evidence, which is exactly what a fresh challenge here would just redo with less scrutiny (single shared context, not an isolated dispatch). The one exception: if a finding is Critical *only* because its verification returned `requires clarification` (couldn't be checked, not confirmed), don't auto-`REQUEST_CHANGES` on an unverified claim — surface it as a blocking question and let the user decide.
-- If nothing survives as Critical, choose between **APPROVE** and **COMMENT**:
+- If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but gets **COMMENT**, not a merge block. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
+- Otherwise choose between **APPROVE** and **COMMENT**:
   - **APPROVE** — requirements are satisfied, and only minor nits or clearly optional suggestions remain.
-  - **COMMENT** — several substantive inline comments, unresolved requirements questions, insufficient context, stale/already-merged PR state, or the user explicitly asks not to approve.
+  - **COMMENT** — the default when any actionable feedback, unresolved requirements question, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
 ### Challenge the APPROVE/COMMENT choice
 
-`REQUEST_CHANGES` is not up for debate in this pass — it isn't a judgment call anymore once Step 6 has verified it. This adversarial pass is scoped to the one choice that's still discretionary, and it reasons over the review as a whole rather than one finding, so it uses `adversarial-debate` rather than a per-finding verifier. Spawn `adversarial-debate` with:
+`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. This adversarial pass is scoped to the one choice that's still discretionary, and it reasons over the review as a whole rather than one finding, so it uses `adversarial-debate` rather than a per-finding verifier. Spawn `adversarial-debate` with:
 
 - proposed APPROVE/COMMENT verdict
 - the final surviving non-Critical findings, with their risk and confidence levels
@@ -523,7 +523,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 
 ## Guidelines
 
-- Every Critical merge-blocking issue must include a concrete fix, ideally replacement code.
+- Every Critical finding must include a concrete fix, ideally replacement code. Only Critical findings with High risk are merge-blocking.
 - Every non-blocking suggestion should include example code when the alternative is not obvious.
 - Explicitly label severity on every comment: **Critical**, **Suggestion (non-blocking)**, **Question**, or **Nit**.
 - Ask rather than demand when the author may have context you lack.
@@ -531,7 +531,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - Cross-service boundaries deserve extra scrutiny because subtle bugs hide there.
 - Tests must test what they claim; vacuous tests are worse than no tests.
 - Never re-raise an issue already present in the PR conversation.
-- Reserve `REQUEST_CHANGES` for Critical merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or omitted must-have acceptance criteria. Non-Critical findings can be raised as comments, questions, suggestions, or nits; use `COMMENT` rather than `APPROVE` when there are several substantive inline comments or unresolved requirements concerns.
+- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern — including a Critical concern with Medium or Low risk — as a `COMMENT`, question, suggestion, or nit. Use `COMMENT` whenever actionable feedback remains; `APPROVE` is for minor or clearly optional comments only.
 
 ## Common Rationalizations
 
@@ -545,7 +545,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 | "The author clearly knows what they're doing" | Author competence isn't evidence the diff is correct. Review the code in front of you, not your prior of the author. |
 | "I already found a few issues, that's enough" | Stopping early because a quota feels met leaves real findings on the table — finish the lens sweep before triaging. |
 | "The PR conversation probably already covers this" | Confirm it actually does by checking `existing_comments_index` — don't silently drop a finding on a hunch. |
-| "COMMENT vs APPROVE doesn't matter much here" | It's the signal the author acts on. Reserve APPROVE for when requirements are satisfied and no Critical finding survives — don't let convenience nudge it up a level. |
+| "COMMENT vs APPROVE doesn't matter much here" | It's the signal the author acts on. COMMENT is the right default for actionable feedback; reserve APPROVE for reviews with only minor or clearly optional comments. |
 
 ## References
 

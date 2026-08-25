@@ -4,7 +4,7 @@ The cross-cutting review categories that apply to every `my-review` invocation r
 
 Categories are ordered by priority. Before raising any issue, check it against the existing-comments dedupe index supplied by the caller. Do not re-raise anything already covered by an existing thread.
 
-## Critical Candidates (request changes only if merge-blocking)
+## Critical Candidates (request changes only if verified High risk and merge-blocking)
 
 ### Correctness / Bugs
 - Logic errors, off-by-one, nil/null handling, race conditions

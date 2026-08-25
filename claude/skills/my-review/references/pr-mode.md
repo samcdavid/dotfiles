@@ -21,7 +21,7 @@ Every subagent prompt in PR mode must receive the same constraints and PR HEAD S
 ## Re-review discipline
 
 Before re-reviewing a PR, record the prior reviewed SHA and a blocker ledger of
-surviving Critical findings. Verify those findings against the new HEAD before
+surviving Critical, High-risk findings. Verify those findings against the new HEAD before
 running broad lenses. Then review the delta since that SHA for regressions.
 
 A requirement-changing workaround (for example, disabling a capability or moving
@@ -32,4 +32,4 @@ do not ask the author to repeatedly iterate on code until the decision is made.
 Do not publish repeated blocking reviews that merely restate an unchanged blocker.
 Use one concise update identifying the clearing condition; publish a new blocking
 review only when the blocker remains after a claimed fix, regresses, or a newly
-verified Critical finding appears.
+verified Critical, High-risk finding appears.

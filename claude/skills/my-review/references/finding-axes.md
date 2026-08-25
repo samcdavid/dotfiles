@@ -16,7 +16,7 @@ They answer three different questions. Do not collapse them — a confidently-id
 
 ### Severity
 
-Use the shared vocabulary from `~/.claude/rules/review-finding-format.md` — that rule is the single source of truth for the `Critical` bar, and this file does not restate or relax it. `Critical` means merge-blocking: likely production breakage, data loss/corruption/exposure, exploitable security or privacy risk, likely runtime break in a cross-service/API/persistence contract, or an omitted must-have acceptance criterion.
+Use the shared vocabulary from `~/.claude/rules/review-finding-format.md` — that rule is the single source of truth for the `Critical` impact bar, and this file does not restate or relax it. `Critical` denotes the potential impact of likely production breakage, data loss/corruption/exposure, exploitable security or privacy risk, likely runtime break in a cross-service/API/persistence contract, or an omitted must-have acceptance criterion. It is not, by itself, a request-for-changes verdict.
 
 Severity is about impact **conditional on the claim being true**. Do not discount it because you are unsure — that is what `Confidence` is for.
 
@@ -28,7 +28,7 @@ Likelihood × blast radius, assuming the claim is true.
 - `Medium` — triggers under a realistic but narrower condition, or the blast radius is contained to one workflow or one tenant.
 - `Low` — needs an unlikely combination of conditions, or the effect is cosmetic, recoverable, or trivially retried.
 
-A `Nit` can carry `Low` risk and a `Critical` can carry `High` risk, but they are not locked together: a `Non-blocking` maintainability finding on a hot cross-service path can be `High` risk, and a `Critical`-severity claim guarded by a feature flag defaulting off can be `Low` risk. Say which and why.
+A `Nit` can carry `Low` risk and a `Critical` can carry `High` risk, but they are not locked together: a `Non-blocking` maintainability finding on a hot cross-service path can be `High` risk, and a `Critical`-severity claim guarded by a feature flag defaulting off can be `Low` risk. The review blocks only on the combination of verified `Critical` severity and `High` risk; all other findings are comments. Say which and why.
 
 ### Confidence
 
@@ -53,7 +53,7 @@ HIGH TIER -> finding-verifier-high   if ANY of:
 LOW TIER  -> finding-verifier-low    otherwise
 ```
 
-Why this shape: expensive verification is bought by the cost of a wrong verdict. A `Critical` is where a false positive wrongly blocks a merge and a false negative ships a defect, so it always earns the deep pass. `High` risk earns it on blast radius alone. And a non-trivial finding the reviewer is shaky on is the single highest-value thing to verify hard — it is simultaneously the most likely to be wrong and the most expensive to get wrong. Nits and Questions stay cheap regardless of confidence, because no verdict they produce can change the review outcome much.
+Why this shape: expensive verification is bought by the cost of a wrong verdict. A `Critical` warrants deep verification because a false negative can ship a severe defect, and a Critical, High-risk finding can correctly block a merge. `High` risk earns it on blast radius alone. And a non-trivial finding the reviewer is shaky on is the single highest-value thing to verify hard — it is simultaneously the most likely to be wrong and the most expensive to get wrong. Nits and Questions stay cheap regardless of confidence, because no verdict they produce can change the review outcome much.
 
 Compute the tier mechanically from the three levels. Do not hand-pick a tier because a finding "feels" important — if it feels important, that belongs in the levels themselves.
 

@@ -20,9 +20,9 @@ Load this after lens reviewers return.
 
 Verdict rule:
 
-- `REQUEST_CHANGES` if any finding survives (or is PROMOTEd to) Critical after its per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. Exception: a finding that's Critical only because verification returned `requires clarification` (couldn't be checked, not confirmed) surfaces as a blocking question instead of an automatic `REQUEST_CHANGES`.
-- `APPROVE` when requirements are satisfied, nothing survives as Critical, and only minor nits or clearly optional suggestions remain.
-- `COMMENT` when nothing survives as Critical but approval would overstate confidence: several substantive inline comments, unresolved requirements questions, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve.
+- `REQUEST_CHANGES` only if a finding survives (or is PROMOTEd to) both Critical **and** High risk after per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. A Critical finding at Medium or Low risk gets `COMMENT`; a finding needing clarification surfaces as a blocking question, never an automatic `REQUEST_CHANGES`.
+- `APPROVE` when requirements are satisfied and only minor nits or clearly optional suggestions remain.
+- `COMMENT` whenever actionable feedback, unresolved requirements questions, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
 For a re-review, report the blocker ledger delta: cleared, still open, regressed,
 or newly verified. Do not repeat a prior blocking finding verbatim when its state

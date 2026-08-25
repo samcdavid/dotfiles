@@ -16,7 +16,7 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 4. Route every finding to exactly one isolated verifier from its severity, risk,
    and confidence. Re-dispatch low-tier escalations to the high tier; do not
    self-adjudicate them.
-5. Compute `REQUEST_CHANGES` mechanically from verified Critical findings.
+5. Compute `REQUEST_CHANGES` mechanically only from verified Critical, High-risk findings.
    Delegate the remaining APPROVE/COMMENT challenge to `adversarial-debate`.
 6. Enforce `review-contract.md` before returning the compact result envelope to
    the wrapper, `implement-review`, or `my-workflow`.

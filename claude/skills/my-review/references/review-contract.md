@@ -41,12 +41,13 @@ Immediately before returning a PR envelope, refresh both the GraphQL review
 thread index and the filtered REST review-comment index. Drop substantive
 duplicates, including bot comments anchored at a different line, then recompute
 the verdict. Do not publish or recommend `REQUEST_CHANGES` unless at least one
-surviving Critical finding passes every evidence rule above.
+surviving Critical, High-risk finding passes every evidence rule above.
 
 ## Re-review and Publication Boundaries
 
 A re-review rebuilds the aggregate diff and current comment index; a prior
 approval never narrows scope. Reviews remain read-only and never publish.
-`REQUEST_CHANGES` requires at least one surviving verified Critical finding with
-an actionable inline anchor; unresolved threads, existing debt, or a body-only
-objection do not independently justify it.
+`REQUEST_CHANGES` requires at least one surviving verified Critical, High-risk
+finding with an actionable inline anchor; unresolved threads, existing debt, a
+Critical finding at Medium or Low risk, or a body-only objection do not
+independently justify it.
