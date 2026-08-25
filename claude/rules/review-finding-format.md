@@ -7,8 +7,8 @@ Review findings must be grounded and actionable.
 `REQUEST_CHANGES` blocks merging. Reserve it for findings that are both
 **Critical** and **High risk**. Critical describes the potential impact; High
 risk means the failure is likely on a common path or has a wide blast radius.
-Critical findings at Medium or Low risk are important comments, not automatic
-merge blocks:
+Critical findings at Medium or Low risk are important non-blocking feedback,
+not automatic merge blocks:
 
 - The PR is likely to break production or a core workflow.
 - The PR can lose, corrupt, or expose data.
@@ -18,7 +18,7 @@ merge blocks:
 
 Everything else should be a non-blocking comment, question, suggestion, or nit, even when it is worth fixing. Do not request changes for style, preference, cleanup, ordinary missing tests, maintainability concerns, minor performance concerns, speculative risk, or a Critical concern whose verified risk is not High.
 
-Approval still has a bar: approve only when the PR satisfies requirements and only minor or clearly optional comments remain. Use `COMMENT` whenever actionable feedback, unresolved requirements questions, or enough non-blocking concerns remain that approval would overstate confidence.
+Approval still has a bar: approve only when the PR satisfies requirements, no Critical High-risk finding survives, and all remaining findings are Low risk. Low-risk findings may be substantive and actionable. Use `COMMENT` whenever a non-blocking finding is Medium/High risk, requirements are unresolved, or context is insufficient.
 
 Use `blocking` only as shorthand for a "Critical, High-risk merge blocker." If a finding is important but does not meet both bars, call it non-blocking and explain the risk.
 

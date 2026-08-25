@@ -28,7 +28,7 @@ Likelihood × blast radius, assuming the claim is true.
 - `Medium` — triggers under a realistic but narrower condition, or the blast radius is contained to one workflow or one tenant.
 - `Low` — needs an unlikely combination of conditions, or the effect is cosmetic, recoverable, or trivially retried.
 
-A `Nit` can carry `Low` risk and a `Critical` can carry `High` risk, but they are not locked together: a `Non-blocking` maintainability finding on a hot cross-service path can be `High` risk, and a `Critical`-severity claim guarded by a feature flag defaulting off can be `Low` risk. The review blocks only on the combination of verified `Critical` severity and `High` risk; all other findings are comments. Say which and why.
+A `Nit` can carry `Low` risk and a `Critical` can carry `High` risk, but they are not locked together: a `Non-blocking` maintainability finding on a hot cross-service path can be `High` risk, and a `Critical`-severity claim guarded by a feature flag defaulting off can be `Low` risk. The review blocks only on the combination of verified `Critical` severity and `High` risk; otherwise the finding is non-blocking, and an all-Low-risk review can still APPROVE. Say which and why.
 
 ### Confidence
 

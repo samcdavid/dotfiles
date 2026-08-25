@@ -295,7 +295,7 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 ## Review: [Brief description of what the change does]
 
 ### Verdict
-**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 7. Approve only when requirements are satisfied and remaining comments are minor or optional.]
+**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 7. Approve when requirements are satisfied and all remaining feedback is Low risk.]
 
 ### Summary
 [1-2 sentences demonstrating you understood the change and its purpose]
@@ -420,23 +420,23 @@ Before Step 7, confirm:
 
 The verdict is a **mechanical function of Step 6's verifier results**, not a fresh judgment call layered on top.
 
-- If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but gets **COMMENT**, not a merge block. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
+- If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but follows the normal non-blocking verdict rules. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
 - Otherwise choose between **APPROVE** and **COMMENT**:
-  - **APPROVE** — requirements are satisfied, and only minor nits or clearly optional suggestions remain.
-  - **COMMENT** — the default when any actionable feedback, unresolved requirements question, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve remains.
+  - **APPROVE** — requirements are satisfied, no Critical High-risk finding survives, and every remaining finding is Low risk (including substantive, actionable low-risk feedback).
+  - **COMMENT** — any remaining Medium/High-risk non-blocking feedback, unresolved requirements question, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
 ### Challenge the APPROVE/COMMENT choice
 
 `REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. This adversarial pass is scoped to the one choice that's still discretionary, and it reasons over the review as a whole rather than one finding, so it uses `adversarial-debate` rather than a per-finding verifier. Spawn `adversarial-debate` with:
 
 - proposed APPROVE/COMMENT verdict
-- the final surviving non-Critical findings, with their risk and confidence levels
+- the final surviving non-blocking findings, with their risk and confidence levels
 - triage context and active lenses
 
 Ask it to challenge:
 
-- Is COMMENT actually warranted, or is this an APPROVE being held back out of excess caution?
-- Is APPROVE overstating confidence given the volume or substance of remaining comments, or unresolved requirements questions?
+- Is COMMENT actually warranted, or are all remaining findings Low risk and therefore compatible with APPROVE?
+- Is APPROVE overstating confidence because a finding is Medium/High risk or a requirements/context question remains?
 
 Apply the adversarial verdict before final output.
 
@@ -531,7 +531,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - Cross-service boundaries deserve extra scrutiny because subtle bugs hide there.
 - Tests must test what they claim; vacuous tests are worse than no tests.
 - Never re-raise an issue already present in the PR conversation.
-- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern — including a Critical concern with Medium or Low risk — as a `COMMENT`, question, suggestion, or nit. Use `COMMENT` whenever actionable feedback remains; `APPROVE` is for minor or clearly optional comments only.
+- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern as a non-blocking finding. Use `APPROVE` when all remaining findings are Low risk; use `COMMENT` when any remaining finding is Medium/High risk or requirements/context are unresolved.
 
 ## Common Rationalizations
 
@@ -545,7 +545,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 | "The author clearly knows what they're doing" | Author competence isn't evidence the diff is correct. Review the code in front of you, not your prior of the author. |
 | "I already found a few issues, that's enough" | Stopping early because a quota feels met leaves real findings on the table — finish the lens sweep before triaging. |
 | "The PR conversation probably already covers this" | Confirm it actually does by checking `existing_comments_index` — don't silently drop a finding on a hunch. |
-| "COMMENT vs APPROVE doesn't matter much here" | It's the signal the author acts on. COMMENT is the right default for actionable feedback; reserve APPROVE for reviews with only minor or clearly optional comments. |
+| "COMMENT vs APPROVE doesn't matter much here" | It's the signal the author acts on. APPROVE is compatible with Low-risk feedback; use COMMENT when any non-blocking finding is Medium/High risk or context is unresolved. |
 
 ## References
 
