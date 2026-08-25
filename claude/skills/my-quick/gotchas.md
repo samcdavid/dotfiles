@@ -13,3 +13,10 @@
 - **Wrong behavior:** Inspect only the working tree, conclude there is no task, and ask what to change.
 - **Correct behavior:** Look up the Linear issue identified by the branch (for example, `ena-591`), use its title and description as the implementation request, and begin the skill's normal intake from that context.
 - **Why it matters:** Branches are normally created for a specific issue; ignoring that association discards the most reliable task context available.
+
+## Axon Ecto queries use pipe style
+
+- **Trigger:** A quick Axon change adds or modifies an Ecto query.
+- **Wrong behavior:** Use or preserve equivalent `from(...)` syntax because it is behaviorally correct.
+- **Correct behavior:** Prefer `Schema |> join(...) |> where(...) |> select(...) |> repo.all()` and use `from(...)` only for a documented construct-specific exception.
+- **Why it matters:** Pipe-style query composition is the agreed Axon code style and avoids a predictable review round.

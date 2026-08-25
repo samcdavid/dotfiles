@@ -75,3 +75,11 @@ they are not documentation-only edits.
 For entitlement-gated rollouts, assess enabled-cohort behavior and explicit
 policy violations. Do not call the default-off or excluded cohort a defect unless
 the stated rollout contract is violated.
+
+### Axon Ecto queries use pipe style
+
+Flag new or modified Axon Ecto queries that use `from(...)` when equivalent
+pipe-style composition is practical: `Schema |> join(...) |> where(...) |>
+select(...) |> repo.all()`. Treat this as a project code-style requirement;
+allow `from` only for documented construct-specific exceptions, and keep test
+findings about observable query behavior rather than literal source tokens.

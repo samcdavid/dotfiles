@@ -33,3 +33,11 @@ before nested access, and run the relevant type checker as well as lint.
 When a root facade exports a result/failure wrapper containing a concrete error
 union, export the union, variants, and discriminators too. Test construction and
 narrowing through only the public facade.
+
+## Axon Ecto queries use pipe style
+
+When reviewing or repairing Axon Ecto queries, prefer `Schema |> join(...) |>
+where(...) |> select(...) |> repo.all()` over `from(...)`. Treat a requested
+conversion as an accepted code-style correction, not optional churn; retain
+`from` only for a documented construct-specific exception. Keep tests focused
+on query behavior rather than source-token counts.
