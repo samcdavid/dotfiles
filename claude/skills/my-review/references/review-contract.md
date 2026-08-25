@@ -15,6 +15,8 @@ be skipped only with a concrete diff-based reason in the manifest.
 
 - Resolve an issue identifier from the branch name before saying requirements
   are unavailable.
+- Map every available acceptance criterion to the diff; record Covered, Partial,
+  or Missing with file evidence before a verdict.
 - A Critical finding needs a changed-line anchor and a causal explanation of
   how this diff introduced, regressed, or newly exposed the defect. Existing
   debt is not a merge blocker.
@@ -40,3 +42,11 @@ thread index and the filtered REST review-comment index. Drop substantive
 duplicates, including bot comments anchored at a different line, then recompute
 the verdict. Do not publish or recommend `REQUEST_CHANGES` unless at least one
 surviving Critical finding passes every evidence rule above.
+
+## Re-review and Publication Boundaries
+
+A re-review rebuilds the aggregate diff and current comment index; a prior
+approval never narrows scope. Reviews remain read-only and never publish.
+`REQUEST_CHANGES` requires at least one surviving verified Critical finding with
+an actionable inline anchor; unresolved threads, existing debt, or a body-only
+objection do not independently justify it.

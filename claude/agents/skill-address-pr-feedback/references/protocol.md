@@ -407,7 +407,12 @@ Present all drafted responses to the user for review before posting, showing the
 
 ## Step 9 — Verify
 
-Per-phase work was already verified by the executor, by the pre-commit gate on its commit, and by your independent re-verify. During iteration, run the narrowest affected check first. This step is the **holistic gate** — run build/compile, lint/format, and the test suite once over the combined result.
+Read `~/.claude/skills/address-pr-feedback/references/execution-contract.md` (or
+the `~/.agents` equivalent) now. Per-phase work was already verified by the
+executor, by the pre-commit gate on its commit, and by your independent
+re-verify. During iteration, run the narrowest affected check first. This step
+is the **holistic gate** — run build/compile, lint/format, and the test suite
+once over the combined result, capturing every final exit status.
 
 Take the per-stack commands from `my-implement/references/verification-commands.md` — the same source the Step 5 slices use, so the gate and the phases can't drift apart. It also covers Python runner detection (uv vs. poetry vs. pipenv); don't assume `uv run`.
 
