@@ -227,5 +227,8 @@
       }
     ]
   },
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "enabledPlugins": {
+    "dscout-data-mcp@dscout-claude-plugins": true
+  }
 }
