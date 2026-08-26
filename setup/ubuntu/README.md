@@ -19,7 +19,7 @@ see `../README.md` for how the two are kept in sync.
 4. `manual-installs.sh` — everything with no apt package: asdf, uv, Codex
    CLI, Docker Desktop, the AWS Session Manager plugin, yarn (via
    corepack), NordVPN, AWS CLI, CircleCI CLI, Google Chrome, Neovim,
-   fonts, and three GNOME Shell extensions
+   Ollama, fonts, and three GNOME Shell extensions
 5. Symlink dotfiles via `rcup`
 6. Authenticate with GitHub (`gh auth login`)
 7. Generate an SSH key, register it with GNOME Keyring, upload it to GitHub
@@ -163,6 +163,12 @@ preferences            # GNOME trackpad, F6 mic-mute hotkey, mic indicator
   `Aptfile` — so the whole script needs exactly one reboot, at the end,
   instead of one stranded mid-run. `repos.sh` still adds the cuda-keyring
   repo/key early; that part has no reboot implication.
+- **Ollama** comes from its own official install script (`ollama.com/install.sh`),
+  not apt/snap — it isn't packaged there, and the installer sets up its own
+  systemd service (`ollama.service`) and detects the NVIDIA GPU/CUDA install
+  itself, which a plain apt package wouldn't do. Re-running the same script
+  is also how you update it later — see `ollama.md` in this directory for
+  day-to-day usage (models, updating, the REST API, further docs).
 - **Codex CLI is a verified GH-release binary, not `npm install`** — avoids
   npm's mutable, transitively-resolved dependency tree. Downloads the
   `-package-` asset (the one covered by `codex-package_SHA256SUMS`) and

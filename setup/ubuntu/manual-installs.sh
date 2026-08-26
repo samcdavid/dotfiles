@@ -218,6 +218,13 @@ if [ ! -f "$FONT_DIR/Hack Regular Nerd Font Complete.ttf" ]; then
   fc-cache -f "$FONT_DIR"
 fi
 
+# --- Ollama (official installer — not in apt/snap; sets up its own systemd
+#     service and auto-detects the NVIDIA GPU/CUDA for hardware acceleration) -
+if ! command -v ollama >/dev/null; then
+  fancy_echo "Installing Ollama..."
+  curl -fsSL https://ollama.com/install.sh | sh
+fi
+
 # --- GNOME Shell extensions -----------------------------------------------
 # pk values are per-shell-version release ids from extensions.gnome.org;
 # re-check https://extensions.gnome.org/extension-query/?search=<name>&shell_version=<N>
