@@ -60,6 +60,12 @@ Non-interactive one-shot prompt:
 ollama run llama3.1:8b "Summarize this in one sentence: ..."
 ```
 
+Field-tested: `ollama run` writes its progress spinner directly to the
+terminal, which garbles output when captured non-interactively (e.g. run in
+a script or captured by another tool). Redirect stderr (`2>/dev/null`) for
+one-shot prompts like the above, or use the REST API below — it returns
+plain JSON with no spinner at all.
+
 Piping stdin works too:
 
 ```bash
