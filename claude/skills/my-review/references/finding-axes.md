@@ -4,6 +4,11 @@ Every finding a lens reviewer emits carries three independent levels. Lens revie
 
 Read this file if you are a lens reviewer, a finding verifier, or the `my-review` orchestrator routing findings in Step 6.
 
+Axes apply only after a candidate passes `review-contract.md`'s Actionability
+Gate. Do not assign levels to an observation, preference, generalized suggestion,
+or speculative concern without a present changed-line consequence and a concrete
+author-controlled fix, decision, or specific information request.
+
 ## The three axes
 
 They answer three different questions. Do not collapse them — a confidently-identified nit and a speculative catastrophe are both "medium" on any single combined score, and that is exactly the distinction the routing depends on.

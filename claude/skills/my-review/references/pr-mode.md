@@ -18,6 +18,15 @@ Hard constraints:
 
 Every subagent prompt in PR mode must receive the same constraints and PR HEAD SHA.
 
+## Verdict relationship
+
+Resolve the PR author with `gh pr view <number> --json author --jq
+'.author.login'` and the authenticated reviewer with `gh api user --jq
+'.login'`. `COMMENT` is eligible only when both values are known and differ. An
+equal login is `self_authored_pr`; a missing value is `unknown_pr`. Both use the
+same binary verdict as local review: `REQUEST_CHANGES` for a verified Critical,
+High-risk blocker, otherwise `APPROVE`.
+
 ## Re-review discipline
 
 Before re-reviewing a PR, record the prior reviewed SHA and a blocker ledger of

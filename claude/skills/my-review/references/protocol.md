@@ -11,8 +11,8 @@ This skill is the **orchestrator**. It fans the work out to subagents — parall
 ## Getting Started
 
 Determine what to review:
-- If `$ARGUMENTS` is `capture` → **Capture Mode** — queue a Learned Miss (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
-- If `$ARGUMENTS` is `promote` → **Promote Mode** — walk the pending queue (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
+- If `$ARGUMENTS` is `capture` → **Capture Mode** — load `references/learned-miss-lifecycle.md`, queue a Learned Miss, and skip the rest of this skill.
+- If `$ARGUMENTS` is `promote` → **Promote Mode** — load `references/learned-miss-lifecycle.md`, walk the pending queue, and skip the rest of this skill.
 - If `$ARGUMENTS` contains a PR number or URL → **PR Mode** (fetch the PR diff via `gh`).
 - If `$ARGUMENTS` contains a Linear issue identifier or URL → **Local Issue Mode** — review the local branch-wide diff with that issue's context.
 - If `$ARGUMENTS` is empty or `local` → **Local Mode** (review the whole branch: every commit since the base branch, plus staged and unstaged changes).
@@ -20,9 +20,19 @@ Determine what to review:
 
 Subcommand keywords (`capture`, `promote`) take precedence over branch-name interpretation.
 
+Resolve `review_relationship` before verdict construction:
+
+- Local, branch/range, Local Issue, and embedded local reviews → `local`.
+- PR author login equals the authenticated GitHub login → `self_authored_pr`.
+- PR author login differs from the authenticated GitHub login → `third_party_pr`.
+- Either login cannot be established → `unknown_pr`.
+
+Only `third_party_pr` is eligible for `COMMENT`.
+
 ### Read before output
 
 - `gotchas.md` — known failure patterns for this skill.
+- `references/learned-miss-lifecycle.md` — run the auto-promotion check.
 - `references/learned-misses.md` — active pattern queue. Auto-promote qualifying pending entries before the triage block.
 
 Before selecting scope, discover the ledger in Claude Thoughts and, when found,
@@ -45,6 +55,8 @@ PR scope is the aggregate merge-base-to-HEAD diff: all net PR changes, never ind
 gh pr diff <number>
 gh pr view <number>
 gh pr view <number> --json files --jq '.files[].path'
+gh pr view <number> --json author --jq '.author.login'
+gh api user --jq '.login'
 
 sha=$(gh api repos/{owner}/{repo}/pulls/<number> --jq '.head.sha')
 gh api repos/{owner}/{repo}/contents/<path>?ref=$sha --jq '.content' | base64 -d
@@ -55,6 +67,10 @@ gh api repos/{owner}/{repo}/contents/<path>?ref=$sha --jq '.content' | base64 -d
 Fetch existing review comments and conversation threads using `~/.claude/rules/pr-cost-control.md`: GraphQL `reviewThreads` first for inline comments/resolved/outdated state, then filtered REST fallbacks for review bodies and issue comments. Do not ingest raw `gh api` review/comment payloads.
 
 Build `existing_comments_index`: file path, line range, substance summary, `thread_root_id`. Pass it to reviewer subagents for dedupe and use it again when merging findings.
+
+Compare the PR author's login with the authenticated GitHub login to resolve
+`review_relationship`. A missing login is `unknown_pr`, never an assumption that
+the PR belongs to someone else.
 
 If existing comments include your own prior review pass, treat as re-review: re-read the full diff and all comments, including issue-level threads where authors may explain what changed.
 
@@ -194,6 +210,9 @@ Ask which skill level to calibrate against. Skip for Local Mode.
 
 Default: **Lead** if I skip.
 
+Author calibration affects explanation depth only. It never permits feedback
+that fails `references/review-contract.md`'s Actionability Gate.
+
 ## Step 3 — Fan out, then compile
 
 You orchestrate in two waves: research first (shared context), then specialized per-lens reviewers (parallel), then you merge everything. The deep reasoning lives in the subagents; the synthesis lives here.
@@ -256,6 +275,11 @@ Merge the lens reviewers' fragments into one findings set:
    re-dispatch it once with a tightened brief before proceeding. Do not silently
    drop a lens.
 
+At compilation, reject any candidate that cannot name a concrete
+author-controlled change, explicit decision, or specific information request
+that resolves a present changed-line risk. Do not keep observations or general
+advice around for the verifier to turn into feedback later.
+
 This compiled set is what Steps 4–8 operate on.
 
 ## Step 4 — Targeted Questions
@@ -295,7 +319,7 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 ## Review: [Brief description of what the change does]
 
 ### Verdict
-**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 7. Approve when requirements are satisfied and all remaining feedback is Low risk.]
+**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 7 and constrained by review relationship. COMMENT is valid only for a third-party PR.]
 
 ### Summary
 [1-2 sentences demonstrating you understood the change and its purpose]
@@ -340,7 +364,7 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 [Only if an active/upcoming project issue exactly covers a duplicate non-blocking follow-up — cite the issue, status, and owned concern. This is context, not a finding.]
 
 ### Questions
-- [Genuine clarifying questions — things where the author has context you don't]
+- [Genuine clarifying questions that name the exact author-only information or decision needed to resolve a changed-line risk]
 
 ### Dropped Findings
 - [Findings a verifier DROPped — what was considered and why it was dropped]
@@ -402,6 +426,14 @@ Verifier agents can accidentally read the local working tree. If any DROP or REV
 
 Before `/this-important`, use `references/project-context.md` to remove only exact non-Critical follow-ups in **Upcoming Project Work**. Title-only/partial matches, gaps, and Critical findings remain.
 
+Apply `references/review-contract.md`'s Actionability Gate to every surviving
+finding and question. Each must request a concrete author-controlled code, test,
+or documentation change; an explicit product/scope decision; or specific
+information needed to resolve a changed-line risk. Drop observations,
+preferences, generalized advice, speculative future concerns, and open-ended
+questions. Do not move rejected material into residual risk, deep-dive prose, or
+Nits.
+
 Then run `/this-important strict` (unless the user asked for a broader sweep) on the remaining **low-tier findings only**. `/this-important` has no PROMOTE verdict and must not downgrade any high-tier KEEP or PROMOTE.
 
 Before Step 7, confirm:
@@ -410,6 +442,7 @@ Before Step 7, confirm:
 - no finding duplicates an existing PR thread
 - every PR finding has an aggregate-diff anchor and causal link; baseline-only issues never survive
 - every finding is grounded in the diff or verified source
+- every surfaced finding and question passes the Actionability Gate; deep-dive and residual-risk sections do not smuggle rejected commentary back in
 - every `REQUEST_CHANGES` candidate is both Critical and High risk, and truly blocks merge
 - dropped findings have one-line reasons
 - every escalation was re-dispatched, not silently resolved or dropped
@@ -418,16 +451,20 @@ Before Step 7, confirm:
 
 ## Step 7 — Verdict
 
-The verdict is a **mechanical function of Step 6's verifier results**, not a fresh judgment call layered on top.
+The verdict is a **mechanical function of Step 6's verifier results and the
+resolved review relationship**, not a fresh judgment call layered on top.
 
 - If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but follows the normal non-blocking verdict rules. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
-- Otherwise choose between **APPROVE** and **COMMENT**:
-  - **APPROVE** — requirements are satisfied, no Critical High-risk finding survives, and every remaining finding is Low risk (including substantive, actionable low-risk feedback).
-  - **COMMENT** — any remaining Medium/High-risk non-blocking feedback, unresolved requirements question, insufficient context, stale/already-merged PR state, or explicit user instruction not to approve remains.
+- Otherwise apply the mode gate:
+  - **Local, branch/range, Local Issue, embedded local, self-authored PR, or unknown PR:** **APPROVE**. Keep actionable non-blocking findings and targeted questions visible, but do not turn them into `COMMENT` and do not inflate them into blockers merely to avoid approval.
+  - **Third-party PR:** **APPROVE** when requirements are satisfied and every remaining finding is Low risk (including substantive actionable feedback). Use **COMMENT** when Medium/High-risk non-blocking feedback, unresolved requirements/context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
-### Challenge the APPROVE/COMMENT choice
+`COMMENT` is invalid unless the review targets an actual PR and its author login
+is known to differ from the authenticated reviewer's login.
 
-`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. This adversarial pass is scoped to the one choice that's still discretionary, and it reasons over the review as a whole rather than one finding, so it uses `adversarial-debate` rather than a per-finding verifier. Spawn `adversarial-debate` with:
+### Challenge the eligible verdict choice
+
+`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. For a third-party PR only, the remaining APPROVE/COMMENT choice is discretionary and receives this whole-review adversarial pass. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-debate` with:
 
 - proposed APPROVE/COMMENT verdict
 - the final surviving non-blocking findings, with their risk and confidence levels
@@ -455,83 +492,18 @@ After the verdict is finalized, look at any PR comments (from other reviewers or
 
 If no `Worth-considering` items, skip the prompt entirely.
 
-## Subcommands — `capture`, `promote`
-
-### `/my-review capture`
-
-Direct, source-agnostic entry into the pattern queue. Use when a pattern surfaces outside the natural prompts in Step 6 and Step 8 — a bug report, a post-mortem, a Slack thread, a hunch.
-
-Flow:
-1. Ask: what pattern are we capturing? Collect Shape (one or two sentences, the *general* pattern), Trigger signals, and the source `ref`.
-2. Check `references/learned-misses.md` and `references/promoted-misses.md` for an existing matching Shape. If found, append Evidence (`type: noted`, today's date, the source `ref`) to the existing entry.
-3. Otherwise, draft the entry and confirm with me before writing under `learned-misses.md`'s `## Pending` with `status: pending`.
-
-Default Evidence type is `noted` (the user is calling it out — neither a clean catch nor a clean miss).
-
-Do **not** run any review flow in this mode. Just capture and exit.
-
-### `/my-review promote`
-
-Walk the pending queue one entry at a time (use the `walk-through` skill). For each entry with `status: pending` or `status: ready`:
-
-1. Show the Shape, Trigger signals, and Evidence summary.
-2. Reaffirm the Shape — is the generalization right, too narrow, or too broad? Offer to rewrite.
-3. Confirm the **target file**:
-   - Lens reference (e.g., `references/cross-service-contracts.md`) for a positive check ("review should affirmatively check for X").
-   - `references/general-checklist.md` for a general-review category addition.
-   - The relevant lens skill's `SKILL.md` (e.g. `~/.claude/skills/security-audit/SKILL.md`) when the pattern belongs to a specific lens.
-   - `gotchas.md` for a failure-mode lesson ("skill itself does the wrong thing").
-4. Confirm the exact wording — show what will be written, let me edit.
-5. On approval: write to target file under the appropriate section, mark entry `status: promoted (<today's date>)`, move entry to `promoted-misses.md`'s `## Promoted` section.
-6. On reject: mark `status: discarded (<today's date>, <one-line reason>)`, move to `promoted-misses.md`'s `## Discarded` section.
-
-Do **not** run any review flow in this mode.
-
-## Queue lifecycle and auto-promotion
-
-The active queue at `references/learned-misses.md` (`## Pending`) is the single source of truth for patterns the skill is still learning; `references/promoted-misses.md` is the audit archive for entries that graduated or were discarded. Lifecycle:
-
-1. **Capture** — entry appended to `learned-misses.md`'s `## Pending` with `status: pending`. Shape is the key; matching new captures against existing Shapes (check both files) appends Evidence rather than creating duplicates.
-2. **Accumulate** — Evidence accrues across reviews. Both `type: caught` and `type: missed` (and `type: noted` from `capture` mode) count toward the threshold.
-3. **Auto-promote** — when `len(evidence) >= 3`:
-   - Draft promotion wording (from the entry's `Proposed promotion: wording` field if set; otherwise generated from Shape + Evidence summary).
-   - Pick the target file (from `Proposed promotion: target` if set; otherwise inferred — see below).
-   - Write to the target file under the appropriate section.
-   - Mark entry `status: promoted (<today's date>)` and move it from `learned-misses.md` to `promoted-misses.md`'s `## Promoted`. Entry is preserved for audit.
-4. **Surface** — at the next `/my-review` invocation, Step 2's triage block reports the auto-promotion.
-
-### When does the auto-promote check run?
-
-At the top of every `/my-review` invocation (after mode detection, before Step 1). Scan `## Pending` for entries whose Evidence length has crossed threshold; auto-promote them before producing the triage block.
-
-### Target inference (when `Proposed promotion: target` is absent)
-
-- Shape describes "review should affirmatively check for X" in a lens-specific way → that lens's skill `SKILL.md` (e.g. `~/.claude/skills/security-audit/SKILL.md`).
-- Shape describes a cross-cutting review category → `references/general-checklist.md` under the appropriate section.
-- Shape describes a cross-service pattern → `references/cross-service-contracts.md`.
-- Shape describes "skill itself does the wrong thing" → `gotchas.md`, using the existing **Category / Context / Wrong / Right / Why / Source** structure.
-- Ambiguous → transition to `status: ready` (not auto-promoted) and surface loudly in next `/my-review` triage block for me to resolve via `/my-review promote`.
-
-### Threshold
-
-Currently **3**. Tune by editing this section. Lower = snappier learning, more noise; higher = more conservative.
-
-### Manual overrides
-
-- `/my-review promote` — promote pending entries early or discard one-offs.
-- `git revert` — undo an auto-promotion entirely. The queue entry stays as `promoted`; if you don't also discard it via `/my-review promote`, additional Evidence accruing later won't re-trigger auto-promote.
-
 ## Guidelines
 
 - Every Critical finding must include a concrete fix, ideally replacement code. Only Critical findings with High risk are merge-blocking.
 - Every non-blocking suggestion should include example code when the alternative is not obvious.
+- Raise only actionable feedback. Every finding or question must name a concrete author-controlled change, decision, or specific information request and the changed-line risk it resolves. Drop observations, preferences, generalized advice, and speculative future concerns.
 - Explicitly label severity on every comment: **Critical**, **Suggestion (non-blocking)**, **Question**, or **Nit**.
 - Ask rather than demand when the author may have context you lack.
 - Focus on substance; do not bikeshed formatting, naming, or style unless genuinely confusing.
 - Cross-service boundaries deserve extra scrutiny because subtle bugs hide there.
 - Tests must test what they claim; vacuous tests are worse than no tests.
 - Never re-raise an issue already present in the PR conversation.
-- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern as a non-blocking finding. Use `APPROVE` when all remaining findings are Low risk; use `COMMENT` when any remaining finding is Medium/High risk or requirements/context are unresolved.
+- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern only when it is actionable and clearly non-blocking. In local and self-authored/unknown PR reviews, approve whenever no such blocker survives. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved requirements/context remains.
 
 ## Common Rationalizations
 
@@ -545,7 +517,8 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 | "The author clearly knows what they're doing" | Author competence isn't evidence the diff is correct. Review the code in front of you, not your prior of the author. |
 | "I already found a few issues, that's enough" | Stopping early because a quota feels met leaves real findings on the table — finish the lens sweep before triaging. |
 | "The PR conversation probably already covers this" | Confirm it actually does by checking `existing_comments_index` — don't silently drop a finding on a hunch. |
-| "COMMENT vs APPROVE doesn't matter much here" | It's the signal the author acts on. APPROVE is compatible with Low-risk feedback; use COMMENT when any non-blocking finding is Medium/High risk or context is unresolved. |
+| "This is worth mentioning even though there is no concrete action" | Review feedback consumes author attention. If you cannot name the change, decision, or information needed to resolve a present diff-caused risk, drop it. |
+| "COMMENT vs APPROVE doesn't matter much here" | It is mode-constrained. COMMENT exists only for a third-party PR; local and self-authored/unknown PR reviews approve unless a verified Critical, High-risk blocker requires changes. |
 
 ## References
 
@@ -556,6 +529,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - `references/project-context.md` - bounded Linear project context and exact-match follow-up calibration.
 - `references/learned-misses.md` - active pattern queue. Auto-promote check runs top invocation; triage block reports promotions.
 - `references/promoted-misses.md` - audit archive of promoted/discarded entries, split out of `learned-misses.md` to stay under the reference word-budget cap.
+- `references/learned-miss-lifecycle.md` - capture/promote subcommands and queue auto-promotion. Load for those modes and at invocation start.
 - `references/team-review-patterns.md` - team-and-community review patterns distilled from multi-developer PR mining pass. Created by separate mining pass; pass into lens reviewers (or fold relevant patterns into briefs) when present.
 - `gotchas.md` - known failure patterns. This skill every lens reviewer read it.
 

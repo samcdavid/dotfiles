@@ -25,6 +25,21 @@ be skipped only with a concrete diff-based reason in the manifest.
 - A resolved/deferred Finding Register entry is context, not suppression. Reopen
   it when later changed code touches its causal path or supplies new evidence.
 
+## Actionability Gate
+
+Every surfaced finding must tell the author exactly what action would resolve it:
+a concrete code/test/documentation change, an explicit product or scope decision,
+or specific information only the author can provide. It must also state the
+changed-line risk that action addresses. A code example is optional when the
+written fix is already unambiguous.
+
+Drop observations, generalized advice, preferences, praise, speculative future
+concerns without a present changed-line consequence, and questions that do not
+name the decision or information needed. Do not preserve them as residual risk,
+body commentary, deep-dive prose, or a downgraded Nit. Deep-dive sections may
+summarize evidence, but may not introduce unactionable feedback that bypassed
+the finding gate.
+
 ## Bounded Whole-Diff Synthesis
 
 After lens compilation and before verifier routing, inspect the full diff,
@@ -39,9 +54,10 @@ verification; synthesis never changes the verdict directly.
 
 Immediately before returning a PR envelope, refresh both the GraphQL review
 thread index and the filtered REST review-comment index. Drop substantive
-duplicates, including bot comments anchored at a different line, then recompute
-the verdict. Do not publish or recommend `REQUEST_CHANGES` unless at least one
-surviving Critical, High-risk finding passes every evidence rule above.
+duplicates, including bot comments anchored at a different line. Re-run the
+Actionability Gate, then recompute the verdict. Do not publish or recommend
+`REQUEST_CHANGES` unless at least one surviving Critical, High-risk finding
+passes every evidence rule above.
 
 ## Re-review and Publication Boundaries
 
@@ -51,3 +67,10 @@ approval never narrows scope. Reviews remain read-only and never publish.
 finding with an actionable inline anchor; unresolved threads, existing debt, a
 Critical finding at Medium or Low risk, or a body-only objection do not
 independently justify it.
+
+`COMMENT` is reserved for a third-party PR: the PR author must differ from
+the authenticated GitHub reviewer. Local, branch/range, local-issue,
+embedded-local, self-authored PR, and unknown-ownership PR reviews must return
+`REQUEST_CHANGES` or `APPROVE`. Non-blocking actionable findings and unresolved
+questions remain visible under `APPROVE`; the binary verdict does not erase
+them or inflate them into blockers.
