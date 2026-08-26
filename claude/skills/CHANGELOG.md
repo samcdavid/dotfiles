@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-26 — Actionable review verdicts
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `063a1f9` | Required actionable review feedback and mode-constrained verdicts. | Every surfaced finding or question requests a concrete author-controlled change, decision, or information tied to a changed-line risk. Local, self-authored PR, and unknown-ownership PR reviews return only APPROVE or REQUEST_CHANGES; COMMENT is reserved for third-party PR reviews. |
+
 ## 2026-08-25 — Review delivery convergence
 
 | Commit | Change | Regression boundary / known-good meaning |
