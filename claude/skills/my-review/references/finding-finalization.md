@@ -2,6 +2,11 @@
 
 Load this after lens reviewers return.
 
+This stage is skipped for `change-set-risk.md`'s Low-risk fast approval. The
+PR-only human-review handoff is finalized separately from findings: one inline
+annotation for the whole PR, deduped by substance and containing all trigger
+anchors. Do not verifier-route it or apply the Actionability Gate to it.
+
 1. Merge duplicate findings across lenses. Keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the merged pair — a finding two lenses read differently gets verified harder, not averaged.
 2. Dedupe against existing PR comments and threads.
 3. Confirm every finding carries all three levels from `references/finding-axes.md` — severity (per the shared review rule), risk, and confidence. Lens reviewers assign these; do not silently re-label them here. A fragment missing them means the reviewer ran an old contract — re-dispatch it rather than filling the levels in yourself.
@@ -24,6 +29,9 @@ Verdict rule:
 - `REQUEST_CHANGES` only if a finding survives (or is PROMOTEd to) both Critical **and** High risk after per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. A finding needing clarification surfaces as a blocking question, never an automatic `REQUEST_CHANGES`.
 - In local, branch/range, local-issue, embedded-local, self-authored PR, and unknown-ownership PR reviews: `APPROVE` whenever no Critical High-risk finding survives. Actionable non-blocking findings and unresolved questions remain visible but cannot produce `COMMENT` or be inflated into `REQUEST_CHANGES`.
 - In a third-party PR review: `APPROVE` when requirements are satisfied and all remaining findings are Low risk; `COMMENT` when Medium/High-risk non-blocking feedback or unresolved requirements/context remains, the PR is stale/already merged, or the user explicitly asks not to approve.
+- A pending human-review handoff counts as unresolved context for a third-party
+  PR and therefore produces `COMMENT`; it never independently produces
+  `REQUEST_CHANGES`. Other review relationships retain their binary verdict.
 
 For a re-review, report the blocker ledger delta: cleared, still open, regressed,
 or newly verified. Do not repeat a prior blocking finding verbatim when its state

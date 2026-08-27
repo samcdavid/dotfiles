@@ -9,21 +9,27 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 ## Mechanical orchestration contract
 
 1. Normalize the input mode and build the diff source of truth exactly as the shared protocol requires.
-2. Dispatch research and active lens reviewers, then merge and dedupe only their flat findings.
-3. Run one bounded whole-diff synthesis pass after lens compilation. It may emit
+2. Classify aggregate change-set risk and scan PR human-review triggers using
+   `change-set-risk.md`. If it qualifies for Low-risk fast approval, return terse
+   `APPROVE` before fan-out.
+3. In PR mode, build at most one deduplicated inline human-review handoff for
+   every migration, env/config, infra/operations, and newly added lint/tooling
+   suppression anchor. Treat it as operational review context, not a finding.
+4. Dispatch research and active lens reviewers, then merge and dedupe only their flat findings.
+5. Run one bounded whole-diff synthesis pass after lens compilation. It may emit
    only interaction candidates grounded in the diff and research evidence; every
    candidate must enter the same verifier route as lens findings.
-4. Route every finding to exactly one isolated verifier from its severity, risk,
+6. Route every finding to exactly one isolated verifier from its severity, risk,
    and confidence. Re-dispatch low-tier escalations to the high tier; do not
    self-adjudicate them.
-5. Apply `review-contract.md`'s Actionability Gate after verification. A finding
+7. Apply `review-contract.md`'s Actionability Gate after verification. A finding
    or question survives only when it requests a concrete author-controlled
    change, decision, or specific information tied to a changed-line risk.
-6. Compute `REQUEST_CHANGES` mechanically only from verified Critical, High-risk
+8. Compute `REQUEST_CHANGES` mechanically only from verified Critical, High-risk
    findings. Otherwise return `APPROVE` for local, self-authored PR, and
    unknown-ownership PR reviews. Only a third-party PR may choose between
    `APPROVE` and `COMMENT`; delegate that choice to `adversarial-debate`.
-7. Enforce `review-contract.md` before returning the compact result envelope to
+9. Enforce `review-contract.md` before returning the compact result envelope to
    the wrapper, `implement-review`, or `my-workflow`.
 
 Never bypass the outer wrapper's publication boundary. Never pass raw subagent transcripts to a downstream stage.

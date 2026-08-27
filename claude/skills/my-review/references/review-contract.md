@@ -6,10 +6,15 @@ Load this during triage, before final output, and when `implement-review` calls
 ## Coverage Manifest
 
 Before fan-out, record the changed-file categories, active lenses, requirements
-source, and source gaps. Security, QA, and the applicable general-reviewer
-lenses are the baseline for every non-empty code diff. A requirements lens is
+source, and source gaps. Except for a valid Low-risk fast approval, Security,
+QA, and the applicable general-reviewer lenses are the baseline for every
+non-empty code diff. A requirements lens is
 required when an issue, spec, or branch-name issue identifier exists. A lens may
 be skipped only with a concrete diff-based reason in the manifest.
+
+Also classify the aggregate diff under `change-set-risk.md`. Low-risk fast
+approval is valid only after requirements, existing-thread, and PR human-review
+trigger checks pass; diff size or an empty candidate-finding list is not enough.
 
 ## Evidence Rules
 
@@ -58,6 +63,11 @@ duplicates, including bot comments anchored at a different line. Re-run the
 Actionability Gate, then recompute the verdict. Do not publish or recommend
 `REQUEST_CHANGES` unless at least one surviving Critical, High-risk finding
 passes every evidence rule above.
+
+When `change-set-risk.md` identifies PR human-review triggers, the envelope has
+exactly one deduplicated inline handoff annotation containing every relevant
+anchor. This operational handoff is not a finding, does not pass through the
+Actionability Gate or verifiers, and is never repeated in body commentary.
 
 ## Re-review and Publication Boundaries
 

@@ -18,6 +18,13 @@ Hard constraints:
 
 Every subagent prompt in PR mode must receive the same constraints and PR HEAD SHA.
 
+Before fan-out, apply `change-set-risk.md`: migrations, changed env/config
+references, infrastructure/operations surfaces, and newly added lint/tooling
+suppressions produce one human-review handoff for the entire PR. Prepare it as
+one inline annotation at the most consequential changed line, list every other
+anchor in its body, and dedupe by substance across existing threads. Never
+repeat the request in the top-level review body or at each trigger.
+
 ## Verdict relationship
 
 Resolve the PR author with `gh pr view <number> --json author --jq

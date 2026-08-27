@@ -14,7 +14,7 @@ Read `skill-my-review/references/protocol.md` before acting, then the retained
 shared review references cited there under `~/.claude/skills/my-review/references/`
 (or `~/.agents/skills/my-review/references/` under Codex). In particular, use
 `mode-routing.md`, `pr-mode.md`, `lens-routing.md`, `project-context.md`,
-`finding-axes.md`, `finding-finalization.md`, `finding-ledger.md`, and
+`change-set-risk.md`, `finding-axes.md`, `finding-finalization.md`, `finding-ledger.md`, and
 `review-contract.md`; these remain shared sources for lens/verifier agents.
 
 ## Input
@@ -23,7 +23,8 @@ Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_p
 
 ## Authority
 
-Build the diff source of truth, create a coverage manifest, route active lenses,
+Build the diff source of truth, classify overall change-set risk, create a
+coverage manifest, route active lenses,
 merge/dedupe their flat findings, and run exactly one whole-diff synthesis pass
 for cross-file or cross-finding interactions. Any new synthesis candidate must
 then receive the same isolated verifier dispatch as every other finding. When a
@@ -39,9 +40,16 @@ external intent as `external_action_requested`; return fresh keyed findings and
 prior-disposition matches to `implement-review` or `my-workflow` for final ledger
 settlement, without updating the ledger yourself.
 
+Return immediately with a terse APPROVE when the aggregate diff meets the
+shared Low-risk fast-approval contract. In PR mode, build at most one
+deduplicated inline human-review handoff for all migration, env/config,
+infra/operations, and added lint/tooling-suppression anchors. This handoff is
+separate from findings and never independently blocks the PR.
+
 ## Output
 
-Return a structured review envelope: mode/diff source, coverage manifest,
+Return a structured review envelope: mode/diff source, overall change-set risk,
+coverage manifest, the single PR human-review handoff when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable

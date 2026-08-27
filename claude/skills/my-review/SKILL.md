@@ -27,9 +27,10 @@ Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows
 
 ## Present
 
-Return the coverage manifest and actionable findings first with file:line
-evidence and concrete author-controlled fixes, decisions, or information
-requests, then verdict, questions, residual risk, requirements coverage,
+Return overall change-set risk first, then the coverage manifest and actionable
+findings with file:line evidence and concrete author-controlled fixes, decisions,
+or information requests, the single PR-only human-review handoff when required,
+verdict, questions, residual risk, requirements coverage,
 dropped findings, prior resolved/deferred matches, and the compact workflow-stage
 envelope when embedded. Drop observations, preferences, and speculative concerns
 that do not ask the author to do something concrete. Use `REQUEST_CHANGES` only
@@ -38,3 +39,9 @@ branch/range, local-issue, embedded-local, self-authored PR, and unknown-PR
 reviews, the only other verdict is `APPROVE`. `COMMENT` is available only for an
 actual PR whose author differs from the authenticated reviewer. Do not include
 raw lens or verifier transcripts.
+
+Classify the aggregate diff using `references/change-set-risk.md` before fan-out.
+A Low-risk set takes its fast-approval path. In PR mode, migrations, env/config
+references, infrastructure/operations changes, and newly added lint/tooling
+suppressions produce one deduplicated inline human-review request for the whole
+PR, never one note per trigger.

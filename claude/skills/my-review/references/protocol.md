@@ -128,6 +128,8 @@ Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sec
 - Existing reviewer assignments or labels on the PR
 
 Read `references/review-contract.md` before choosing lenses.
+Read `references/change-set-risk.md` before fan-out; classify the aggregate diff
+and build the PR-only human-review handoff from its deterministic triggers.
 
 ### Lens catalog
 
@@ -145,8 +147,8 @@ Read `references/review-contract.md` before choosing lenses.
 | **Migration safety** | Lock risk, down-migration safety, column types, advisory locks, backfillers | Migration files in the diff |
 | **Dependency** | License, maintenance, attack surface of new packages | Lockfile changes, new dependency manifests |
 
-Security, QA, and a general-reviewer lens (Backend when none is obvious) are
-baseline for every non-empty code diff.
+Except for the Low-risk fast-approval path, Security, QA, and a general-reviewer
+lens (Backend when none is obvious) are baseline for every non-empty code diff.
 
 ### Requirements checklist (if a ticket is linked)
 
@@ -176,6 +178,8 @@ Produce a short triage block and show it to me before going deep:
 ### Review Triage
 - **Scope:** <PR #N at <sha>> | <local: <N> commits since `<base_ref>` (<fork sha>) + <clean tree | staged/unstaged changes>>, <N> files
 - **Intent:** <1–2 sentences in your words — what this change does and why>
+- **Overall change-set risk:** <Low | Medium | High> — <diff-grounded rationale>
+- **Human review handoff (PR Mode):** <one inline anchor + trigger/anchor count> | none
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
@@ -195,6 +199,10 @@ To populate the last two lines:
 If `status: ready` entries exist (auto-promote blocked on ambiguous target), call them out by name — these need your input.
 
 Proceed automatically unless I override.
+
+If the aggregate set qualifies for `change-set-risk.md`'s Low-risk fast
+approval, stop here after the required scope, requirements, thread, and trigger
+checks. Return the terse approval directly; Steps 3–8 do not run.
 
 ### Author Skill Level (PR Mode only)
 
@@ -318,6 +326,9 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 
 ## Review: [Brief description of what the change does]
 
+### Overall Change Risk
+**Low** / **Medium** / **High** — [aggregate-diff rationale]
+
 ### Verdict
 **APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 7 and constrained by review relationship. COMMENT is valid only for a third-party PR.]
 
@@ -341,6 +352,12 @@ Take the compiled findings from Step 3 + user answers + any FLAGged answers from
 **Suggestion:** [What to improve and why]
 **Example:**
 [Code snippet if helpful]
+
+### Prepared Inline Comments
+[PR Mode only, and only when required: one human-review annotation at the
+primary changed-line anchor, listing all migration/env/infra/linter-suppression
+anchors. This is publishing input, not review-body prose. Do not repeat this
+request anywhere else in the review.]
 
 ### Security Deep-Dive
 [Only if the compiled findings include this block — skip otherwise]
@@ -448,11 +465,21 @@ Before Step 7, confirm:
 - every escalation was re-dispatched, not silently resolved or dropped
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
+- overall change-set risk was classified independently from per-finding risk
+- a required PR human-review handoff is one deduplicated inline annotation, not
+  repeated in the review body, questions, findings, or residual risk
 
 ## Step 7 — Verdict
 
 The verdict is a **mechanical function of Step 6's verifier results and the
 resolved review relationship**, not a fresh judgment call layered on top.
+
+The Low-risk fast-approval path has already returned before this step. A
+human-review handoff is not a defect and cannot produce `REQUEST_CHANGES` by
+itself. For a third-party PR it is unresolved review context, so use `COMMENT`
+until a human has reviewed the marked surfaces. For other review relationships,
+preserve the existing binary verdict constraint and include the one inline
+handoff under `APPROVE` when no Critical, High-risk blocker survives.
 
 - If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but follows the normal non-blocking verdict rules. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
 - Otherwise apply the mode gate:
@@ -495,6 +522,11 @@ If no `Worth-considering` items, skip the prompt entirely.
 ## Guidelines
 
 - Every Critical finding must include a concrete fix, ideally replacement code. Only Critical findings with High risk are merge-blocking.
+- Classify the aggregate change set before rating findings. A genuinely Low-risk
+  set is approved immediately; line count alone never establishes Low risk.
+- In PR mode, migrations, env/config references, infra/ops changes, and added
+  linter/tooling suppressions require exactly one deduplicated inline human-review
+  handoff for the whole PR.
 - Every non-blocking suggestion should include example code when the alternative is not obvious.
 - Raise only actionable feedback. Every finding or question must name a concrete author-controlled change, decision, or specific information request and the changed-line risk it resolves. Drop observations, preferences, generalized advice, and speculative future concerns.
 - Explicitly label severity on every comment: **Critical**, **Suggestion (non-blocking)**, **Question**, or **Nit**.
@@ -523,6 +555,8 @@ If no `Worth-considering` items, skip the prompt entirely.
 ## References
 
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
+- `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
+  approval, and the single PR-only human-review handoff.
 - `references/review-contract.md` - deterministic coverage, evidence, and final-integrity requirements for every review.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
 - `references/cross-service-contracts.md` - checklist for cross-service changes. Read by `general-reviewer`.
