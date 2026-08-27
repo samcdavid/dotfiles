@@ -4,7 +4,17 @@ Load this reference when the project changes Ecto migrations, persisted schema, 
 
 ## Ticket boundary and release ordering
 
-Create migration-only issue(s), each mapped to one PR, before the functional issue(s) they enable. A migration issue contains no user-facing feature behavior; a functional issue contains no migration. The functional issue is blocked until the migration PR has been deployed and the migration's acceptance evidence is available.
+Create migration-only issue(s), each mapped to one PR and a 3–5-commit TDD plan,
+before the functional issue(s) they enable. A migration issue contains no
+user-facing feature behavior; a functional issue contains no migration. The
+functional issue is blocked until the migration PR has been deployed and the
+migration's acceptance evidence is available. Record each such direct blocker
+as a Linear relationship in the draft manifest, not only in issue prose.
+
+Migration work is not exempt from the milestone demo rule. Include it in a
+milestone whose runnable team demo proves compatibility, history validation,
+backfill observability, or safe rollout/rollback; merged migration files alone
+are not a demo.
 
 For an incompatible change, plan expand/migrate/contract rather than one risky edit. The initial migration-only work can add compatible schema or write paths; backfill and validation are separate, observable work where needed; destructive cleanup is a later migration-only issue after every deployed application version no longer reads or writes the old shape. Never make a later cleanup migration share a PR with functional work simply to preserve an artificial project order.
 
