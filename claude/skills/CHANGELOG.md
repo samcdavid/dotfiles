@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-27 — Parallel team delivery planning
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `4de164e` | Sized team-plan issues to 3–5 TDD commits and made demos, milestone parallelism, issue caps, and blocker persistence explicit. | Every issue has 3–5 meaningful RED → GREEN → VALIDATE → commit slices; every milestone is team-demoable, targets at most 10 issues with a hard cap of 15, and participates in an acyclic parallel delivery graph. Approved Linear writes preserve and round-trip every direct blocker relationship. |
+
 ## 2026-08-27 — Aggregate review risk and human handoffs
 
 | Commit | Change | Regression boundary / known-good meaning |
