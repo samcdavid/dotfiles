@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-27 — Post-implementation review loop
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `ba54e5c` | Separated full plan implementation from the bounded review/repair loop. | `my-workflow` completes and records every `my-implement` phase plus its holistic test gate before dispatching `implement-review`. The five-pass budget begins only afterward, and `implement-review` refuses unfinished planned work rather than executing it. |
+
 ## 2026-08-27 — Durable local review confirmations
 
 | Commit | Change | Regression boundary / known-good meaning |
