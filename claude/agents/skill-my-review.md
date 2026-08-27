@@ -19,7 +19,7 @@ shared review references cited there under `~/.claude/skills/my-review/reference
 
 ## Input
 
-Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
+Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, accepted_trigger_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `accepted_trigger_scope` is either `none` or the exact normalized local trigger tuples explicitly approved during this invocation. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
 
 ## Authority
 
@@ -40,6 +40,10 @@ external intent as `external_action_requested`; return fresh keyed findings and
 prior-disposition matches to `implement-review` or `my-workflow` for final ledger
 settlement, without updating the ledger yourself.
 
+In local mode, return one first-item human confirmation for trigger content not
+covered by the latest `accepted` ledger row. The wrapper owns the user prompt and
+append-only ledger write; do not infer approval or update the ledger yourself.
+
 Return immediately with a terse APPROVE when the aggregate diff meets the
 shared Low-risk fast-approval contract. In PR mode, build at most one
 deduplicated inline human-review handoff for all migration, env/config,
@@ -49,9 +53,9 @@ separate from findings and never independently blocks the PR.
 ## Output
 
 Return a structured review envelope: mode/diff source, overall change-set risk,
-coverage manifest, the single PR human-review handoff when required,
+coverage manifest, the single PR human-review handoff or local confirmation when required,
 verified findings ordered by severity with stable keys, verifier evidence,
-dropped findings, prior resolved/deferred matches, requirements coverage,
+dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable
 adversarial verdict reconciliation, and embedded stage outcome. Do not include
 raw lens or verifier transcripts.

@@ -10,9 +10,13 @@ Load this when `my-review` needs help deciding review source of truth.
 
 Before fan-out, produce a short triage block: resolved scope (base ref, commit
 count, file count), intent, overall change-set risk, the single PR human-review
-handoff when triggered, active lenses, requirements source, tracer triggers,
+handoff or first-item local confirmation when triggered, active lenses,
+requirements source, tracer triggers,
 author calibration when PR mode, and pending learned misses. Follow
 `change-set-risk.md`; a qualifying Low-risk set returns APPROVE before fan-out.
+In local modes, uncovered human-review triggers return one first-item explicit
+confirmation before review fan-out; an accepted ledger scope suppresses only
+unchanged trigger contents.
 
 Also resolve the verdict relationship:
 

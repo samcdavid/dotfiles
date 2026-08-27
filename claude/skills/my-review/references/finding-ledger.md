@@ -18,6 +18,7 @@ an item has a final outcome:
 | --- | --- | --- | --- | --- | --- |
 | `auth.refresh-expiry` | resolved | Refresh accepts expired token | Regression test + `abc1234` | `abc1234` | 2026-08-24, Feedback Round 2 |
 | `canvas.diary-readback` | deferred | Diary readback needs persistence | Outside this slice; MCP-722 explicitly owns it | MCP-722 | 2026-08-24, Feedback Round 2 |
+| `review-handoff.local-sensitive-changes` | accepted | Local review-sensitive change confirmation | User explicitly accepted, acknowledged, and approved; accepted scope: `<category>:<path>:<changed_content_digest>`, review base `<sha>` | user approval | 2026-08-27, Local Review Confirmation |
 ```
 
 The only final statuses are:
@@ -27,6 +28,11 @@ The only final statuses are:
   needed.
 - `deferred` — the concern is valid but truly out of scope, with a concrete,
   verified follow-up ticket, owner, or clearing condition.
+- `accepted` — only for `change-set-risk.md`'s local human confirmation. The
+  user explicitly accepted and acknowledged the listed review-sensitive changes
+  and approved continuing without repeat prompts while the recorded trigger
+  contents remain unchanged. Never use this status to settle a defect, ordinary
+  suggestion, requirement gap, or unverified claim.
 
 Use a stable `Key`: `<affected behavior or subsystem>.<short concern>`. Base it
 on the causal behavior and symbol/module, not a line number, reviewer wording,
@@ -41,6 +47,20 @@ candidate that matches a prior `resolved` or `deferred` row is not a fresh
 finding and must not consume another repair pass or be re-presented verbatim.
 Report it compactly as an existing disposition when useful.
 
+For `review-handoff.local-sensitive-changes`, retain the latest `accepted` row's
+normalized trigger tuples. Suppress a local confirmation when every current
+tuple is covered. If any category, path, or changed-content digest is new, ask
+once for only that uncovered set and append a new `accepted` row containing the
+full current scope after explicit approval. Line numbers are presentation
+anchors, not scope identity.
+
+The outer `my-review` wrapper owns this append. Record a faithful copy of the
+user's affirmative response; the full sorted trigger tuples; review mode, base,
+and current HEAD when available; and `Recorded: <date>, Local Review
+Confirmation`. Update only the ledger frontmatter's `updated:` date in addition
+to appending the row. Never rewrite a prior acceptance row, and never create a
+ledger solely for this confirmation.
+
 Reopen the concern only with new, specific evidence: the affected behavior was
 changed or regressed after the recorded commit, the prior evidence is disproven,
 or the deferred follow-up/clearing condition has materially changed. Record the
@@ -50,4 +70,5 @@ trigger. Never silently overwrite historical rows.
 Do not falsely close an item. A fresh substantive finding awaiting a user scope
 decision, a repair attempt, or a missing follow-up remains an active handoff and
 is not entered in the register until it can honestly be marked `resolved` or
-`deferred`.
+`deferred`. An unanswered or declined local human confirmation is likewise not
+`accepted`.

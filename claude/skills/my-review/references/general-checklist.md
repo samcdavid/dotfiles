@@ -66,11 +66,11 @@ Categories are ordered by priority. Before raising any issue, check it against t
 
 ### Lint and Tooling Discipline
 - Are any lint checks, formatter rules, or static analysis warnings being disabled or suppressed (e.g. `# credo:disable-for-this-file`, `# noqa`, `# eslint-disable`, `# rubocop:disable`, `@dialyzer`, `mix format` skip comments)?
-- In PR mode, every newly added inline suppression or config/file exclusion is
-  also recorded in the orchestrator's single human-review handoff per
-  `change-set-risk.md`. Do not emit a second human-review request from this lens;
-  raise a normal finding only when the suppression itself creates an actionable
-  code risk.
+- Every newly added inline suppression or config/file exclusion is also recorded
+  in the orchestrator's human-review gate per `change-set-risk.md`: one inline
+  handoff in PR mode or one ledger-deduped confirmation in local mode. Do not
+  emit a second human-review request from this lens; raise a normal finding only
+  when the suppression itself creates an actionable code risk.
 - A newly disabled check is Critical only when it can hide a production, security, data, contract, or launch-critical correctness issue; otherwise raise a non-blocking question or suggestion. "Valid" means: the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass").
 - Common invalid justifications: disabling formatting rules to preserve manual formatting, disabling import-order checks, suppressing warnings instead of fixing them, disabling type checks because a type is hard to express.
 - If a disable comment already existed and the PR didn't add it, it is not Critical — but flag it as a question ("is this still needed?").

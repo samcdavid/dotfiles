@@ -38,9 +38,9 @@ or use `COMMENT`. This path is unavailable when requirements are missing or
 partial, an existing unresolved thread concerns the changed lines, or any human
 review trigger is present.
 
-## PR-only human-review triggers
+## Human-review triggers
 
-In PR mode, scan added and modified diff lines for:
+In PR and local modes, scan added and modified diff lines for:
 
 - database/schema/data migrations or backfills;
 - new or changed environment-variable references, secrets/config lookups, or
@@ -54,6 +54,13 @@ In PR mode, scan added and modified diff lines for:
 These signals require judgment about deployment state, operational ownership,
 or intentionally hidden diagnostics that repository analysis cannot settle.
 They are handoff triggers, not automatic defects or blockers.
+
+Normalize every trigger as `{ category, path, changed_content_digest }`, where
+the digest covers the added/modified trigger content without its line number.
+Sort and deduplicate these tuples. Line movement alone must not manufacture a
+new trigger; new or materially changed trigger content must.
+
+### PR mode
 
 Build one `human_review_handoff` for the entire PR:
 
@@ -91,3 +98,39 @@ intentional. This is a review handoff, not an automatically identified defect.
 
 Keep only the categories that fired and do not add the same request to the
 top-level review body.
+
+### Local mode
+
+Build one `local_human_confirmation` from every trigger not already covered by
+the matching workflow ledger's latest accepted scope. Use the stable key
+`review-handoff.local-sensitive-changes` and place this special confirmation as
+review item/finding 1, before ordinary findings. It is a user decision, not a
+defect claim: do not verifier-route it, send it through `/this-important`, or
+let it independently produce `REQUEST_CHANGES`.
+
+Ask exactly once for the current uncovered set:
+
+> This local change set includes migration, environment/configuration,
+> infrastructure/operations, or newly suppressed lint/tooling checks at the
+> anchors below. Do you accept and acknowledge these review-sensitive changes
+> and approve continuing this review/workflow without repeating this
+> confirmation while these exact trigger contents remain unchanged?
+
+List every uncovered `category` and `path:line` under the prompt. Do not ask once
+per anchor or repeat the prompt in Questions/residual risk. Auto/no-questions
+mode cannot waive this explicit confirmation.
+
+- **Affirmative:** the outer wrapper appends one `accepted` Finding Register row
+  using `finding-ledger.md`, recording the exact affirmative response, all
+  current normalized trigger tuples, and the review scope/base. Continue the
+  review and remove the confirmation from active findings.
+- **Negative:** append nothing, stop with `needs_input: local human confirmation
+  declined`, and preserve the anchors. Do not return APPROVE.
+- **No matching ledger:** ask once for this invocation, but report that the
+  acknowledgement cannot be durably suppressed. Never create a workflow ledger;
+  ledger creation remains owned by `my-workflow`.
+
+On later passes, suppress the confirmation when every current normalized trigger
+tuple is covered by the latest `accepted` row for the stable key. A new category,
+path, or changed-content digest is new scope: ask once for only the uncovered
+set, then append a new row whose accepted scope covers the full current set.

@@ -129,7 +129,7 @@ Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sec
 
 Read `references/review-contract.md` before choosing lenses.
 Read `references/change-set-risk.md` before fan-out; classify the aggregate diff
-and build the PR-only human-review handoff from its deterministic triggers.
+and build the mode-specific human-review gate from its deterministic triggers.
 
 ### Lens catalog
 
@@ -179,7 +179,7 @@ Produce a short triage block and show it to me before going deep:
 - **Scope:** <PR #N at <sha>> | <local: <N> commits since `<base_ref>` (<fork sha>) + <clean tree | staged/unstaged changes>>, <N> files
 - **Intent:** <1–2 sentences in your words — what this change does and why>
 - **Overall change-set risk:** <Low | Medium | High> — <diff-grounded rationale>
-- **Human review handoff (PR Mode):** <one inline anchor + trigger/anchor count> | none
+- **Human review gate:** <PR: one inline anchor + trigger/anchor count> | <local: accepted ledger scope | confirmation required for N uncovered triggers> | none
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
@@ -204,22 +204,17 @@ If the aggregate set qualifies for `change-set-risk.md`'s Low-risk fast
 approval, stop here after the required scope, requirements, thread, and trigger
 checks. Return the terse approval directly; Steps 3–8 do not run.
 
+### Local human-confirmation gate
+
+Before Step 3 in any local mode, apply `change-set-risk.md`'s local gate exactly.
+Uncovered trigger scope returns as review item 1 before fan-out. Only explicit
+user approval lets the wrapper persist/pass accepted scope and resume; a decline
+or missing response returns `needs_input`. Acceptance suppresses only the repeat
+prompt, never ordinary defect analysis.
+
 ### Author Skill Level (PR Mode only)
 
-Ask which skill level to calibrate against. Skip for Local Mode.
-
-| Level | Calibration |
-|---|---|
-| **Junior** | Thorough and educational. Explain *why*. Encouraging on good work. |
-| **Mid** | Standard. Explain non-obvious issues. Trust they can implement fixes given a clear problem description. |
-| **Senior** | Concise and direct. Focus on subtle bugs and architecture. Skip explanations of well-known patterns. |
-| **Lead** | Concise and strategic. Maintainability, team-wide impact, precedent. |
-| **Staff+** | Peer review. Systemic impact, cross-team implications, design tradeoffs. Frame as discussion. |
-
-Default: **Lead** if I skip.
-
-Author calibration affects explanation depth only. It never permits feedback
-that fails `references/review-contract.md`'s Actionability Gate.
+Load `references/author-calibration.md`. Skip this step in Local Mode.
 
 ## Step 3 — Fan out, then compile
 
@@ -468,6 +463,8 @@ Before Step 7, confirm:
 - overall change-set risk was classified independently from per-finding risk
 - a required PR human-review handoff is one deduplicated inline annotation, not
   repeated in the review body, questions, findings, or residual risk
+- local trigger scope resumed only after its one first-item confirmation was
+  explicitly accepted; durable suppression has an `accepted` ledger row
 
 ## Step 7 — Verdict
 
@@ -527,6 +524,8 @@ If no `Worth-considering` items, skip the prompt entirely.
 - In PR mode, migrations, env/config references, infra/ops changes, and added
   linter/tooling suppressions require exactly one deduplicated inline human-review
   handoff for the whole PR.
+- In local mode, apply `change-set-risk.md`'s ledger-deduped first-item
+  confirmation; never infer or auto-accept it.
 - Every non-blocking suggestion should include example code when the alternative is not obvious.
 - Raise only actionable feedback. Every finding or question must name a concrete author-controlled change, decision, or specific information request and the changed-line risk it resolves. Drop observations, preferences, generalized advice, and speculative future concerns.
 - Explicitly label severity on every comment: **Critical**, **Suggestion (non-blocking)**, **Question**, or **Nit**.
@@ -556,7 +555,8 @@ If no `Worth-considering` items, skip the prompt entirely.
 
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
 - `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
-  approval, and the single PR-only human-review handoff.
+  approval, the single PR handoff, and ledger-deduped local confirmation.
+- `references/author-calibration.md` - PR-only explanation-depth calibration.
 - `references/review-contract.md` - deterministic coverage, evidence, and final-integrity requirements for every review.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
 - `references/cross-service-contracts.md` - checklist for cross-service changes. Read by `general-reviewer`.
