@@ -1,44 +1,39 @@
 # Protocol — implement-review
 
-`implement-review` is the sole owner of the local implementation-to-clean-review
-cycle. It reuses the existing implementation and review agents; it does not
-reimplement their checklists or create a second repair loop.
+`implement-review` is the sole owner of the local post-implementation
+review-to-clean cycle. Initial plan execution belongs to `my-implement` and must
+finish before this loop starts. This runner reuses validation, review, and repair
+agents; it does not reimplement their checklists or create a second repair loop.
 
-## Route Selection and Preconditions
+## Preconditions
 
-Read the available plan, behavior-first test strategy, base ref, and workflow
-ledger before choosing work. Select exactly one route:
+Read the available plan, behavior-first test strategy, base ref, workflow ledger,
+and implementation evidence before starting.
 
-- **Plan delivery:** use only when an approved plan has unfinished behavioral
-  phases and the ledger does not record the workflow or atomic delivery stage
-  as complete. If that plan lacks an honest RED test or mechanical success
-  criteria for an unfinished behavioral phase, return `blocked` rather than
-  inventing a plan.
-- **Review-first:** use when no plan is available, or when the supplied ledger
-  marks the workflow or its `implement-review`/atomic delivery stage completed
-  (including a recorded clean terminal result). The existing branch is the
-  review subject; do not reopen completed planning or require a plan merely to
-  examine and repair it.
+- When a plan is supplied, require every phase/checklist item complete, plan
+  status `implemented`, and the successful holistic test gate from
+  `my-implement`. If any evidence is missing or any phase remains unfinished,
+  return `blocked` with the exact `my-implement` handoff. Do not implement the
+  missing phase, start a review pass, or spend loop budget.
+- When no plan is supplied, treat the existing branch as unplanned completed
+  work and review it directly. Do not manufacture a retrospective plan.
 
-Require a base ref for either route, deriving it by the shared review base-ref
-rules when the caller did not supply one. Pass all available artifacts as review
-context. An unavailable requirements source is recorded as such by `my-review`;
-it does not prevent review-first from starting.
+Require a base ref for planned or unplanned work, deriving it by the shared
+review base-ref rules when the caller did not supply one. Pass all available
+artifacts as review context. An unavailable requirements source is recorded as
+such by `my-review`;
+it does not prevent review from starting.
 
 ## Execution
 
-1. On the plan-delivery route, dispatch `skill-my-implement` in embedded mode
-   for every unfinished plan phase. Preserve its isolated executor and local-
-   commit behavior. On the review-first route, do not dispatch implementation
-   before the first review.
-2. Run up to **five** review passes.
-   - Plan delivery: each pass dispatches `skill-my-validate` in plan/embedded
-     mode, then `skill-my-review` in local mode against the supplied base ref.
-   - Review-first: pass 1 dispatches `skill-my-review` directly and records
-     `validation: not_run`. If it is clean, exit clean without inventing a
-     validation run. After a repair, each later pass dispatches
-     `skill-my-validate` in session/embedded mode against the repair evidence,
-     then `skill-my-review`.
+1. Start the loop only after the preconditions above pass. Pass 1 dispatches
+   `skill-my-review` directly and records the completed `my-implement` holistic
+   test evidence as `validation: implementation_gate` (or `not_run` for
+   unplanned existing work). If it is clean, exit without inventing another
+   validation run.
+2. Run up to **five** review passes. After a repair, each later pass dispatches
+   `skill-my-validate` in session/embedded mode against the repair evidence,
+   then `skill-my-review`.
    Record the validation result, review findings, and changed commits for every
    pass.
 3. If validation blocks, or review returns a Critical finding, unresolved
@@ -46,7 +41,7 @@ it does not prevent review-first from starting.
    findings before another pass. For behavior changes, dispatch one
    `implementation-executor` per bounded finding with an honest RED test,
    explicit allowed paths, relevant plan constraints when available, and the
-   verifier evidence. For review-first behavioral repairs, the verified finding
+   verifier evidence. For unplanned-work behavioral repairs, the verified finding
    supplies the bounded requirement; do not create a retrospective broad plan.
    For a genuinely non-behavioral edit, dispatch `quick-implement-agent` with
    the same evidence and bounded paths. Re-verify each repair and require its
@@ -57,12 +52,13 @@ it does not prevent review-first from starting.
 5. Exit `clean` only after the terminal whole-branch `my-review` has no
    Critical, unresolved requirement, or substantive non-blocking finding. When
    the run made a repair, that review must follow a successful validation pass;
-   the untouched review-first pass is the sole exception. Nits and clearly
+   the untouched first review pass is the sole exception. Nits and clearly
    optional suggestions may be recorded as deferred, never silently erased.
 
 ## Stop Conditions
 
-- `clean`: terminal validation and review are clean.
+- `clean`: the terminal review is clean, and validation passed after the latest
+  repair when any repair occurred.
 - `blocked`: an incomplete plan, impossible honest RED test, repeated repair
   failure, a required product decision, or validation failure outside safe local
   repair scope. Stop immediately with evidence.
@@ -83,7 +79,7 @@ Pass the plan, test strategy, base ref, changed-file manifest, and ledger to
 - a changed-line causal proof for every Critical finding; and
 - any earlier finding reopened because a repair touched its causal path.
 
-The runner reports each phase commit as `locally_validated`, never as
+Supplied implementation phase commits remain `locally_validated`, never
 `review_clean`. Only this terminal contract can set `review_clean: true`.
 
 ## Output Envelope
@@ -91,10 +87,10 @@ The runner reports each phase commit as `locally_validated`, never as
 ```markdown
 status: clean | blocked | cap_reached
 review_clean: true | false
-route: plan_delivery | review_first
+route: review_repair
 passes:
   - pass: <1-5>
-    validation: not_run | pass | repaired | blocked
+    validation: implementation_gate | not_run | pass | repaired | blocked
     findings: [<stable finding key>]
     repairs: [<commit SHA>]
 surviving_findings: [<stable finding key>]

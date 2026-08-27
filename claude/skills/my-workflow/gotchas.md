@@ -42,7 +42,7 @@ Decisions belong to the user — approach selection, scope trade-offs, product i
 
 If `my-implement` trips loop-detection, or `my-validate` can't self-repair, or a sub-skill errors — that is a blocker. STOP and escalate with full context. Marching to the next stage on a broken foundation produces a green-looking pipeline over broken work.
 
-## Reviewing the wrong thing in stages 10–13
+## Reviewing the wrong thing in stage 12
 
 The review scope is the **whole branch against the base branch** (`main`/`master`), computed once and shared. Don't let `my-review` slip into PR mode (there is no PR), review only uncommitted changes when committed-on-branch work also exists, or review only the last commit when the branch has several. Compute `fork=$(git merge-base "$base_ref" HEAD); git diff "$fork"` once — that range covers every branch commit plus staged and unstaged work — and feed it to all four review stages.
 
@@ -52,7 +52,10 @@ Eight stages now run back-to-back with zero stops before the Decisions Checkpoin
 
 ## Treating one clean cross-workflow check as good for the rest of the run
 
-Sibling ledgers advance and Linear issue statuses change between checkpoints. A "no overlap" result at intake does not carry forward to the pre-implementation gate — re-run `references/cross-workflow-coordination.md` fresh at each of the three points it applies (Step 0 intake, stage 10's Pre-Implementation Gate after the Decisions Checkpoint, the atomic block's final checkpoint), not just once. Skipping the re-check because "I already looked" is how a sibling's plan lands on the same files mid-run without anyone noticing. (Stages 1-9 no longer stop at all, so there's nothing to re-check between them — the three points above are the whole list now.)
+Sibling ledgers advance and Linear issue statuses change between checkpoints. A
+"no overlap" result at intake does not carry forward: re-run coordination at
+Step 0, stage 10, and stage 12's final checkpoint. Do not add checks between
+stage 11 phases or stage 12 repair passes.
 
 ## Escalating on sibling existence instead of sibling overlap
 
@@ -62,9 +65,18 @@ Most sibling issues on the same Linear project are unrelated. Do not stop the pi
 
 Commits are expected: every validated implementation phase and every validated fix lands as its own local commit via the `commit` skill, so the session leaves a readable history instead of one giant working tree. The boundary is *remote* actions — no push, no PR, no thread resolution, even when the work looks finished and clean. Suggest `/create-pr` and let the user pull that trigger.
 
-## Treating "no separate stop" at stage 10 as authorization to dispatch my-implement
+## Treating stage 10 success as implementation authorization
 
-The protocol says a clean pre-implementation-check (stage 10, no sibling overlap) flows straight into the atomic block with no separate stop — that line describes when the *pipeline* is allowed to proceed, not when *this user* has actually authorized code to be written. Caught on MCP-523: Decisions Checkpoint was confirmed, stage 10 passed clean, phase tasks were staged, and the first `implementation-executor` dispatch was about to fire — the user interrupted: "You didn't have approval to implement yet, just approval of decisions." Confirming the Decisions Checkpoint approves the *decisions*; it is a separate question whether the user is also greenlighting `my-implement` right now. Stop and ask explicitly before dispatching the first executor, even on a clean stage 10 pass — do not treat "the protocol allows continuing" as "the user told me to continue." Same shape as the `my-quick` approval gotcha above, at a different transition point in the same pipeline.
+A clean stage 10 means coordination permits implementation; it does not mean the
+user authorized code changes. Confirming the Decisions Checkpoint approves the
+decisions only. Ask explicitly before stage 11 dispatches its first executor.
+
+## Entering the repair loop before implementation completes
+
+Stage 11 belongs entirely to `my-implement`. Do not dispatch `implement-review`,
+`my-review`, or repair validation between phases. Only a completed plan, all
+phase commits, and the holistic test gate allow stage 12 to begin. If stage 11
+blocks, stop there without consuming a review pass.
 
 ## Cargo-culting `:follower_db` from a ticket into Axon read paths
 

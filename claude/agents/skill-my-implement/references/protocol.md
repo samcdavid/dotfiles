@@ -101,7 +101,9 @@ When all phases are verified done:
 1. Run the full testing strategy from the plan (you run this yourself — it's the holistic gate).
 2. Update the plan status to `implemented`.
 3. Present a summary: what was done, any deviations, any remaining concerns, and how many phases needed a re-dispatch (a signal for tuning future plan granularity).
-4. Suggest running `/my-validate` for a thorough post-implementation check.
+4. Suggest running `/implement-review` for the post-implementation review and
+   bounded repair loop. Do not enter that loop until every phase and this
+   holistic test gate are complete.
 
 In embedded mode, return the compact phase/commit/verification outcome to
 `my-workflow`. Do not update its ledger or declare the pipeline complete.

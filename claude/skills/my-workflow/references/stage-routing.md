@@ -57,10 +57,37 @@ Run stages in this order, based on ledger status. Stages 1-9 run back-to-back wi
 - `my-observe` not completed: run `my-observe`, log the artifact, continue.
 - `my-eval-plan` unset: decide applicability. If the plan touches an AI/LLM surface (prompts, system messages, tool docstrings, model or retrieval selection, scoring, or model-produced behavior), run `my-eval-plan` and log the artifact. Otherwise mark it `not_applicable` with a one-line reason. Either way, continue without stopping.
 - `my-analyze` not completed: run `my-analyze`, including the test-strategy artifact, log the artifact, then **stop here** at the Decisions Checkpoint — present every stage 1-9 artifact plus every accumulated provisional decision for the user to confirm or override. This is the point to clear context; do not run stage 10 yet.
-- Decisions Checkpoint confirmed (every provisional decision resolved), and `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, stop with just that decision (options, recommendation, evidence) — a small checkpoint of its own. If clear, ledger `passed` and continue straight into the atomic block with no separate stop. Not a Linear issue: ledger `passed` (not applicable) and continue straight into the atomic block.
-- Implementation not reviewed, and implementation gate is satisfied (Decisions Checkpoint confirmed, pre-implementation check `passed`): dispatch `implement-review` in embedded mode with the approved plan, test strategy, base, and ledger context. It owns implementation, validation, whole-branch review, and repair; do not wrap it in another loop.
+- Decisions Checkpoint confirmed (every provisional decision resolved), and `pre_implementation_check` is unset or `not_run` for the current plan version, and the task is a Linear issue: run the Pre-Implementation Gate in `references/cross-workflow-coordination.md` — fresh sibling ledger/issue scan against the finalized plan's surfaces. If it finds overlap, stop with just that decision (options, recommendation, evidence). If clear, ledger `passed`. Not a Linear issue: ledger `passed` (not applicable).
+- Implementation gate satisfied and explicit implementation authorization
+  present: dispatch `my-implement` in embedded mode with the approved plan, test
+  strategy, and ledger context. Do not dispatch `implement-review` yet. Mark the
+  implementation stage complete only when every phase is committed, the plan is
+  `implemented`, and its holistic test gate passes; otherwise stop with the
+  runner's blocker.
+- Implementation stage completed: dispatch `implement-review` in embedded mode
+  with the completed implementation evidence, approved artifacts, base, and
+  ledger context. It owns only whole-branch review and bounded repair. It must
+  not dispatch `my-implement` or finish an incomplete plan.
 
-`implement-review` has one shared cap of 5 review passes. A `clean` result proceeds to the final checkpoint. `blocked` or `cap_reached` stops with its surviving findings, iteration deltas, commits, and root-cause theory; neither is implementation completion. Nits and clearly optional suggestions are deferred without another pass.
+`implement-review` has one cap of 5 post-implementation review passes. Its pass
+counter begins only after `my-implement` completes. A `clean` result proceeds to
+the final checkpoint. `blocked` or `cap_reached` stops with surviving findings,
+iteration deltas, repair commits, and root-cause theory. Nits and clearly
+optional suggestions are deferred without another pass.
+
+Review-loop gate:
+
+- The ledger marks `my-implement` completed for the current plan version.
+- Every plan phase/checklist item is complete and plan status is `implemented`.
+- The `my-implement` envelope records all phase commits and a successful holistic
+  test gate.
+- Missing or failed evidence blocks `implement-review` without consuming pass 1.
+
+Legacy ledger compatibility: a previously completed clean atomic
+`implement-review` stage satisfies both stages 11 and 12. For an old incomplete
+atomic stage, inspect the plan. If any implementation remains, record the route
+migration and resume at stage 11 `my-implement`; do not continue the old nested
+loop or count pre-completion review attempts against stage 12's pass budget.
 
 Implementation gate:
 

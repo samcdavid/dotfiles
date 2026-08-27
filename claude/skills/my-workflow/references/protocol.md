@@ -8,7 +8,12 @@ Orchestrate the delivery pipeline as resumable stage work. The task is establish
 
 Stages 1-9 run back-to-back with no stop between them; the ledger is updated silently after each one. Genuine decisions inside a stage are resolved with the pipeline's own best recommendation and logged as provisional rather than asked live. The pipeline stops after stage 9 — the **Decisions Checkpoint** — to present every artifact and every provisional decision together, so the user can confirm or override. This is the deliberate point to clear context: the next run reads the ledger and resumes from here.
 
-Stage 10, the pre-implementation coordination check, runs only after the user resumes past the Decisions Checkpoint — never before it, and never folded into it. It stops on its own only if it finds a sibling overlap; when clear, it flows straight into the atomic `implement-review` block with no further stop. `implement-review` owns implementation, validation, whole-branch review, and repair with one shared cap of five review passes, ending at one stop with `clean`, `blocked`, or `cap_reached`. Implementation cannot start from a new workflow or loose artifacts; it requires completed ledger status for all prior stages, a completed behavior-first test strategy, user confirmation of every provisional decision at the Decisions Checkpoint, and a fresh `passed` pre-implementation coordination check run after that confirmation.
+Stage 10, the pre-implementation coordination check, runs only after the user
+resumes past the Decisions Checkpoint. When clear and implementation is explicitly
+authorized, stage 11 dispatches `my-implement` to complete every plan phase and
+its holistic test gate. Only after the ledger records that completion does stage
+12 enter `implement-review`'s whole-branch review/repair loop, capped at five
+review passes and ending at one stop with `clean`, `blocked`, or `cap_reached`.
 
 Factual questions are handled autonomously through research. Genuine decisions are also resolved autonomously with the pipeline's best recommendation and logged as provisional — ownership stays with the user, who confirms or overrides every provisional decision at the Decisions Checkpoint before the pre-implementation coordination check or implementation can start.
 
@@ -23,16 +28,27 @@ Factual questions are handled autonomously through research. Genuine decisions a
 
 These override sub-skill instructions.
 
-1. **One intake, one Decisions Checkpoint.** Capture task/context once in Step 0. After go-ahead, run stages 1 through 9 autonomously and back-to-back, updating the ledger silently after each one. Do not stop between stages 1-9 for user review — the only guaranteed stop before the atomic block is the Decisions Checkpoint after stage 9.
+1. **One intake, one Decisions Checkpoint.** Capture task/context once in Step 0. After go-ahead, run stages 1 through 9 autonomously and back-to-back, updating the ledger silently after each one. Do not stop between stages 1-9 for user review — the only guaranteed stop before implementation is the Decisions Checkpoint after stage 9.
 2. **Resume from artifacts.** On a later run, read the ledger and continue from the earliest incomplete stage. Do not redo completed stage work unless its input artifact changed.
 3. **Research before asking factual questions.** Answer knowable questions from code, Notion, Google Drive, Linear, and artifacts; log factual assumptions in the ledger.
 4. **Decisions belong to the user, but the pipeline doesn't stop mid-run to ask.** Approach selection, scope trade-offs, product intent, and spec/plan approval are user decisions. Prepare evidence and a recommendation, pick the recommendation, log it under the ledger's `## Provisional Decisions` section, and continue. Every provisional decision from stages 1-9 is presented together at the Decisions Checkpoint for the user to confirm or override before the pre-implementation coordination check or implementation starts.
 5. **Pre-implementation check runs after the Decisions Checkpoint, never before.** Stage 10 only starts once the user has resumed past the Decisions Checkpoint with every provisional decision confirmed or overridden. It is a fresh check, not something to run speculatively during stages 1-9 or to fold into the Decisions Checkpoint's own output.
-6. **Atomic implement-review block.** Implementation is gated. Start it only when the ledger explicitly marks stages 1-9 complete, including `my-test-strategy`, every provisional decision confirmed/overridden at the Decisions Checkpoint, and the pre-implementation coordination check `passed` for the current plan version (run fresh after that checkpoint). Once it starts, dispatch `implement-review` and do not separately dispatch `my-implement`, `my-validate`, `my-review`, or `address-pr-feedback local`. Stop after its terminal envelope.
-7. **One loop owner.** `implement-review` owns the entire repair loop and its five-pass budget. It exits `clean` only after a passing validation and clean whole-branch review; `blocked` and `cap_reached` are incomplete outcomes, not checkpoints that can be represented as ready work. Nits never trigger another iteration.
+6. **Implementation before loop.** Implementation is gated. After its gates pass,
+   dispatch `my-implement` exactly once as stage 11 and let it finish every phase
+   plus the holistic test gate. If it blocks, stop; do not start review or spend
+   loop budget. Mark stage 11 complete before dispatching `implement-review`.
+7. **One post-implementation loop owner.** Stage 12 `implement-review` owns only
+   the review/repair loop and its five-pass budget. It must refuse unfinished
+   plan work, never dispatch `my-implement`, and exit `clean` only after a clean
+   whole-branch review (with validation after any repair). Nits never trigger
+   another iteration.
 8. **No remote actions.** Local commits per validated phase/fix are expected. No `git push`, `gh pr create`, published replies, or state-changing remote calls unless explicitly requested.
 9. **Carry artifacts forward.** Each stage's output is the next stage's input. Track concrete paths/IDs in the ledger.
-10. **Cross-workflow coordination runs at intake, the pre-implementation gate, and the final atomic checkpoint.** When the task is a Linear issue, re-run `references/cross-workflow-coordination.md` at Step 0 intake, at stage 10's Pre-Implementation Gate (after the Decisions Checkpoint), and once more at the atomic block's own final checkpoint after review — sibling ledgers and sibling issues can change between those points. Log a note when siblings are clear; escalate to the user only on an actual file/module or requirement/scope overlap, per that reference's escalation bar. An overlap found at stage 10 is its own stop, separate from the Decisions Checkpoint that already ran.
+10. **Cross-workflow coordination runs at intake, the pre-implementation gate,
+    and the final review checkpoint.** When the task is a Linear issue, re-run
+    `references/cross-workflow-coordination.md` at Step 0 intake, stage 10, and
+    after stage 12 review. Sibling state is not rechecked between every
+    implementation phase or repair pass.
 11. **Provisional decisions are logged, never silently resolved.** Whenever a stage reaches a genuine decision, research it, form a recommendation, pick it, and record it under the ledger's `## Provisional Decisions` section (stage, question, options, recommendation chosen, evidence) before continuing to the next stage. A provisional decision is not a factual assumption — it must be confirmed or overridden by the user at the checkpoint, even when the recommendation seems obvious.
 12. **Migration safety is a hard gate.** When migration work is detected, research must create the history audit and compatibility matrix required by `references/migration-safety.md`; the plan must cover every target history; and validation must pass every listed history. A dependency, environment, or credential failure leaves the gate `blocked`, not implicitly waived. Do not commit the phase, push, open a PR, merge, retry deployment, or claim release readiness unless the user explicitly directs an override; preserve that override and its risk in the ledger and final report.
 
@@ -50,9 +66,13 @@ These override sub-skill instructions.
 | 8 | `my-eval-plan` (conditional) | plan | eval companion | continue |
 | 9 | `my-analyze` | research + spec + test strategy + plan + companions | consistency report | **stop — Decisions Checkpoint** |
 | 10 | Pre-implementation coordination check (Linear issues only), run after the Decisions Checkpoint is confirmed | finalized plan + fresh sibling ledger/issue scan | updated `cross_workflow` ledger section | stop only if overlap found |
-| 11 | gated atomic block: `implement-review` | approved plan + completed test strategy + confirmed provisional decisions + completed stage 1-10 ledger | phase/fix commits, five-pass review ledger, terminal status | stop after terminal envelope |
+| 11 | `my-implement` | approved plan + completed test strategy + confirmed decisions + stage-10 gate | all phase commits + holistic test evidence + plan status `implemented` | continue if complete; stop if blocked |
+| 12 | `implement-review` | completed stage-11 evidence + base + review artifacts | repair commits + five-pass review ledger + terminal status | stop after terminal envelope |
 
-Every stage still writes to the ledger the moment it finishes — status, artifacts, and any provisional decision. Stage 9's Decisions Checkpoint is the mandatory stop and the intended point to clear context; stage 10 only stops again if it surfaces a sibling overlap, and otherwise flows straight into the atomic block. Track stages in the ledger. Mark each `in_progress` when it starts and `completed` when output exists. A checkpoint is an intentional stop, not a blocker.
+Every stage writes to the ledger the moment it finishes. Stage 9 is the mandatory
+stop; stage 10 stops only for overlap. Stage 11 must be recorded `completed`
+with every phase commit and holistic test evidence before stage 12 can start.
+Stage 12 owns the only review/repair pass counter.
 
 Stage 8 is conditional. Run `my-eval-plan` when the plan touches an AI/LLM surface — prompts, system messages, tool docstrings, model or retrieval selection, scoring, or any behavior a model produces. Otherwise mark it `not_applicable` in the ledger with a one-line reason. `not_applicable` satisfies the implementation gate; an unset stage does not.
 
@@ -85,7 +105,7 @@ Entry point: **[stage]**; skipped stages: **[only stages already completed in th
 Route: **[full pipeline | my-quick, with ledgered reason]**.
 Cross-workflow: **[no Linear issue | siblings checked and clear | overlap found — see decision below]**.
 
-Mode: I run research through analysis back-to-back with no stops in between. Factual questions are researched as they come up. Genuine decisions (approach, scope, architecture trade-offs, spec/plan sign-off) get my own best recommendation, logged as a provisional decision rather than asked live. I stop once, after analysis — the Decisions Checkpoint — to hand you every artifact and every provisional decision together for confirmation or override; that's also the point to clear context if you want to. Only after you resume past that checkpoint do I run the pre-implementation coordination check, which stops again only if it finds a sibling overlap — otherwise it flows straight into `implement-review`, which owns implementation, validation, whole-branch review, and repair for up to 5 review passes. Each validated phase and fix is committed locally so the session leaves a readable history; no pushes, PRs, or other outward actions unless explicitly requested. When the task shares a Linear project or milestone with other in-progress work, I check for sibling overlap at intake and again at the pre-implementation gate after your confirmation.
+Mode: I run research through analysis back-to-back with no stops in between. Factual questions are researched as they come up. Genuine decisions (approach, scope, architecture trade-offs, spec/plan sign-off) get my own best recommendation, logged as a provisional decision rather than asked live. I stop once, after analysis — the Decisions Checkpoint — to hand you every artifact and every provisional decision together for confirmation or override; that's also the point to clear context if you want to. Only after you resume past that checkpoint do I run the pre-implementation coordination check. Once implementation is explicitly authorized, `my-implement` completes every planned phase and holistic test gate before `implement-review` begins its whole-branch review/repair loop of up to 5 review passes. Each validated phase and fix is committed locally; no pushes, PRs, or other outward actions unless explicitly requested.
 
 Starting assumptions: **[list]**.
 ```
@@ -103,7 +123,10 @@ For the selected stage, invoke the stage skill with established context: task pl
 - **Decision gates get a recommendation and continue.** If the stage reaches approach choice, scope trade-off, product intent, or spec/plan approval, research it, prepare options and a recommendation, pick the recommendation, log it as a provisional decision in the ledger, and keep running the pipeline. Do not stop the stage for it — it surfaces later at the Decisions Checkpoint.
 - **Provisional decisions accumulate instead of batching into a per-stage stop.** For `my-spec`, `my-clarify`, `my-architecture-plan`, `my-test-strategy`, and `my-plan`, run every question through the Blocking-Question Protocol: factual questions get resolved and logged as assumptions; genuine decisions get a recommendation, get logged as provisional, and the stage continues.
 - **Plan approval is provisional like any other decision gate.** The test strategy and plan are written and recommendations logged, but the pipeline does not stop for them — they surface at the Decisions Checkpoint alongside every other provisional decision, and the pre-implementation coordination check (stage 10) cannot start until the user confirms there and the ledger marks stages 1-9 complete.
-- **Stage boundary is soft between 1-9, hard at 9->10.** Move directly from one completed stage to the next without stopping. The guaranteed stop is once after stage 9 (the Decisions Checkpoint); stage 10 stops again only on a sibling overlap, and the atomic `implement-review` block stops once more when it returns its terminal envelope.
+- **Stage boundary is soft between 1-9, hard at 9->10.** Move directly from
+  one completed stage to the next without stopping. After stage 10 and explicit
+  implementation approval, stage 11 `my-implement` completes in full before
+  stage 12 `implement-review` starts; do not interleave them.
 - **Do not double-spawn.** Only one stage skill runs at a time.
 
 ## Blocking-Question Protocol (research first; then decide who owns it)
@@ -131,8 +154,8 @@ On the answer: confirmed decisions stay as-is, and the run proceeds to stage 10 
 
 ## Stage notes (where the override needs specifics)
 
-- **Cross-workflow, three checkpoints only:** Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 10's Pre-Implementation Gate (after the Decisions Checkpoint), and the atomic block's own final checkpoint after review. There is no per-stage re-check between stages 1-9 anymore — they no longer stop, so there is nothing to check at. Log a clear note when siblings are unrelated; only escalate on an actual file/module or requirement/scope overlap.
-- **10 Pre-implementation coordination check (Linear issues only):** Runs only after the user has resumed past the Decisions Checkpoint with every provisional decision confirmed or overridden — never during stages 1-9, and never as part of that checkpoint's own output. This run compares the *finalized plan's* exact surfaces (not the spec's stated scope) against a fresh sibling scan, since siblings may have advanced since intake. See `references/cross-workflow-coordination.md`'s Pre-Implementation Gate section. Record `pre_implementation_check: passed` or `overlap_pending` in the ledger. If it finds overlap, stop with that one decision (options, recommendation, evidence) — a small checkpoint of its own, not a re-run of the Decisions Checkpoint. If clear, ledger `passed` and continue straight into `my-implement` with no separate stop. The atomic block's own final checkpoint (after review) re-runs the standard check once more, since implementation can take a while.
+- **Cross-workflow, three checkpoints only:** Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 10's Pre-Implementation Gate, and stage 12's final checkpoint after review. Do not recheck between implementation phases or repair passes.
+- **10 Pre-implementation coordination check (Linear issues only):** Runs only after the user has resumed past the Decisions Checkpoint with every provisional decision confirmed or overridden. Compare the finalized plan's exact surfaces against a fresh sibling scan and record `passed` or `overlap_pending`. If clear, obtain/confirm implementation authorization and continue to stage 11; if overlap exists, stop with that decision.
 - **2 `my-spec` / 3 `my-clarify`:** These are the most question-prone. Most "questions" are *factual* and answerable from research + code — resolve those and record assumptions. The residue is usually a genuine scope or product-intent **decision** (what's in scope, what success means, which trade-off) — these get a recommendation and are logged as provisional rather than stopping the stage; they surface together at the single pre-implementation checkpoint. Feed clarify's resolutions back into the spec file before planning.
 - **4 `my-architecture-plan`:** Its criteria come from `my-arch-review/references/protocol.md` (Structural Fit, Coupling, Cohesion, Boundary Integrity, Dependency Health), applied prospectively to the not-yet-planned change. Most questions here are factual (does this convention actually exist in the codebase? what does the current dependency graph look like?) — research them. The genuine decisions are the ones `my-arch-review`'s own Step 3 calls out: whether a proposed deviation from convention is worth its inconsistency — log the recommendation as provisional and continue rather than stopping. Its output feeds `my-plan`'s `## Architectural Constraints` section directly.
 - **5 `my-test-strategy`:** It maps acceptance criteria and regression risks to behavior-first unit and integration assertions, excludes implementation-detail checks, and gives `my-plan` a binding RED-test handoff. Use it to settle test-level, fixture/isolation, and recovery behavior before phase design; route genuine testing trade-offs into provisional decisions.
@@ -140,8 +163,11 @@ On the answer: confirmed decisions stay as-is, and the run proceeds to stage 10 
 - **7 `my-observe`:** It asks which observability platforms/alert channels exist. Detect from the repo first (config files, dependencies, existing dashboards/monitors, CLAUDE.md). If undetectable, default to platform-agnostic recommendations rather than asking. Its output is a companion observability plan linked to the main plan — keep it as a deliverable, not a blocker.
 - **Migration work:** Before the Decisions Checkpoint, complete the history audit and matrix in `references/migration-safety.md`. The architecture plan must name the compatibility strategy; the implementation plan must have a phase and mechanical success criteria for every history; and the observability companion must identify release health checks and error monitors. The reviewer must receive the matrix, not just the migration diff.
 - **8 `my-eval-plan` (conditional):** Run it only when the plan touches an AI/LLM surface — prompts, system messages, tool docstrings, model or retrieval selection, scoring, or any behavior a model produces. Decide this from the plan's changed surfaces, not by asking. Its output is a companion eval plan linked to the main plan, the same shape as `my-observe`'s: a deliverable, not a blocker. When it does not apply, ledger it `not_applicable` with a one-line reason and move on without a checkpoint — an unset stage blocks the implementation gate, `not_applicable` does not.
-- **11 `my-implement`:** The autonomous code-writing core. It reads the test strategy with the plan, then orchestrates one narrow behavior at a time through an isolated `implementation-executor` that does RED/GREEN/VALIDATE. TDD is non-negotiable: each RED assertion must prove an observable outcome rather than a query, call sequence, private helper, or framework policy. Honor the orchestrator's **loop detection**: if the same check fails 3× across attempts (executor + re-verify), STOP and escalate with the error output and your root-cause theory — that is a genuine blocker, not something to power through.
-- **12 `my-validate`:** Run in **Plan Mode** against the plan file from stage 6 and its linked test strategy. Let it self-repair trivial failures; escalate what it cannot fix confidently.
+- **11 `my-implement`:** The autonomous code-writing stage. It reads the test strategy with the plan and completes every narrow RED/GREEN/VALIDATE phase sequentially. Record all phase commits, successful holistic test evidence, and plan status `implemented`. If it blocks or leaves a phase incomplete, stop here; never start stage 12.
+- **Validation after repairs:** Inside stage 12, `implement-review` runs
+  `my-validate` only after a repair and before the next whole-branch review.
+  Stage 11's holistic test gate is the initial validation evidence; do not run a
+  redundant validation/review loop while implementation phases remain.
 - **Compute the diff once for the review stage.** Detect the base branch and the changed files, then pass both to `my-review`:
   ```bash
   base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')
@@ -156,7 +182,11 @@ On the answer: confirmed decisions stay as-is, and the run proceeds to stage 10 
   git diff "$fork"   # the review scope: every branch commit + staged + unstaged
   ```
   Diff from the merge base, not `HEAD`/`HEAD~1` and not the bare working tree — `git diff "$fork"` is the only form that covers both the branch's commits and anything still uncommitted. Pass `base_ref` and `fork` to `my-review` alongside the diff.
-- **`implement-review`:** The atomic delivery stage invokes `my-review` with the base branch name so it diffs the current work tree vs `main`/`master`; stay in read-only local review — no checkout, no PR. Because this is the deliberate full pipeline, don't let lens triage thin the review:
+- **12 `implement-review`:** Start only from completed stage-11 evidence. It
+  invokes `my-review` with the base branch name so it diffs the current work tree
+  vs `main`/`master`; stay in read-only local review. It may repair verified
+  findings, but it must never dispatch `my-implement` or finish omitted plan work.
+  Because this is the deliberate full pipeline, don't let lens triage thin the review:
   - **Force the full lens set active** — Security, Architecture, Performance, QA, and PM/requirements, plus whichever general lenses (Backend/Frontend/Ops/Migration/Dependency) the diff touches. The pipeline always wants the comprehensive pass, not a minimal triage.
   - **Feed the stage-2 spec as the requirements source.** Pass the spec path so `requirements-reviewer` traces acceptance criteria against the spec (and any linked Linear ticket) — this replaces the former standalone `requirements-audit` stage and satisfies its "requires a spec" need without asking.
   - It internally spawns the research subagents + the per-lens reviewers, then merges, de-dupes, runs the adversarial pass, and proposes a verdict. That single output is the pipeline's complete review surface.
@@ -188,7 +218,9 @@ End with the explicit boundary:
 
 ## Guidelines
 
-- Run stages 1-9 back-to-back in one invocation, with a stop after stage 9 (Decisions Checkpoint); stage 10 runs only after that, stopping again only on overlap; the atomic execution/review block is the last stop.
+- Run stages 1-9 back-to-back in one invocation, with a stop after stage 9
+  (Decisions Checkpoint); stage 10 runs only after that, stage 11 completes all
+  implementation, and stage 12 alone owns the review/repair loop and final stop.
 - Research factual questions before proceeding; never ask what code, docs, tickets, or artifacts can answer.
 - Resolve judgment calls with a recommendation and log them as provisional; never silently finalize a decision the user reserves.
 - Keep the ledger current; it is the resume contract after context clearing, and the record of every provisional decision awaiting confirmation.

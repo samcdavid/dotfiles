@@ -6,12 +6,18 @@ There are three possible stops in the whole pipeline; only two are guaranteed. E
 
 - Stages 1-9 (`my-research`, `my-spec`, `my-clarify`, `my-architecture-plan`, `my-test-strategy`, `my-plan`, `my-observe`, `my-eval-plan` when applicable, `my-analyze`) -> continue automatically. Update the ledger silently: status, artifact path, factual assumptions, and any provisional decision (options, recommendation chosen, evidence). Do not stop.
 - **Decisions Checkpoint**, after stage 9 -> always stop, guaranteed. Present every artifact from stages 1-9 and every provisional decision logged along the way together, so the user can confirm or override. This is the deliberate point to clear context — resuming reads the ledger and continues from here. Nothing runs stage 10 or touches `my-implement` before this stop happens and the user resumes past it.
-- Stage 10, Pre-implementation coordination check -> runs only after the Decisions Checkpoint is confirmed. Stop only if it finds a sibling overlap (its own small checkpoint, just that one decision); if clear, continue straight into the atomic block with no further stop.
-- Atomic block (`implement-review`) -> stop after its terminal envelope.
+- Stage 10, Pre-implementation coordination check -> runs only after the Decisions Checkpoint is confirmed. Stop only if it finds a sibling overlap.
+- Stage 11 (`my-implement`) -> complete all implementation without review-loop
+  passes. Stop only if implementation blocks; otherwise continue to stage 12.
+- Stage 12 (`implement-review`) -> begin the review/repair loop only after stage
+  11 is recorded complete, then stop after its terminal envelope.
 
-The implementation/review loop is **not** checkpointed per iteration. `implement-review` owns `my-implement` -> `my-validate` -> `my-review` -> bounded repair without stopping until the review comes back clean of Critical, unresolved requirements, and substantive non-blocking findings, or 5 review passes elapse. Stop once after its terminal envelope. `blocked` and `cap_reached` are incomplete outcomes and must report every iteration's verdict plus the commits each produced.
+Implementation and review are not interleaved. Stage 11 finishes the complete
+`my-implement` plan first. Stage 12 then runs `my-review` -> bounded repair ->
+`my-validate` -> `my-review` without checkpointing each iteration, until clean or
+5 review passes elapse. `blocked` and `cap_reached` are incomplete outcomes.
 
-Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 10 (after the Decisions Checkpoint), and the atomic block's own final checkpoint after review — not at every stage, since stages 1-9 no longer stop.
+Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 10, and stage 12's final checkpoint after review—not between implementation phases or repair passes.
 
 ## The Decisions Checkpoint must report
 
@@ -29,11 +35,12 @@ If the user overrides a provisional decision, update the ledger and re-run only 
 
 - the specific sibling overlap: issue, files/requirement, options, recommendation, evidence
 - that everything else (stages 1-9, Decisions Checkpoint) is already confirmed and unaffected
-- next stage (the atomic block, once resolved) and the exact resume command
+- next stage (`my-implement`, once resolved and authorized) and the exact resume command
 
-## The atomic block's final checkpoint must report
+## Stage 12's final checkpoint must report
 
-- every fix-loop iteration's verdict and the commits it produced
+- stage 11 implementation completion, phase commits, and holistic test evidence
+- every stage 12 repair-loop iteration's verdict and commits
 - the final review verdict
 - cross-workflow re-check result (siblings may have advanced during implementation)
 - whether context can be cleared safely

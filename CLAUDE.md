@@ -36,7 +36,11 @@ Git boundary for skills and agents:
 
 - Local commits are **expected**, not gated: `implementation-executor` and `quick-implement-agent` commit their phase via the `commit` skill once their own validation passes, and `my-implement`, `my-quick`, and `address-pr-feedback` ensure every validated phase or fix is committed. Work that failed validation or escalated stays uncommitted.
 - The gated boundary is remote: no push, no PR create/update, no published replies or thread resolution without an explicit request. `claude/rules/no-outward-actions.md` is the single source.
-- `my-workflow`'s atomic block runs an unattended fix loop: `my-validate` -> `my-review` -> `address-pr-feedback local`, repeating until a review pass is clean of Critical and substantive non-blocking findings, capped at 3 iterations. Nits never trigger another iteration.
+- `my-workflow` completes every planned phase through `my-implement` before it
+  enters `implement-review`. Only then does the unattended five-pass
+  review/repair loop begin: `my-review` -> bounded repair -> `my-validate` ->
+  `my-review`. `implement-review` never performs initial plan execution, and
+  nits never trigger another pass.
 - The format/lint/test gate (`claude/hooks/checks.sh`) runs in exactly one place: `PreToolUse` with `if: Skill(commit)`. Because every code change lands through the `commit` skill, gating commits gates everything. The former `SubagentStop` and `Stop` copies were removed as duplicates, along with the `apf-mark.sh` marker they needed.
 
 Frontmatter conventions:

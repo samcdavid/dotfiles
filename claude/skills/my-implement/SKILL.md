@@ -22,4 +22,7 @@ The runner may make locally validated implementation changes only through its `i
 
 ## Present
 
-Return completed phases, commit SHAs, verification evidence, deviations, uncommitted or escalated work, the workflow-stage envelope when embedded, and the recommended next command. Do not include raw executor transcripts.
+Return completed phases, commit SHAs, holistic verification evidence, deviations,
+uncommitted or escalated work, the workflow-stage envelope when embedded, and
+the recommended next command: `implement-review` only after every implementation
+phase is complete. Do not include raw executor transcripts.
