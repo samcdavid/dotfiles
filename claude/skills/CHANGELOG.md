@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-27 — Durable local review confirmations
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `26dea92` | Added a ledger-backed local confirmation for review-sensitive migration, env/config, infra/ops, and lint-suppression changes. | Local review returns one explicit confirmation as review item 1 before fan-out. An affirmative response records `accepted` trigger-content scope in the workflow ledger; unchanged covered triggers are not raised again, while new or modified trigger content requires a fresh confirmation and real defects remain reviewable. |
+
 ## 2026-08-27 — Parallel team delivery planning
 
 | Commit | Change | Regression boundary / known-good meaning |
