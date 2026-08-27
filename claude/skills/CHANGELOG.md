@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-27 — Aggregate review risk and human handoffs
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `7266259` | Added aggregate change-set risk classification and one PR human-review handoff for infrastructure and added tooling suppressions. | Genuinely Low-risk sets receive a terse APPROVE before fan-out. Migrations, env/config references, infra/ops changes, and added linter/tooling ignores disqualify that fast path and produce exactly one deduplicated inline human-review annotation for the PR. |
+
 ## 2026-08-26 — Actionable review verdicts
 
 | Commit | Change | Regression boundary / known-good meaning |
