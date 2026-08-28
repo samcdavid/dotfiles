@@ -30,8 +30,11 @@ trigger checks pass; diff size or an empty candidate-finding list is not enough.
 - A resolved/deferred Finding Register entry is context, not suppression. Reopen
   it when later changed code touches its causal path or supplies new evidence.
 - An `accepted` row suppresses only the local human confirmation whose normalized
-  trigger tuples it covers. It never suppresses defect analysis or ordinary
-  findings, and new/changed trigger content requires a fresh confirmation.
+  trigger tuples and stable key it covers. Advisory acknowledgement under
+  `review-handoff.local-sensitive-changes` never confirms operational readiness
+  under `review-handoff.operational-readiness`. Neither suppresses defect
+  analysis or ordinary findings, and new/changed trigger content requires fresh
+  confirmation.
 
 ## Actionability Gate
 
@@ -71,12 +74,15 @@ When `change-set-risk.md` identifies PR human-review triggers, the envelope has
 exactly one deduplicated inline handoff annotation containing every relevant
 anchor. This operational handoff is not a finding, does not pass through the
 Actionability Gate or verifiers, and is never repeated in body commentary.
+Deduplicating the request does not confirm the external readiness facts.
 
 When the same triggers appear in local mode, the first review item is one
-explicit confirmation for all uncovered trigger tuples. Do not continue or
-return APPROVE until the user affirmatively accepts, acknowledges, and approves
-the scope. The matching ledger's append-only `accepted` row is the only durable
-dedupe signal; auto mode and conversation inference are not substitutes.
+explicit confirmation for all uncovered trigger tuples. Continue substantive
+review, but do not return APPROVE until a human explicitly confirms the
+environment-variable, feature-flag, and migration readiness conditions.
+Generic acknowledgement is sufficient only for the separate advisory scope.
+The matching ledger keys' append-only `accepted` rows are the only durable
+dedupe signals; auto mode and conversation inference are not substitutes.
 
 ## Re-review and Publication Boundaries
 
@@ -91,7 +97,8 @@ independently justify it.
 
 `COMMENT` is reserved for a third-party PR: the PR author must differ from
 the authenticated GitHub reviewer. Local, branch/range, local-issue,
-embedded-local, self-authored PR, and unknown-ownership PR reviews must return
-`REQUEST_CHANGES` or `APPROVE`. Non-blocking actionable findings and unresolved
-questions remain visible under `APPROVE`; the binary verdict does not erase
-them or inflate them into blockers.
+embedded-local, self-authored PR, and unknown-ownership PR reviews return
+`REQUEST_CHANGES`, `APPROVE`, or no verdict with `needs_input` while operational
+readiness is unconfirmed. Non-blocking actionable findings and unresolved
+questions remain visible under `APPROVE`; the verdict rule does not erase them
+or inflate them into blockers.

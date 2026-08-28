@@ -10,13 +10,15 @@ Load this when `my-review` needs help deciding review source of truth.
 
 Before fan-out, produce a short triage block: resolved scope (base ref, commit
 count, file count), intent, overall change-set risk, the single PR human-review
-handoff or first-item local confirmation when triggered, active lenses,
+handoff or first-item local confirmation when triggered, operational approval
+status, active lenses,
 requirements source, tracer triggers,
 author calibration when PR mode, and pending learned misses. Follow
 `change-set-risk.md`; a qualifying Low-risk set returns APPROVE before fan-out.
 In local modes, uncovered human-review triggers return one first-item explicit
-confirmation before review fan-out; an accepted ledger scope suppresses only
-unchanged trigger contents.
+confirmation while review fan-out continues. Separate ledger keys cover
+advisory acknowledgement and operational readiness. Approval remains pending
+until environment-variable, feature-flag, and migration readiness is confirmed.
 
 Also resolve the verdict relationship:
 
@@ -25,6 +27,7 @@ Also resolve the verdict relationship:
 - `third_party_pr`: PR author login differs from the authenticated GitHub login.
 - `unknown_pr`: either login cannot be established.
 
-Only `third_party_pr` is eligible for `COMMENT`. Every other relationship has a
-binary verdict: `REQUEST_CHANGES` for a verified Critical, High-risk blocker;
-otherwise `APPROVE`.
+Only `third_party_pr` is eligible for `COMMENT`. Every other relationship returns
+`REQUEST_CHANGES` for a verified Critical, High-risk blocker, `APPROVE` when no
+such blocker survives and operational readiness is confirmed, or no verdict
+with `needs_input` while confirmation is pending.

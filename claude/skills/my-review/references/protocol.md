@@ -179,7 +179,7 @@ Produce a short triage block and show it to me before going deep:
 - **Scope:** <PR #N at <sha>> | <local: <N> commits since `<base_ref>` (<fork sha>) + <clean tree | staged/unstaged changes>>, <N> files
 - **Intent:** <1–2 sentences in your words — what this change does and why>
 - **Overall change-set risk:** <Low | Medium | High> — <diff-grounded rationale>
-- **Human review gate:** <PR: one inline anchor + trigger/anchor count> | <local: accepted ledger scope | confirmation required for N uncovered triggers> | none
+- **Human review gate:** <PR: one inline anchor + trigger/anchor count; operational readiness confirmed|required|not applicable> | <local: accepted advisory scope + confirmed operational scope | confirmation required for N uncovered triggers> | none
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
@@ -207,10 +207,12 @@ checks. Return the terse approval directly; Steps 3–8 do not run.
 ### Local human-confirmation gate
 
 Before Step 3 in any local mode, apply `change-set-risk.md`'s local gate exactly.
-Uncovered trigger scope returns as review item 1 before fan-out. Only explicit
-user approval lets the wrapper persist/pass accepted scope and resume; a decline
-or missing response returns `needs_input`. Acceptance suppresses only the repeat
-prompt, never ordinary defect analysis.
+Uncovered trigger scope is review item 1. Keep advisory acknowledgement separate
+from the approval-gating operational confirmation for environment variables,
+feature flags, and migrations. Continue fan-out so the same pass returns the
+substantive review, but return `needs_input` and withhold `APPROVE` until the
+readiness facts are explicitly confirmed. Accepted scope suppresses only the
+matching repeat prompt, never ordinary defect analysis.
 
 ### Author Skill Level (PR Mode only)
 
@@ -315,74 +317,8 @@ If I've authorized auto-mode (or said "no questions, just review"), log these as
 
 ## Step 5 — Format the Review
 
-Take the compiled findings from Step 3 + user answers + any FLAGged answers from Step 4, and structure the review as follows:
-
-```markdown
-
-## Review: [Brief description of what the change does]
-
-### Overall Change Risk
-**Low** / **Medium** / **High** — [aggregate-diff rationale]
-
-### Verdict
-**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [1 sentence: why this verdict, set by Step 7 and constrained by review relationship. COMMENT is valid only for a third-party PR.]
-
-### Summary
-[1-2 sentences demonstrating you understood the change and its purpose]
-
-### Critical Findings
-
-#### 1. [Category]: [Concise issue title]
-**Risk:** [High | Medium | Low] · **Confidence:** [High | Medium | Low] · **Verified by:** [finding-verifier-high | finding-verifier-low]
-**File:** `path/to/file.ext:LINE`
-**Problem:** [What's wrong and why it matters]
-**Fix:**
-[Concrete code suggestion — copy-pasteable, not vague guidance]
-
-### Non-blocking Suggestions
-
-#### 1. [Category]: [Concise title]
-**Risk:** [High | Medium | Low] · **Confidence:** [High | Medium | Low] · **Verified by:** [finding-verifier-high | finding-verifier-low]
-**File:** `path/to/file.ext:LINE`
-**Suggestion:** [What to improve and why]
-**Example:**
-[Code snippet if helpful]
-
-### Prepared Inline Comments
-[PR Mode only, and only when required: one human-review annotation at the
-primary changed-line anchor, listing all migration/env/infra/linter-suppression
-anchors. This is publishing input, not review-body prose. Do not repeat this
-request anywhere else in the review.]
-
-### Security Deep-Dive
-[Only if the compiled findings include this block — skip otherwise]
-
-### Architecture Assessment
-[Only if the compiled findings include this block — skip otherwise]
-
-### Performance Deep-Dive
-[Only if the compiled findings include this block — skip otherwise]
-
-### Quality Deep-Dive
-[Only if the compiled findings include this block — skip otherwise]
-
-### Requirements Traceability
-[Only if the compiled findings include this block — skip otherwise]
-
-### Related-Issue Regression Risks
-[Only if the compiled findings include this block — skip otherwise]
-
-### Upcoming Project Work
-[Only if an active/upcoming project issue exactly covers a duplicate non-blocking follow-up — cite the issue, status, and owned concern. This is context, not a finding.]
-
-### Questions
-- [Genuine clarifying questions that name the exact author-only information or decision needed to resolve a changed-line risk]
-
-### Dropped Findings
-- [Findings a verifier DROPped — what was considered and why it was dropped]
-```
-
-There is deliberately no "What's Good" section. Lens reviewers no longer return grounded positives, so anything written here would be the orchestrator inventing praise it did not verify. Do not add one back from your own impression of the diff.
+Load `references/review-output.md` and render the compiled findings, human
+handoff, approval status, and Step 7 verdict in that exact shape.
 
 ## Step 6 — Whole-Diff Synthesis and Per-Finding Verification
 
@@ -462,9 +398,12 @@ Before Step 7, confirm:
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
 - overall change-set risk was classified independently from per-finding risk
 - a required PR human-review handoff is one deduplicated inline annotation, not
-  repeated in the review body, questions, findings, or residual risk
-- local trigger scope resumed only after its one first-item confirmation was
-  explicitly accepted; durable suppression has an `accepted` ledger row
+  repeated in the review body, questions, findings, or residual risk; a
+  deduplicated request is not readiness confirmation
+- local advisory and operational scopes use their separate stable keys; an
+  older generic acceptance never confirms environment, feature-flag, or
+  migration readiness
+- `APPROVE` is absent whenever any operational-readiness tuple is unconfirmed
 
 ## Step 7 — Verdict
 
@@ -473,12 +412,15 @@ resolved review relationship**, not a fresh judgment call layered on top.
 
 The Low-risk fast-approval path has already returned before this step. A
 human-review handoff is not a defect and cannot produce `REQUEST_CHANGES` by
-itself. For a third-party PR it is unresolved review context, so use `COMMENT`
-until a human has reviewed the marked surfaces. For other review relationships,
-preserve the existing binary verdict constraint and include the one inline
-handoff under `APPROVE` when no Critical, High-risk blocker survives.
+itself. Advisory-only handoffs follow the ordinary relationship rules. If any
+environment-variable, feature-flag, or migration readiness tuple remains
+unconfirmed, set `status: needs_input` and
+`approval_status: pending_human_confirmation`. A third-party PR may use
+`COMMENT`; local, self-authored, and unknown-ownership reviews return no verdict.
+Never use `APPROVE` until the exact operational scope is confirmed.
 
 - If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but follows the normal non-blocking verdict rules. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
+- Otherwise, if operational readiness is pending, apply the pending state above.
 - Otherwise apply the mode gate:
   - **Local, branch/range, Local Issue, embedded local, self-authored PR, or unknown PR:** **APPROVE**. Keep actionable non-blocking findings and targeted questions visible, but do not turn them into `COMMENT` and do not inflate them into blockers merely to avoid approval.
   - **Third-party PR:** **APPROVE** when requirements are satisfied and every remaining finding is Low risk (including substantive actionable feedback). Use **COMMENT** when Medium/High-risk non-blocking feedback, unresolved requirements/context, stale/already-merged PR state, or explicit user instruction not to approve remains.
@@ -488,7 +430,7 @@ is known to differ from the authenticated reviewer's login.
 
 ### Challenge the eligible verdict choice
 
-`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. For a third-party PR only, the remaining APPROVE/COMMENT choice is discretionary and receives this whole-review adversarial pass. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-debate` with:
+`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. A pending operational-readiness state is likewise mechanical, so do not challenge it. For a third-party PR only, the remaining APPROVE/COMMENT choice after readiness is confirmed is discretionary and receives this whole-review adversarial pass. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-debate` with:
 
 - proposed APPROVE/COMMENT verdict
 - the final surviving non-blocking findings, with their risk and confidence levels
@@ -521,11 +463,13 @@ If no `Worth-considering` items, skip the prompt entirely.
 - Every Critical finding must include a concrete fix, ideally replacement code. Only Critical findings with High risk are merge-blocking.
 - Classify the aggregate change set before rating findings. A genuinely Low-risk
   set is approved immediately; line count alone never establishes Low risk.
-- In PR mode, migrations, env/config references, infra/ops changes, and added
-  linter/tooling suppressions require exactly one deduplicated inline human-review
-  handoff for the whole PR.
+- In PR mode, migrations, environment variables, feature flags, other config,
+  infra/ops changes, and added linter/tooling suppressions require exactly one
+  deduplicated inline human-review handoff for the whole PR.
 - In local mode, apply `change-set-risk.md`'s ledger-deduped first-item
-  confirmation; never infer or auto-accept it.
+  confirmation; never infer or auto-accept it. Environment-variable,
+  feature-flag, and migration readiness uses its separate stable key and blocks
+  approval until explicitly confirmed.
 - Every non-blocking suggestion should include example code when the alternative is not obvious.
 - Raise only actionable feedback. Every finding or question must name a concrete author-controlled change, decision, or specific information request and the changed-line risk it resolves. Drop observations, preferences, generalized advice, and speculative future concerns.
 - Explicitly label severity on every comment: **Critical**, **Suggestion (non-blocking)**, **Question**, or **Nit**.
@@ -534,7 +478,7 @@ If no `Worth-considering` items, skip the prompt entirely.
 - Cross-service boundaries deserve extra scrutiny because subtle bugs hide there.
 - Tests must test what they claim; vacuous tests are worse than no tests.
 - Never re-raise an issue already present in the PR conversation.
-- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern only when it is actionable and clearly non-blocking. In local and self-authored/unknown PR reviews, approve whenever no such blocker survives. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved requirements/context remains.
+- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern only when it is actionable and clearly non-blocking. In local and self-authored/unknown PR reviews, approve whenever no such blocker survives **and** operational readiness is confirmed; otherwise return approval pending. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved requirements/context remains.
 
 ## Common Rationalizations
 
@@ -549,13 +493,15 @@ If no `Worth-considering` items, skip the prompt entirely.
 | "I already found a few issues, that's enough" | Stopping early because a quota feels met leaves real findings on the table — finish the lens sweep before triaging. |
 | "The PR conversation probably already covers this" | Confirm it actually does by checking `existing_comments_index` — don't silently drop a finding on a hunch. |
 | "This is worth mentioning even though there is no concrete action" | Review feedback consumes author attention. If you cannot name the change, decision, or information needed to resolve a present diff-caused risk, drop it. |
-| "COMMENT vs APPROVE doesn't matter much here" | It is mode-constrained. COMMENT exists only for a third-party PR; local and self-authored/unknown PR reviews approve unless a verified Critical, High-risk blocker requires changes. |
+| "The env var/flag/migration looks correct in code, so human confirmation is unnecessary" | Repository correctness cannot prove values exist in every staging/production environment or that a migration ran successfully in staging. Keep the readiness request separate from risk and withhold approval until a human confirms it. |
+| "COMMENT vs APPROVE doesn't matter much here" | It is mode-constrained. COMMENT exists only for a third-party PR; local and self-authored/unknown PR reviews approve only when no verified Critical, High-risk blocker survives and operational readiness is confirmed. |
 
 ## References
 
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
 - `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
-  approval, the single PR handoff, and ledger-deduped local confirmation.
+  approval, the single human-review handoff, and the approval-gating operational
+  readiness confirmation.
 - `references/author-calibration.md` - PR-only explanation-depth calibration.
 - `references/review-contract.md` - deterministic coverage, evidence, and final-integrity requirements for every review.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).

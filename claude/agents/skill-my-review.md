@@ -19,7 +19,7 @@ shared review references cited there under `~/.claude/skills/my-review/reference
 
 ## Input
 
-Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, accepted_trigger_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `accepted_trigger_scope` is either `none` or the exact normalized local trigger tuples explicitly approved during this invocation. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
+Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human explicitly confirmed the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
 
 ## Authority
 
@@ -40,20 +40,25 @@ external intent as `external_action_requested`; return fresh keyed findings and
 prior-disposition matches to `implement-review` or `my-workflow` for final ledger
 settlement, without updating the ledger yourself.
 
-In local mode, return one first-item human confirmation for trigger content not
-covered by the latest `accepted` ledger row. The wrapper owns the user prompt and
-append-only ledger write; do not infer approval or update the ledger yourself.
+Return one human-review item containing all trigger content. In local mode,
+compare advisory and operational tuples against their separate `accepted`
+ledger keys. The wrapper owns the user prompt and append-only ledger writes; do
+not infer acknowledgement/readiness or update the ledger yourself. Complete the
+substantive review even when operational confirmation is absent, then return
+approval pending.
 
 Return immediately with a terse APPROVE when the aggregate diff meets the
 shared Low-risk fast-approval contract. In PR mode, build at most one
-deduplicated inline human-review handoff for all migration, env/config,
-infra/operations, and added lint/tooling-suppression anchors. This handoff is
-separate from findings and never independently blocks the PR.
+deduplicated inline human-review handoff for all migration, environment-variable,
+feature-flag, config, infrastructure/operations, and added
+lint/tooling-suppression anchors. This handoff is separate from findings.
+Unconfirmed environment-variable, feature-flag, or migration readiness blocks
+only `APPROVE`, not by manufacturing a defect or `REQUEST_CHANGES` verdict.
 
 ## Output
 
 Return a structured review envelope: mode/diff source, overall change-set risk,
-coverage manifest, the single PR human-review handoff or local confirmation when required,
+approval status, coverage manifest, the single PR human-review handoff or local confirmation when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable

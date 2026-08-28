@@ -12,14 +12,18 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 2. Classify aggregate change-set risk and scan human-review triggers using
    `change-set-risk.md`. If it qualifies for Low-risk fast approval, return terse
    `APPROVE` before fan-out.
-3. In PR mode, build at most one deduplicated inline human-review handoff for
-   every migration, env/config, infra/operations, and newly added lint/tooling
-   suppression anchor. Treat it as operational review context, not a finding.
-4. In local mode, compare normalized triggers with the latest accepted ledger
-   scope and the wrapper's invocation-local `accepted_trigger_scope`. If
-   uncovered triggers remain, return one explicit confirmation as review item
-   1. The wrapper records an affirmative response in the ledger when available
-   and re-dispatches; never infer acceptance or write the ledger in this runner.
+3. Build at most one deduplicated human-review handoff containing every
+   migration, environment-variable, feature-flag, config, infra/operations, and
+   newly added lint/tooling-suppression anchor. Treat it as operational review
+   context, not a finding. Track environment-variable, feature-flag, and
+   migration tuples separately as approval-gating operational readiness.
+4. In local mode, compare advisory tuples with the latest accepted
+   `review-handoff.local-sensitive-changes` scope and operational tuples with
+   `review-handoff.operational-readiness` plus the wrapper's invocation-local
+   scopes. Present one explicit confirmation as review item 1 when uncovered.
+   The wrapper records only an exact acknowledgement/confirmation in the ledger
+   and re-dispatches; never infer it or write the ledger in this runner. Continue
+   the substantive review while confirmation is pending.
 5. Dispatch research and active lens reviewers, then merge and dedupe only their flat findings.
 6. Run one bounded whole-diff synthesis pass after lens compilation. It may emit
    only interaction candidates grounded in the diff and research evidence; every
@@ -31,9 +35,13 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    or question survives only when it requests a concrete author-controlled
    change, decision, or specific information tied to a changed-line risk.
 9. Compute `REQUEST_CHANGES` mechanically only from verified Critical, High-risk
-   findings. Otherwise return `APPROVE` for local, self-authored PR, and
-   unknown-ownership PR reviews. Only a third-party PR may choose between
-   `APPROVE` and `COMMENT`; delegate that choice to `adversarial-debate`.
+   findings. When operational readiness remains unconfirmed, return
+   `needs_input` with `approval_status: pending_human_confirmation`; never return
+   `APPROVE`. A third-party PR may use `COMMENT`, while other relationships have
+   no verdict until confirmation. Once confirmed, return `APPROVE` for local,
+   self-authored PR, and unknown-ownership reviews when no blocker survives.
+   Only a third-party PR may choose between `APPROVE` and `COMMENT`; delegate
+   that confirmed-readiness choice to `adversarial-debate`.
 10. Enforce `review-contract.md` before returning the compact result envelope to
    the wrapper, `implement-review`, or `my-workflow`.
 

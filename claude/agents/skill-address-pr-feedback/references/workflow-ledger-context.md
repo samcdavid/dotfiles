@@ -20,9 +20,11 @@ If a matching ledger exists, read it and its recorded artifact paths — researc
 - **Fix Quality Bar / `architectural_constraints` (Act II).** Pull each relevant phase's `architectural_constraints` from the plan as a floor for this skill's own Fix Quality Bar (`references/fix-planning.md`) — a feedback fix should not violate a boundary the original plan explicitly called out. When a `my-architecture-plan` artifact exists, its own constraints are the deeper source the plan's were copied from — check a disputed structural comment against it directly if the plan's copy is ambiguous or the comment is about a boundary the plan didn't restate in full.
 - **Finding dedupe (Act I).** Match feedback to the latest Finding Register key before investigation. An unchanged `resolved` or `deferred` concern is already settled: do not re-plan it or spend another repair pass. Reopen only with the concrete trigger required by `finding-ledger.md`; otherwise report the prior disposition compactly if the reviewer needs a response.
 - **Accepted review handoffs are not defect dispositions.** An `accepted` row
-  for `review-handoff.local-sensitive-changes` suppresses only `my-review`'s
-  repeated local confirmation for its recorded trigger contents. Never use it
-  to dismiss, defer, or avoid investigating actual review feedback.
+  for `review-handoff.local-sensitive-changes` suppresses only repeated advisory
+  acknowledgement; `review-handoff.operational-readiness` suppresses only the
+  exact environment-variable, feature-flag, and migration readiness facts it
+  records. Neither can dismiss, defer, or avoid investigating actual review
+  feedback, and the advisory key never satisfies the operational key.
 
 ## Step 4 — Append the round record and finding dispositions
 

@@ -58,10 +58,12 @@ it does not prevent review from starting.
 ## Stop Conditions
 
 - `clean`: the terminal review is clean, and validation passed after the latest
-  repair when any repair occurred.
+  repair when any repair occurred. Any environment-variable, feature-flag, or
+  migration operational-readiness gate is explicitly confirmed.
 - `blocked`: an incomplete plan, impossible honest RED test, repeated repair
-  failure, a required product decision, or validation failure outside safe local
-  repair scope. Stop immediately with evidence.
+  failure, a required product decision, an unconfirmed operational-readiness
+  gate, or validation failure outside safe local repair scope. Stop immediately
+  with evidence; readiness is a human handoff, not a repair finding.
 - `cap_reached`: the fifth review pass still has substantive findings. Do not
   call it complete, do not start a sixth pass, and report each pass's finding
   delta, commits, and root-cause theory.
@@ -78,6 +80,8 @@ Pass the plan, test strategy, base ref, changed-file manifest, and ledger to
   indexes in PR mode;
 - a changed-line causal proof for every Critical finding; and
 - any earlier finding reopened because a repair touched its causal path.
+- `approval_status: eligible`; `pending_human_confirmation` can never set
+  `review_clean: true` even when there are no code findings.
 
 Supplied implementation phase commits remain `locally_validated`, never
 `review_clean`. Only this terminal contract can set `review_clean: true`.

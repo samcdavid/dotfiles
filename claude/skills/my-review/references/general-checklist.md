@@ -4,6 +4,19 @@ The cross-cutting review categories that apply to every `my-review` invocation r
 
 Categories are ordered by priority. Before raising any issue, check it against the existing-comments dedupe index supplied by the caller. Do not re-raise anything already covered by an existing thread.
 
+## Operational Readiness (separate from findings)
+
+- Inventory every changed environment-variable reference/value, feature-flag
+  definition/lookup/default/configuration, and migration/backfill under
+  `change-set-risk.md`.
+- Call them out in the single human-review handoff. Do not assign severity or
+  inflate aggregate risk merely because repository analysis cannot see external
+  environment state.
+- Withhold approval until a human explicitly confirms environment variables and
+  feature flags have the appropriate values/configuration in every staging and
+  production environment and migrations/backfills were tested successfully in
+  staging. A generic acknowledgement or existing handoff comment is not enough.
+
 ## Critical Candidates (request changes only if verified High risk and merge-blocking)
 
 ### Correctness / Bugs
