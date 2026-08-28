@@ -65,8 +65,11 @@ without an explicit request.
 ## Output
 
 During planning, return the compact ledger delta and next single decision. At
-sync, return the complete planning surface. At the pre-implementation stop,
-return gate evidence and request implementation authorization. At completion,
+each decision or question, show the smallest relevant current-code block with
+file/line context, or a clearly labeled proposed-code sketch when the surface
+does not exist yet. At sync, return the complete planning surface. At the
+pre-implementation stop, return gate evidence and request implementation
+authorization. At completion,
 return implementation and review evidence from the ledger. Do not reproduce raw
 issue payloads, agent transcripts, or superseded standalone planning artifacts.
 Lead with the actual requirements, decisions, changes, and findings. Never make

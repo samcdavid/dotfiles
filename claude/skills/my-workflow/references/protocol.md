@@ -87,7 +87,11 @@ ledger path, current user response, and local-only authority. The runner:
 - returns one next decision or a sync proposal.
 
 Present its compact delta and question in plain language, expanding every
-requirement, decision, test, and phase reference before any optional ID. End the turn. On the user's answer,
+requirement, decision, test, and phase reference before any optional ID. Render
+the returned `code_context` immediately before the decision: clickable
+file/start-line, one sentence explaining what matters, and the fenced excerpt.
+For `kind: proposed`, label it as a sketch rather than current repository code.
+Do not ask the question without this context. End the turn. On the user's answer,
 re-dispatch the same ledger and response. Do not answer on the runner's behalf,
 batch its questions, or continue into implementation in the same turn.
 

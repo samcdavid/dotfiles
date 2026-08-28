@@ -18,6 +18,11 @@ versions of those skills remain available.
 - Compact means concise, not cryptic. Lead with the actual requirement,
   decision, test outcome, or plan change; include a ledger ID only afterward for
   traceability. Never ask the user to decode a key.
+- Every decision, question, or active design discussion includes code context.
+  Quote the smallest exact current excerpt that exposes the choice, with its
+  file and starting line. If no implementation exists, show a clearly labeled
+  proposed interface or pseudocode block. Never fabricate proposed code as if it
+  came from the repository.
 - A synchronized ledger is planning approval, not implementation authority.
 - Missing or stale evidence fails closed to a focused deep dive or another
   conversation turn.
@@ -86,7 +91,7 @@ known/unknown boundary. Set `planning_status: pairing`, increment
 - three to five facts that appear settled;
 - a working hypothesis for what should change;
 - confidence and the largest remaining uncertainty; and
-- one load-bearing decision with a recommended answer.
+- one load-bearing decision with a recommended answer and its code context.
 
 ## Step 4 — Pair through the plan
 
@@ -103,6 +108,19 @@ For each candidate question:
 4. If a user-owned choice remains, state the current hypothesis and confidence,
    ask one question, give the recommended answer and evidence, and explain what
    changes if the recommendation is wrong.
+
+Before returning that question, re-read the relevant source so the excerpt is
+current. Select the smallest complete block that lets the user understand the
+choice—usually the function/interface plus the relevant branch or call site.
+Give its clickable path and starting line, use the correct fenced-code language,
+and state in one sentence what to notice. Use additional excerpts only when the
+decision genuinely spans boundaries and one block would mislead.
+
+When there is no existing implementation surface, set `kind: proposed` and show
+the smallest proposed signature, data shape, or pseudocode needed to make the
+choice concrete. Say explicitly that it is a sketch, not repository code. A
+product-only question must still show the proposed behavior at the nearest code
+boundary rather than asking in the abstract.
 
 After every answer, update the affected ledger sections and append a decision
 row with status `confirmed`, `revised`, or `rejected`. Increment `plan_version`,
@@ -186,6 +204,14 @@ delta: <sections and decisions updated this turn>
 confidence: <0-100 plus largest uncertainty>
 deep_dives: [<agent + exact question + evidence refs>]
 next_decision: null | { question, recommendation, evidence, consequence }
+code_context: null | {
+  kind: current | proposed,
+  path: <repository path or proposed target>,
+  start_line: <line or null>,
+  language: <fence language>,
+  excerpt: <exact current code or clearly labeled proposal>,
+  relevance: <what the user should notice>
+}
 sync_proposal: null | { summary, gaps, recommendation }
 assumptions: [<verified factual assumption>]
 external_action_requested: null | { actions, targets, rationale }
@@ -195,6 +221,11 @@ Every keyed item in this envelope must include its plain-language meaning. For
 example, return “Use a five-minute cache TTL (`decision A-003`)”, never
 “confirmed A-003”; return the full decision question and recommendation rather
 than `next_decision: A-003`.
+
+`code_context` is mandatory whenever `next_decision` is non-null or the turn
+asks the user to discuss/choose an approach. A synchronization proposal includes
+the smallest representative code context for any point it asks the user to
+reconsider; it does not dump every touched file.
 
 Return `complete` only after explicit synchronization. An unresolved decision,
 stale issue context, malformed plan phase, uncovered requirement, or missing

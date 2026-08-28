@@ -39,4 +39,6 @@ delta, current confidence, deep dives run, one next decision or synchronization
 proposal, planning status, assumptions, and external-action request. Never
 return raw issue payloads or subagent transcripts. Every referenced ledger ID
 must carry its concrete description; the wrapper must be able to speak without
-looking up shorthand.
+looking up shorthand. Every decision/question must include structured
+`code_context` containing source path and line, language, exact minimal excerpt,
+current-versus-proposed status, and why it matters.

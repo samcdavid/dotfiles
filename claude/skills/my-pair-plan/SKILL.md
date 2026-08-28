@@ -24,7 +24,8 @@ stage: collaborative_planning, authority: local_only }` and dispatch it to
 - Resume from `ledger_path` when supplied; never create a second ledger for the
   same branch.
 - Present the runner's current hypothesis and one load-bearing question with its
-  recommended answer. Do not batch decisions.
+  recommended answer. Include the runner's smallest relevant code excerpt so
+  the user can evaluate the choice in context. Do not batch decisions.
 - After each answer, re-dispatch with the answer as `user_response`; the runner
   updates the ledger before returning the next question or sync proposal.
 - A synchronized plan does not authorize implementation. Return control to
@@ -39,5 +40,8 @@ Show the compact ledger delta, current confidence, any focused deep dive that
 ran, and either the next single decision or the final synchronization proposal.
 Read `~/.claude/rules/human-readable-communication.md` (or the `~/.agents`
 equivalent) and state the actual changed requirement, decision, evidence, and
-consequence before any optional ledger ID. Do not reproduce the full issue
-corpus or raw agent transcripts.
+consequence before any optional ledger ID. Before every decision or question,
+show the supplied current-code excerpt with file and line, or a clearly labeled
+proposed-code block when no implementation exists yet. Explain which lines make
+the decision necessary. Do not reproduce the full issue corpus or raw agent
+transcripts.
