@@ -3,11 +3,11 @@
 Load this after lens reviewers return.
 
 This stage is skipped for `change-set-risk.md`'s Low-risk fast approval. The
-PR-only human-review handoff is finalized separately from findings: one inline
+PR-only human acknowledgement is finalized separately from findings: one inline
 annotation for the whole PR, deduped by substance and containing all trigger
 anchors. Do not verifier-route it or apply the Actionability Gate to it.
 
-The local pre-stage human-review checklist is likewise finalized separately
+The local pre-stage human-acknowledgement checklist is likewise finalized separately
 from findings. It must be review item 1 when uncovered and bypasses
 verifier/importance routing. Advisory acknowledgements and
 operational-readiness confirmations use separate stable keys. Continue
@@ -36,7 +36,7 @@ Verdict rule:
 - `REQUEST_CHANGES` only if a finding survives (or is PROMOTEd to) both Critical **and** High risk after per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. A finding needing clarification surfaces as a blocking question, never an automatic `REQUEST_CHANGES`.
 - In local, branch/range, local-issue, and embedded-local reviews: always return
   `APPROVE` when no Critical High-risk finding survives, otherwise
-  `REQUEST_CHANGES`. Outstanding pre-stage human-review items remain visible but
+  `REQUEST_CHANGES`. Outstanding pre-stage human-acknowledgement items remain visible but
   never suppress this code verdict. Actionable non-blocking findings and
   unresolved questions cannot produce `COMMENT` or be inflated into
   `REQUEST_CHANGES`.
@@ -45,14 +45,14 @@ Verdict rule:
   If readiness is unconfirmed, return `needs_input` with approval pending and no
   PR verdict.
 - In a third-party PR review: `APPROVE` when requirements are satisfied and all remaining findings are Low risk; `COMMENT` when Medium/High-risk non-blocking feedback or unresolved requirements/context remains, the PR is stale/already merged, or the user explicitly asks not to approve.
-- A pending advisory handoff counts as unresolved context for a third-party PR
+- A pending advisory acknowledgement counts as unresolved context for a third-party PR
   and therefore produces `COMMENT`. Pending operational readiness forbids
   PR `APPROVE`; use `COMMENT` for a third-party PR and no verdict with
   `needs_input` for other PR relationships. It never independently produces
   `REQUEST_CHANGES` and never suppresses a local code verdict.
 
 For a re-review, report the blocker ledger delta: cleared, still open, regressed,
-or newly verified, plus any accepted local human-review scope reused or expanded.
+or newly verified, plus any accepted local human-acknowledgement scope reused or expanded.
 Do not repeat a prior blocking finding or accepted confirmation verbatim when its
 covered state has not changed.
 

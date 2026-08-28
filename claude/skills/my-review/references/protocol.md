@@ -132,7 +132,7 @@ Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sec
 
 Read `references/review-contract.md` before choosing lenses.
 Read `references/change-set-risk.md` before fan-out; classify the aggregate diff
-and build the mode-specific human-review gate from its deterministic triggers.
+and build the mode-specific human-acknowledgement item from its deterministic triggers.
 Read `references/incremental-delivery.md` and resolve the current change's
 promised increment before building the requirements checklist or choosing a
 requirements verdict.
@@ -197,7 +197,7 @@ Produce a short triage block and show it to me before going deep:
 - **Intent:** <1–2 sentences in your words — what this change does and why>
 - **Delivery increment:** <what this change promises now; whether it is user-facing; deferred integration or handoff>
 - **Overall change-set risk:** <Low | Medium | High> — <diff-grounded rationale>
-- **Human review:** <PR: one inline anchor + trigger/anchor count; operational readiness confirmed|required|not applicable> | <local pre-stage: clear | N checks required, with accepted advisory and confirmed operational scope> | none
+- **Human acknowledgement:** <PR: one inline anchor + trigger/anchor count; operational readiness confirmed|required|not applicable> | <local pre-stage: clear | N acknowledgements required, with accepted advisory and confirmed operational scope> | none
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
@@ -222,7 +222,7 @@ If the aggregate set qualifies for `change-set-risk.md`'s Low-risk fast
 approval, stop here after the required scope, requirements, thread, and trigger
 checks. Return the terse approval directly; Steps 3–8 do not run.
 
-### Local pre-stage human-review checklist
+### Local pre-stage human-acknowledgement checklist
 
 Before Step 3 in any local mode, apply `change-set-risk.md`'s local checklist
 exactly. Uncovered trigger scope is review item 1. Keep advisory acknowledgement
@@ -417,7 +417,7 @@ Before Step 7, confirm:
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
 - overall change-set risk was classified independently from per-finding risk
-- a required PR human-review handoff is one deduplicated inline annotation, not
+- a required PR human acknowledgement is one deduplicated inline annotation, not
   repeated in the review body, questions, findings, or residual risk; a
   deduplicated request is not readiness confirmation
 - local advisory and operational scopes use their separate stable keys; an
@@ -425,7 +425,7 @@ Before Step 7, confirm:
   migration readiness
 - In PR mode, `APPROVE` is absent whenever any operational-readiness tuple is
   unconfirmed. In local mode, the code verdict is always present and the same
-  tuple is reported under pre-stage human review.
+  tuple is reported under pre-stage human acknowledgement.
 
 ## Step 7 — Verdict
 
@@ -433,7 +433,7 @@ The verdict is a **mechanical function of Step 6's verifier results and the
 resolved review relationship**, not a fresh judgment call layered on top.
 
 The Low-risk fast-approval path has already returned before this step. A
-human-review handoff is not a defect and cannot produce `REQUEST_CHANGES` by
+human acknowledgement is not a defect and cannot produce `REQUEST_CHANGES` by
 itself. Local reviews always compute `code_verdict` independently: a verified
 Critical, High-risk blocker produces `REQUEST_CHANGES`; otherwise return
 `APPROVE`, even when pre-stage human checks remain. In PR mode, if any
@@ -447,7 +447,7 @@ Never use PR `APPROVE` until the exact operational scope is confirmed.
 - Otherwise, in PR mode, if operational readiness is pending, apply the pending
   state above.
 - Otherwise apply the mode gate:
-  - **Local, branch/range, Local Issue, or embedded local:** **APPROVE** with any outstanding pre-stage human-review items shown separately. Keep actionable non-blocking findings and targeted questions visible, but do not turn them into `COMMENT` and do not inflate them into blockers merely to avoid approval.
+  - **Local, branch/range, Local Issue, or embedded local:** **APPROVE** with any outstanding pre-stage human-acknowledgement items shown separately. Keep actionable non-blocking findings and targeted questions visible, but do not turn them into `COMMENT` and do not inflate them into blockers merely to avoid approval.
   - **Self-authored PR or unknown PR:** **APPROVE** after operational readiness is confirmed. Keep actionable non-blocking findings and targeted questions visible.
   - **Third-party PR:** **APPROVE** when the declared increment's requirements are satisfied and every remaining finding is Low risk (including substantive actionable feedback). Use **COMMENT** when Medium/High-risk non-blocking feedback, unresolved increment/requirements context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
@@ -490,8 +490,9 @@ If no `Worth-considering` items, skip the prompt entirely.
 - Classify the aggregate change set before rating findings. A genuinely Low-risk
   set is approved immediately; line count alone never establishes Low risk.
 - In PR mode, migrations, environment variables, feature flags, other config,
-  infra/ops changes, and added linter/tooling suppressions require exactly one
-  deduplicated inline human-review handoff for the whole PR.
+  infra/ops changes, added linter/tooling suppressions, and modifications to
+  existing test files require exactly one deduplicated inline human
+  acknowledgement for the whole PR. New test files do not trigger it.
 - In local mode, apply `change-set-risk.md`'s ledger-deduped first-item pre-stage
   checklist; never infer or auto-accept readiness. Environment-variable,
   feature-flag, and migration readiness uses its separate stable key but never
@@ -527,7 +528,7 @@ If no `Worth-considering` items, skip the prompt entirely.
 
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
 - `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
-  approval, the single human-review handoff, and the approval-gating operational
+  approval, the single human acknowledgement, and the approval-gating operational
   readiness confirmation.
 - `references/incremental-delivery.md` - resolves the current promised increment
   and permits coherent internal groundwork or staged delivery without requiring

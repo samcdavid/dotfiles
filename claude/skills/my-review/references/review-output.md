@@ -12,10 +12,11 @@ Load during Step 5 of `protocol.md`.
 **APPROVE** / **REQUEST_CHANGES** — [whether the code change itself should move
 forward. Always present this in local modes.]
 
-### Readiness Status
+### Acknowledgement Status
 **PR:** eligible / pending human confirmation
-**Local:** pre-stage human review clear / required — [name each environment-variable,
-feature-flag, migration, config, infrastructure, or suppression item]
+**Local:** pre-stage human acknowledgement clear / required — [name each
+environment-variable, feature-flag, migration, config, infrastructure,
+suppression, or modified-existing-test item]
 
 ### Delivery Increment
 **Promised now:** [the concrete outcomes reviewed in this change]
@@ -45,9 +46,10 @@ mode only. Pending PR operational readiness never returns APPROVE.]
 **Suggestion:** [What to improve and why, with an example when useful]
 
 ### Prepared Inline Comments
-[PR only: one human-review annotation at the primary changed-line anchor,
+[PR only: one human-acknowledgement annotation at the primary changed-line anchor,
 listing all migration/environment-variable/feature-flag/config/infra/linter-
-suppression anchors and the exact operational confirmation still required.
+suppression and modified-existing-test anchors, plus the exact operational
+confirmation still required.
 This is publishing input, not review-body prose. Do not repeat it elsewhere.]
 
 ### Security Deep-Dive

@@ -1,4 +1,4 @@
-# Change-Set Risk and Human Review Handoff
+# Change-Set Risk and Human Acknowledgement
 
 Load during triage, before reviewer fan-out. This classifies the aggregate set of
 changes, not individual findings. Finding `Risk` in `finding-axes.md` remains a
@@ -12,12 +12,12 @@ rationale.
 - **Low** — the aggregate diff is small, local, reversible, and does not alter
   runtime behavior, public or persistence contracts, data, authorization,
   dependencies, deployment/configuration, infrastructure, or requirements. No
-  human-review trigger below is present and no source gap or ambiguity could
+  human-acknowledgement trigger below is present and no source gap or ambiguity could
   change that classification. Typical examples are documentation, comments,
   snapshots/fixtures that mirror an already-reviewed behavior, or a mechanical
   refactor whose equivalence is directly visible.
 - **Medium** — the diff changes behavior or operational shape in a contained,
-  reversible way, or needs a human-review handoff, but has no evident wide or
+  reversible way, or needs human acknowledgement, but has no evident wide or
   irreversible failure mode.
 - **High** — the diff touches a wide, privileged, irreversible, externally
   coupled, or difficult-to-roll-back surface: authentication/authorization,
@@ -37,13 +37,13 @@ rationale. Do not fan out research/lens/verifier agents, manufacture suggestions
 or use `COMMENT`. This path is unavailable when requirements included in the
 declared delivery increment are missing or partial, when the increment is
 consequentially unclear, an existing unresolved thread concerns the changed
-lines, or any human review trigger is present. Requirements explicitly deferred
+lines, or any human-acknowledgement trigger is present. Requirements explicitly deferred
 from this increment do not disable the fast path by themselves.
 
-## Human-review triggers
+## Human-acknowledgement triggers
 
-Scan added and modified diff lines in PR and local modes. Build two disjoint
-trigger sets.
+Scan aggregate diff changes in PR and local modes. Build two disjoint trigger
+sets.
 
 `operational_readiness_triggers` require explicit human confirmation before PR
 approval is eligible and remain mandatory pre-stage callouts in local review:
@@ -54,26 +54,34 @@ approval is eligible and remain mandatory pre-stage callouts in local review:
 - new or changed feature-flag definitions, lookups, defaults, rollout values,
   or targeting configuration.
 
-`advisory_handoff_triggers` still require human attention, but do not by
+`advisory_acknowledgement_triggers` still require human acknowledgement, but do not by
 themselves withhold approval:
 
 - other secrets/config lookups or deployment-time settings not already captured
   as environment variables or feature flags;
 - infrastructure and operations surfaces such as Terraform/Pulumi/CloudFormation,
   Kubernetes/Helm, deploy manifests, CI/CD workflows, service/resource limits,
-  networking, permissions, and production config; and
+  networking, permissions, and production config;
 - newly added linter, formatter, type-checker, or static-analysis ignores and
-  suppressions, including file/config exclusions and inline disable comments.
+  suppressions, including file/config exclusions and inline disable comments;
+  and
+- modifications to a test file that existed at the comparison base, including
+  changed expectations, fixtures, setup, coverage, or deleted test content.
+  Brand-new test files do not trigger acknowledgement.
 
-These signals require repository-external knowledge. They are not automatic
-defects, do not acquire finding severity or risk, and do not independently
-justify `REQUEST_CHANGES`. The operational-readiness set withholds PR approval
-because the agent cannot verify deployment state or staging execution. In local
-review it is reported separately and never changes the code verdict.
+These signals need deliberate human acknowledgement; the operational subset
+also requires repository-external knowledge. They are not automatic defects,
+do not acquire finding severity or risk, and do not independently justify
+`REQUEST_CHANGES`. The operational-readiness set withholds PR approval because
+the agent cannot verify deployment state or staging execution. In local review
+it is reported separately and never changes the code verdict.
 
 Normalize every trigger as `{ category, path, changed_content_digest }`, where
 `category` is `migration`, `environment-variable`, `feature-flag`, `config`,
-`infra-ops`, or `lint-tooling-suppression`, and the digest covers the
+`infra-ops`, `lint-tooling-suppression`, or `modified-existing-test`. For an
+existing test, establish that the path exists at the comparison base and digest
+its semantic added/deleted content without hunk line numbers; a newly added test
+path is not a trigger. For other categories, the digest covers the
 added/modified trigger content without its line number. Sort and deduplicate
 these tuples. Line movement alone must not manufacture a new trigger; new or
 materially changed trigger content must.
@@ -92,7 +100,7 @@ withholding its code verdict:
   successfully in staging.
 
 A generic acknowledgement, request to continue, prior approval, passing local
-tests, or the existence/deduplication of a handoff comment is not confirmation.
+tests, or the existence/deduplication of an acknowledgement comment is not confirmation.
 Accept a direct user response or a human-authored PR statement only when it
 unambiguously confirms the applicable condition for the current normalized
 trigger tuples. Never infer it from repository contents. New or materially
@@ -108,42 +116,44 @@ confirmation, re-dispatch with the exact confirmed tuples and compute the
 ordinary relationship-constrained verdict.
 
 When readiness confirmation is missing in local mode, return
-`pre_stage_human_review: required` and the complete checklist alongside the
+`pre_stage_human_acknowledgement: required` and the complete checklist alongside the
 ordinary `code_verdict: APPROVE | REQUEST_CHANGES`. Never return `needs_input`
-solely for local human-review items.
+solely for local human-acknowledgement items.
 
 ### PR mode
 
-Build one `human_review_handoff` for the entire PR:
+Build one `human_acknowledgement` for the entire PR:
 
 - `required: true`
 - `reasons`: the trigger categories that fired
 - `anchors`: every relevant changed `path:line`
 - `primary_anchor`: the most consequential changed line, preferring an
   irreversible migration, environment-variable change, feature-flag change,
-  production-infra change, then a newly added suppression
+  production-infra change, a modified existing test, then a newly added
+  suppression
 - `operational_confirmation`: `confirmed | required | not_applicable`
 
 Emit exactly one inline annotation at `primary_anchor`, titled
-`Human review requested`, and list the other anchors in its body so a reviewer
+`Human acknowledgement requested`, and list the other anchors in its body so a reviewer
 can jump directly to every relevant surface. Do not repeat the request in the
 review body, another inline comment, a question, residual risk, or a lens
 finding. Dedupe the annotation against existing comments by substance as well
 as line, but never treat deduplication as operational confirmation.
 
-The handoff is independent of defect findings: a suspicious suppression or
-unsafe migration may also become a normal verified finding, but the handoff
+The acknowledgement is independent of defect findings: a suspicious
+suppression, unsafe migration, or weakened test may also become a normal
+verified finding, but the acknowledgement
 itself bypasses finding verification and the Actionability Gate.
 
 Use this prepared inline-comment shape, retaining only the sections whose
 categories fired:
 
 ```markdown
-Human review requested: this PR changes operationally owned surfaces that need
-repository-external confirmation. This is a readiness check, not an
-automatically identified defect or a claim that the change is high-risk.
+Human acknowledgement requested: this PR changes surfaces that need deliberate
+human acknowledgement. This is not an automatically identified defect or a
+claim that the change is high-risk.
 
-- `<path:line>` — <migration | environment-variable | feature-flag | config | infra/ops | lint/tooling suppression>
+- `<path:line>` — <migration | environment-variable | feature-flag | config | infra/ops | lint/tooling suppression | modified existing test>
 - `<path:line>` — <category>
 
 Before approval, please explicitly confirm:
@@ -154,19 +164,22 @@ Before approval, please explicitly confirm:
 - each changed migration/backfill has been tested successfully in staging.
 
 For any other listed config, infrastructure, or suppression anchors, please
-verify the operational intent. Approval remains pending only for the applicable
+verify the operational intent. For modified existing tests, acknowledge that
+the expectation or coverage change is intentional and still protects the
+desired outcome. Approval remains pending only for the applicable
 environment-variable, feature-flag, and migration confirmations above.
 ```
 
 If all readiness tuples already have valid human confirmation, retain any
-advisory handoff anchors that still need review, mark
+advisory acknowledgement anchors that still need attention, mark
 `operational_confirmation: confirmed`, and do not ask for the readiness facts
 again.
 
 ### Local pre-stage mode
 
 Use stable key `review-handoff.operational-readiness` for readiness tuples and
-`review-handoff.local-sensitive-changes` for advisory tuples. Compare each set
+`review-handoff.local-sensitive-changes` for advisory acknowledgement tuples.
+Compare each set
 with the matching workflow ledger's latest `accepted` scope and the wrapper's
 invocation-local confirmed/accepted scopes.
 
@@ -174,12 +187,14 @@ Present one combined first review item when either set is uncovered. List every
 uncovered `category` and `path:line`, then state the applicable facts a human
 must verify before staging or production promotion:
 
-> This local change set includes operationally owned changes that require human
-> review. For every listed environment variable and feature flag, confirm that
+> This local change set includes changes that require human acknowledgement.
+> For every listed environment variable and feature flag, confirm that
 > its appropriate value/configuration has been set in every staging and
 > production environment. For every listed migration or backfill, confirm that
 > it has been tested successfully in staging. Please also acknowledge any other
-> listed config, infrastructure, or tooling-suppression changes. These checks do
+> listed config, infrastructure, tooling-suppression, or modified-existing-test
+> changes. For modified tests, acknowledge that the changed expectations or
+> coverage are intentional and still protect the desired outcome. These checks do
 > not imply that the change is unusually risky and do not change the code
 > verdict. They must be completed before the affected change is promoted to
 > staging or production.

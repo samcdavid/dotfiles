@@ -43,7 +43,7 @@ external intent as `external_action_requested`; return fresh keyed findings and
 prior-disposition matches to `implement-review` or `my-workflow` for final ledger
 settlement, without updating the ledger yourself.
 
-Return one human-review item containing all trigger content. In local mode it
+Return one human-acknowledgement item containing all trigger content. In local mode it
 is a pre-stage checklist, not a code-approval gate;
 compare advisory and operational tuples against their separate `accepted`
 ledger keys. The wrapper owns the user prompt and append-only ledger writes; do
@@ -53,9 +53,11 @@ when operational confirmation is absent.
 
 Return immediately with a terse APPROVE when the aggregate diff meets the
 shared Low-risk fast-approval contract. In PR mode, build at most one
-deduplicated inline human-review handoff for all migration, environment-variable,
+deduplicated inline human acknowledgement for all migration, environment-variable,
 feature-flag, config, infrastructure/operations, and added
-lint/tooling-suppression anchors. This handoff is separate from findings.
+lint/tooling-suppression anchors, plus modified test files that existed at the
+comparison base. New test files do not trigger it. This acknowledgement is
+separate from findings.
 In PR mode, unconfirmed environment-variable, feature-flag, or migration
 readiness blocks only `APPROVE`, not by manufacturing a defect or
 `REQUEST_CHANGES` verdict.
@@ -63,7 +65,7 @@ readiness blocks only `APPROVE`, not by manufacturing a defect or
 ## Output
 
 Return a structured review envelope: mode/diff source, overall change-set risk,
-code verdict, PR approval status or local pre-stage human-review status, delivery increment and deferred integration context, coverage manifest, the single PR human-review handoff or local checklist when required,
+code verdict, PR approval status or local pre-stage human-acknowledgement status, delivery increment and deferred integration context, coverage manifest, the single PR acknowledgement or local checklist when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable

@@ -13,7 +13,7 @@ required when an issue, spec, or branch-name issue identifier exists. A lens may
 be skipped only with a concrete diff-based reason in the manifest.
 
 Also classify the aggregate diff under `change-set-risk.md`. Low-risk fast
-approval is valid only after requirements, existing-thread, and human-review
+approval is valid only after requirements, existing-thread, and human-acknowledgement
 trigger checks pass; diff size or an empty candidate-finding list is not enough.
 
 ## Evidence Rules
@@ -76,14 +76,14 @@ Actionability Gate, then recompute the verdict. Do not publish or recommend
 `REQUEST_CHANGES` unless at least one surviving Critical, High-risk finding
 passes every evidence rule above.
 
-When `change-set-risk.md` identifies PR human-review triggers, the envelope has
-exactly one deduplicated inline handoff annotation containing every relevant
-anchor. This operational handoff is not a finding, does not pass through the
+When `change-set-risk.md` identifies PR human-acknowledgement triggers, the envelope has
+exactly one deduplicated inline acknowledgement containing every relevant
+anchor. This acknowledgement is not a finding, does not pass through the
 Actionability Gate or verifiers, and is never repeated in body commentary.
 Deduplicating the request does not confirm the external readiness facts.
 
 When the same triggers appear in local mode, the first review item is one
-pre-stage checklist for all uncovered trigger tuples. Continue substantive
+pre-stage acknowledgement checklist for all uncovered trigger tuples. Continue substantive
 review and always return the independent code verdict. Human confirmation is
 still required before promotion to the affected staging or production
 environment, but it does not gate local code approval. Generic acknowledgement

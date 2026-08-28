@@ -4,12 +4,14 @@ The cross-cutting review categories that apply to every `my-review` invocation r
 
 Categories are ordered by priority. Before raising any issue, check it against the existing-comments dedupe index supplied by the caller. Do not re-raise anything already covered by an existing thread.
 
-## Operational Readiness (separate from findings)
+## Human Acknowledgement (separate from findings)
 
 - Inventory every changed environment-variable reference/value, feature-flag
   definition/lookup/default/configuration, and migration/backfill under
   `change-set-risk.md`.
-- Call them out in the single human-review handoff. Do not assign severity or
+- Also inventory modified test files that existed at the comparison base; new
+  test files do not trigger acknowledgement.
+- Call them out in the single human acknowledgement. Do not assign severity or
   inflate aggregate risk merely because repository analysis cannot see external
   environment state.
 - Withhold approval until a human explicitly confirms environment variables and
@@ -82,9 +84,9 @@ Categories are ordered by priority. Before raising any issue, check it against t
 ### Lint and Tooling Discipline
 - Are any lint checks, formatter rules, or static analysis warnings being disabled or suppressed (e.g. `# credo:disable-for-this-file`, `# noqa`, `# eslint-disable`, `# rubocop:disable`, `@dialyzer`, `mix format` skip comments)?
 - Every newly added inline suppression or config/file exclusion is also recorded
-  in the orchestrator's human-review gate per `change-set-risk.md`: one inline
-  handoff in PR mode or one ledger-deduped confirmation in local mode. Do not
-  emit a second human-review request from this lens; raise a normal finding only
+  in the orchestrator's human-acknowledgement item per `change-set-risk.md`: one
+  inline acknowledgement in PR mode or one ledger-deduped acknowledgement in
+  local mode. Do not emit a second acknowledgement request from this lens; raise a normal finding only
   when the suppression itself creates an actionable code risk.
 - A newly disabled check is Critical only when it can hide a production, security, data, contract, or launch-critical correctness issue; otherwise raise a non-blocking question or suggestion. "Valid" means: the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass").
 - Common invalid justifications: disabling formatting rules to preserve manual formatting, disabling import-order checks, suppressing warnings instead of fixing them, disabling type checks because a type is hard to express.

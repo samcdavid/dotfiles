@@ -3,7 +3,7 @@ model: sonnet
 effort: high
 name: my-review
 runner: skill-my-review
-description: "Rigorous local and PR review that raises only actionable feedback, separating local code approval from pre-stage human readiness checks."
+description: "Actionable local and PR review separating local code approval from required human acknowledgement."
 when_to_use: "Use when the user asks to review their changes, diff, branch, or a GitHub PR."
 ---
 
@@ -26,8 +26,8 @@ Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normaliz
 - Preserve an explicit delivery increment. Otherwise resolve it under
   `references/incremental-delivery.md`; never equate the full linked issue with
   the current change's promised scope.
-- When the runner returns local pre-stage human-review items, present them as
-  review item 1 without delaying the code verdict. For environment variables,
+- Present local pre-stage acknowledgements as item 1 without delaying the code
+  verdict. For environment variables,
   feature flags, and migrations, accept only an
   explicit response confirming the exact readiness conditions in
   `references/change-set-risk.md`; a generic acknowledgement is insufficient.
@@ -48,7 +48,7 @@ Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return overall change-set risk, the code verdict, readiness status, and the
 current delivery increment first, then the coverage manifest and actionable
 findings with file:line evidence and concrete author-controlled fixes, decisions,
-or information requests, the single PR human-review handoff or first-item local
+or information requests, the single PR human acknowledgement or first-item local
 pre-stage checklist when required,
 verdict, questions, residual risk, requirements coverage including what is
 intentionally deferred from this increment,
@@ -58,7 +58,7 @@ consequence, and fix, but may never replace them. Drop observations, preferences
 that do not ask the author to do something concrete. Use `REQUEST_CHANGES` only
 for verified findings that are both `Critical` and `High` risk. Local,
 branch/range, local-issue, and embedded-local reviews always return the code
-verdict; pre-stage human-review items never replace it. PR reviews return
+verdict; pre-stage human-acknowledgement items never replace it. PR reviews return
 `needs_input` with approval pending when required operational readiness is
 unconfirmed. `COMMENT` is
 available only for an actual PR whose author differs from the authenticated
@@ -66,8 +66,9 @@ reviewer. Do not include raw lens or verifier transcripts.
 
 Classify the aggregate diff using `references/change-set-risk.md` before fan-out.
 A Low-risk set takes its fast-approval path. Migrations, environment variables,
-feature flags, infrastructure/operations changes, other config, and newly added
-lint/tooling suppressions produce one deduplicated human-review item.
+feature flags, infrastructure/operations changes, other config, newly added
+lint/tooling suppressions, and modifications to existing tests produce one
+deduplicated human-acknowledgement item. New test files do not trigger it.
 In PR mode, environment variables, feature flags, and migrations additionally
 withhold approval until a human confirms their environment or staging
 readiness. In local mode, report them as pre-stage checks and persist exact

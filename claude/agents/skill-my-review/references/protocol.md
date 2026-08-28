@@ -9,13 +9,14 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 ## Mechanical orchestration contract
 
 1. Normalize the input mode and build the diff source of truth exactly as the shared protocol requires.
-2. Classify aggregate change-set risk and scan human-review triggers using
+2. Classify aggregate change-set risk and scan human-acknowledgement triggers using
    `change-set-risk.md`. If it qualifies for Low-risk fast approval, return terse
    `APPROVE` before fan-out.
-3. Build at most one deduplicated human-review handoff containing every
+3. Build at most one deduplicated human acknowledgement containing every
    migration, environment-variable, feature-flag, config, infra/operations, and
-   newly added lint/tooling-suppression anchor. Treat it as operational review
-   context, not a finding. Track environment-variable, feature-flag, and
+   newly added lint/tooling-suppression anchor, plus modified test files that
+   existed at the comparison base. New test files do not trigger it. Treat the
+   acknowledgement as context, not a finding. Track environment-variable, feature-flag, and
    migration tuples separately as approval-gating operational readiness.
 4. In local mode, compare advisory tuples with the latest accepted
    `review-handoff.local-sensitive-changes` scope and operational tuples with
@@ -35,11 +36,13 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    or question survives only when it requests a concrete author-controlled
    change, decision, or specific information tied to a changed-line risk.
 9. Compute `REQUEST_CHANGES` mechanically only from verified Critical, High-risk
-   findings. When operational readiness remains unconfirmed, return
-   `needs_input` with `approval_status: pending_human_confirmation`; never return
-   `APPROVE`. A third-party PR may use `COMMENT`, while other relationships have
-   no verdict until confirmation. Once confirmed, return `APPROVE` for local,
-   self-authored PR, and unknown-ownership reviews when no blocker survives.
+   findings. Local review always returns an independent code verdict and lists
+   acknowledgement items separately. For PR review, unconfirmed operational
+   readiness returns `needs_input` with
+   `approval_status: pending_human_confirmation`; never return PR `APPROVE`.
+   A third-party PR may use `COMMENT`, while other PR relationships have no
+   verdict until confirmation. Once confirmed, return `APPROVE` for
+   self-authored and unknown-ownership PRs when no blocker survives.
    Only a third-party PR may choose between `APPROVE` and `COMMENT`; delegate
    that confirmed-readiness choice to `adversarial-debate`.
 10. Enforce `review-contract.md` before returning the compact result envelope to
