@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Review acknowledgements for test changes
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `ce15da6` | Renamed `my-review` human-review handoffs to human acknowledgements and added modified existing tests to the trigger set. | Environment, flag, migration, config, infrastructure, suppression, and pre-existing-test changes appear in one deduplicated acknowledgement item. Test files trigger only when they existed at the comparison base; brand-new tests do not. A test acknowledgement remains separate from defect analysis and operational confirmation, while local code verdicts and PR readiness gates retain their existing behavior. |
+
 ## 2026-08-28 — Local pre-stage review verdicts
 
 | Commit | Change | Regression boundary / known-good meaning |
