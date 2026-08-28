@@ -59,6 +59,15 @@ for approval. Migration work never uses `my-quick`.
 `implement-review` begins only after that completion and remains the sole
 review/repair-loop owner.
 
+## Requiring staging migration proof before local review
+
+Keep local implementation validation and deployment validation separate. Run
+the generated migration locally with the repository's normal migration command
+(`mix ecto.migrate` for Axon) and complete local tests before review. Staging
+migration, artifact, and physical-schema evidence can only be collected after a
+PR exists and a staging deployment is kicked off; record it as a later
+deployment gate, not as a blocker for local implementation or review.
+
 ## Cargo-culting operational directives
 
 Reconcile ticket claims with current code and retained gotchas before planning.
