@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Code context in pairing conversations
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `c4deb83` | Required every `my-pair-plan` decision, question, or active design discussion to include its relevant code context. | Before prompting the user, pairing rereads the source and shows the smallest complete current excerpt with a clickable file/start-line, language fence, and explanation of what matters. When no implementation exists, it shows a clearly labeled proposed interface or pseudocode sketch instead of asking an abstract question or presenting invented code as current. |
+
 ## 2026-08-28 — Human-readable skill output
 
 | Commit | Change | Regression boundary / known-good meaning |
