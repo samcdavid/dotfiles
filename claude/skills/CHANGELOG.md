@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Collaborative workflow planning
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `d7b88b3` | Replaced `my-workflow`'s serial pre-implementation artifact pipeline with `my-pair-plan` and one living issue ledger. | Full workflows read the current issue plus the deterministic linked/milestone/project sibling corpus, briefly orient in code, pair through one recommended decision at a time, and call existing specialist agents only for focused deep dives. Explicit ledger synchronization is followed by a fresh current-version preflight and separate current-version implementation authorization; `my-implement` and `implement-review` retain their existing execution and review loops. |
+
 ## 2026-08-28 — Operational readiness review gate
 
 | Commit | Change | Regression boundary / known-good meaning |
