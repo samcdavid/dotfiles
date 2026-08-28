@@ -19,7 +19,7 @@ Omit a duplicate follow-up only when all of these are true:
 
 - an active or upcoming sibling issue in the same project is `started` or `unstarted`;
 - its full description or acceptance criteria explicitly cover the same behavior, surface, and gap—not merely a similar title or theme;
-- the current issue does not require that work for its own acceptance criteria; and
+- the declared current delivery increment does not require that work; and
 - the finding is not a likely production break, security/privacy risk, data-integrity risk, or other Critical concern.
 
-For an exact match, add a concise **Upcoming Project Work** note with the issue link, status, and the concern it owns; do not emit a duplicate suggestion or create another follow-up. A partial match leaves the uncovered portion as a finding. Never treat a future issue as proof that code is correct today, and never suppress a current requirement gap, regression risk, or Critical finding.
+For an exact match, add a concise **Upcoming Project Work** note with the issue link, status, and the concern it owns; do not emit a duplicate suggestion or create another follow-up. A partial match leaves the uncovered portion as a finding. Never treat a future issue as proof that code is correct today, and never suppress a current-increment gap, regression risk, or Critical finding. Conversely, do not manufacture a gap from final-feature work that is explicitly outside the current increment.

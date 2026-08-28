@@ -15,6 +15,28 @@ Determine scope:
 
 A requirements audit requires a spec to audit against. If neither a PR description nor a Linear ticket provides acceptance criteria, ask the user for the source of truth.
 
+### Incremental delivery when embedded in `my-review`
+
+When `my-review` supplies `delivery_increment`, the full spec describes the
+eventual destination rather than automatically defining this PR's merge scope.
+Read `~/.claude/skills/my-review/references/incremental-delivery.md` and classify
+each requirement as Included now, Foundation for later integration, Deferred to
+a later increment, or Unclear before tracing coverage.
+
+Only Included-now requirements can be Missing or Partial findings for the
+current review. Foundation and Deferred requirements remain visible in the
+traceability matrix as context, but their lack of final wiring or user
+visibility is not a defect. A valid deferral may be evidenced by the PR body,
+workflow ledger, issue comment, explicit next step, or a named person/team; a
+separate follow-up ticket is not mandatory for an incremental review.
+
+Incremental scope never excuses a present regression, security/privacy or
+data-integrity problem, unsafe build/deployment/migration, reachable broken
+behavior, or an inconsistent public/API/persistence boundary exposed by the
+current change. If the promised increment is unclear and that distinction
+would change the verdict, request the concrete scope decision instead of
+assuming either full delivery or valid deferral.
+
 ## Step 1 — Gather the Spec
 
 ### From Linear (primary source)
@@ -136,11 +158,13 @@ For each "Missing" or "Partial" requirement:
 - Is it simply overlooked?
 
 ### Deferral Verification
-A deferral is only valid if the cited follow-up actually covers the gap — a ticket number is not proof of a plan. For every requirement or known issue deferred to a ticket:
+A deferral in a standalone full-feature audit is only valid if the cited
+follow-up actually covers the gap — a ticket number is not proof of a plan. For
+every requirement or known issue deferred to a ticket:
 - Fetch the cited ticket (Linear MCP) and confirm it exists — a deferral citing a ticket ID that doesn't resolve, or resolves to something unrelated, is not a valid deferral; treat it as "simply overlooked."
 - Read the ticket's actual title and description and confirm it covers the *specific* gap being deferred, not just a topically-adjacent concern. A ticket about "recursion limits" doesn't cover a `RecursionError` unless it actually discusses recursion; check the text, don't infer from the title alone.
 - If every sibling deferral in the same PR cites a ticket and one doesn't, that asymmetry itself is worth flagging — the missing-ticket deferral needs the same scrutiny as one with no ticket at all.
-- A deferral with no ticket, a nonexistent ticket, or a ticket that doesn't cover the gap is not a deferral — classify the requirement as genuinely missing.
+- A deferral with no ticket, a nonexistent ticket, or a ticket that doesn't cover the gap is not a deferral — classify the requirement as genuinely missing. This standalone rule does not override the embedded `my-review` incremental-delivery evidence rule above.
 
 ### Missing Tests
 For each requirement:
@@ -247,7 +271,9 @@ Spec sources: [Linear ticket, Notion doc, PR description]
 ## Guidelines
 
 - The spec is the source of truth — not your opinion of what the feature should do
-- Missing requirements are higher priority than scope creep — shipping incomplete is worse than shipping extra
+- Missing requirements promised by the audited scope are higher priority than
+  scope creep. Do not call an intentionally staged increment incomplete merely
+  because later integration or user-facing delivery remains.
 - Edge cases should be realistic, not exhaustive — focus on scenarios that users or systems will actually hit
 - Be precise about "Missing" vs. "Partial" vs. "Implemented differently" — these have very different implications
 - Scope creep is not inherently bad — flag it for awareness, don't treat it as a defect

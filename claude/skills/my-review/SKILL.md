@@ -17,12 +17,15 @@ envelope.
 
 ## Dispatch
 
-Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows/`; workflow ledgers are retained in Claude Thoughts and never in the worktree. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
+Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows/`; workflow ledgers are retained in Claude Thoughts and never in the worktree. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
 
 - Infer `mode` as capture/promote, PR, branch/range, local, or local issue only from the supplied argument and current context; load the runner's retained shared routing references before resolving ambiguity.
 - Set `review_relationship` to `local`, `self_authored_pr`, or `third_party_pr`. In PR mode, compare the PR author's login with the authenticated GitHub login; if either cannot be established, use `unknown_pr`, which is not eligible for `COMMENT`.
 - Match a ledger by its recorded branch first, then its issue/slug context when branch metadata is unavailable. Set `ledger_path: none` only after that Claude Thoughts lookup finds no matching ledger; never search the repository for one.
 - For `/my-workflow`, pass the approved plan/base/ledger context and stage number in embedded local mode. The runner returns the compact review envelope plus each finding's full description, stable key, and prior-ledger match, so the feedback loop can settle findings without making the user decode bookkeeping.
+- Preserve an explicit delivery increment. Otherwise resolve it under
+  `references/incremental-delivery.md`; never equate the full linked issue with
+  the current change's promised scope.
 - When the runner returns a local human confirmation, present it as review item
   1. For environment variables, feature flags, and migrations, accept only an
   explicit response confirming the exact readiness conditions in
@@ -41,11 +44,13 @@ Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows
 ## Present
 
 Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
-Return overall change-set risk and approval status first, then the coverage manifest and actionable
+Return overall change-set risk, approval status, and the current delivery
+increment first, then the coverage manifest and actionable
 findings with file:line evidence and concrete author-controlled fixes, decisions,
 or information requests, the single PR human-review handoff or first-item local
 confirmation when required,
-verdict, questions, residual risk, requirements coverage,
+verdict, questions, residual risk, requirements coverage including what is
+intentionally deferred from this increment,
 dropped findings, prior resolved/deferred/accepted matches, and the compact workflow-stage
 envelope when embedded. Finding keys may follow the complete title, problem,
 consequence, and fix, but may never replace them. Drop observations, preferences, and speculative concerns

@@ -14,18 +14,19 @@ Read `skill-my-review/references/protocol.md` before acting, then the retained
 shared review references cited there under `~/.claude/skills/my-review/references/`
 (or `~/.agents/skills/my-review/references/` under Codex). In particular, use
 `mode-routing.md`, `pr-mode.md`, `lens-routing.md`, `project-context.md`,
-`change-set-risk.md`, `finding-axes.md`, `finding-finalization.md`, `finding-ledger.md`, and
+`change-set-risk.md`, `incremental-delivery.md`, `finding-axes.md`, `finding-finalization.md`, `finding-ledger.md`, and
 `review-contract.md`; these remain shared sources for lens/verifier agents.
 Also read `~/.claude/rules/human-readable-communication.md` (or the
 `~/.agents/rules/` equivalent) before assembling the output.
 
 ## Input
 
-Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human explicitly confirmed the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
+Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `delivery_increment` is explicit caller scope or `infer`; resolve `infer` under `incremental-delivery.md` before requirements fan-out. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human explicitly confirmed the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
 
 ## Authority
 
-Build the diff source of truth, classify overall change-set risk, create a
+Build the diff source of truth, resolve the promised delivery increment,
+classify overall change-set risk, create a
 coverage manifest, route active lenses,
 merge/dedupe their flat findings, and run exactly one whole-diff synthesis pass
 for cross-file or cross-finding interactions. Any new synthesis candidate must
@@ -60,7 +61,7 @@ only `APPROVE`, not by manufacturing a defect or `REQUEST_CHANGES` verdict.
 ## Output
 
 Return a structured review envelope: mode/diff source, overall change-set risk,
-approval status, coverage manifest, the single PR human-review handoff or local confirmation when required,
+approval status, delivery increment and deferred integration context, coverage manifest, the single PR human-review handoff or local confirmation when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable

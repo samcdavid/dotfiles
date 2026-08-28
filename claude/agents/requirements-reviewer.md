@@ -17,6 +17,9 @@ Read `read-only-verification.md`; use read-only tools only. Read-only Linear tic
 `mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`, and:
 
 - `requirements_checklist`: linked-ticket criteria. If absent, say so and review only obvious scope creep.
+- `delivery_increment`: the current change's promised outcomes, supporting
+  groundwork, deferred outcomes, and scope evidence. The linked issue remains
+  destination context; it is not automatically the merge scope.
 
 ## PR Mode — read-only via `gh`
 
@@ -32,10 +35,15 @@ In local mode, `diff_text` is fork-to-HEAD plus uncommitted changes; re-derive o
 
 ## What to do
 
-1. Load the `requirements-audit` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/requirements-audit/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth for this lens — apply its criteria, don't reinvent them or stop at `SKILL.md`.
+1. Load the `requirements-audit` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/requirements-audit/references/protocol.md`. Also read `~/.claude/skills/my-review/references/incremental-delivery.md`. Apply the audit criteria to the declared increment, not automatically to the entire eventual feature.
 2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
 3. Read the changed files (PR-safe in PR mode).
-4. **Map every acceptance criterion to specific code changes.** Mark each Covered / Partial / Missing with `file:line`. Flag **out-of-scope** changes (code the ticket didn't ask for). Check that **user-facing behavior** matches stated intent, including edge cases the criteria imply but don't enumerate.
+4. **Map every acceptance criterion to the delivery increment and code.**
+   Classify it as Included now, Foundation for later integration, Deferred to a
+   later increment, or Unclear. Mark Included-now criteria Covered / Partial /
+   Missing with `file:line`. Do not report intentionally deferred final-feature
+   work or a lack of immediate user visibility as a defect. Flag scope creep
+   and verify any user-facing behavior this increment actually exposes.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
 6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
 
@@ -58,9 +66,9 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Add-to-thread:** [thread_root_id] | (omit if new)
 
 ### Requirements Traceability
-| Requirement | Status | File(s) |
-|---|---|---|
-| [acceptance criterion] | Covered / Partial / Missing | `path:line` |
+| Requirement | Delivery classification | Status | File(s) |
+|---|---|---|---|
+| [acceptance criterion] | Included now / Foundation / Deferred / Unclear | Covered / Partial / Missing / Deferred outside increment | `path:line` |
 ```
 
 Omit empty sections. You are read-only: never call Edit/Write on the code under review.

@@ -11,6 +11,11 @@ Load during Step 5 of `protocol.md`.
 ### Approval Status
 **eligible** / **pending human confirmation** — [name any unconfirmed environment-variable, feature-flag, or migration readiness conditions]
 
+### Delivery Increment
+**Promised now:** [the concrete outcomes reviewed in this change]
+**User-facing now:** yes / no
+**Deferred integration or handoff:** [what remains, plus the next step or owner when known]
+
 ### Verdict
 **APPROVE** / **COMMENT** / **REQUEST_CHANGES** / **none — needs input** — [why this verdict or pending state applies. COMMENT is valid only for a third-party PR; pending operational readiness never returns APPROVE.]
 
@@ -51,7 +56,9 @@ This is publishing input, not review-body prose. Do not repeat it elsewhere.]
 [Only when returned by the relevant lens]
 
 ### Requirements Traceability
-[Only when returned by the relevant lens]
+[Only when returned by the relevant lens. Show each eventual-feature
+requirement's delivery classification so deferred work is not mistaken for a
+current defect.]
 
 ### Related-Issue Regression Risks
 [Only when returned by the tracer]

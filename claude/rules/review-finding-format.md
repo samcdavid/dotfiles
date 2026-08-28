@@ -14,11 +14,17 @@ not automatic merge blocks:
 - The PR can lose, corrupt, or expose data.
 - The PR creates an exploitable security or privacy issue.
 - The PR breaks a cross-service, API, or persistence contract with likely runtime impact.
-- The PR omits a must-have acceptance criterion that makes the feature objectively incomplete for launch.
+- The PR omits a must-have outcome promised by the declared delivery increment,
+  making that increment objectively unsafe or incomplete for its stated use.
 
 Everything else should be a non-blocking comment, question, suggestion, or nit, even when it is worth fixing. Do not request changes for style, preference, cleanup, ordinary missing tests, maintainability concerns, minor performance concerns, speculative risk, or a Critical concern whose verified risk is not High.
 
-Approval still has a bar: approve only when the PR satisfies requirements, no Critical High-risk finding survives, and all remaining findings are Low risk. Low-risk findings may be substantive and actionable. Use `COMMENT` whenever a non-blocking finding is Medium/High risk, requirements are unresolved, or context is insufficient.
+Approval still has a bar: approve only when the PR satisfies the declared
+increment's requirements, no Critical High-risk finding survives, and all
+remaining findings are Low risk. The eventual feature may remain incomplete or
+non-user-facing. Low-risk findings may be substantive and actionable. Use
+`COMMENT` whenever a non-blocking finding is Medium/High risk, current-increment
+requirements are unresolved, or context is insufficient.
 
 Use `blocking` only as shorthand for a "Critical, High-risk merge blocker." If a finding is important but does not meet both bars, call it non-blocking and explain the risk.
 

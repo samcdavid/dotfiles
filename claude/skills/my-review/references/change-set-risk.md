@@ -34,9 +34,11 @@ and state the missing fact.
 When `overall_change_risk` is `Low`, stop after scope/intent validation and
 existing-comment dedupe. Return a terse `APPROVE` with the classification and
 rationale. Do not fan out research/lens/verifier agents, manufacture suggestions,
-or use `COMMENT`. This path is unavailable when requirements are missing or
-partial, an existing unresolved thread concerns the changed lines, or any human
-review trigger is present.
+or use `COMMENT`. This path is unavailable when requirements included in the
+declared delivery increment are missing or partial, when the increment is
+consequentially unclear, an existing unresolved thread concerns the changed
+lines, or any human review trigger is present. Requirements explicitly deferred
+from this increment do not disable the fast path by themselves.
 
 ## Human-review triggers
 

@@ -6,7 +6,7 @@ Load this during triage, before final output, and when `implement-review` calls
 ## Coverage Manifest
 
 Before fan-out, record the changed-file categories, active lenses, requirements
-source, and source gaps. Except for a valid Low-risk fast approval, Security,
+source, resolved delivery increment, and source gaps. Except for a valid Low-risk fast approval, Security,
 QA, and the applicable general-reviewer lenses are the baseline for every
 non-empty code diff. A requirements lens is
 required when an issue, spec, or branch-name issue identifier exists. A lens may
@@ -20,8 +20,14 @@ trigger checks pass; diff size or an empty candidate-finding list is not enough.
 
 - Resolve an issue identifier from the branch name before saying requirements
   are unavailable.
-- Map every available acceptance criterion to the diff; record Covered, Partial,
-  or Missing with file evidence before a verdict.
+- Map every available acceptance criterion to the declared delivery increment
+  and diff. Record its delivery classification plus Covered, Partial, Missing,
+  or Deferred outside increment with evidence before a verdict. Do not turn
+  intentionally deferred eventual-feature work into a current defect.
+- A change may be approved as internal groundwork or a partial delivery when
+  the declared increment is coherent, safe, tested, and accurately scoped.
+  Immediate user visibility and completion of the entire linked issue are not
+  approval requirements.
 - A Critical finding needs a changed-line anchor and a causal explanation of
   how this diff introduced, regressed, or newly exposed the defect. Existing
   debt is not a merge blocker.

@@ -130,6 +130,9 @@ Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sec
 Read `references/review-contract.md` before choosing lenses.
 Read `references/change-set-risk.md` before fan-out; classify the aggregate diff
 and build the mode-specific human-review gate from its deterministic triggers.
+Read `references/incremental-delivery.md` and resolve the current change's
+promised increment before building the requirements checklist or choosing a
+requirements verdict.
 
 ### Lens catalog
 
@@ -163,6 +166,12 @@ Need Summary sections. A direct planning document is an equally valid
 requirements source and takes precedence when both it and a ticket are present.
 Activate the PM lens whenever any requirements source exists.
 
+The checklist describes the eventual need. Classify its criteria against
+`delivery_increment` as Included now, Foundation for later integration,
+Deferred to a later increment, or Unclear. Only Included-now criteria are
+required to be complete in this change. A partial or non-user-facing increment
+is eligible for approval under `references/incremental-delivery.md`.
+
 ### Linear project context
 
 For a project ticket, read `references/project-context.md` and build `project_context` before fan-out. It informs duplicate non-Critical follow-ups only; planned work never accepts a current gap or Critical defect.
@@ -183,6 +192,7 @@ Produce a short triage block and show it to me before going deep:
 ### Review Triage
 - **Scope:** <PR #N at <sha>> | <local: <N> commits since `<base_ref>` (<fork sha>) + <clean tree | staged/unstaged changes>>, <N> files
 - **Intent:** <1–2 sentences in your words — what this change does and why>
+- **Delivery increment:** <what this change promises now; whether it is user-facing; deferred integration or handoff>
 - **Overall change-set risk:** <Low | Medium | High> — <diff-grounded rationale>
 - **Human review gate:** <PR: one inline anchor + trigger/anchor count; operational readiness confirmed|required|not applicable> | <local: accepted advisory scope + confirmed operational scope | confirmation required for N uncovered triggers> | none
 - **Lenses identified:**
@@ -265,7 +275,7 @@ In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and 
 | Architecture | `arch-reviewer` | — |
 | Performance | `perf-reviewer` | — |
 | QA | `quality-reviewer` | — |
-| PM | `requirements-reviewer` | `requirements_checklist` |
+| PM | `requirements-reviewer` | `requirements_checklist`, `delivery_increment` |
 | Backend, Frontend, Full-stack, Ops, Migration, Dependency | `general-reviewer` | `assigned_lenses` (the subset that fired) |
 
 Spawn a reviewer only for lenses that actually fired in triage. Always include `general-reviewer` if any non-specialized lens is active (it also carries the cross-service-contract checks). Each reviewer reads its source-of-truth skill, applies the checklist, dedupes against `existing_comments_index`, and returns a findings fragment.
@@ -396,7 +406,9 @@ Before Step 7, confirm:
 - every PR finding has an aggregate-diff anchor and causal link; baseline-only issues never survive
 - every finding is grounded in the diff or verified source
 - every surfaced finding and question passes the Actionability Gate; deep-dive and residual-risk sections do not smuggle rejected commentary back in
-- every `REQUEST_CHANGES` candidate is both Critical and High risk, and truly blocks merge
+- every `REQUEST_CHANGES` candidate is both Critical and High risk, and truly
+  blocks the declared increment rather than merely belonging to the eventual
+  feature
 - dropped findings have one-line reasons
 - every escalation was re-dispatched, not silently resolved or dropped
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
@@ -428,7 +440,7 @@ Never use `APPROVE` until the exact operational scope is confirmed.
 - Otherwise, if operational readiness is pending, apply the pending state above.
 - Otherwise apply the mode gate:
   - **Local, branch/range, Local Issue, embedded local, self-authored PR, or unknown PR:** **APPROVE**. Keep actionable non-blocking findings and targeted questions visible, but do not turn them into `COMMENT` and do not inflate them into blockers merely to avoid approval.
-  - **Third-party PR:** **APPROVE** when requirements are satisfied and every remaining finding is Low risk (including substantive actionable feedback). Use **COMMENT** when Medium/High-risk non-blocking feedback, unresolved requirements/context, stale/already-merged PR state, or explicit user instruction not to approve remains.
+  - **Third-party PR:** **APPROVE** when the declared increment's requirements are satisfied and every remaining finding is Low risk (including substantive actionable feedback). Use **COMMENT** when Medium/High-risk non-blocking feedback, unresolved increment/requirements context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
 `COMMENT` is invalid unless the review targets an actual PR and its author login
 is known to differ from the authenticated reviewer's login.
@@ -483,7 +495,7 @@ If no `Worth-considering` items, skip the prompt entirely.
 - Cross-service boundaries deserve extra scrutiny because subtle bugs hide there.
 - Tests must test what they claim; vacuous tests are worse than no tests.
 - Never re-raise an issue already present in the PR conversation.
-- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have acceptance criterion with a likely or wide-impact launch failure. Raise every other concern only when it is actionable and clearly non-blocking. In local and self-authored/unknown PR reviews, approve whenever no such blocker survives **and** operational readiness is confirmed; otherwise return approval pending. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved requirements/context remains.
+- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have outcome promised by the declared increment with likely or wide impact. The eventual feature may remain incomplete or non-user-facing. Raise every other concern only when it is actionable and clearly non-blocking. In local and self-authored/unknown PR reviews, approve whenever no such blocker survives **and** operational readiness is confirmed; otherwise return approval pending. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved increment/requirements context remains.
 
 ## Common Rationalizations
 
@@ -499,6 +511,7 @@ If no `Worth-considering` items, skip the prompt entirely.
 | "The PR conversation probably already covers this" | Confirm it actually does by checking `existing_comments_index` — don't silently drop a finding on a hunch. |
 | "This is worth mentioning even though there is no concrete action" | Review feedback consumes author attention. If you cannot name the change, decision, or information needed to resolve a present diff-caused risk, drop it. |
 | "The env var/flag/migration looks correct in code, so human confirmation is unnecessary" | Repository correctness cannot prove values exist in every staging/production environment or that a migration ran successfully in staging. Keep the readiness request separate from risk and withhold approval until a human confirms it. |
+| "The linked issue is not complete or user-facing, so this PR cannot be approved" | Review the declared delivery increment. Internal groundwork and partial delivery can merge when the promised slice is coherent, safe, tested, and accurately leaves later integration or handoff outside its scope. |
 | "COMMENT vs APPROVE doesn't matter much here" | It is mode-constrained. COMMENT exists only for a third-party PR; local and self-authored/unknown PR reviews approve only when no verified Critical, High-risk blocker survives and operational readiness is confirmed. |
 
 ## References
@@ -507,6 +520,9 @@ If no `Worth-considering` items, skip the prompt entirely.
 - `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
   approval, the single human-review handoff, and the approval-gating operational
   readiness confirmation.
+- `references/incremental-delivery.md` - resolves the current promised increment
+  and permits coherent internal groundwork or staged delivery without requiring
+  the eventual feature to be user-facing.
 - `references/author-calibration.md` - PR-only explanation-depth calibration.
 - `references/review-contract.md` - deterministic coverage, evidence, and final-integrity requirements for every review.
 - `references/general-checklist.md` - cross-cutting Critical/non-blocking categories. Read by `general-reviewer` (and promotion target cross-cutting patterns).
