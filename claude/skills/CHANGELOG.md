@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Human-readable skill output
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `8d36cba` | Required workflow skills and agents to explain internal references in plain language. | User-facing questions and reports lead with the actual requirement, decision, test outcome, phase result, finding/problem/fix, or commit effect. Stable IDs such as `A-003`, `IR-67`, `R-4`, test IDs, finding keys, phase numbers, and SHAs remain available only as optional traceability metadata after their meaning; agents return both ID and description so wrappers never ask users to decode bookkeeping. |
+
 ## 2026-08-28 — Outcome-only testing
 
 | Commit | Change | Regression boundary / known-good meaning |
