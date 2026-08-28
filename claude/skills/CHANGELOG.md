@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Local migration validation boundary
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `4167342` | Kept staging migration evidence out of local `my-workflow` review. | Local implementation validation runs the repository's normal migration command and tests. Staging migration artifacts and physical-schema evidence remain a later deployment gate because they cannot exist before a PR and staging deployment. |
+
 ## 2026-08-28 — Review acknowledgements for test changes
 
 | Commit | Change | Regression boundary / known-good meaning |
