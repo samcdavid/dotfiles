@@ -15,7 +15,8 @@ Use `skill-my-clarify` for the substantive ambiguity review. This wrapper resolv
 Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-clarify`.
 
 - For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
-- For `/my-workflow`, preserve the supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. The runner records unresolved blocking choices as provisional decisions instead of stopping the pipeline.
+- `my-workflow` now resolves ambiguity live through `my-pair-plan`; it does not
+  run this standalone clarification artifact stage.
 - If no target document can be inferred from arguments or context, ask the user which document to clarify before dispatching.
 
 In embedded mode the runner returns local resolutions for `my-workflow` to record in the ledger; in standalone mode it may append to an existing ledger. It must return any request to edit a source document, create or update remote content, post, send, publish, or push to this wrapper for explicit authorization.

@@ -13,12 +13,12 @@ Own the substantive test-planning procedure. Read `skill-my-test-strategy/refere
 
 ## Input
 
-Accept `{ task, artifact_inputs, ledger_path, stage, authority }`. Standalone callers may omit `artifact_inputs`, `ledger_path`, and `stage`; embedded callers supply `stage` and `authority: local_only`.
+Accept `{ mode, task, artifact_inputs, ledger_path, stage, authority }`. `mode` is `standalone`, `embedded`, or `focused_advisory`. Advisory callers supply one testing question plus relevant requirement/decision IDs and evidence.
 
 ## Authority
 
-Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local test-strategy artifact. Append its outcome to an existing workflow ledger only in standalone mode; embedded mode returns the outcome for `my-workflow` to record. Never write production code or tests, publish, send, push, create/update remote content, deploy, or make any other outward action. Return such intent as `external_action_requested`.
+Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local test-strategy artifact outside advisory mode. In `focused_advisory`, remain read-only and return evidence plus a proposed Test Strategy patch; never update the ledger yourself. Never write production code or tests, publish, send, push, create/update remote content, or deploy.
 
 ## Output
 
-Return the protocol's compact decision/artifact envelope. In embedded mode, record genuine testing trade-offs as recommended provisional decisions; do not interrupt the pipeline or claim user approval.
+Return the protocol's normal envelope, or in `focused_advisory` return the exact question, evidence, proposed `TS-*` contracts, recommendation/trade-offs, confidence, and ledger patch. Do not claim user approval.

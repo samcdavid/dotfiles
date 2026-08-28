@@ -6,6 +6,17 @@ Full private procedure for the `skill-my-eval-plan` runner. The `my-eval-plan` w
 
 Design a rigorous evaluation plan for an AI or LLM feature. This is the thinking-before-building step — what to measure, how to measure it, and what "good" looks like.
 
+## Focused advisory mode
+
+When `mode: focused_advisory`, answer only the supplied AI/LLM evaluation
+uncertainty. Read the living ledger and cited behavior/requirements; do not run
+the standalone intake, create an artifact, or ask the user. Return evidence,
+recommended eval dimensions, dataset slices, scorers, thresholds, regression
+gate, alternatives, confidence, and a proposed Evaluation-section patch. The
+pair-planning coordinator decides whether to apply it.
+Return immediately; the remaining artifact workflow applies only outside
+advisory mode.
+
 ## Getting Started
 
 If the input `task` or `artifact_inputs` describes a feature or links to a ticket/spec, use that as the starting point. Otherwise, inspect the workflow ledger and conversation before asking: **"What AI feature are you evaluating, and what does it do?"**

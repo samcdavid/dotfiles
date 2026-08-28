@@ -1,87 +1,72 @@
 # my-workflow — Gotchas
 
-Known failure patterns for the full-pipeline orchestrator. Read before running.
+## Starting a second ledger for an existing branch
 
-## Stopping at a sub-skill's intake prompt
+Detect the current branch before parsing the request. A feature-branch ledger
+is authoritative unless the user explicitly abandons or replaces it. On the
+default branch, fall back to issue ID/slug/topic because multiple planning
+ledgers may coexist.
 
-Every stage skill has an interactive opener ("Ready to research. What's your question?", "Describe the task…", "Do NOT proceed until confirmed"). Those are written for standalone use. Inside `my-workflow` they are **noise** — the task was established at Step 0. Supply the context from the ledger and continue. Halting here defeats the entire point of the skill.
+## Copying issue prose into the ledger
 
-## Asking a factual question before researching
+Read the complete current/sibling issue corpus, but write only the load-bearing
+need, constraints, dependencies, and source references. The issues explain what
+is needed; the ledger explains how to meet it.
 
-Only stop for a *factual* question that cannot be resolved by researching the codebase, Notion, Google Drive, or Linear. A factual question that could have been answered by spawning a `codebase-analyzer`, running `notion-search`, or searching Google Drive is a protocol violation, not diligence. Run the Blocking-Question Protocol every time before you stop. (This is about *factual* questions — genuine decisions are a different thing entirely; see the next gotcha.)
+## Treating pair planning as a disguised stage pipeline
 
-## Starting a second ledger for a branch that already has one
+Do not automatically invoke research, spec, clarify, architecture, test, plan,
+observe, eval, and analyze runners. `my-pair-plan` owns synthesis; existing
+agents are focused specialists invoked only for a concrete uncertainty.
 
-Always run `git branch --show-current` and check for a ledger whose `branch` field matches before parsing `$ARGUMENTS` into what looks like a fresh task. If you're on a feature branch with an existing ledger, that ledger is the one — resume it and use its recorded task with no confirmation step, even if this invocation's phrasing reads like a new or different request. There is exactly one ledger per branch. Do not open a second one because the phrasing doesn't match; the only way a branch gets a new ledger while an old one exists is the user explicitly saying to abandon or replace it. Only fall back to matching by Linear ID, ticket slug, or topic when on the default branch (`main`/`master`, where several ledgers can legitimately coexist) or when no ledger's `branch` field matches at all. If the branch was renamed and the ledger's `branch` field is now stale, a Linear ID/topic cross-check will still find it — update the field once confirmed rather than leaving it pointing at a branch that no longer exists.
+## Batching decisions
 
-## Re-discovering what an earlier stage already produced
+Pair planning asks one load-bearing decision at a time with a recommendation,
+then updates the ledger immediately. Do not accumulate provisional decisions for
+one late reveal or force the user to review several unrelated choices at once.
 
-`my-plan` should consume the stage-1 research doc and stage-2 spec by path, not re-research from scratch. `requirements-audit` should audit against the stage-2 spec, not ask for a spec source. If a later stage starts exploring ground an earlier stage already covered, you forgot to pass the artifact forward — check the ledger.
+## Asking a factual question
 
-## Jumping straight to implementation
+Research facts from issues, code, docs, or focused agents. User attention is for
+product intent and trade-offs that evidence cannot settle.
 
-New workflows start at `my-research`, even when the user phrases the request as "build/fix/implement." Existing plans, specs, tickets, or conversation context are inputs, not permission to skip stages. `my-implement` is allowed only after the workflow ledger explicitly marks stages 1-9 complete, including `my-test-strategy`, every entry under `## Provisional Decisions` is confirmed or overridden at the Decisions Checkpoint, `cross_workflow.pre_implementation_check` is `passed` for the current plan version (not `not_run`, unset, or `overlap_pending`), and that check was run *after* the Decisions Checkpoint — not before it, and not reused from an earlier stage. A clean cross-workflow result from an earlier stage does not carry forward to the gate on its own — the pre-implementation coordination check (stage 10) re-runs fresh regardless, because the plan may have changed since and siblings may have advanced.
+## Letting conversation history become state
 
-## Running the pre-implementation coordination check before the Decisions Checkpoint
+The ledger must reflect every substantive decision before the turn ends.
+Conversation memory, a subagent transcript, or a loose artifact is not durable
+workflow state.
 
-Stage 10 exists to catch sibling drift right before code changes land — that guarantee only holds if it runs *after* the user has reviewed and confirmed everything from stages 1-9. Running it earlier (during stages 1-9, or bundling it into the Decisions Checkpoint's own output "since the data's already there") defeats the point twice over: it checks against a plan the user hasn't signed off on yet, and it removes the natural pause where the user can clear context before the next stretch of work. The Decisions Checkpoint must fire and get a resume first; stage 10 is the very next thing after that, never before.
+## Treating synchronization as implementation permission
+
+Sync approves the planning document only. Run the fresh issue/consistency/
+sibling preflight on a later turn, then obtain separate explicit authorization
+before dispatching `my-implement`.
+
+## Reusing a stale preflight
+
+Any plan-version change invalidates synchronization, preflight, and
+implementation authorization. Refresh the full deterministic issue scope and
+rerun the one-document audit for the current version.
 
 ## Silently switching to my-quick
 
-If the work is small enough for `my-quick`, say so upfront and write it into the workflow ledger before handing off. The ledger should show `route: my-quick`, why the full pipeline was skipped, expected scope, and the exact handoff command. Do not leave a workflow ledger that looks like stage 1 started when the actual path was quick mode.
+Record the route, reason, scope, and handoff in the ledger, present it, and wait
+for approval. Migration work never uses `my-quick`.
 
-## Invoking my-quick right after ledgering the route, without waiting for approval
+## Entering review before implementation completes
 
-Ledgering the `route: my-quick` decision is necessary but not sufficient. The route choice is itself a user-owned decision (same class as "Self-approving a decision the user owns" below) — skipping research/spec/clarify/architecture-plan/plan/observe/analyze on the user's behalf, even for a well-evidenced ticket, is a call the user gets to make, not one to log-and-proceed on. After writing the route decision to the ledger, stop and present it (route + one-sentence reason + expected scope + exact handoff command) and wait for explicit confirmation before calling `Skill(my-quick)`. Concretely: end the turn there; do not chain the routing message and the `my-quick` invocation together in the same turn. Caught when the user was surprised by a batch of file edits landing in their working tree with no chance to redirect first, even though the ledger note itself was correct and complete.
+`my-implement` owns every plan phase and the holistic test gate.
+`implement-review` begins only after that completion and remains the sole
+review/repair-loop owner.
 
-## Self-approving a decision the user owns
+## Cargo-culting operational directives
 
-Decisions belong to the user — approach selection, scope trade-offs, product intent, and sign-off on the spec and the plan. Do the research, form a recommendation, and pick it so the pipeline can keep moving — but do NOT drop it silently into a plain assumption. Log it under the ledger's `## Provisional Decisions` section with the options, the recommendation, and the evidence, and it must reach the user at the Decisions Checkpoint for confirmation or override. "I resolved it and kept going" is fine; "I resolved it and it never surfaced again" is self-approval. The flip side — don't over-correct into asking the user *factual* questions you could research; that's the previous gotcha. The line is: facts you resolve and log as assumptions (done, no confirmation needed), decisions you resolve and log as provisional (done for now, but still awaiting the user's sign-off).
+Reconcile ticket claims with current code and retained gotchas before planning.
+For example, do not copy a `:follower_db` directive into Axon platform reads
+without verifying that the current local routing convention actually uses it.
 
-## Treating a hard failure as skippable
+## Forgetting the remote boundary
 
-If `my-implement` trips loop-detection, or `my-validate` can't self-repair, or a sub-skill errors — that is a blocker. STOP and escalate with full context. Marching to the next stage on a broken foundation produces a green-looking pipeline over broken work.
-
-## Reviewing the wrong thing in stage 12
-
-The review scope is the **whole branch against the base branch** (`main`/`master`), computed once and shared. Don't let `my-review` slip into PR mode (there is no PR), review only uncommitted changes when committed-on-branch work also exists, or review only the last commit when the branch has several. Compute `fork=$(git merge-base "$base_ref" HEAD); git diff "$fork"` once — that range covers every branch commit plus staged and unstaged work — and feed it to all four review stages.
-
-## Losing the ledger on a long run
-
-Eight stages now run back-to-back with zero stops before the Decisions Checkpoint — that's a long unattended stretch to lose if something interrupts it. Persist the ledger to `~/.claude/thoughts/shared/workflows/<slug>.md` and update it silently as each stage finishes, including every provisional decision the moment it's made. If the run is interrupted and re-invoked, Step 0's detection should find the ledger and resume from the first incomplete stage — not restart at research, and not re-litigate a provisional decision that was already logged.
-
-## Treating one clean cross-workflow check as good for the rest of the run
-
-Sibling ledgers advance and Linear issue statuses change between checkpoints. A
-"no overlap" result at intake does not carry forward: re-run coordination at
-Step 0, stage 10, and stage 12's final checkpoint. Do not add checks between
-stage 11 phases or stage 12 repair passes.
-
-## Escalating on sibling existence instead of sibling overlap
-
-Most sibling issues on the same Linear project are unrelated. Do not stop the pipeline just because another in-progress workflow or issue shares the project — that is noise, not a decision. Only escalate to the user when there is an actual file/module overlap (surfaces named in both plans/diffs) or a requirement/scope conflict (contradictory or duplicated acceptance criteria). Everything short of that is a one-line ledger note, not a checkpoint stop.
-
-## Forgetting where the git boundary now sits
-
-Commits are expected: every validated implementation phase and every validated fix lands as its own local commit via the `commit` skill, so the session leaves a readable history instead of one giant working tree. The boundary is *remote* actions — no push, no PR, no thread resolution, even when the work looks finished and clean. Suggest `/create-pr` and let the user pull that trigger.
-
-## Treating stage 10 success as implementation authorization
-
-A clean stage 10 means coordination permits implementation; it does not mean the
-user authorized code changes. Confirming the Decisions Checkpoint approves the
-decisions only. Ask explicitly before stage 11 dispatches its first executor.
-
-## Entering the repair loop before implementation completes
-
-Stage 11 belongs entirely to `my-implement`. Do not dispatch `implement-review`,
-`my-review`, or repair validation between phases. Only a completed plan, all
-phase commits, and the holistic test gate allow stage 12 to begin. If stage 11
-blocks, stop there without consuming a review pass.
-
-## Cargo-culting `:follower_db` from a ticket into Axon read paths
-
-When a ticket says to route a projector or comparable persisted-definition read through `:follower_db`, do not treat that as an established platform convention. For this class of platform read, Axon does not use `:follower_db`; research the actual local routing convention before planning. Otherwise a workflow turns a ticket-level assumption into unnecessary or incorrect infrastructure coupling.
-
-## Letting ticket wording override a workflow gotcha without reconciling it
-
-Before carrying a ticket's operational directive into a spec or architecture plan, read the invoked workflow's `gotchas.md`. If it conflicts with a local gotcha (for example, `:follower_db` routing for an Axon projector), the gotcha is a discovered repository correction: use the current local convention and record the ticket conflict as a provisional decision instead of repeating the retired pattern.
+Validated implementation phases and repairs commit locally. Never push, open or
+update a PR, publish replies, resolve threads, or deploy unless explicitly
+requested.

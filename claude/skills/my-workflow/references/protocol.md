@@ -1,236 +1,193 @@
 # Protocol — my-workflow
 
-Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the detail. Standalone references (gotchas, checklists, mined patterns) remain separate files in `references/`.
+`my-workflow` coordinates one collaborative planning document, a fresh
+pre-implementation gate, and the existing implementation/review loop. The
+workflow ledger is both the resume source of truth and the approved plan.
 
-## My Workflow
+## Governing constraints
 
-Orchestrate the delivery pipeline as resumable stage work. The task is established once at intake, artifacts carry context between stages, and the workflow ledger is the resume source of truth.
+1. **Pair before implementation.** Planning is a real back-and-forth
+   conversation, not an autonomous sequence of artifact-producing stages.
+2. **One canonical document.** The local workflow ledger holds the need summary,
+   decisions, requirements, architecture, tests, observability/evaluation,
+   migrations, and implementation phases. Do not create separate planning
+   artifacts inside this workflow.
+3. **Issues say what; the ledger says how.** Read the complete issue corpus, but
+   record only the load-bearing need and source references. Do not copy issue
+   descriptions/comments into the ledger.
+4. **Research facts; discuss decisions.** Resolve knowable facts from sources.
+   Ask one user-owned, load-bearing decision at a time with a recommendation.
+5. **Deep dive on demand.** Reuse existing specialist agents for precise
+   uncertainties. Do not run the former research/spec/clarify/architecture/
+   test/plan/observe/eval/analyze pipeline wholesale.
+6. **Persist every turn.** Update the ledger after each substantive decision or
+   deep dive so clearing context never loses planning state.
+7. **Sync is not implementation authority.** A synchronized plan must pass the
+   fresh pre-implementation gate, then receive separate explicit authorization.
+8. **Implementation before review.** `my-implement` completes every phase and
+   holistic test gate before `implement-review` begins. Keep both procedures and
+   the five-pass review cap unchanged.
+9. **Migration safety remains a hard gate.** Apply `migration-safety.md` without
+   weakening its history, compatibility, validation, or override rules.
+10. **No outward actions.** Local planning writes and validated implementation
+    commits are allowed. Pushes, PR mutations, published messages, deployments,
+    and other remote changes require explicit authorization.
 
-Stages 1-9 run back-to-back with no stop between them; the ledger is updated silently after each one. Genuine decisions inside a stage are resolved with the pipeline's own best recommendation and logged as provisional rather than asked live. The pipeline stops after stage 9 — the **Decisions Checkpoint** — to present every artifact and every provisional decision together, so the user can confirm or override. This is the deliberate point to clear context: the next run reads the ledger and resumes from here.
+## Pipeline
 
-Stage 10, the pre-implementation coordination check, runs only after the user
-resumes past the Decisions Checkpoint. When clear and implementation is explicitly
-authorized, stage 11 dispatches `my-implement` to complete every plan phase and
-its holistic test gate. Only after the ledger records that completion does stage
-12 enter `implement-review`'s whole-branch review/repair loop, capped at five
-review passes and ending at one stop with `clean`, `blocked`, or `cap_reached`.
+| # | Stage | Produces | Stop |
+| --- | --- | --- | --- |
+| 0 | Intake and route | matched/new ledger or explicit `my-quick` handoff | route confirmation when quick |
+| 1 | `my-pair-plan` | living ledger at synchronized plan version | every conversational turn; final planning sync |
+| 2 | Pre-implementation gate | refreshed sources, consistency audit, sibling check | overlap, drift, or gate failure |
+| 3 | Implementation authorization | explicit user approval recorded | always before code changes |
+| 4 | `my-implement` | phase commits + holistic test evidence | only if blocked |
+| 5 | `implement-review` | bounded review/repair outcome | terminal result |
 
-Factual questions are handled autonomously through research. Genuine decisions are also resolved autonomously with the pipeline's best recommendation and logged as provisional — ownership stays with the user, who confirms or overrides every provisional decision at the Decisions Checkpoint before the pre-implementation coordination check or implementation can start.
+## Step 0 — Intake and ledger detection
 
-## What this is — and is not
+Run `git branch --show-current` before matching the task.
 
-- This skill **dispatches the real stage procedures in order**. When a named stage runner exists, dispatch it in embedded mode with the compact envelope in `stage-routing.md`; during rollout, fall back to that stage's Skill entrypoint. It does NOT reimplement stage procedure. Each stage's wrapper/runner pair remains the single source of truth for that stage.
-- Contrast with `/my-quick`: that collapses a *subset* of this flow into one fast inline pass for small, well-understood changes. `my-workflow` is the deliberate opposite for substantial work. If intake routes to `my-quick`, record that route and reason in the workflow ledger before handing off.
-- Migration files and migration-history repairs are persistent compatibility work, not mechanical renames. They always use the full pipeline and the additional gate in `references/migration-safety.md`.
-- It commits locally as work lands — each validated phase and fix gets its own commit via the `commit` skill — but performs **no remote git actions**. It never pushes or opens a PR. The hand-off summary is the stopping point.
+- On a feature branch, a ledger with matching `branch` is authoritative. Resume
+  it and use its recorded task. Never create a second ledger for that branch
+  unless the user explicitly abandons/replaces the first.
+- On `main`/`master`, or when no branch match exists, fall back to Linear ID,
+  issue slug, then topic.
+- Parse a Linear issue/URL, supplied file/URL, free-text request, or current
+  conversation only after ledger detection.
 
-## Governing Constraints
+Use `stage-routing.md` to choose full workflow versus `my-quick`. Migration work
+always takes the full workflow. If quick applies, create/update the ledger with
+the route, reason, expected scope, and exact command, then stop for confirmation
+before invoking it.
 
-These override sub-skill instructions.
+For the full workflow, dispatch `my-pair-plan`. That runner creates a new ledger
+when needed from its template and owns subsequent planning updates.
 
-1. **One intake, one Decisions Checkpoint.** Capture task/context once in Step 0. After go-ahead, run stages 1 through 9 autonomously and back-to-back, updating the ledger silently after each one. Do not stop between stages 1-9 for user review — the only guaranteed stop before implementation is the Decisions Checkpoint after stage 9.
-2. **Resume from artifacts.** On a later run, read the ledger and continue from the earliest incomplete stage. Do not redo completed stage work unless its input artifact changed.
-3. **Research before asking factual questions.** Answer knowable questions from code, Notion, Google Drive, Linear, and artifacts; log factual assumptions in the ledger.
-4. **Decisions belong to the user, but the pipeline doesn't stop mid-run to ask.** Approach selection, scope trade-offs, product intent, and spec/plan approval are user decisions. Prepare evidence and a recommendation, pick the recommendation, log it under the ledger's `## Provisional Decisions` section, and continue. Every provisional decision from stages 1-9 is presented together at the Decisions Checkpoint for the user to confirm or override before the pre-implementation coordination check or implementation starts.
-5. **Pre-implementation check runs after the Decisions Checkpoint, never before.** Stage 10 only starts once the user has resumed past the Decisions Checkpoint with every provisional decision confirmed or overridden. It is a fresh check, not something to run speculatively during stages 1-9 or to fold into the Decisions Checkpoint's own output.
-6. **Implementation before loop.** Implementation is gated. After its gates pass,
-   dispatch `my-implement` exactly once as stage 11 and let it finish every phase
-   plus the holistic test gate. If it blocks, stop; do not start review or spend
-   loop budget. Mark stage 11 complete before dispatching `implement-review`.
-7. **One post-implementation loop owner.** Stage 12 `implement-review` owns only
-   the review/repair loop and its five-pass budget. It must refuse unfinished
-   plan work, never dispatch `my-implement`, and exit `clean` only after a clean
-   whole-branch review (with validation after any repair). Nits never trigger
-   another iteration.
-8. **No remote actions.** Local commits per validated phase/fix are expected. No `git push`, `gh pr create`, published replies, or state-changing remote calls unless explicitly requested.
-9. **Carry artifacts forward.** Each stage's output is the next stage's input. Track concrete paths/IDs in the ledger.
-10. **Cross-workflow coordination runs at intake, the pre-implementation gate,
-    and the final review checkpoint.** When the task is a Linear issue, re-run
-    `references/cross-workflow-coordination.md` at Step 0 intake, stage 10, and
-    after stage 12 review. Sibling state is not rechecked between every
-    implementation phase or repair pass.
-11. **Provisional decisions are logged, never silently resolved.** Whenever a stage reaches a genuine decision, research it, form a recommendation, pick it, and record it under the ledger's `## Provisional Decisions` section (stage, question, options, recommendation chosen, evidence) before continuing to the next stage. A provisional decision is not a factual assumption — it must be confirmed or overridden by the user at the checkpoint, even when the recommendation seems obvious.
-12. **Migration safety is a hard gate.** When migration work is detected, research must create the history audit and compatibility matrix required by `references/migration-safety.md`; the plan must cover every target history; and validation must pass every listed history. A dependency, environment, or credential failure leaves the gate `blocked`, not implicitly waived. Do not commit the phase, push, open a PR, merge, retry deployment, or claim release readiness unless the user explicitly directs an override; preserve that override and its risk in the ledger and final report.
+### Legacy workflow ledgers
 
-## Pipeline Exact Order
+If a ledger uses the former stages 1–9, do not rerun them automatically. Read
+their artifacts, synthesize their still-current decisions and content into the
+living-ledger sections, record the imported paths under a legacy note, set
+`planning_status: sync_pending`, and require one user sync. The old Decisions
+Checkpoint does not by itself satisfy the new pre-implementation gate.
 
-| # | Stage | Consumes | Produces | Checkpoint |
-|---|---|---|---|---|
-| 1 | `my-research` | task / ticket | research doc | continue |
-| 2 | `my-spec` | research + task | spec | continue |
-| 3 | `my-clarify` | spec | clarified spec | continue |
-| 4 | `my-architecture-plan` | clarified spec + research | architecture plan | continue |
-| 5 | `my-test-strategy` | clarified spec + research + architecture plan | behavior-first TDD strategy | continue |
-| 6 | `my-plan` | spec + research + architecture plan + test strategy | plan | continue |
-| 7 | `my-observe` | plan | observability companion | continue |
-| 8 | `my-eval-plan` (conditional) | plan | eval companion | continue |
-| 9 | `my-analyze` | research + spec + test strategy + plan + companions | consistency report | **stop — Decisions Checkpoint** |
-| 10 | Pre-implementation coordination check (Linear issues only), run after the Decisions Checkpoint is confirmed | finalized plan + fresh sibling ledger/issue scan | updated `cross_workflow` ledger section | stop only if overlap found |
-| 11 | `my-implement` | approved plan + completed test strategy + confirmed decisions + stage-10 gate | all phase commits + holistic test evidence + plan status `implemented` | continue if complete; stop if blocked |
-| 12 | `implement-review` | completed stage-11 evidence + base + review artifacts | repair commits + five-pass review ledger + terminal status | stop after terminal envelope |
+## Step 1 — Collaborative planning
 
-Every stage writes to the ledger the moment it finishes. Stage 9 is the mandatory
-stop; stage 10 stops only for overlap. Stage 11 must be recorded `completed`
-with every phase commit and holistic test evidence before stage 12 can start.
-Stage 12 owns the only review/repair pass counter.
+Dispatch `skill-my-pair-plan` in `collaborative_planning` mode with task,
+ledger path, current user response, and local-only authority. The runner:
 
-Stage 8 is conditional. Run `my-eval-plan` when the plan touches an AI/LLM surface — prompts, system messages, tool docstrings, model or retrieval selection, scoring, or any behavior a model produces. Otherwise mark it `not_applicable` in the ledger with a one-line reason. `not_applicable` satisfies the implementation gate; an unset stage does not.
+- reads the current issue and required sibling corpus fully;
+- records a synthesized need/source index;
+- performs brief code orientation;
+- maintains requirements, decisions, architecture, behavior-first tests,
+  observability/evaluation, migration/operations, implementation phases, and
+  traceability in the ledger;
+- uses current specialist agents only for focused deep dives; and
+- returns one next decision or a sync proposal.
 
-Inside `implement-review`, the single `my-review` stage replaces separate `requirements-audit`, `security-audit`, `my-arch-review`, `perf-review`, and `quality-audit` runs; lens reviewers read those skills' criteria as source truth. Invoke a standalone deep audit only when the review finding warrants a focused follow-up.
+Present its compact delta and question. End the turn. On the user's answer,
+re-dispatch the same ledger and response. Do not answer on the runner's behalf,
+batch its questions, or continue into implementation in the same turn.
 
-## Step 0 - Intake & Entry-Point Detection
+When the runner proposes synchronization, present the complete planning surface
+and ask what is wrong or missing. Only explicit confirmation marks the current
+`plan_version` synchronized. Corrections invalidate the sync, update the ledger,
+and resume the pairing loop.
 
-This first human touchpoint frames the workflow and creates or updates the ledger.
+## Step 2 — Pre-implementation gate
 
-1. **Detect the workflow ledger first, keyed to the current branch.** Run `git branch --show-current` before matching by anything else, then search `~/.claude/thoughts/shared/workflows/`:
-   - **Feature branch:** a ledger whose `branch` field matches is the ledger, full stop. Resume it and use its recorded task — no confirmation needed, even if this invocation's arguments are phrased differently. There is exactly one ledger per branch; never create a second one for a branch that already has one. The only way to start a new ledger on a branch that has one is the user explicitly saying to abandon or replace the existing one.
-   - **Default branch (`main`/`master`) or no branch match:** fall back to matching by Linear ID, ticket slug, or topic — several ledgers can legitimately sit on the default branch before their feature branch exists, so branch alone doesn't disambiguate there.
-   - **No match by either key:** this is a new workflow; the current branch gets recorded on it in Step 6.
-   Then search research, specs, and plans only to attach artifact paths to ledger stages. Artifacts do not mark stages complete by themselves.
-2. **Establish task.** Parse `$ARGUMENTS`, unless Step 1 already resolved the task from a branch-matched ledger:
-   - Linear issue ID/URL -> fetch issue, comments, linked issues, project.
-   - File path -> read fully.
-   - URL -> fetch/extract.
-   - Free-text description -> use task.
-   - Empty -> read conversation context first; ask only if there is genuinely no target.
-3. **Choose full pipeline or quick handoff.** Use `references/stage-routing.md`. If migrations are in scope, read `references/migration-safety.md` before routing and record `migration_safety: required`. If no ledger exists and the work is not explicitly routed to `my-quick`, the entry stage is always `my-research`.
-   - If routing to `my-quick`, open the workflow ledger first and record `route: my-quick`, reason, expected scope, skipped full-pipeline rationale, and exact handoff command.
-   - Then present the handoff upfront instead of pretending the full pipeline started.
-4. **Cross-workflow coordination.** If the task resolves to a Linear issue, run `references/cross-workflow-coordination.md` now: resolve the issue's project/milestone, scan sibling ledgers and live Linear sibling issues, and check for file/module or requirement overlap. Fold the result into the confirm-mode message below — either "no sibling overlap found" or the overlap decision to raise.
-5. **Confirm mode once.** Present:
+Run only after `planning_status: synchronized`. Never fold this gate into the
+sync turn.
 
-```markdown
-Here's the task as I understand it: **[one paragraph]**.
-Entry point: **[stage]**; skipped stages: **[only stages already completed in the ledger, with artifact paths]**.
-Route: **[full pipeline | my-quick, with ledgered reason]**.
-Cross-workflow: **[no Linear issue | siblings checked and clear | overlap found — see decision below]**.
+1. **Refresh source needs.** Re-fetch the current issue and exact sibling scope
+   from `cross-workflow-coordination.md`, reading titles, descriptions, and all
+   comments. Compare the synthesized need against the ledger's retrieval
+   version. If load-bearing intent changed, invalidate sync and return to
+   `my-pair-plan` with the delta.
+2. **Audit the one document.** Dispatch `skill-my-analyze` with
+   `mode: ledger_preflight`, the ledger path, and current plan version. It checks
+   internal contradictions, unresolved decisions, scope, requirement → test →
+   phase coverage, phase executability, observability/eval applicability, and
+   migration requirements. It returns findings, not a separate artifact.
+3. **Coordinate siblings.** Apply the fresh overlap check in
+   `cross-workflow-coordination.md` against exact planned files, modules,
+   contracts, and requirements. Stop only for a material overlap decision.
+4. **Check migrations.** When required, confirm the ledger contains the history
+   audit, compatibility matrix, per-history validation plan, and rollout health
+   checks from `migration-safety.md`.
 
-Mode: I run research through analysis back-to-back with no stops in between. Factual questions are researched as they come up. Genuine decisions (approach, scope, architecture trade-offs, spec/plan sign-off) get my own best recommendation, logged as a provisional decision rather than asked live. I stop once, after analysis — the Decisions Checkpoint — to hand you every artifact and every provisional decision together for confirmation or override; that's also the point to clear context if you want to. Only after you resume past that checkpoint do I run the pre-implementation coordination check. Once implementation is explicitly authorized, `my-implement` completes every planned phase and holistic test gate before `implement-review` begins its whole-branch review/repair loop of up to 5 review passes. Each validated phase and fix is committed locally; no pushes, PRs, or other outward actions unless explicitly requested.
+If any check needs a planning correction, set `planning_status: pairing`,
+increment `plan_version`, record the reason, and resume `my-pair-plan`. When all
+checks pass, record:
 
-Starting assumptions: **[list]**.
+```yaml
+pre_implementation_check: passed
+checked_plan_version: <current version>
+pre_implementation_checked_at: <timestamp>
+issue_context_refreshed_at: <timestamp>
 ```
 
-Wait for go-ahead once to start the selected stage.
+The gate's success permits asking for implementation authorization; it does not
+provide that authorization.
 
-6. **Open ledger.** Create/update `~/.claude/thoughts/shared/workflows/<slug>.md` with task, `branch` (the current git branch — the primary lookup key for future invocations per Step 1), `base_branch` (the diff target for review, usually `main`/`master`), chosen entry point, route, stage statuses, artifact paths, decisions, autonomous assumptions, and (when applicable) the `cross_workflow` section from `references/cross-workflow-coordination.md`. New full-pipeline ledgers start with all stages incomplete. Quick-handoff ledgers record the route and handoff command instead of stage completion. Update it at every checkpoint; if the branch changes mid-workflow (renamed, or moved intentionally), update `branch` too rather than leaving it stale.
+## Step 3 — Implementation authorization
 
-## Autonomy Override
+Present the synchronized ledger path/version, gate evidence, exact phases,
+affected surfaces, test strategy, migration/operational requirements, and any
+remaining assumptions. Ask explicitly whether to implement this plan.
 
-For the selected stage, invoke the stage skill with established context: task plus concrete artifact paths/IDs from the ledger. Then follow that skill with these adjustments:
+Only an affirmative response sets `implementation_authorized: true`,
+`authorized_plan_version: <current version>`, and
+`implementation_authorized_at: <timestamp>`. Any planning correction clears
+the sync, gate, and authorization fields and returns to pairing. Never reuse
+authorization after the plan version changes.
 
-- **Intake prompts stay internal.** If the stage skill asks for topic/context, provide it from the ledger and continue within the stage.
-- **Factual gates are researched.** If the stage asks to confirm how code behaves, what requirements say, or whether wiring exists, verify through code/docs/tickets/artifacts and log the factual assumption.
-- **Decision gates get a recommendation and continue.** If the stage reaches approach choice, scope trade-off, product intent, or spec/plan approval, research it, prepare options and a recommendation, pick the recommendation, log it as a provisional decision in the ledger, and keep running the pipeline. Do not stop the stage for it — it surfaces later at the Decisions Checkpoint.
-- **Provisional decisions accumulate instead of batching into a per-stage stop.** For `my-spec`, `my-clarify`, `my-architecture-plan`, `my-test-strategy`, and `my-plan`, run every question through the Blocking-Question Protocol: factual questions get resolved and logged as assumptions; genuine decisions get a recommendation, get logged as provisional, and the stage continues.
-- **Plan approval is provisional like any other decision gate.** The test strategy and plan are written and recommendations logged, but the pipeline does not stop for them — they surface at the Decisions Checkpoint alongside every other provisional decision, and the pre-implementation coordination check (stage 10) cannot start until the user confirms there and the ledger marks stages 1-9 complete.
-- **Stage boundary is soft between 1-9, hard at 9->10.** Move directly from
-  one completed stage to the next without stopping. After stage 10 and explicit
-  implementation approval, stage 11 `my-implement` completes in full before
-  stage 12 `implement-review` starts; do not interleave them.
-- **Do not double-spawn.** Only one stage skill runs at a time.
+## Step 4 — Existing implementation loop
 
-## Blocking-Question Protocol (research first; then decide who owns it)
+Dispatch `skill-my-implement` in embedded mode with:
 
-Every candidate question is one of two kinds, and they are handled differently:
+```yaml
+mode: embedded
+plan_path: <ledger path>
+ledger_path: <same ledger path>
+artifact_inputs:
+  planning_document: <ledger path>
+  test_strategy: <ledger path>#test-strategy
+  architecture: <ledger path>#architecture
+stage: implementation
+authority: local_only
+```
 
-- A **factual question** has a knowable right answer (how the code behaves, what a ticket says, whether a table exists, what a prior decision was). These you must answer yourself — never bounce them to the user.
-- A **decision** is a judgment call with no single right answer (which approach, what scope trade-off, what the product should do, whether the spec/plan is right). These belong to the user.
+The ledger's `Implementation Plan` is the plan and its `Test Strategy` is the
+binding behavior contract. `my-implement` retains its sequential executor,
+RED → GREEN → VALIDATE, independent re-verification, local commit, loop
+detection, and holistic test behavior.
 
-For every candidate, run this in order:
+Record the returned phase commits and evidence in `Execution Log`. If it blocks,
+stop. Only complete implementation permits stage 5.
 
-1. **Re-read the artifacts.** The answer is often already in the research doc, spec, plan, ticket, ledger, or earlier in this conversation.
-2. **Research the codebase.** Spawn `codebase-locator` / `codebase-analyzer` / `codebase-pattern-finder` to settle how the code actually behaves, what conventions exist, or what's already wired up.
-3. **Search Notion, Google Drive + Linear.** Use `notion-search` / `notion-query-data-sources` for design docs, RFCs, and meeting notes. For Drive, prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `Google_Drive__read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials. Fetch linked Linear issues and their comments. Product intent and prior decisions frequently live in one of these — check all three before concluding the answer isn't written down anywhere.
-4. **Classify what remains.**
-   - **Factual and now resolved** → log it as an assumption in the ledger and proceed. (A reversible, trivial, non-decision detail — e.g., what to name a private helper — may be defaulted the same way; it is not a decision.)
-   - **A genuine decision** → it does NOT get silently defaulted, and it does NOT stop the stage. Prepare it fully: the options, the pros/cons, your recommendation, and the evidence you gathered. Pick the recommendation, log it under the ledger's `## Provisional Decisions` section (stage, question, options, recommendation chosen, evidence), and continue running the pipeline.
+## Step 5 — Existing review loop
 
-A genuine decision is never resolved by "a competent engineer could pick something" without recording it — even an obvious call must be logged as provisional. The distinction from a factual assumption is ownership: an assumption is something research settled outright; a provisional decision is the pipeline's best judgment standing in for the user's until confirmed.
+Dispatch `skill-implement-review` with completed implementation evidence, the
+ledger as requirements/plan/test context, base ref, and local-only authority.
+It remains the sole owner of `my-review` → repair → `my-validate` → `my-review`,
+capped at five review passes. Do not interleave implementation or run a second
+repair loop.
 
-**At the Decisions Checkpoint**, present every provisional decision accumulated across stages 1-9 in one message:
-> Reached the Decisions Checkpoint. Stages 1-9 are complete — artifacts: **[paths]**. Along the way I resolved **[N]** provisional decisions with my own best judgment: **[stage]**: **[question]**, options **[A vs B]**, I went with **[recommendation]** because **[evidence]** — repeated for each. Confirm all, or tell me which to override. This is also a good point to clear context if you'd like — resuming will pick up here.
+After its terminal result, run the final sibling-state refresh retained in
+`cross-workflow-coordination.md` and render `final-report.md`.
 
-On the answer: confirmed decisions stay as-is, and the run proceeds to stage 10 (the pre-implementation coordination check) next. An override updates the ledger and, if it invalidates downstream artifacts (e.g. an overridden spec decision the test strategy and plan already built on), re-run only the affected stages before returning to this checkpoint. Do not restart from the top.
+## Resume rules
 
-## Stage notes (where the override needs specifics)
+Read the ledger first and route from durable state:
 
-- **Cross-workflow, three checkpoints only:** Re-run `references/cross-workflow-coordination.md` when the task is a Linear issue at exactly three points: Step 0 intake, stage 10's Pre-Implementation Gate, and stage 12's final checkpoint after review. Do not recheck between implementation phases or repair passes.
-- **10 Pre-implementation coordination check (Linear issues only):** Runs only after the user has resumed past the Decisions Checkpoint with every provisional decision confirmed or overridden. Compare the finalized plan's exact surfaces against a fresh sibling scan and record `passed` or `overlap_pending`. If clear, obtain/confirm implementation authorization and continue to stage 11; if overlap exists, stop with that decision.
-- **2 `my-spec` / 3 `my-clarify`:** These are the most question-prone. Most "questions" are *factual* and answerable from research + code — resolve those and record assumptions. The residue is usually a genuine scope or product-intent **decision** (what's in scope, what success means, which trade-off) — these get a recommendation and are logged as provisional rather than stopping the stage; they surface together at the single pre-implementation checkpoint. Feed clarify's resolutions back into the spec file before planning.
-- **4 `my-architecture-plan`:** Its criteria come from `my-arch-review/references/protocol.md` (Structural Fit, Coupling, Cohesion, Boundary Integrity, Dependency Health), applied prospectively to the not-yet-planned change. Most questions here are factual (does this convention actually exist in the codebase? what does the current dependency graph look like?) — research them. The genuine decisions are the ones `my-arch-review`'s own Step 3 calls out: whether a proposed deviation from convention is worth its inconsistency — log the recommendation as provisional and continue rather than stopping. Its output feeds `my-plan`'s `## Architectural Constraints` section directly.
-- **5 `my-test-strategy`:** It maps acceptance criteria and regression risks to behavior-first unit and integration assertions, excludes implementation-detail checks, and gives `my-plan` a binding RED-test handoff. Use it to settle test-level, fixture/isolation, and recovery behavior before phase design; route genuine testing trade-offs into provisional decisions.
-- **6 `my-plan`:** Pass the architecture and test-strategy artifacts so each phase's RED test references a behavior-first strategy ID and the plan preserves its isolation controls. A plan that lacks a strategy-covered RED test for a behavioral phase is incomplete.
-- **7 `my-observe`:** It asks which observability platforms/alert channels exist. Detect from the repo first (config files, dependencies, existing dashboards/monitors, CLAUDE.md). If undetectable, default to platform-agnostic recommendations rather than asking. Its output is a companion observability plan linked to the main plan — keep it as a deliverable, not a blocker.
-- **Migration work:** Before the Decisions Checkpoint, complete the history audit and matrix in `references/migration-safety.md`. The architecture plan must name the compatibility strategy; the implementation plan must have a phase and mechanical success criteria for every history; and the observability companion must identify release health checks and error monitors. The reviewer must receive the matrix, not just the migration diff.
-- **8 `my-eval-plan` (conditional):** Run it only when the plan touches an AI/LLM surface — prompts, system messages, tool docstrings, model or retrieval selection, scoring, or any behavior a model produces. Decide this from the plan's changed surfaces, not by asking. Its output is a companion eval plan linked to the main plan, the same shape as `my-observe`'s: a deliverable, not a blocker. When it does not apply, ledger it `not_applicable` with a one-line reason and move on without a checkpoint — an unset stage blocks the implementation gate, `not_applicable` does not.
-- **11 `my-implement`:** The autonomous code-writing stage. It reads the test strategy with the plan and completes every narrow RED/GREEN/VALIDATE phase sequentially. Record all phase commits, successful holistic test evidence, and plan status `implemented`. If it blocks or leaves a phase incomplete, stop here; never start stage 12.
-- **Validation after repairs:** Inside stage 12, `implement-review` runs
-  `my-validate` only after a repair and before the next whole-branch review.
-  Stage 11's holistic test gate is the initial validation evidence; do not run a
-  redundant validation/review loop while implementation phases remain.
-- **Compute the diff once for the review stage.** Detect the base branch and the changed files, then pass both to `my-review`:
-  ```bash
-  base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@')
-  [ -z "$base" ] && { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
-  cur=$(git rev-parse --abbrev-ref HEAD)   # a branch is never its own base
-  [ "$base" = "$cur" ] && [ "$cur" != main ] && [ "$cur" != master ] && \
-    { git show-ref --verify --quiet refs/heads/main && base=main || base=master; }
-  base_ref="$base"
-  git show-ref --verify --quiet "refs/remotes/origin/$base" && base_ref="origin/$base"
-  fork=$(git merge-base "$base_ref" HEAD)
-  git diff --name-only "$fork"
-  git diff "$fork"   # the review scope: every branch commit + staged + unstaged
-  ```
-  Diff from the merge base, not `HEAD`/`HEAD~1` and not the bare working tree — `git diff "$fork"` is the only form that covers both the branch's commits and anything still uncommitted. Pass `base_ref` and `fork` to `my-review` alongside the diff.
-- **12 `implement-review`:** Start only from completed stage-11 evidence. It
-  invokes `my-review` with the base branch name so it diffs the current work tree
-  vs `main`/`master`; stay in read-only local review. It may repair verified
-  findings, but it must never dispatch `my-implement` or finish omitted plan work.
-  Because this is the deliberate full pipeline, don't let lens triage thin the review:
-  - **Force the full lens set active** — Security, Architecture, Performance, QA, and PM/requirements, plus whichever general lenses (Backend/Frontend/Ops/Migration/Dependency) the diff touches. The pipeline always wants the comprehensive pass, not a minimal triage.
-  - **Feed the stage-2 spec as the requirements source.** Pass the spec path so `requirements-reviewer` traces acceptance criteria against the spec (and any linked Linear ticket) — this replaces the former standalone `requirements-audit` stage and satisfies its "requires a spec" need without asking.
-  - It internally spawns the research subagents + the per-lens reviewers, then merges, de-dupes, runs the adversarial pass, and proposes a verdict. That single output is the pipeline's complete review surface.
-  - For migration work, require the Migration/Ops reviewer to verify version identity, all matrix states, idempotence, and recovery ordering against the migration-history artifact.
+- `context`, `pairing`, or `sync_pending` → `my-pair-plan`;
+- `synchronized` without a passing current-version preflight → Step 2;
+- preflight passed without current-version authorization → Step 3;
+- authorized implementation incomplete → Step 4;
+- implementation complete, review incomplete → Step 5;
+- review terminal → final report.
 
-## Implement-Review Result
-
-Consume only `implement-review`'s compact terminal envelope. A `clean` result
-may advance to the final report. `blocked` and `cap_reached` stop the workflow:
-record its pass ledger, finding deltas, commits, surviving findings, root-cause
-theory, and exact resume command. Do not launch a parallel repair loop or
-reinterpret either incomplete result as completion.
-
-## Final report & hand-off
-
-After the post-review loop converges (or escalates), assemble one consolidated report from the ledger:
-
-- **Task & entry point** — what ran, what was skipped and why.
-- **Artifacts produced** — paths to research / spec / test strategy / plan / observability / analysis / validation reports.
-- **Decisions you made** — the decision points where the pipeline paused and what you chose. (These are the user's calls, captured for the record.)
-- **Autonomous assumptions** — the full list of *factual* assumptions from the ledger (the things research resolved). This is the after-the-fact review surface; make it scannable. No genuine decision should appear here — decisions live in the section above.
-- **Findings by severity** — present the final `my-review` verdict (the pass that converged the loop) grouped Critical → Minor. Note how many loop iterations it took to reach zero findings.
-- **What I changed** — files touched (paths + line counts), tests run + results.
-- **Migration safety** — when applicable, the history matrix, validation evidence, release-health checks, and any explicit override.
-- **Suggested next steps** — `/commit`, then `/create-pr`; and re-run a specific stage if any finding is substantial.
-
-End with the explicit boundary:
-> No git actions were taken. You approved the spec and plan along the way; the pipeline self-reviewed its own code (the `my-review` stage) — treat the findings and assumptions above as the review surface before committing.
-
-## Guidelines
-
-- Run stages 1-9 back-to-back in one invocation, with a stop after stage 9
-  (Decisions Checkpoint); stage 10 runs only after that, stage 11 completes all
-  implementation, and stage 12 alone owns the review/repair loop and final stop.
-- Research factual questions before proceeding; never ask what code, docs, tickets, or artifacts can answer.
-- Resolve judgment calls with a recommendation and log them as provisional; never silently finalize a decision the user reserves.
-- Keep the ledger current; it is the resume contract after context clearing, and the record of every provisional decision awaiting confirmation.
-- If routing to `my-quick`, note that upfront in the workflow ledger before handoff.
-- The Decisions Checkpoint should make the next command, and every open decision, obvious — and double as the intended point to clear context.
-- Skipping a stage requires a current artifact and completed ledger status.
-- Never start implementation from artifact inference alone; require the stage-routing implementation gate, user confirmation of provisional decisions, and a pre-implementation coordination check run *after* that confirmation.
-- Surface assumptions and provisional decisions loudly, together, at the Decisions Checkpoint.
-- A blocker stops the pipeline; do not work around it silently.
-
-## Gotchas
-
-If a `gotchas.md` file exists in this skill's directory, read it before starting. These are known failure patterns — avoid them.
+Never infer completion from loose artifacts, conversation memory, old plan
+versions, or a previous workflow's authorization.

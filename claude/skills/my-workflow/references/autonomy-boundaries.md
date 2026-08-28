@@ -1,7 +1,13 @@
 # Autonomy Boundaries
 
-Load this when a stage wants to ask questions.
+Resolve factual questions from issues, code, artifacts, docs, or focused agents.
+Record the evidence in the ledger without asking the user to confirm a knowable
+fact.
 
-The workflow answers factual questions itself by reading artifacts, code, Linear, Notion, Drive, logs, or tests. For genuine decisions — product intent, scope tradeoffs, approach choice, or sign-off on spec/plan — it does not pause mid-stage. It researches the options, picks its own best recommendation, and logs it as a provisional decision in the ledger, then keeps running the pipeline.
+Discuss genuine product, scope, architecture, testing, rollout, or trade-off
+decisions live. Ask one at a time with a recommendation and consequence; update
+the ledger immediately after the answer. Never convert a user-owned decision
+into a silent assumption or batch it into a later checkpoint.
 
-Every provisional decision, with options, recommendation, and evidence, surfaces together at the Decisions Checkpoint (after stage 9, `my-analyze`) so the user can confirm or override each one — before the pre-implementation coordination check (stage 10) even runs, let alone implementation. Do not convert a judgment call into a plain assumption just because a reasonable default exists — a provisional decision still needs the user's confirmation; a factual assumption does not.
+Read-only focused deep dives are autonomous. Planning synchronization and
+implementation authorization always require explicit user responses.

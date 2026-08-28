@@ -6,6 +6,18 @@ Full private procedure for the `skill-my-observe` runner. The `my-observe` wrapp
 
 Identify what to monitor and how to alert for code changes — pragmatically. Monitors should catch real problems, not generate noise.
 
+## Focused advisory mode
+
+When `mode: focused_advisory`, answer only the supplied runtime-observability or
+rollout question. Read the living ledger and cited code, reuse its code
+orientation, and commission extra analyzer/docs work only when the exact question
+requires it. Do not create an artifact or ask the user. Return evidence,
+recommended metrics/traces/logs/health checks and alert conditions, alternatives,
+confidence, applicability, and a proposed Observability-section patch. The
+pair-planning coordinator decides whether to apply it.
+Return immediately; the remaining artifact workflow applies only outside
+advisory mode.
+
 ## Getting Started
 
 Determine scope:

@@ -13,12 +13,12 @@ Own the substantive cross-artifact consistency procedure. Read `skill-my-analyze
 
 ## Input
 
-Accept `{ task, artifact_inputs, ledger_path, stage, authority }`. Standalone callers may omit `artifact_inputs`, `ledger_path`, and `stage`; embedded callers supply `stage` and `authority: local_only`.
+Accept `{ mode, task, artifact_inputs, ledger_path, stage, authority }`. `mode` is `standalone`, `embedded`, or `ledger_preflight`. Preflight callers supply the synchronized ledger and exact plan version.
 
 ## Authority
 
-Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local analysis-report artifact. Append its outcome to an existing local workflow ledger only in standalone mode; embedded mode returns the outcome for `my-workflow` to record. Never publish, send, push, create/update remote content, or make any other outward action. Return such intent as `external_action_requested`.
+Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local analysis-report artifact outside preflight mode. In `ledger_preflight`, remain read-only and audit the one ledger without creating an artifact or updating it. Never publish, send, push, create/update remote content, or make another outward action.
 
 ## Output
 
-Return the protocol's compact decision/artifact envelope. In embedded mode, turn genuine artifact conflicts into recommended provisional decisions; do not claim user approval or interrupt the pipeline.
+Return the protocol's normal envelope, or in `ledger_preflight` return `pass | revise | blocked`, cited findings, requirement/test/phase coverage, unresolved decisions, applicability checks, and exact invalidated ledger sections. Do not claim user approval.

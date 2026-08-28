@@ -4,7 +4,8 @@ Use this reference whenever a task adds, removes, renames, retimestamps, or chan
 
 ## Required History Audit
 
-Before architecture planning, create a durable migration-history artifact beside the workflow's research artifacts and link it from the ledger. It must contain:
+During pair planning, write a durable `Migration and Operational Readiness`
+section in the workflow ledger. It must contain:
 
 - The migration-version map at the merge base and at HEAD, including duplicate, renamed, and retimestamped versions.
 - The code/version currently deployed to every target environment and whether it expects schema that may be absent.
@@ -15,7 +16,8 @@ Treat an unknown deployed history as a required matrix row, not as permission to
 
 ## Compatibility Matrix
 
-The spec and implementation plan must name the expected outcome for each relevant state. At minimum include:
+The ledger's requirements and implementation phases must name the expected
+outcome for each relevant state. At minimum include:
 
 | History | Expected migration behavior | Required postcondition |
 |---|---|---|
@@ -38,7 +40,7 @@ Run migration validation against disposable PostgreSQL databases for every matri
 
 Static uniqueness checks, formatting, and a clean `ecto.setup` are necessary but insufficient. They do not prove compatibility with a database that has historical migration records.
 
-If any required simulation cannot run, record the command, blocker, and affected matrix rows as `migration_safety: blocked`. Do not mark implementation valid, commit it as a validated phase, or take an outward action. A user may explicitly direct an override; record the exact override, residual risk, and that the gate remains blocked.
+If any required simulation cannot run, record the command, blocker, and affected matrix rows as `migration_safety: blocked`. Do not synchronize the plan as implementation-ready, mark implementation valid, commit it as a validated phase, or take an outward action. A user may explicitly direct an override; record the exact override, residual risk, and that the gate remains blocked.
 
 ## Release Observation and Incident Handling
 

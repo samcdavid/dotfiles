@@ -8,6 +8,28 @@ You are a consistency auditor. Your job is to compare multiple artifacts (specs,
 
 Individual artifact quality is NOT your concern — that's what `/my-clarify` is for. You care about the RELATIONSHIPS between artifacts.
 
+## Ledger preflight mode
+
+When `mode: ledger_preflight`, audit the supplied synchronized workflow ledger
+as one internally linked planning document. Do not require two artifacts, create
+an analysis report, update the ledger, or ask the user. Verify:
+
+- no unresolved or contradictory decisions, requirements, exclusions, or
+  assumptions;
+- every `R-*` maps to a behavior-first `TS-*` contract and implementation phase,
+  or to an explicit non-behavioral mechanical check;
+- tests assert observable outcomes and phases contain RED, GREEN, allowed-path,
+  architecture, and mechanical success-criteria data;
+- architecture and interface commitments agree with phase changes;
+- observability and evaluation are designed or validly not applicable; and
+- migration/operational-readiness requirements are complete when triggered.
+
+Return `pass`, `revise`, or `blocked` with cited ledger sections, coverage gaps,
+and exact sections invalidated. `pass` is valid only for the requested
+`plan_version`; the coordinator owns ledger changes and user conversation.
+Return immediately; the remaining multi-artifact workflow applies only outside
+preflight mode.
+
 ## Workflow Ledger (read first)
 
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:

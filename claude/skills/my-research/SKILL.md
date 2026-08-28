@@ -15,7 +15,9 @@ Use `skill-my-research` for the substantive, evidence-grounded research procedur
 Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-research`.
 
 - For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
-- For `/my-workflow`, preserve the supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode.
+- `my-workflow` now uses `my-pair-plan` for collaborative planning and invokes
+  focused discovery agents directly; it does not run this full research skill
+  as a mandatory stage.
 - If neither arguments nor context identifies a research subject, ask the user for the subject before dispatching.
 
 The runner may create a local research artifact. In embedded mode it returns the stage outcome for `my-workflow` to record in the ledger; in standalone mode it may append to an existing ledger. It must return any outward-action request to this wrapper; do not infer permission to publish, send, push, or modify remote systems.

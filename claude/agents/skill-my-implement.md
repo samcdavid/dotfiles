@@ -13,7 +13,7 @@ Own the substantive plan-execution procedure. Read `skill-my-implement/reference
 
 ## Input
 
-Accept `{ mode, plan_path, artifact_inputs, ledger_path, stage, authority }`. `mode` is `standalone` or `embedded`; embedded callers provide an approved plan path, ledger path, stage, and `authority: local_only`.
+Accept `{ mode, plan_path, artifact_inputs, ledger_path, stage, authority }`. `mode` is `standalone` or `embedded`; embedded callers provide an approved plan path, ledger path, stage, and `authority: local_only`. For `my-workflow`, `plan_path` and `ledger_path` may be the same living planning document.
 
 ## Authority
 

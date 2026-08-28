@@ -15,7 +15,9 @@ Use `skill-my-test-strategy` for the substantive test-design procedure. This wra
 Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-test-strategy`.
 
 - For a standalone request, derive the task and artifacts from `$ARGUMENTS` and the conversation; leave `stage` unset.
-- For `/my-workflow`, preserve the research, clarified-spec, and architecture-plan paths; dispatch in embedded mode before `my-plan`.
+- `my-workflow` invokes the runner's `focused_advisory` mode only when its
+  planning conversation needs deeper test design; the binding `TS-*` contracts
+  live directly in the workflow ledger.
 - If no task or artifact context can be inferred, ask the user for the target behavior or feature.
 
 The runner may create a local test-strategy artifact. In embedded mode it returns the result for `my-workflow` to record; in standalone mode it may append to an existing ledger. It must return any request to create or update remote content, publish, send, push, or deploy for explicit user authorization.

@@ -156,7 +156,12 @@ Fetch a supplied Linear ticket into `requirements_checklist`; otherwise infer an
 issue identifier from the branch name before declaring it unavailable. Activate
 the PM lens when a checklist exists.
 
-If a caller supplies a **spec or requirements document** directly (e.g. `my-workflow` passes the stage-2 spec path, or `$ARGUMENTS` names a spec/PRD), read it and build the `requirements_checklist` from its acceptance criteria the same way — a spec is an equally valid requirements source, and takes precedence when both a spec and a ticket are present. Activate the PM lens whenever any requirements source exists.
+If a caller supplies a **spec, living workflow ledger, or requirements
+document** directly (for example, `my-workflow` passes its synchronized ledger),
+read it and build the `requirements_checklist` from its Requirements, Scope, and
+Need Summary sections. A direct planning document is an equally valid
+requirements source and takes precedence when both it and a ticket are present.
+Activate the PM lens whenever any requirements source exists.
 
 ### Linear project context
 

@@ -22,7 +22,7 @@ Determine which PR to address:
 - Otherwise, check `gh pr status` for the current branch's PR.
 - If neither works, ask the user.
 
-Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its spec, plan, decisions, and Finding Register feed the Requirements Traceability Baseline below and the investigation in Step 2, and Step 13 appends this run's round record plus resolved/deferred dispositions back to it. When none exists, this adds nothing — proceed as usual and skip Step 13.
+Before anything else, check for a `my-workflow` ledger tied to the current branch — read `references/workflow-ledger-context.md` and run its detection now, in both PR mode and local mode. When one exists, its need, requirements, architecture, test strategy, implementation plan, decisions, and Finding Register feed the Requirements Traceability Baseline below and the investigation in Step 2, and Step 13 appends this run's round record plus resolved/deferred dispositions back to it. When none exists, this adds nothing — proceed as usual and skip Step 13.
 
 ---
 

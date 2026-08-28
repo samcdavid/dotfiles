@@ -4,13 +4,15 @@ Load this when completing `my-workflow`.
 
 Report:
 
-- Task and entry point.
-- Stages run and skipped with reasons.
-- Artifacts produced.
-- Behavior-first test strategy and its implementation handoff.
+- Task, route, and canonical ledger path/version.
+- Planning conversation decisions and focused deep dives used.
+- Synchronized requirements, architecture, behavior-first test strategy,
+  observability/evaluation, migration/operations, and implementation phases.
 - User decisions.
 - Factual assumptions.
-- Cross-workflow coordination — sibling ledgers/issues checked on the same Linear project (or "no Linear issue"), any overlap found, and how it was resolved.
+- Issue context scope and refresh — linked issues plus milestone issues, or
+  linked issues plus project issues when no milestone exists, or linked-only
+  when no project exists; any overlap and resolution.
 - Files changed.
 - Tests and validation commands.
 - `my-implement` completion status, every phase commit, and holistic test gate.

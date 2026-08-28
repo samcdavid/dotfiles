@@ -1,6 +1,6 @@
 # Workflow Ledger Context — skill-address-pr-feedback
 
-Load at the very start of every run, before Step 1 (Gather All Feedback), in both PR mode and local mode. This skill can be invoked standalone on any branch, or from inside `my-workflow`'s automatic fix loop where a ledger already exists. Either way, check for it — the ledger carries the plan, spec, decisions, and requirements that produced the code under review, and working from the raw PR/diff alone risks re-litigating a decision the plan already made or missing an acceptance criterion the linked ticket alone wouldn't show.
+Load at the very start of every run, before Step 1 (Gather All Feedback), in both PR mode and local mode. This skill can be invoked standalone on any branch, or with a `my-workflow` ledger already present. Either way, check for it — the living ledger carries the need, requirements, decisions, architecture, test strategy, and implementation plan that produced the code under review, and working from the raw PR/diff alone risks re-litigating a decision or missing an acceptance criterion.
 
 The ledger is both an input and an output here: steps 1-3 read it, and step 4 appends this run's round record and final finding dispositions to it. A feedback round is the densest source of what the plan got wrong, and a round that only exists in a finished session's transcript is lost.
 
@@ -10,14 +10,18 @@ Run `git branch --show-current`, then search `~/.claude/thoughts/shared/workflow
 
 ## Step 2 — Read
 
-If a matching ledger exists, read it and its recorded artifact paths — research doc, spec, architecture plan, plan, analysis report, and observability/eval companions, whichever exist. Read the plan and spec in full; skim the others for anything relevant to the feedback at hand. Also read its `## Finding Register` using `~/.claude/skills/my-review/references/finding-ledger.md` (or the equivalent `~/.agents` path under Codex), retaining the latest row for each key.
+If a matching ledger exists, read it completely. The current format is the
+canonical planning document; legacy ledgers may instead link separate research,
+spec, architecture, test, plan, analysis, and observability/eval artifacts, which
+should be read as before. Also read `## Finding Register` using
+`my-review/references/finding-ledger.md`, retaining the latest row for each key.
 
 ## Step 3 — Fold into this skill's own steps
 
-- **Requirements map (Step 1's Requirements Traceability Baseline).** Build the requirements map from the ledger's spec acceptance criteria and the plan's phase breakdown, in addition to any linked Linear ticket. The spec is usually more granular than the raw ticket, and the plan shows which files/changes were meant to satisfy which criterion.
-- **Investigation (Step 2).** Treat a decision recorded in the ledger (spec scope call, plan architectural choice, an assumption logged during the pipeline) as settled — don't silently re-open it just because a reviewer's comment revisits it. Instead, use the recorded rationale as investigation evidence: if the comment conflicts with an explicit decision, that decision *is* your evidence for a **Disagree / Push Back** or **Valid Deferral**, per `references/pushback-patterns.md`'s Pattern 3 (evidence-backed pushback) — cite the plan/spec's stated reasoning, not just your own judgment.
+- **Requirements map (Step 1's Requirements Traceability Baseline).** Build the requirements map from the ledger's Need Summary, Requirements, Test Strategy, Traceability, and Implementation Plan, plus the linked Linear ticket.
+- **Investigation (Step 2).** Treat a confirmed ledger decision as settled — don't silently re-open it just because a reviewer's comment revisits it. Use its recorded rationale as evidence for **Disagree / Push Back** or **Valid Deferral** when appropriate.
 - **Deferral scope.** If the ledger has a `cross_workflow` section noting sibling overlap, a reviewer's suggestion that duplicates or belongs to a sibling issue's tracked work is stronger evidence for **Valid Deferral** — cite the sibling issue and its ledger/status.
-- **Fix Quality Bar / `architectural_constraints` (Act II).** Pull each relevant phase's `architectural_constraints` from the plan as a floor for this skill's own Fix Quality Bar (`references/fix-planning.md`) — a feedback fix should not violate a boundary the original plan explicitly called out. When a `my-architecture-plan` artifact exists, its own constraints are the deeper source the plan's were copied from — check a disputed structural comment against it directly if the plan's copy is ambiguous or the comment is about a boundary the plan didn't restate in full.
+- **Fix Quality Bar / architectural constraints (Act II).** Pull the relevant phase and Architecture-section constraints from the ledger as a floor for this skill's Fix Quality Bar. For legacy ledgers, retain the separate architecture-plan lookup.
 - **Finding dedupe (Act I).** Match feedback to the latest Finding Register key before investigation. An unchanged `resolved` or `deferred` concern is already settled: do not re-plan it or spend another repair pass. Reopen only with the concrete trigger required by `finding-ledger.md`; otherwise report the prior disposition compactly if the reviewer needs a response.
 - **Accepted review handoffs are not defect dispositions.** An `accepted` row
   for `review-handoff.local-sensitive-changes` suppresses only repeated advisory
@@ -72,7 +76,9 @@ What belongs in "Things worth remembering" is the material that would change how
 
 ## Write boundaries
 
-- **Append only.** Never edit or rewrite an existing section — not stage statuses, artifacts, provisional decisions, `cross_workflow`, nor a prior round's record. `my-workflow` owns those, and it may be mid-run.
+- **Append only.** Never edit or rewrite planning sections, decisions, execution
+  history, cross-workflow state, or a prior round. `my-workflow` owns them and
+  may be mid-run.
 - **Corrections are new text, not edits.** If this round proves an earlier ledger claim wrong, say so in the new section and point back at the section it corrects. Leaving the original wrong claim visible next to its correction is the point — that history is why the ledger is worth keeping.
 - **Update the frontmatter `updated:` date, and `pr:` if this run is the first to have a PR.** Those two fields are safe; leave every other frontmatter key alone.
 - **A ledger write is not an outward action.** It is a local file under `~/.claude/thoughts/`, so `no-outward-actions.md` does not gate it. It is also not a substitute for the Step 11 summary — write both.

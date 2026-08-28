@@ -6,6 +6,18 @@ Full private procedure for the `skill-my-architecture-plan` runner. The `my-arch
 
 Design the architectural shape of a change — module placement, coupling and cohesion, boundary and dependency design, and any deliberate deviation from convention — before `my-plan` writes implementation phases. This is `my-arch-review`'s judgment applied one step earlier: instead of grading a diff that already exists, decide the structure a not-yet-written change should take.
 
+## Focused advisory mode
+
+When `mode: focused_advisory`, answer only the supplied architectural question.
+Read the living ledger and cited code/source sections, then apply the relevant
+criteria below without launching the full three-agent discovery wave, asking the
+user, or creating an artifact. Run additional discovery only for a fact the
+bounded evidence cannot settle. Return cited evidence, alternatives and a
+recommendation, confidence, affected requirement/decision IDs, and a proposed
+patch for the ledger's Architecture section. The pair-planning coordinator
+decides whether to apply it. Return immediately; the remaining artifact workflow
+applies only outside advisory mode.
+
 ## Workflow Ledger (read first)
 
 This skill runs both standalone and as a stage inside `/my-workflow`, positioned after `my-clarify` and before `my-plan`. Before anything else, look for the task's workflow ledger:

@@ -15,7 +15,8 @@ Use `skill-my-eval-plan` for the substantive AI/LLM evaluation-planning procedur
 Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-eval-plan`.
 
 - For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
-- For `/my-workflow`, preserve supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. The runner records genuine quality-bar or launch choices as provisional decisions instead of stopping the pipeline.
+- `my-workflow` invokes the runner's `focused_advisory` mode only for applicable
+  AI/LLM behavior; evaluation decisions live in the workflow ledger.
 - If no AI/LLM feature can be inferred from context or linked artifacts, ask the user for the feature to evaluate before dispatching.
 
 The runner may create a local evaluation-plan artifact. In embedded mode it returns the stage outcome for `my-workflow` to record; in standalone mode it may append to an existing ledger. It must return any external dataset, vendor, publication, or notification request to this wrapper for explicit authorization.

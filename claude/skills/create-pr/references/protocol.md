@@ -62,7 +62,13 @@ rg -l -F -e "branch: ${branch}" -e "branch: \"${branch}\"" ~/.claude/thoughts/sh
 
 Open candidates and compare the `branch:` scalar exactly, including its optional YAML quotes; do not select a similarly named branch.
 
-When a ledger exists, read it completely. Extract decisions and outcomes from its decision/assumption, `## Provisional Decisions`, Decisions Checkpoint, implementation/phase-note, and `## Feedback Round N` sections, including a user override when one occurred. Then read the implementation plan named by the ledger (or otherwise associated with the branch) for recorded deviations. Commit messages are a supplementary source only when their body records a choice and rationale.
+When a ledger exists, read it completely. Extract decisions and outcomes from
+its Need Summary, Scope, Requirements, Decisions, Architecture, Test Strategy,
+Implementation Plan, Execution Log, and `## Feedback Round N` sections,
+including rejected alternatives and user revisions. For legacy ledgers, also
+read `## Provisional Decisions`, the Decisions Checkpoint, and the named plan.
+Commit messages are supplementary only when their body records a choice and
+rationale.
 
 Include only an evidenced **choice** that affected product behavior, scope, design, compatibility, test contract, rollout, or a plan deviation. For each, preserve its outcome and a short rationale or source reference. Do not turn ordinary task completion, test commands, refactors without a stated trade-off, or an inference from the diff into a decision.
 

@@ -13,12 +13,12 @@ Own the substantive structural-design procedure. Read `skill-my-architecture-pla
 
 ## Input
 
-Accept `{ task, artifact_inputs, ledger_path, stage, authority }`. Standalone callers may omit `artifact_inputs`, `ledger_path`, and `stage`; embedded callers supply `stage` and `authority: local_only`.
+Accept `{ mode, task, artifact_inputs, ledger_path, stage, authority }`. `mode` is `standalone`, `embedded`, or `focused_advisory`. Advisory callers supply one architectural question plus relevant ledger IDs/evidence.
 
 ## Authority
 
-Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local architecture-plan artifact. Append its outcome to an existing local workflow ledger only in standalone mode; embedded mode returns the outcome for `my-workflow` to record. Never publish, send, push, create/update remote content, or make any other outward action. Return such intent as `external_action_requested`.
+Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local architecture-plan artifact outside advisory mode. In `focused_advisory`, remain read-only and return evidence plus a proposed Architecture-section patch; never update the ledger yourself. Never publish, send, push, create/update remote content, or make any other outward action.
 
 ## Output
 
-Return the protocol's compact decision/artifact envelope. In embedded mode, turn genuine structural trade-offs into recommended provisional decisions; do not claim user approval or interrupt the pipeline.
+Return the protocol's normal envelope, or in `focused_advisory` return the exact question, evidence, recommendation/alternatives, confidence, affected ledger IDs, and proposed section patch. Do not claim user approval.

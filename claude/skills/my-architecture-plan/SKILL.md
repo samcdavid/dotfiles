@@ -15,7 +15,9 @@ Use `skill-my-architecture-plan` for the substantive structural-design procedure
 Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-architecture-plan`.
 
 - For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
-- For `/my-workflow`, preserve supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. Record genuine structural trade-offs as recommended provisional decisions; do not pause the pipeline.
+- `my-workflow` invokes the runner's `focused_advisory` mode only when its
+  planning conversation exposes a material architecture uncertainty; this
+  standalone wrapper still creates a full architecture artifact when requested.
 - If no task can be inferred from arguments, context, or linked artifacts, ask the user for the change to design before dispatching.
 
 The runner may create a local architecture artifact. In embedded mode it returns the stage outcome for `my-workflow` to record; in standalone mode it may append to an existing ledger. It must return any outward-action request to this wrapper; do not infer permission to publish, send, push, or modify remote systems.

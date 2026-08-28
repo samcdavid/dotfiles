@@ -15,11 +15,21 @@ Why this shape: each phase runs in a small, fresh context instead of one ever-gr
 
 If `$ARGUMENTS` contains a path, read that plan. Otherwise, list plans in `~/.claude/thoughts/shared/plans/` and ask the user which to implement.
 
-Read the plan completely. Check for existing `[x]` checkmarks — if resuming, trust completed work and pick up from the first unchecked phase. Only re-verify previous work if something seems off.
+Read the plan completely. In `my-workflow`, the plan may be the workflow ledger;
+use its `Implementation Plan` as the phase source, `Test Strategy` as the binding
+test contract, and `Architecture` as constraints. Check for existing `[x]`
+checkmarks — if resuming, trust completed work and pick up from the first
+unchecked phase. Only re-verify previous work if something seems off.
 
 ## Test-strategy gate
 
-When `artifact_inputs` or the workflow ledger names a `my-test-strategy` artifact, read it completely before slicing phases. In embedded `my-workflow` mode it is mandatory: if it is absent, incomplete, or not linked from the plan, stop as a planning failure rather than inventing test design. The strategy's behavior IDs, observable assertions, test levels, recovery expectations, and isolation controls are binding inputs to every phase.
+When `artifact_inputs` or the workflow ledger names a test-strategy artifact,
+read it completely before slicing phases. When the approved workflow ledger is
+the plan, read its `Test Strategy` section instead. In embedded `my-workflow`
+mode one of these sources is mandatory: if absent, incomplete, or not linked by
+the plan's traceability table, stop as a planning failure rather than inventing
+test design. The strategy's behavior IDs, observable assertions, test levels,
+recovery expectations, and isolation controls are binding inputs to every phase.
 
 If a plan's `Tests First (RED)` entry conflicts with the strategy—for example, it asserts a query/call count/private helper/framework policy instead of the required outcome—stop and request a plan/test-strategy revision. Do not let a green implementation validate a brittle test.
 
@@ -68,7 +78,7 @@ Before declaring a Python phase green where it involves a dependency pin, lockfi
 ### 4. Record and advance
 
 On a verified-done phase:
-1. Mark the phase's RED, GREEN, and Success-Criteria checkboxes `[x]` in the plan file.
+1. Mark the phase's RED, GREEN, and Success-Criteria checkboxes `[x]` in the plan file or workflow ledger.
 2. Update the todo to completed.
 3. Move to the next phase.
 

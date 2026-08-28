@@ -2,6 +2,20 @@
 
 This runner designs the behavior-first TDD strategy that `my-plan` turns into executable RED/GREEN phases. It is not a manual E2E test-plan replacement and it does not write tests or production code.
 
+## Focused advisory mode
+
+When `mode: focused_advisory`, answer only the supplied testing uncertainty.
+Read the living ledger, referenced requirements/decisions, existing tests, and
+the minimum production code needed. Apply the behavior-first criteria below
+without creating an artifact, asking the user, or mechanically running the full
+strategy challenge. Return evidence, proposed `TS-*` rows, test level,
+observable assertions, isolation/flakiness controls, prohibited implementation-
+detail assertions, trade-offs, confidence, and a proposed Test Strategy patch.
+The pair-planning coordinator decides whether to apply it and may request an
+adversarial challenge for consequential low-confidence advice.
+Return immediately; the remaining artifact workflow applies only outside
+advisory mode.
+
 ## Outcome
 
 Produce a durable local artifact at `~/.claude/thoughts/shared/test-strategies/NNN_<topic>.md` that maps each meaningful requirement and regression risk to the smallest test that can prove the observable outcome. The strategy must make implementation tests resistant to harmless refactors and able to catch a realistic behavior regression.

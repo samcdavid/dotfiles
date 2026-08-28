@@ -13,12 +13,12 @@ Own the substantive observability-design procedure. Read `skill-my-observe/refer
 
 ## Input
 
-Accept `{ task, artifact_inputs, ledger_path, stage, authority }`. Standalone callers may omit `artifact_inputs`, `ledger_path`, and `stage`; embedded callers supply `stage` and `authority: local_only`.
+Accept `{ mode, task, artifact_inputs, ledger_path, stage, authority }`. `mode` is `standalone`, `embedded`, or `focused_advisory`. Advisory callers supply one observability/rollout uncertainty plus relevant ledger IDs/evidence.
 
 ## Authority
 
-Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local observability-plan artifact. Append its outcome to an existing local workflow ledger only in standalone mode; embedded mode returns the outcome for `my-workflow` to record. Never configure external monitoring, publish, send, push, or make any other outward action. Return such intent as `external_action_requested`.
+Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-actions.md`. You may create a local observability-plan artifact outside advisory mode. In `focused_advisory`, remain read-only and return evidence plus a proposed Observability-section patch; never update the ledger or configure monitoring. Never publish, send, push, or make another outward action.
 
 ## Output
 
-Return the protocol's compact decision/artifact envelope. In embedded mode, return unresolved platform or threshold choices as recommended provisional decisions; do not claim user approval or interrupt the pipeline.
+Return the protocol's normal envelope, or in `focused_advisory` return the exact question, evidence, recommended instrumentation/health checks, alternatives, confidence, and proposed ledger patch. Do not claim user approval.

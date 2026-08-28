@@ -15,7 +15,9 @@ Use `skill-my-plan` for the substantive implementation-planning procedure. This 
 Normalize the request into `{ task, artifact_inputs, ledger_path, stage, authority: local_only }` and dispatch it to `skill-my-plan`.
 
 - For a standalone request, derive `task` from `$ARGUMENTS` and the conversation; leave `stage` unset.
-- For `/my-workflow`, preserve supplied artifact inputs, ledger path, and stage number, and dispatch in embedded mode. The runner records genuine scope or approach choices as provisional decisions instead of stopping the pipeline.
+- `my-workflow` now builds implementation phases interactively in
+  `my-pair-plan`'s living ledger; it does not run this standalone plan artifact
+  stage.
 - If no task can be inferred from arguments, context, or linked artifacts, ask the user for the work to plan before dispatching.
 
 The runner may create a local implementation plan. In embedded mode it returns the stage outcome for `my-workflow` to record; in standalone mode it may append to an existing ledger. It must return any outward-action request to this wrapper; do not infer permission to publish, send, push, or modify remote systems.
