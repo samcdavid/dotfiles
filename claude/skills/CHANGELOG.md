@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Incremental review scope
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `a7755c2` | Allowed `my-review` to approve coherent incremental and non-user-facing delivery. | Review resolves the concrete outcome promised by the current change and classifies eventual-feature requirements as included now, supporting groundwork, deferred, or unclear. Internal foundation work and teammate handoffs do not block approval merely because final integration remains, while falsely claimed outcomes, unsafe partial boundaries, reachable breakage, regressions, and unresolved consequential scope still receive findings or a plain-language question. |
+
 ## 2026-08-28 — Code context in pairing conversations
 
 | Commit | Change | Regression boundary / known-good meaning |
