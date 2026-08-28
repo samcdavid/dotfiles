@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Operational readiness review gate
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `2cafa03` | Required human readiness confirmation for environment variables, feature flags, and migrations before review approval. | Review still analyzes the full diff and keeps the handoff separate from defect risk, but returns approval pending until a human confirms appropriate env/flag values in every staging and production environment and successful staging migration/backfill testing. Advisory config/infra/suppression acknowledgements remain separate and cannot satisfy this gate. |
+
 ## 2026-08-27 — Post-implementation review loop
 
 | Commit | Change | Regression boundary / known-good meaning |
