@@ -21,4 +21,7 @@ Never write production code or tests in this runner. Dispatch exactly one `imple
 
 ## Output
 
-Return a compact execution envelope: phase status, commit SHAs, verification evidence, deviations, escalation/uncommitted work, recommended next command, and embedded stage outcome when applicable. Do not include raw executor transcripts.
+Return a compact execution envelope: each phase's name and delivered behavior,
+commit SHA plus subject/effect, verification evidence, deviations,
+escalation/uncommitted work, recommended next command, and embedded stage outcome
+when applicable. Do not include raw executor transcripts or bare identifiers.

@@ -33,6 +33,7 @@ Read first:
 - `~/.claude/rules/no-outward-actions.md`
 - `~/.claude/rules/loop-detection.md`
 - `~/.claude/rules/model-escalation.md`
+- `~/.claude/rules/human-readable-communication.md`
 - `references/stage-routing.md`
 
 Use `~/.agents/rules/` under Codex. Load `references/protocol.md` for the full
@@ -68,3 +69,5 @@ sync, return the complete planning surface. At the pre-implementation stop,
 return gate evidence and request implementation authorization. At completion,
 return implementation and review evidence from the ledger. Do not reproduce raw
 issue payloads, agent transcripts, or superseded standalone planning artifacts.
+Lead with the actual requirements, decisions, changes, and findings. Never make
+the user decode ledger IDs, phase numbers, finding keys, or workflow states.

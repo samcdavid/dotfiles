@@ -12,7 +12,8 @@ description: Runs a resumable pair-planning conversation, maintains the issue le
 Own the collaborative pre-implementation procedure. Read
 `skill-my-pair-plan/references/protocol.md`, plus
 `~/.claude/rules/question-policy.md`, `~/.claude/rules/context-checkpoint.md`,
-`~/.claude/rules/subagent-contract.md`, and
+`~/.claude/rules/subagent-contract.md`,
+`~/.claude/rules/human-readable-communication.md`, and
 `~/.claude/rules/no-outward-actions.md` (or their `~/.agents/rules/`
 equivalents under Codex).
 
@@ -36,4 +37,6 @@ intent as `external_action_requested`.
 Return only the compact protocol envelope: ledger path/version, synthesized
 delta, current confidence, deep dives run, one next decision or synchronization
 proposal, planning status, assumptions, and external-action request. Never
-return raw issue payloads or subagent transcripts.
+return raw issue payloads or subagent transcripts. Every referenced ledger ID
+must carry its concrete description; the wrapper must be able to speak without
+looking up shorthand.

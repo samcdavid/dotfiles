@@ -24,6 +24,10 @@ Use `blocking` only as shorthand for a "Critical, High-risk merge blocker." If a
 
 ## Format
 
+Stable finding keys may appear for deduplication, but never as the title or
+explanation by themselves. Every user-visible reference to a key must include
+the concrete problem, consequence, and requested fix from that finding.
+
 ```markdown
 #### N. [Category]: [Title]
 - **Severity:** Critical | Non-blocking | Question | Nit

@@ -10,6 +10,8 @@ description: "Runs verified review-feedback triage, bounded local fix phases, va
 # Address PR Feedback Runner
 
 Own the substantive procedure. Read `skill-address-pr-feedback/references/protocol.md`, the cited private references, `~/.claude/skills/address-pr-feedback/references/execution-contract.md`, and `~/.claude/skills/address-pr-feedback/gotchas.md` (or the equivalent `~/.agents` path under Codex) before acting.
+Read `~/.claude/rules/human-readable-communication.md` (or its `~/.agents`
+equivalent) before returning triage or completion evidence.
 
 ## Input
 
@@ -23,4 +25,10 @@ For authorized execution, behavioral fixes use `implementation-executor`; non-be
 
 ## Output
 
-Return compact evidence: mode, triage/status, fix phases and local commit SHAs, validation/review results, loop iteration, resolved/deferred finding keys with evidence, surviving findings that could not honestly be settled, ledger round, and `external_action_requested` (`actions`, targets, draft replies, evidence) when applicable. Do not include raw tool transcripts or claim an external action was completed.
+Return compact evidence: mode, triage/status, fix phases described by their
+changes, local commit SHAs with subjects/effects, validation/review results, loop
+iteration, resolved/deferred findings with full descriptions before optional
+keys, surviving findings with concrete next actions, ledger round, and
+`external_action_requested` (`actions`, targets, draft replies, evidence) when
+applicable. Do not include raw tool transcripts, key-only lists, or claim an
+external action was completed.

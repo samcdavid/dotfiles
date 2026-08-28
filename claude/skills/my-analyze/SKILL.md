@@ -23,4 +23,5 @@ The runner may create a local analysis report. In embedded mode it returns the s
 
 ## Present
 
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return the analysis-report path, consistency findings with artifact references, recommended fixes, implementation-readiness assessment, assumptions, provisional decisions, and compact decision/artifact envelope.

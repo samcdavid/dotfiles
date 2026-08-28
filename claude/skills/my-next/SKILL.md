@@ -11,7 +11,9 @@ Clarify the path forward from current context.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex.
+Read `~/.claude/rules/context-checkpoint.md`, `~/.claude/rules/question-policy.md`,
+and `~/.claude/rules/human-readable-communication.md` when available. Use
+`~/.agents/rules/` under Codex.
 
 ## Flow
 
@@ -23,4 +25,3 @@ Read `~/.claude/rules/context-checkpoint.md` and `~/.claude/rules/question-polic
 ## Output
 
 Return a concise ordered plan, decision points, and commands or skills to run next.
-

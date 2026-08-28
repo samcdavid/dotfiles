@@ -21,4 +21,8 @@ Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-acti
 
 ## Output
 
-Return the protocol's normal envelope, or in `ledger_preflight` return `pass | revise | blocked`, cited findings, requirement/test/phase coverage, unresolved decisions, applicability checks, and exact invalidated ledger sections. Do not claim user approval.
+Return the protocol's normal envelope, or in `ledger_preflight` return `pass |
+revise | blocked`, cited findings, requirement/test/phase coverage, unresolved
+decisions, applicability checks, and exact invalidated ledger sections. Include
+the full meaning of every referenced requirement, test, decision, and phase; do
+not return bare IDs or claim user approval.

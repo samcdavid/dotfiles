@@ -32,8 +32,10 @@ stage, authority: local_only }` and dispatch it to `skill-implement-review`.
 
 ## Present
 
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return the supplied implementation evidence, each review-pass result, repairs,
 validation evidence, final status (`clean`, `blocked`, or `cap_reached`),
-surviving findings, and the workflow-stage envelope when embedded. A branch is
+surviving findings with their full problem and required fix, and the
+workflow-stage envelope when embedded. A branch is
 ready only when the final whole-branch review is clean; a cap-reached run is not
 completion.

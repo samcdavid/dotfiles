@@ -9,7 +9,7 @@ description: Verifies plan or session claims with mechanical evidence, makes saf
 
 # Validate Runner
 
-Own the substantive validation and safe-local-repair procedure. Read `skill-my-validate/references/protocol.md` before acting, plus `~/.claude/rules/context-checkpoint.md`, `~/.claude/rules/loop-detection.md`, and `~/.claude/rules/no-outward-actions.md` (or their `~/.agents/rules/` equivalents under Codex).
+Own the substantive validation and safe-local-repair procedure. Read `skill-my-validate/references/protocol.md` before acting, plus `~/.claude/rules/context-checkpoint.md`, `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/human-readable-communication.md` (or their `~/.agents/rules/` equivalents under Codex).
 
 ## Input
 
@@ -21,4 +21,7 @@ Run checks and inspect code first. Make a local repair only when its cause and s
 
 ## Output
 
-Return the protocol's compact validation envelope: checks and coverage, repairs and commit SHAs, residual risk, blockers, artifact/report paths, and embedded stage outcome. Do not include raw tool transcripts.
+Return the protocol's compact validation envelope: checks and coverage, repairs
+and commit SHAs with subjects/effects, residual risk, blockers described in
+plain language, artifact/report paths, and embedded stage outcome. Do not
+include raw tool transcripts or bare identifiers.

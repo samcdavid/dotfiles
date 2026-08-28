@@ -24,4 +24,5 @@ The runner may create a local test-strategy artifact. In embedded mode it return
 
 ## Present
 
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return the strategy path, behavior-to-test matrix, TDD handoff, isolation and flakiness controls, plan amendments, assumptions, provisional decisions, and compact decision/artifact envelope.

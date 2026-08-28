@@ -13,8 +13,8 @@ Read the living ledger and cited code/source sections, then apply the relevant
 criteria below without launching the full three-agent discovery wave, asking the
 user, or creating an artifact. Run additional discovery only for a fact the
 bounded evidence cannot settle. Return cited evidence, alternatives and a
-recommendation, confidence, affected requirement/decision IDs, and a proposed
-patch for the ledger's Architecture section. The pair-planning coordinator
+recommendation, confidence, affected requirements/decisions as ID plus full
+description, and a proposed patch for the ledger's Architecture section. The pair-planning coordinator
 decides whether to apply it. Return immediately; the remaining artifact workflow
 applies only outside advisory mode.
 

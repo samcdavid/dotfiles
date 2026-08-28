@@ -23,4 +23,9 @@ Report:
   or `cap_reached`; do not present either state as completion.
 - Suggested next command.
 
+Use human-readable descriptions as the primary labels. If an internal ID,
+finding key, phase number, or commit SHA is useful for traceability, put it after
+the actual decision, behavior, problem/fix, phase outcome, or commit subject.
+Never return a key-only status list.
+
 End by stating that no git outward actions were taken unless explicitly requested.

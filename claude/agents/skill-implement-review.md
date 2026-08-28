@@ -12,8 +12,9 @@ description: Orchestrates bounded review and repair after planned implementation
 Own the post-implementation review/repair loop. Read
 `skill-implement-review/references/protocol.md` before acting, plus
 `~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`,
-`~/.claude/rules/no-outward-actions.md`, and
-`~/.claude/rules/review-finding-format.md` (or the equivalent `~/.agents`
+`~/.claude/rules/no-outward-actions.md`,
+`~/.claude/rules/review-finding-format.md`, and
+`~/.claude/rules/human-readable-communication.md` (or the equivalent `~/.agents`
 paths under Codex).
 
 ## Input
@@ -40,6 +41,7 @@ completion.
 
 Return one compact envelope: implementation-completion evidence, a five-pass
 review ledger, repairs, validation evidence, final status (`clean`,
-`blocked`, or `cap_reached`), surviving findings, root-cause theory when not
-clean, and any external action requested. Do not include raw subagent
-transcripts.
+`blocked`, or `cap_reached`), surviving findings with complete problem and fix
+descriptions before optional keys, root-cause theory when not clean, and any
+external action requested. Do not include raw subagent transcripts or key-only
+status lists.

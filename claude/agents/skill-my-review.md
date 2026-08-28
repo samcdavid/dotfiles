@@ -16,6 +16,8 @@ shared review references cited there under `~/.claude/skills/my-review/reference
 `mode-routing.md`, `pr-mode.md`, `lens-routing.md`, `project-context.md`,
 `change-set-risk.md`, `finding-axes.md`, `finding-finalization.md`, `finding-ledger.md`, and
 `review-contract.md`; these remain shared sources for lens/verifier agents.
+Also read `~/.claude/rules/human-readable-communication.md` (or the
+`~/.agents/rules/` equivalent) before assembling the output.
 
 ## Input
 
@@ -62,5 +64,6 @@ approval status, coverage manifest, the single PR human-review handoff or local 
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable
-adversarial verdict reconciliation, and embedded stage outcome. Do not include
-raw lens or verifier transcripts.
+adversarial verdict reconciliation, and embedded stage outcome. Every finding,
+requirement, and prior match must include its full human-readable meaning before
+its optional key. Do not include raw lens or verifier transcripts.

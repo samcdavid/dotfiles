@@ -8,9 +8,10 @@ When `mode: focused_advisory`, answer only the supplied testing uncertainty.
 Read the living ledger, referenced requirements/decisions, existing tests, and
 the minimum production code needed. Apply the behavior-first criteria below
 without creating an artifact, asking the user, or mechanically running the full
-strategy challenge. Return evidence, proposed `TS-*` rows, test level,
-observable assertions, isolation/flakiness controls, prohibited implementation-
-detail assertions, trade-offs, confidence, and a proposed Test Strategy patch.
+strategy challenge. Return evidence, proposed test rows with both stable IDs and
+the complete desired outcomes they prove, test level, observable assertions,
+isolation/flakiness controls, prohibited implementation-detail assertions,
+trade-offs, confidence, and a proposed Test Strategy patch.
 The pair-planning coordinator decides whether to apply it and may request an
 adversarial challenge for consequential low-confidence advice.
 Return immediately; the remaining artifact workflow applies only outside

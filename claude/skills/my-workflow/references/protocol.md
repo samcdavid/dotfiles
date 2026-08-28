@@ -86,7 +86,8 @@ ledger path, current user response, and local-only authority. The runner:
 - uses current specialist agents only for focused deep dives; and
 - returns one next decision or a sync proposal.
 
-Present its compact delta and question. End the turn. On the user's answer,
+Present its compact delta and question in plain language, expanding every
+requirement, decision, test, and phase reference before any optional ID. End the turn. On the user's answer,
 re-dispatch the same ledger and response. Do not answer on the runner's behalf,
 batch its questions, or continue into implementation in the same turn.
 
@@ -136,6 +137,10 @@ provide that authorization.
 Present the synchronized ledger path/version, gate evidence, exact phases,
 affected surfaces, test strategy, migration/operational requirements, and any
 remaining assumptions. Ask explicitly whether to implement this plan.
+
+Describe each phase by the behavior it delivers and each remaining assumption
+by its actual content. Do not present phase numbers or ledger keys as if the
+user already knows their meaning.
 
 Only an affirmative response sets `implementation_authorized: true`,
 `authorized_plan_version: <current version>`, and

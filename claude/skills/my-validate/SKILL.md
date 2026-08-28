@@ -22,4 +22,8 @@ The runner may make only obvious, scoped local repairs and must validate each re
 
 ## Present
 
-Return checks and coverage, repairs and local commit SHAs, residual risks, blockers, report/artifact paths, and the workflow-stage envelope when embedded. Do not include raw tool transcripts.
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Return checks and coverage, repairs and local commit SHAs with their subjects and
+effects, residual risks, blockers, report/artifact paths, and the workflow-stage
+envelope when embedded. Expand every internal status/key. Do not include raw
+tool transcripts.

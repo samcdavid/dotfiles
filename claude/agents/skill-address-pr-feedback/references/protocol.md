@@ -488,7 +488,7 @@ Present the final result:
 
 ## Step 13 — Append the Round Record and Finding Dispositions to the Ledger
 
-Skip if Getting Started found no ledger. Otherwise this runs last — after local validation/review, or after returning the PR external-action request — so the record states what landed locally and what the wrapper still owns. Append one dated `## Feedback Round N` section and resolved/deferred Finding Register rows per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Preserve each incoming `my-review` finding key. Report the path, round number, settled keys, and any unsettled findings in Step 12's output.
+Skip if Getting Started found no ledger. Otherwise this runs last — after local validation/review, or after returning the PR external-action request — so the record states what landed locally and what the wrapper still owns. Append one dated `## Feedback Round N` section and resolved/deferred Finding Register rows per `references/workflow-ledger-context.md`'s Step 4, which holds the template and the append-only write boundaries. Preserve each incoming `my-review` finding key. Report the path and round number, then describe each settled finding and disposition before its optional key and each unsettled finding with its full problem and next action.
 
 ## Guidelines
 

@@ -8,3 +8,5 @@ Classify every possible question before asking:
 
 Do not ask blank intake questions when the conversation or artifacts already identify the task.
 
+Apply `human-readable-communication.md`: restate the actual choice and
+recommendation. Never ask the user to interpret or approve a bare internal ID.

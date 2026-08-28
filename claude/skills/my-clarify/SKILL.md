@@ -23,4 +23,5 @@ In embedded mode the runner returns local resolutions for `my-workflow` to recor
 
 ## Present
 
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return the issues grouped by severity, document locations, why each matters, suggested resolutions, assumptions, provisional decisions, and compact decision/artifact envelope.

@@ -26,7 +26,9 @@ The runner may make locally validated implementation changes only through its `i
 
 ## Present
 
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return completed phases, commit SHAs, holistic verification evidence, deviations,
 uncommitted or escalated work, the workflow-stage envelope when embedded, and
 the recommended next command: `implement-review` only after every implementation
-phase is complete. Do not include raw executor transcripts.
+phase is complete. Name what each phase delivered and pair every SHA with its
+subject/effect. Do not include raw executor transcripts.

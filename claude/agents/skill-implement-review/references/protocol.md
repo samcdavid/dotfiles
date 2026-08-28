@@ -95,9 +95,9 @@ route: review_repair
 passes:
   - pass: <1-5>
     validation: implementation_gate | not_run | pass | repaired | blocked
-    findings: [<stable finding key>]
-    repairs: [<commit SHA>]
-surviving_findings: [<stable finding key>]
+    findings: [{ key: <stable key>, problem: <what is wrong>, fix: <required action> }]
+    repairs: [{ sha: <commit SHA>, subject: <commit subject>, effect: <what changed> }]
+surviving_findings: [{ key: <stable key>, problem: <what remains>, fix: <next action> }]
 root_cause: <required unless clean>
 external_action_requested: null | { actions, targets, rationale }
 ```

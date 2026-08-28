@@ -15,6 +15,9 @@ versions of those skills remain available.
   load-bearing decision at a time, with a recommended answer and consequences.
 - Update the ledger immediately after every substantive user decision or
   verified deep dive. Show only a compact delta during the conversation.
+- Compact means concise, not cryptic. Lead with the actual requirement,
+  decision, test outcome, or plan change; include a ledger ID only afterward for
+  traceability. Never ask the user to decode a key.
 - A synchronized ledger is planning approval, not implementation authority.
 - Missing or stale evidence fails closed to a focused deep dive or another
   conversation turn.
@@ -122,8 +125,9 @@ Use existing agents as specialists, not as a serial artifact pipeline:
 - AI/LLM evaluation: `skill-my-eval-plan` with `mode: focused_advisory` only for
   model-produced behavior.
 
-Pass the ledger path, exact question, relevant requirement/decision IDs, and
-only the cited code/source sections needed. Advisory agents return evidence and
+Pass the ledger path, exact question, relevant requirements/decisions with both
+their IDs and full descriptions, and only the cited code/source sections needed.
+Advisory agents return evidence and
 a proposed ledger-section patch; they do not create companion artifacts, ask
 the user, or update the ledger. Apply a patch only after checking it against the
 current conversation and sources. Record the agent and evidence under `Deep
@@ -186,6 +190,11 @@ sync_proposal: null | { summary, gaps, recommendation }
 assumptions: [<verified factual assumption>]
 external_action_requested: null | { actions, targets, rationale }
 ```
+
+Every keyed item in this envelope must include its plain-language meaning. For
+example, return “Use a five-minute cache TTL (`decision A-003`)”, never
+“confirmed A-003”; return the full decision question and recommendation rather
+than `next_decision: A-003`.
 
 Return `complete` only after explicit synchronization. An unresolved decision,
 stale issue context, malformed plan phase, uncovered requirement, or missing

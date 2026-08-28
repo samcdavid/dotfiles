@@ -37,4 +37,7 @@ stage: collaborative_planning, authority: local_only }` and dispatch it to
 
 Show the compact ledger delta, current confidence, any focused deep dive that
 ran, and either the next single decision or the final synchronization proposal.
-Do not reproduce the full issue corpus or raw agent transcripts.
+Read `~/.claude/rules/human-readable-communication.md` (or the `~/.agents`
+equivalent) and state the actual changed requirement, decision, evidence, and
+consequence before any optional ledger ID. Do not reproduce the full issue
+corpus or raw agent transcripts.

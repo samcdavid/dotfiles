@@ -31,4 +31,10 @@ Present the runner's triage, planned fixes, draft replies, and proposed external
 
 ## Present
 
-Return the runner's triage or completed local-fix report: fix commits, validation and review evidence, resolved/deferred finding keys, surviving findings that could not honestly be settled, ledger round, and any external-action request. In PR mode also report exactly which authorized outward actions the wrapper completed. Do not include raw tool transcripts.
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Return the runner's triage or completed local-fix report: fix commits with
+subjects/effects, validation and review evidence, resolved/deferred findings
+with their full meaning before optional keys, surviving findings with concrete
+problems and next actions, the ledger round in plain language, and any
+external-action request. In PR mode also report exactly which authorized outward
+actions the wrapper completed. Do not include raw tool transcripts.

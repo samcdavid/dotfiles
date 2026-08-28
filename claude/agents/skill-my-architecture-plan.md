@@ -21,4 +21,7 @@ Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-acti
 
 ## Output
 
-Return the protocol's normal envelope, or in `focused_advisory` return the exact question, evidence, recommendation/alternatives, confidence, affected ledger IDs, and proposed section patch. Do not claim user approval.
+Return the protocol's normal envelope, or in `focused_advisory` return the exact
+question, evidence, recommendation/alternatives, confidence, affected ledger
+items as `{ id, description }`, and proposed section patch. Do not claim user
+approval.

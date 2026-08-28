@@ -21,4 +21,7 @@ Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-acti
 
 ## Output
 
-Return the protocol's normal envelope, or in `focused_advisory` return the exact question, evidence, proposed `TS-*` contracts, recommendation/trade-offs, confidence, and ledger patch. Do not claim user approval.
+Return the protocol's normal envelope, or in `focused_advisory` return the exact
+question, evidence, proposed test contracts as `{ id, desired_outcome,
+assertion }`, recommendation/trade-offs, confidence, and ledger patch. Do not
+claim user approval.

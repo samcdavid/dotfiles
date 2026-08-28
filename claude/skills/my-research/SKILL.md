@@ -24,4 +24,5 @@ The runner may create a local research artifact. In embedded mode it returns the
 
 ## Present
 
+Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return the runner's verified summary, research artifact path, assumptions, open questions, and compact decision/artifact envelope. Do not present unverified claims as findings.

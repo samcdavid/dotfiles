@@ -10,7 +10,12 @@ Handle small changes end-to-end without running the full workflow.
 
 ## Load Rules
 
-Read `~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`, and `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. For tripwires or full checklist, read `references/protocol.md`, `references/tripwire-signals.md`, and `references/self-review-checklist.md`.
+Read `~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`,
+`~/.claude/rules/no-outward-actions.md`, and
+`~/.claude/rules/human-readable-communication.md` when available. Use
+`~/.agents/rules/` under Codex. For tripwires or full checklist, read
+`references/protocol.md`, `references/tripwire-signals.md`, and
+`references/self-review-checklist.md`.
 
 ## Flow
 
@@ -28,5 +33,6 @@ Stop and recommend full workflow if scope expands, requirements are unclear, man
 
 ## Output
 
-Return changes made, checks run, residual risk, and whether a larger workflow is warranted.
-
+Return the actual changes made, checks run, residual risk, and whether a larger
+workflow is warranted. Pair any phase, finding, or commit identifier with its
+plain-language meaning.
