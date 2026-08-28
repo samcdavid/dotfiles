@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Local pre-stage review verdicts
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `d4a8325` | Separated local code approval from pre-stage human readiness checks in `my-review`. | Local, branch, issue, and embedded reviews always say whether the code itself is `APPROVE` or `REQUEST_CHANGES`. Environment-variable, feature-flag, migration, config, infrastructure, and suppression items remain visible as a separate pre-stage checklist but cannot suppress the code verdict; PR operational-readiness confirmation continues to gate PR approval. |
+
 ## 2026-08-28 — Incremental review scope
 
 | Commit | Change | Regression boundary / known-good meaning |
