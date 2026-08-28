@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-08-28 — Outcome-only testing
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `e49ea68` | Required planning, implementation, and review to derive tests only from distinct desired outcomes. | Each outcome receives one smallest proving test. Returned values, public errors, user-visible behavior, persisted state, and explicitly requested external effects are valid assertions; telemetry, database/cache access, locks/semaphores, collaborator calls, retries, call order, and framework mechanics are handled as non-test constraints unless explicitly defined as the product outcome. Duplicate coverage of the same outcome across layers is rejected. |
+
 ## 2026-08-28 — Collaborative workflow planning
 
 | Commit | Change | Regression boundary / known-good meaning |
