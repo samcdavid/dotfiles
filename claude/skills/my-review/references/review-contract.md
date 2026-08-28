@@ -83,12 +83,13 @@ Actionability Gate or verifiers, and is never repeated in body commentary.
 Deduplicating the request does not confirm the external readiness facts.
 
 When the same triggers appear in local mode, the first review item is one
-explicit confirmation for all uncovered trigger tuples. Continue substantive
-review, but do not return APPROVE until a human explicitly confirms the
-environment-variable, feature-flag, and migration readiness conditions.
-Generic acknowledgement is sufficient only for the separate advisory scope.
-The matching ledger keys' append-only `accepted` rows are the only durable
-dedupe signals; auto mode and conversation inference are not substitutes.
+pre-stage checklist for all uncovered trigger tuples. Continue substantive
+review and always return the independent code verdict. Human confirmation is
+still required before promotion to the affected staging or production
+environment, but it does not gate local code approval. Generic acknowledgement
+is sufficient only for the separate advisory scope. The matching ledger keys'
+append-only `accepted` rows are the only durable dedupe signals; auto mode and
+conversation inference are not substitutes.
 
 ## Re-review and Publication Boundaries
 
@@ -101,10 +102,11 @@ finding with an actionable inline anchor; unresolved threads, existing debt, a
 Critical finding at Medium or Low risk, or a body-only objection do not
 independently justify it.
 
-`COMMENT` is reserved for a third-party PR: the PR author must differ from
-the authenticated GitHub reviewer. Local, branch/range, local-issue,
-embedded-local, self-authored PR, and unknown-ownership PR reviews return
-`REQUEST_CHANGES`, `APPROVE`, or no verdict with `needs_input` while operational
-readiness is unconfirmed. Non-blocking actionable findings and unresolved
-questions remain visible under `APPROVE`; the verdict rule does not erase them
-or inflate them into blockers.
+`COMMENT` is reserved for a third-party PR: the PR author must differ from the
+authenticated GitHub reviewer. Local, branch/range, local-issue, and
+embedded-local reviews always return a code verdict of `REQUEST_CHANGES` or
+`APPROVE`; outstanding pre-stage checks remain visible separately.
+Self-authored and unknown-ownership PR reviews may return no verdict with
+`needs_input` while operational readiness is unconfirmed. Non-blocking
+actionable findings and unresolved questions remain visible under `APPROVE`;
+the verdict rule does not erase them or inflate them into blockers.

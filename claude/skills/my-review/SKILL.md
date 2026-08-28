@@ -3,7 +3,7 @@ model: sonnet
 effort: high
 name: my-review
 runner: skill-my-review
-description: "Rigorous local and PR review that raises only actionable feedback, with human readiness confirmation for environment variables, feature flags, and migrations before approval."
+description: "Rigorous local and PR review that raises only actionable feedback, separating local code approval from pre-stage human readiness checks."
 when_to_use: "Use when the user asks to review their changes, diff, branch, or a GitHub PR."
 ---
 
@@ -17,7 +17,7 @@ envelope.
 
 ## Dispatch
 
-Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows/`; workflow ledgers are retained in Claude Thoughts and never in the worktree. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
+Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
 
 - Infer `mode` as capture/promote, PR, branch/range, local, or local issue only from the supplied argument and current context; load the runner's retained shared routing references before resolving ambiguity.
 - Set `review_relationship` to `local`, `self_authored_pr`, or `third_party_pr`. In PR mode, compare the PR author's login with the authenticated GitHub login; if either cannot be established, use `unknown_pr`, which is not eligible for `COMMENT`.
@@ -26,8 +26,9 @@ Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows
 - Preserve an explicit delivery increment. Otherwise resolve it under
   `references/incremental-delivery.md`; never equate the full linked issue with
   the current change's promised scope.
-- When the runner returns a local human confirmation, present it as review item
-  1. For environment variables, feature flags, and migrations, accept only an
+- When the runner returns local pre-stage human-review items, present them as
+  review item 1 without delaying the code verdict. For environment variables,
+  feature flags, and migrations, accept only an
   explicit response confirming the exact readiness conditions in
   `references/change-set-risk.md`; a generic acknowledgement is insufficient.
   Append the corresponding `accepted` row from `references/finding-ledger.md`
@@ -37,37 +38,38 @@ Before dispatch, resolve `ledger_path` from `~/.claude/thoughts/shared/workflows
   only. Never infer confirmation from a general review request,
   auto/no-questions mode, a prior approval, or a response whose trigger contents
   differ.
-  If no ledger exists, do not create one; disclose that the one-invocation
-  confirmation cannot be durably suppressed.
+  If no ledger exists, do not create one; disclose that confirmation cannot be
+  durably suppressed.
 - Do not invoke publication from this wrapper unless the user explicitly asks after reviewing the completed result. A runner may never publish a review, reply, resolve a thread, push, create/update a PR, or widen that authorization.
 
 ## Present
 
 Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
-Return overall change-set risk, approval status, and the current delivery
-increment first, then the coverage manifest and actionable
+Return overall change-set risk, the code verdict, readiness status, and the
+current delivery increment first, then the coverage manifest and actionable
 findings with file:line evidence and concrete author-controlled fixes, decisions,
 or information requests, the single PR human-review handoff or first-item local
-confirmation when required,
+pre-stage checklist when required,
 verdict, questions, residual risk, requirements coverage including what is
 intentionally deferred from this increment,
 dropped findings, prior resolved/deferred/accepted matches, and the compact workflow-stage
 envelope when embedded. Finding keys may follow the complete title, problem,
 consequence, and fix, but may never replace them. Drop observations, preferences, and speculative concerns
 that do not ask the author to do something concrete. Use `REQUEST_CHANGES` only
-for verified findings that are both `Critical` and `High` risk. In local,
-branch/range, local-issue, embedded-local, self-authored PR, and unknown-PR
-reviews, the ordinary non-blocking verdict is `APPROVE`; however, when required
-operational readiness is unconfirmed, return `needs_input` with approval pending
-and no approval verdict. `COMMENT` is available only for an actual PR whose
-author differs from the authenticated reviewer. Do not include raw lens or
-verifier transcripts.
+for verified findings that are both `Critical` and `High` risk. Local,
+branch/range, local-issue, and embedded-local reviews always return the code
+verdict; pre-stage human-review items never replace it. PR reviews return
+`needs_input` with approval pending when required operational readiness is
+unconfirmed. `COMMENT` is
+available only for an actual PR whose author differs from the authenticated
+reviewer. Do not include raw lens or verifier transcripts.
 
 Classify the aggregate diff using `references/change-set-risk.md` before fan-out.
 A Low-risk set takes its fast-approval path. Migrations, environment variables,
 feature flags, infrastructure/operations changes, other config, and newly added
-lint/tooling suppressions produce one deduplicated human-review request.
-Environment variables, feature flags, and migrations additionally withhold
-approval until a human confirms their environment or staging readiness. In
-local mode, persist exact confirmations separately from advisory
-acknowledgements so an older generic acceptance can never unlock approval.
+lint/tooling suppressions produce one deduplicated human-review item.
+In PR mode, environment variables, feature flags, and migrations additionally
+withhold approval until a human confirms their environment or staging
+readiness. In local mode, report them as pre-stage checks and persist exact
+confirmations separately from advisory acknowledgements so an older generic
+acceptance can never satisfy operational readiness.

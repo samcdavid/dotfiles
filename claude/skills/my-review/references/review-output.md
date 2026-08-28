@@ -8,16 +8,23 @@ Load during Step 5 of `protocol.md`.
 ### Overall Change Risk
 **Low** / **Medium** / **High** — [aggregate-diff rationale]
 
-### Approval Status
-**eligible** / **pending human confirmation** — [name any unconfirmed environment-variable, feature-flag, or migration readiness conditions]
+### Code Verdict
+**APPROVE** / **REQUEST_CHANGES** — [whether the code change itself should move
+forward. Always present this in local modes.]
+
+### Readiness Status
+**PR:** eligible / pending human confirmation
+**Local:** pre-stage human review clear / required — [name each environment-variable,
+feature-flag, migration, config, infrastructure, or suppression item]
 
 ### Delivery Increment
 **Promised now:** [the concrete outcomes reviewed in this change]
 **User-facing now:** yes / no
 **Deferred integration or handoff:** [what remains, plus the next step or owner when known]
 
-### Verdict
-**APPROVE** / **COMMENT** / **REQUEST_CHANGES** / **none — needs input** — [why this verdict or pending state applies. COMMENT is valid only for a third-party PR; pending operational readiness never returns APPROVE.]
+### PR Verdict
+**APPROVE** / **COMMENT** / **REQUEST_CHANGES** / **none — needs input** — [PR
+mode only. Pending PR operational readiness never returns APPROVE.]
 
 ### Summary
 [1-2 sentences demonstrating you understood the change and its purpose]

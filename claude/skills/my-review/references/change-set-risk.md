@@ -45,8 +45,8 @@ from this increment do not disable the fast path by themselves.
 Scan added and modified diff lines in PR and local modes. Build two disjoint
 trigger sets.
 
-`operational_readiness_triggers` require explicit human confirmation before an
-approval is eligible:
+`operational_readiness_triggers` require explicit human confirmation before PR
+approval is eligible and remain mandatory pre-stage callouts in local review:
 
 - database/schema/data migrations or backfills;
 - new or changed runtime environment-variable references, declarations, or
@@ -67,9 +67,9 @@ themselves withhold approval:
 
 These signals require repository-external knowledge. They are not automatic
 defects, do not acquire finding severity or risk, and do not independently
-justify `REQUEST_CHANGES`. The operational-readiness set withholds approval
-because the agent cannot verify deployment state or staging execution, not
-because the diff is presumed unusually risky.
+justify `REQUEST_CHANGES`. The operational-readiness set withholds PR approval
+because the agent cannot verify deployment state or staging execution. In local
+review it is reported separately and never changes the code verdict.
 
 Normalize every trigger as `{ category, path, changed_content_digest }`, where
 `category` is `migration`, `environment-variable`, `feature-flag`, `config`,
@@ -80,8 +80,9 @@ materially changed trigger content must.
 
 ## Operational readiness clearing condition
 
-Approval remains pending until a human explicitly confirms every applicable
-condition:
+PR approval remains pending until a human explicitly confirms every applicable
+condition. Local review reports the same conditions as pre-stage checks without
+withholding its code verdict:
 
 - **Environment variables:** the appropriate value has been set in every
   staging and production environment.
@@ -97,13 +98,19 @@ unambiguously confirms the applicable condition for the current normalized
 trigger tuples. Never infer it from repository contents. New or materially
 changed tuples require fresh confirmation.
 
-When readiness confirmation is missing, complete the substantive review but
-return `status: needs_input`, `approval_status: pending_human_confirmation`, and
-no `APPROVE` verdict. A verified Critical, High-risk defect may still produce
-`REQUEST_CHANGES`; otherwise a third-party PR may use `COMMENT`, while local,
-self-authored, and unknown-ownership reviews remain pending without a verdict.
-After explicit confirmation, re-dispatch with the exact confirmed tuples and
-compute the ordinary relationship-constrained verdict.
+When readiness confirmation is missing in PR mode, complete the substantive
+review but return `status: needs_input`,
+`approval_status: pending_human_confirmation`, and no `APPROVE` verdict. A
+verified Critical, High-risk defect may still produce `REQUEST_CHANGES`;
+otherwise a third-party PR may use `COMMENT`, while self-authored and
+unknown-ownership PR reviews remain pending without a verdict. After explicit
+confirmation, re-dispatch with the exact confirmed tuples and compute the
+ordinary relationship-constrained verdict.
+
+When readiness confirmation is missing in local mode, return
+`pre_stage_human_review: required` and the complete checklist alongside the
+ordinary `code_verdict: APPROVE | REQUEST_CHANGES`. Never return `needs_input`
+solely for local human-review items.
 
 ### PR mode
 
@@ -156,7 +163,7 @@ advisory handoff anchors that still need review, mark
 `operational_confirmation: confirmed`, and do not ask for the readiness facts
 again.
 
-### Local mode
+### Local pre-stage mode
 
 Use stable key `review-handoff.operational-readiness` for readiness tuples and
 `review-handoff.local-sensitive-changes` for advisory tuples. Compare each set
@@ -164,7 +171,8 @@ with the matching workflow ledger's latest `accepted` scope and the wrapper's
 invocation-local confirmed/accepted scopes.
 
 Present one combined first review item when either set is uncovered. List every
-uncovered `category` and `path:line`, then ask only for the applicable facts:
+uncovered `category` and `path:line`, then state the applicable facts a human
+must verify before staging or production promotion:
 
 > This local change set includes operationally owned changes that require human
 > review. For every listed environment variable and feature flag, confirm that
@@ -172,14 +180,13 @@ uncovered `category` and `path:line`, then ask only for the applicable facts:
 > production environment. For every listed migration or backfill, confirm that
 > it has been tested successfully in staging. Please also acknowledge any other
 > listed config, infrastructure, or tooling-suppression changes. These checks do
-> not imply that the change is unusually risky, but approval remains pending
-> until the environment-variable, feature-flag, and migration conditions are
-> explicitly confirmed.
+> not imply that the change is unusually risky and do not change the code
+> verdict. They must be completed before the affected change is promoted to
+> staging or production.
 
 Do not ask once per anchor or repeat the prompt in Questions/residual risk.
-Auto/no-questions mode cannot waive it. Continue the substantive review so the
-user receives all code findings in the same pass, but return `needs_input` and
-withhold approval while any readiness tuple is unconfirmed.
+Auto/no-questions mode cannot omit it. Continue the substantive review and
+return the code verdict in the same pass, regardless of confirmation state.
 
 - **Explicit readiness confirmation:** the outer wrapper appends an `accepted`
   Finding Register row for `review-handoff.operational-readiness`, faithfully
@@ -189,7 +196,7 @@ withhold approval while any readiness tuple is unconfirmed.
   `accepted` row for `review-handoff.local-sensitive-changes`, covering only the
   advisory tuples.
 - **Negative or incomplete response:** append nothing for the unconfirmed set;
-  preserve the anchors and return `needs_input`. Do not return `APPROVE`.
+  preserve the anchors and pre-stage status without changing the code verdict.
 - **No matching ledger:** accept the facts for this invocation, but report that
   they cannot be durably reused. Never create a workflow ledger; ledger creation
   remains owned by `my-workflow`.

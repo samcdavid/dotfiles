@@ -19,12 +19,17 @@ not automatic merge blocks:
 
 Everything else should be a non-blocking comment, question, suggestion, or nit, even when it is worth fixing. Do not request changes for style, preference, cleanup, ordinary missing tests, maintainability concerns, minor performance concerns, speculative risk, or a Critical concern whose verified risk is not High.
 
-Approval still has a bar: approve only when the PR satisfies the declared
+PR approval still has a bar: approve only when the PR satisfies the declared
 increment's requirements, no Critical High-risk finding survives, and all
 remaining findings are Low risk. The eventual feature may remain incomplete or
 non-user-facing. Low-risk findings may be substantive and actionable. Use
 `COMMENT` whenever a non-blocking finding is Medium/High risk, current-increment
 requirements are unresolved, or context is insufficient.
+
+Local review is a pre-stage code decision. Always return `APPROVE` or
+`REQUEST_CHANGES` for the code itself. Report environment, feature-flag,
+migration, config, infrastructure, and suppression checks separately; an
+unconfirmed human-review item does not erase or delay the local code verdict.
 
 Use `blocking` only as shorthand for a "Critical, High-risk merge blocker." If a finding is important but does not meet both bars, call it non-blocking and explain the risk.
 

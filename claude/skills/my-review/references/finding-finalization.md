@@ -7,12 +7,12 @@ PR-only human-review handoff is finalized separately from findings: one inline
 annotation for the whole PR, deduped by substance and containing all trigger
 anchors. Do not verifier-route it or apply the Actionability Gate to it.
 
-The local human confirmation is likewise finalized separately from findings.
-It must be review item 1 when uncovered and bypasses verifier/importance
-routing. Advisory acknowledgements and operational-readiness confirmations use
-separate stable keys. Continue substantive review when either is pending, but a
-declined, incomplete, or unanswered readiness confirmation returns
-`needs_input` without APPROVE.
+The local pre-stage human-review checklist is likewise finalized separately
+from findings. It must be review item 1 when uncovered and bypasses
+verifier/importance routing. Advisory acknowledgements and
+operational-readiness confirmations use separate stable keys. Continue
+substantive review and always return the independent local code verdict when
+either is pending.
 
 1. Merge duplicate findings across lenses. Keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the merged pair — a finding two lenses read differently gets verified harder, not averaged.
 2. Dedupe against existing PR comments and threads.
@@ -34,13 +34,22 @@ declined, incomplete, or unanswered readiness confirmation returns
 Verdict rule:
 
 - `REQUEST_CHANGES` only if a finding survives (or is PROMOTEd to) both Critical **and** High risk after per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. A finding needing clarification surfaces as a blocking question, never an automatic `REQUEST_CHANGES`.
-- In local, branch/range, local-issue, embedded-local, self-authored PR, and unknown-ownership PR reviews: `APPROVE` whenever no Critical High-risk finding survives and operational readiness is confirmed. If readiness is unconfirmed, return `needs_input` with approval pending and no verdict. Actionable non-blocking findings and unresolved questions remain visible but cannot produce `COMMENT` or be inflated into `REQUEST_CHANGES`.
+- In local, branch/range, local-issue, and embedded-local reviews: always return
+  `APPROVE` when no Critical High-risk finding survives, otherwise
+  `REQUEST_CHANGES`. Outstanding pre-stage human-review items remain visible but
+  never suppress this code verdict. Actionable non-blocking findings and
+  unresolved questions cannot produce `COMMENT` or be inflated into
+  `REQUEST_CHANGES`.
+- In self-authored and unknown-ownership PR reviews: `APPROVE` whenever no
+  Critical High-risk finding survives and operational readiness is confirmed.
+  If readiness is unconfirmed, return `needs_input` with approval pending and no
+  PR verdict.
 - In a third-party PR review: `APPROVE` when requirements are satisfied and all remaining findings are Low risk; `COMMENT` when Medium/High-risk non-blocking feedback or unresolved requirements/context remains, the PR is stale/already merged, or the user explicitly asks not to approve.
 - A pending advisory handoff counts as unresolved context for a third-party PR
   and therefore produces `COMMENT`. Pending operational readiness forbids
-  `APPROVE` for every relationship; use `COMMENT` for a third-party PR and no
-  verdict with `needs_input` for other relationships. It never independently
-  produces `REQUEST_CHANGES`.
+  PR `APPROVE`; use `COMMENT` for a third-party PR and no verdict with
+  `needs_input` for other PR relationships. It never independently produces
+  `REQUEST_CHANGES` and never suppresses a local code verdict.
 
 For a re-review, report the blocker ledger delta: cleared, still open, regressed,
 or newly verified, plus any accepted local human-review scope reused or expanded.
