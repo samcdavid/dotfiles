@@ -6,9 +6,26 @@ For implementation phases:
 2. GREEN: write the minimum production code needed to pass.
 3. VALIDATE: run every success criterion and verify the diff satisfies the behavioral requirement.
 
-Tests specify an observable outcome or stable postcondition—not the implementation path used to reach it. Assert returned values, public errors, persisted state, emitted contracts, or later behavior a caller can observe. Do not assert a query executed, a private helper was called, an internal call sequence occurred, or a framework/supervisor policy was selected unless that detail is itself the stated external contract.
+Derive tests only from desired outcomes. For each outcome, write the smallest
+test that proves the returned value, public error, user-visible behavior,
+persisted state, or explicitly requested external effect. Do not add separate
+tests for the mechanisms used to produce it: telemetry/log emission, database or
+cache access, collaborator calls, locks/semaphores, retries, private helpers,
+call order, or framework/supervisor policy. An implementation detail becomes a
+test outcome only when the requirement explicitly makes that externally
+observable effect the product behavior—not merely an architecture,
+observability, performance, or implementation constraint.
 
-For failure recovery, exercise the public behavior before and after the failure and assert the known-good recovered result. Do not treat a supervisor callback or restart-policy assertion as proof that the system recovered correctly. At integration boundaries, assert the externally observable result and stable postcondition; use doubles only to control an external or nondeterministic boundary, not to mock away the behavior under test.
+One outcome should normally have one test at the lowest level that proves it.
+Do not duplicate the same outcome across unit, integration, and interaction
+tests. Verify non-behavioral constraints with review, static analysis,
+benchmarks, or another mechanical check outside the behavioral test suite.
+
+For failure recovery, exercise the public behavior before and after the failure
+and assert only the known-good recovered result. At integration boundaries,
+assert the externally observable result or stable postcondition; doubles may
+control an external or nondeterministic boundary, but tests must not assert the
+double interaction as an additional outcome.
 
 Required phase inputs: phase overview, RED tests, behavioral test contracts, GREEN changes, allowed paths, success criteria, verification commands, and architectural constraints.
 

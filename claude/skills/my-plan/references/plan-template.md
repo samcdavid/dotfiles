@@ -36,7 +36,8 @@ status: approved
 
 ### Tests First (RED)
 Define the tests that will be written BEFORE any production code in this phase.
-Each test encodes one observable behavioral expectation from the spec and test strategy—not an implementation step.
+Each test proves one desired outcome from the spec and test strategy—not an
+implementation step—and does not duplicate an outcome proved elsewhere.
 - [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 - [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 

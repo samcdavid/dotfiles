@@ -16,8 +16,12 @@ an analysis report, update the ledger, or ask the user. Verify:
 
 - no unresolved or contradictory decisions, requirements, exclusions, or
   assumptions;
-- every `R-*` maps to a behavior-first `TS-*` contract and implementation phase,
-  or to an explicit non-behavioral mechanical check;
+- every desired-outcome `R-*` maps to one smallest `TS-*` contract and
+  implementation phase, while non-behavioral constraints map to mechanical
+  checks without generating tests;
+- no test asserts telemetry, database/cache access, locks/semaphores,
+  collaborators, call order, retries, or another mechanism in addition to the
+  requested result, and no outcome is redundantly tested at multiple layers;
 - tests assert observable outcomes and phases contain RED, GREEN, allowed-path,
   architecture, and mechanical success-criteria data;
 - architecture and interface commitments agree with phase changes;

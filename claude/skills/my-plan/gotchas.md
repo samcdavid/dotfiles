@@ -70,7 +70,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Category:** failure-mode
 - **Context:** Planning tests for boundary logic, command entrypoints, configuration splits, or failure paths
 - **Wrong:** Adding an assertion that can pass before the relevant code runs, using fixtures that still expose the tool/path being excluded, or using identical values on both sides of a separation.
-- **Right:** Specify a RED case with controlled preconditions that reaches the target branch, exercises the public entrypoint, and uses distinguishable values/resources. Assert the prevented side effect did not occur as well as the expected result.
+- **Right:** Specify a RED case with controlled preconditions that reaches the target branch, exercises the public entrypoint, and asserts only the expected result or stable postcondition. Do not add an assertion about which internal side effect was prevented.
 - **Why:** Superficially passing tests routinely miss shebang/entrypoint regressions, prerequisite short-circuits, and accidental fallback to the wrong configuration source.
 - **Source:** ENA-590 PR review — restricted-PATH, fixture ordering, and storage-vs-presign regressions.
 
@@ -78,7 +78,7 @@ Known failure patterns and lessons learned. Read before starting work with this 
 - **Category:** failure-mode
 - **Context:** Planning a shared registration, rollout, authorization, or injected-resolver helper
 - **Wrong:** Plan denial/cloaking coverage only, or treat a feature/account gate as the complete authorization boundary.
-- **Right:** Plan a test matrix that proves the allowed handler path (identity, arguments, order, exactly-once invocation, result) as well as denial; state that the resolver establishes caller membership/ownership; trace required telemetry, session, and context-wrapper composition.
+- **Right:** Plan tests for the externally visible allowed and denied outcomes. Treat identity propagation, invocation order/count, telemetry, session, and wrapper composition as implementation or review constraints unless the acceptance criteria explicitly expose one as the desired result.
 - **Why:** A gate can reject correctly while silently dropping permitted work, trusting a client-supplied resource ID, or bypassing a platform wrapper before the first real consumer exposes it.
 - **Source:** MCP-727 human review
 

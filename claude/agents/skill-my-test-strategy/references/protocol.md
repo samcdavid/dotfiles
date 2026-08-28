@@ -18,7 +18,7 @@ advisory mode.
 
 ## Outcome
 
-Produce a durable local artifact at `~/.claude/thoughts/shared/test-strategies/NNN_<topic>.md` that maps each meaningful requirement and regression risk to the smallest test that can prove the observable outcome. The strategy must make implementation tests resistant to harmless refactors and able to catch a realistic behavior regression.
+Produce a durable local artifact at `~/.claude/thoughts/shared/test-strategies/NNN_<topic>.md` that maps each desired outcome to the smallest single test that proves it. Requirements about telemetry, storage choice, caching, calls, locking, ordering, or other implementation mechanisms receive no behavioral test unless the requirement explicitly names their externally observable effect as the desired product outcome. Verify those constraints outside the behavioral test suite.
 
 Read the workflow ledger first when one exists. Use its research, clarified spec, and architecture-plan artifacts as the source of truth. Do not re-ask factual questions those artifacts answer. In embedded mode, return only the compact envelope; `my-workflow` owns ledger updates.
 
@@ -26,33 +26,50 @@ Read the workflow ledger first when one exists. Use its research, clarified spec
 
 Read the supplied research, clarified spec, architecture plan, related tests, and relevant production code. Research the testing stack and local conventions before proposing tests. Build a list of:
 
-- Observable user, caller, or operator outcomes from each acceptance criterion.
+- Observable user or caller outcomes from each acceptance criterion.
 - Existing behavior that must remain compatible.
 - Failure and recovery behavior that a real caller can observe.
-- Boundaries that introduce nondeterminism: persistence, time, processes, queues, network calls, randomness, and concurrency.
+- Boundaries that need deterministic setup to reach an outcome: persistence,
+  time, processes, queues, network calls, randomness, and concurrency.
 - Existing tests that already cover a behavior, including whether they are at the right level and have a realistic escape path.
 
-Do not turn private functions, query selection, mock call counts, implementation order, or a framework policy into requirements unless that detail is itself a documented external contract.
+Classify architecture, observability, performance, and implementation
+requirements separately from desired outcomes. They may shape setup or
+mechanical validation, but they do not create tests. Do not turn telemetry,
+private functions, query/cache selection, mock call counts, locks/semaphores,
+implementation order, retry mechanics, or framework policy into test outcomes.
 
 ## Step 2 — Choose test level and assertion
 
 For each behavior, choose the lowest-level test that can prove the outcome without mocking away the behavior under test:
 
-- **Unit:** pure/domain behavior, validation, branching, and state transitions through a public module/function interface. Assert concrete returned values, emitted domain events, or externally visible state—not collaborators called or queries issued.
-- **Integration:** wiring across meaningful boundaries such as HTTP/API → domain → persistence, a worker with its real queue adapter, or a GenServer under its supervisor. Assert the response, persisted state, event, or later public operation that a caller can observe.
+- **Unit:** pure/domain behavior, validation, branching, and state transitions through a public module/function interface. Assert the concrete returned value, public error, or visible state.
+- **Integration:** use only when the desired outcome crosses a meaningful boundary. Assert the response, persisted state, or later public operation—not the internal wiring.
 - **E2E/manual:** reserve for critical cross-system user journeys; point to `my-test-plan` when a manual execution plan is needed.
 
-Use a test double only at an external or nondeterministic boundary. A double may control time, network response, randomness, or a third-party service; the assertion still proves the system's observable output, persisted postcondition, or published contract. Interaction assertions are allowed only when making that external call with a specific payload is itself the behavior contract; never use them as a substitute for validating the resulting outcome.
+Use a test double only to control an external or nondeterministic boundary. Do
+not assert that the double was called as an additional expectation. If the
+desired outcome is an external delivery, assert the delivered artifact or
+published contract at that boundary rather than an internal collaborator call.
 
 Apply these non-negotiable examples:
 
 - A list-producing function or endpoint asserts the returned list's values, filtering, order when specified, and relevant empty/error result. It does not assert that a query ran or that a repository method was called.
+- A function that adds two numbers asserts only the returned sum. It does not
+  also assert telemetry, locking, or collaborator calls.
+- A database update asserts that the record has the expected persisted values.
+  It does not assert that Redis was read, a query function ran, or a lock was
+  acquired before the update.
 - A supervised GenServer failure test drives state through its public API, induces the relevant failure deterministically, then proves the restarted process serves a known-good state through the same public API. It does not assert the supervisor's restart policy, child-start call sequence, or private state mutation unless that policy is the product contract.
 - An integration test asserts the user/system result and stable postconditions across the boundary. It does not duplicate unit branching tests or bind itself to controller/service/query call order.
 
 ## Step 3 — Design for TDD and stability
 
-For every proposed test, specify the RED behavior it will disprove before production code changes and the observable assertion that will turn GREEN. A test is admissible only if a plausible broken implementation would fail it while a refactor preserving the contract would pass it unchanged.
+For every proposed test, specify the RED outcome it will disprove before
+production code changes and the single observable assertion surface that will
+turn GREEN. A test is admissible only if a plausible broken outcome would fail
+it while any refactor preserving that outcome would pass unchanged. Drop a
+candidate when another test already proves the same outcome.
 
 Specify deterministic controls where relevant: explicit/frozen time, seed data owned by the test, sandboxed persistence, unique process names, controlled message delivery, test servers/fakes at external boundaries, and bounded synchronization rather than sleeps or retry loops. Avoid global mocks, shared mutable fixtures, unbounded polling, random values without a fixed seed, and implicit ordering.
 
@@ -63,6 +80,9 @@ Do not recommend tests for trivial delegation, generated code, or implementation
 Send the behavior matrix and proposed assertion/fixture choices to `adversarial-debate`. Ask it to challenge:
 
 - Whether each assertion would fail for the intended broken behavior.
+- Whether any test exists only to prove telemetry, persistence/cache access,
+  locking, call order, or another implementation mechanism.
+- Whether the same desired outcome is redundantly asserted at multiple layers.
 - Whether a harmless implementation refactor would force a test rewrite.
 - Whether unit/integration placement is appropriate and mocks hide the behavior.
 - Whether setup has timing, shared-state, ordering, network, or process-lifecycle flakiness.
@@ -86,8 +106,8 @@ status: proposed
 ## Test Design Principles
 [Behavior-first, implementation-detail exclusions, and local conventions]
 
-## Behavior-to-Test Matrix
-| ID | Requirement / risk | Level | Setup/control | Observable assertion | Do not assert | TDD phase |
+## Outcome-to-Test Matrix
+| ID | Desired outcome | Level | Setup/control | Outcome assertion | Do not assert | TDD phase |
 |---|---|---|---|---|---|---|
 | TS-1 | ... | Unit | ... | ... | ... | ... |
 
@@ -106,8 +126,9 @@ status: proposed
 ## TDD Handoff to `my-plan`
 [One narrow RED behavior per implementation phase, its test ID, expected failing reason, and GREEN outcome]
 
-## Intentional Test Omissions
-[Trivial/delegating/generated detail deliberately not tested, with rationale]
+## Non-Tested Constraints
+[Architecture, telemetry, storage/cache, concurrency, performance, and other
+mechanism constraints assigned to review or mechanical validation instead]
 
 ## Open Questions / Provisional Decisions
 [Only genuine testing trade-offs]

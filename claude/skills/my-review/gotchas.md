@@ -61,8 +61,9 @@ different runtime contract in CI or another worktree.
 ### Test the causal path, not only the final assertion
 
 For cancellation, retries, authorization, or error handling, check that tests
-exercise the changed branch and failure mode. A final state assertion alone can
-pass while the intended transition never occurs.
+use setup that reaches the changed behavior. The assertion must still target
+only the requested result or stable postcondition; do not add retry counts,
+collaborator calls, lock state, or transition-order assertions to prove the path.
 
 ### CI wiring and developer instructions are behavioral surfaces
 

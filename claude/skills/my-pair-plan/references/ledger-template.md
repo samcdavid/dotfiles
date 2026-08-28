@@ -47,8 +47,8 @@ updated: <timestamp>
 
 ## Requirements
 
-| ID | Requirement | Source | Status |
-| --- | --- | --- | --- |
+| ID | Requirement | Type (`outcome` or `constraint`) | Source | Status |
+| --- | --- | --- | --- | --- |
 
 ## Decisions
 
@@ -65,7 +65,7 @@ updated: <timestamp>
 
 ## Test Strategy
 
-| ID | Requirement/risk | Level | Setup/control | Observable assertion | Do not assert |
+| ID | Desired outcome | Level | Setup/control | Outcome assertion | Do not assert |
 | --- | --- | --- | --- | --- | --- |
 
 ## Observability

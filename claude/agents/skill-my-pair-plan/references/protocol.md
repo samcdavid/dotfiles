@@ -140,16 +140,17 @@ Continuously converge the ledger on:
 - numbered requirements and explicit non-goals;
 - confirmed decisions and rejected alternatives;
 - architecture boundaries, interfaces, dependencies, and migration path;
-- behavior-first test contracts with stable `TS-*` IDs, observable assertions,
-  test level, isolation, and prohibited implementation-detail assertions;
+- outcome-only test contracts with stable `TS-*` IDs, one smallest proving test
+  per desired outcome, deterministic setup, and prohibited mechanism assertions;
 - observability/evaluation applicability and design;
 - migration and operational-readiness requirements;
 - ordered implementation phases with `Tests First (RED)`, `Changes Required
   (GREEN)`, allowed paths, architectural constraints, and mechanical success
   criteria.
 
-Trace every requirement `R-*` to at least one `TS-*` contract and implementation
-phase, or explicitly mark it non-behavioral with its mechanical check. Every
+Trace every desired-outcome requirement `R-*` to one smallest `TS-*` contract
+and implementation phase. Trace architecture, observability, performance, and
+implementation constraints to a mechanical check without creating a test. Every
 phase must be small enough for one implementation executor. Preserve the
 existing RED → GREEN → VALIDATE contract.
 

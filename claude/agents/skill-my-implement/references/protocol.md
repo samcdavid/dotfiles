@@ -31,7 +31,11 @@ the plan's traceability table, stop as a planning failure rather than inventing
 test design. The strategy's behavior IDs, observable assertions, test levels,
 recovery expectations, and isolation controls are binding inputs to every phase.
 
-If a plan's `Tests First (RED)` entry conflicts with the strategy—for example, it asserts a query/call count/private helper/framework policy instead of the required outcome—stop and request a plan/test-strategy revision. Do not let a green implementation validate a brittle test.
+If a plan's `Tests First (RED)` entry asserts telemetry, a query/cache access,
+call count, lock/semaphore, private helper, retry/call order, or framework policy
+instead of—or in addition to—the desired outcome, stop and request a
+plan/test-strategy revision. Also stop when multiple tests duplicate the same
+outcome without a distinct acceptance criterion.
 
 Create a todo list (TodoWrite) to track phases. Each plan phase is one todo.
 
@@ -68,7 +72,7 @@ Spawn the `implementation-executor` agent with the slice. **One at a time** — 
 When the executor returns its report, **do not take it on faith**. As the reviewer-not-implementer, confirm two things: that the mechanical checks pass, and — the real goal — that the implementation actually **matches the requirements this phase was given**.
 
 1. **Re-run the phase's mechanical `success_criteria`** yourself and read the diff the executor produced.
-2. **Check requirements and test-strategy conformance against the slice you handed it.** Read the executor's "Requirements Conformance" and "Test Fidelity" tables, then verify them against the diff: does the code satisfy `phase_overview` and every behavioral expectation, fully? Do the tests genuinely exercise the outcome, or are they vacuous or coupled to a query, call sequence, private helper, or framework policy? Was anything in the brief silently dropped or reinterpreted? Green tests that don't actually encode the requirement do **not** count as done.
+2. **Check requirements and test-strategy conformance against the slice you handed it.** Read the executor's "Requirements Conformance" and "Test Fidelity" tables, then verify them against the diff: does the code satisfy `phase_overview` and every desired outcome fully? Does each test prove only that outcome, or does it add assertions about telemetry, storage/cache calls, locks, call sequence, private helpers, or framework policy? Is the same outcome duplicated at another layer? Was anything in the brief silently dropped or reinterpreted? Green tests that do not encode the requested outcome—or that freeze its mechanism—do **not** count as done.
 
 - All criteria pass, the diff stays within `allowed_paths`, AND the implementation meets the phase's requirements and behavior-first test strategy → the phase is genuinely done.
 - A criterion fails, the diff touched files it shouldn't have, the executor returned `ESCALATE`, OR the work doesn't conform to the requirements (even with green tests) → go to Loop Detection (re-dispatch with a brief that names the specific gap).

@@ -62,7 +62,13 @@ For every test, read the test name/description and compare to what the test actu
 
 ### Behavior-First Assertions
 - Does each test assert an observable result, stable postcondition, public error, or externally visible contract that a caller depends on?
-- Is a test asserting that a query ran, a repository/mock method was called, a private helper was reached, or an internal call order occurred instead of validating the returned/persisted outcome? Flag it unless that interaction itself is the documented boundary contract.
+- Is any test asserting telemetry, a database/cache call, a mock interaction, a
+  lock/semaphore, retry/call order, a private helper, or framework policy instead
+  of—or in addition to—the desired outcome? Flag it and remove that assertion;
+  mechanism requirements belong in non-test validation.
+- Is the same desired outcome tested again at another layer without a distinct
+  acceptance criterion? Flag the redundant test and keep the smallest one that
+  proves the outcome.
 - For supervised-process recovery, does the test prove the restarted component serves its known-good state through its public interface, rather than merely asserting a supervisor callback or restart policy?
 - Would a refactor that preserves the behavior force the test to change? If so, recommend the smallest outcome-oriented assertion that would survive it.
 

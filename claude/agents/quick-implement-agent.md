@@ -39,7 +39,11 @@ Stay inside `allowed_paths`, read only needed files, and stop if the phase is to
 
 ## TDD Flow
 
-1. RED: write the requested failing tests and prove failure for the intended reason.
+1. RED: write the requested failing test for the desired outcome and prove
+   failure for that reason. Assert only the output or stable postcondition; do
+   not add telemetry, database/cache-call, lock/semaphore, collaborator,
+   retry/order, or private-helper expectations. Reject redundant tests of an
+   outcome already covered.
 2. GREEN: implement the minimum code needed to pass.
 3. VALIDATE: run every success criterion and verify requirements conformance.
 4. COMMIT: see below.

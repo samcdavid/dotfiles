@@ -42,7 +42,13 @@ Boundaries:
 
 ## Flow
 
-1. **RED:** write the specified failing test first. The assertion must prove the supplied public outcome or stable postcondition—not that a query ran, a private helper or call sequence was used, or a framework policy fired. Run the relevant command and confirm it fails for the intended behavioral reason, not syntax/import scaffolding.
+1. **RED:** write the specified failing test first. Assert only the supplied
+   desired outcome. Do not add expectations for telemetry, database/cache calls,
+   locks/semaphores, collaborators, retries, private helpers, call order, or
+   framework policy. If the requested test contains such an assertion or
+   duplicates an outcome already covered, return a planning error instead of
+   writing it. Run the relevant command and confirm it fails because the outcome
+   is missing, not because of syntax/import scaffolding.
 2. **GREEN:** implement the minimum production change that makes the RED test pass.
 3. **VALIDATE:** run every success criterion, read the diff, and verify the implementation actually satisfies the phase requirements and the test-design constraints. For recovery behavior, prove a caller can use the restarted component in its known-good state rather than asserting supervisor mechanics.
 4. **COMMIT:** only once VALIDATE passes, invoke the `commit` skill with this phase's `allowed_paths` so it commits exactly your files and nothing the user had in flight. One commit per phase — the message should describe the behavior change, not the phase number.

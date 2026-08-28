@@ -87,7 +87,13 @@ If a unit of work would require touching many files, holding lots of repo contex
 
 Every phase runs the same three subphases: **RED** (write the failing test), **GREEN** (minimum code to pass), **VALIDATE** (run the phase's mechanical success criteria). Plan all three for each phase.
 
-When a `my-test-strategy` artifact is available, it is binding for test design: every behavioral phase must cite its strategy ID, preserve its test level and isolation controls, and assert the observable outcome it names. Do not replace a strategy assertion with a query/call-count/private-helper/framework-policy assertion. If the plan needs to deviate from the strategy, record the reason and send the strategy back for revision before implementation.
+When a `my-test-strategy` artifact is available, it is binding for test design:
+every behavioral phase must cite its strategy ID and assert only the desired
+outcome it names. Do not add tests for telemetry, queries, cache access,
+call-counts, locks/semaphores, private helpers, retries, call order, or framework
+policy. Put such implementation constraints in GREEN work and mechanical
+validation. If the plan needs another test, first identify the distinct desired
+outcome it proves; otherwise do not add it.
 
 If the **requirements-tracer** ran in Step 1 and surfaced `At-risk` related issues, factor them in:
 - Related-issue regression risks shape the `What We're NOT Doing` boundary (e.g., "do NOT alter the return shape of `X` — issue ENG-1234 depends on the current shape").
@@ -139,7 +145,8 @@ status: approved
 
 ### Tests First (RED)
 Define the tests that will be written BEFORE any production code in this phase.
-Each test encodes one observable behavioral expectation from the spec and test strategy, not an implementation step.
+Each test proves one desired outcome from the spec and test strategy, not an
+implementation step. Do not duplicate an outcome already proved elsewhere.
 - [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 - [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 
@@ -234,7 +241,8 @@ Apply the agent's verdicts — adjust phases, add missing "What Could Go Wrong" 
 After applying verdicts, confirm:
 - [ ] Every success criterion is a RUNNABLE COMMAND (no prose-only criteria)
 - [ ] Every phase has a "Tests First (RED)" section with at least one test defined
-- [ ] Every behavioral RED test traces to a `my-test-strategy` ID or an explicit, reviewed deviation and asserts an observable outcome rather than an implementation detail
+- [ ] Every behavioral RED test traces to one distinct desired outcome, uses the
+      smallest proving level, and contains no additional mechanism assertions
 - [ ] Every phase has RED and GREEN success criteria in that order
 - [ ] Every phase is small enough for a single implementation subagent — one function / narrow behavior, a bounded file set, no whole-repo reading required. Split any oversized phase before presenting.
 - [ ] No open questions remain — all resolved or explicitly deferred with rationale

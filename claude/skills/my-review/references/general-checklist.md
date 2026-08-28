@@ -73,9 +73,11 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Coverage for the critical path — not necessarily 100%, but the important paths
 
 ### Test Placement
-- Are detailed branching/logic tests at the unit level, close to the function they exercise?
-- Integration tests should verify wiring only — one happy-path test to confirm the pieces connect. Branching and edge cases belong in unit tests.
-- If a new module or function is added but only tested through a high-level integration test, flag it: the function needs its own unit tests.
+- Is each desired outcome tested once at the lowest level that proves it?
+- Do not require a unit test for every new function or an integration test for
+  wiring when an existing outcome test already proves the acceptance criterion.
+- Flag tests that duplicate an outcome across layers or assert internal wiring,
+  telemetry, database/cache calls, locks, call order, or collaborators.
 
 ### Lint and Tooling Discipline
 - Are any lint checks, formatter rules, or static analysis warnings being disabled or suppressed (e.g. `# credo:disable-for-this-file`, `# noqa`, `# eslint-disable`, `# rubocop:disable`, `@dialyzer`, `mix format` skip comments)?
