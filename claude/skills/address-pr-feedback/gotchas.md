@@ -41,3 +41,15 @@ where(...) |> select(...) |> repo.all()` over `from(...)`. Treat a requested
 conversion as an accepted code-style correction, not optional churn; retain
 `from` only for a documented construct-specific exception. Keep tests focused
 on query behavior rather than source-token counts.
+
+## Never reset a database without verified, target-specific permission
+
+Before any database reset, drop, recreate, truncate, or equivalent destructive
+test-state command, independently resolve the effective host, port, and database
+name from the command's actual environment and show that exact target to the
+user. Obtain explicit permission for that verified target immediately before
+running the command; permission based on an assumed or described-as-isolated
+target is invalid. Do not delegate or execute the operation until both checks
+are complete. A worktree label or intended Compose stack does not prove database
+isolation, and targeting a shared test database can destroy other worktrees'
+state and interrupt their tests.
