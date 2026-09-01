@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Evidence-scoped workflow routing
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `97a40cf` | Added reusable evidence bundles, a shared verification ladder, and conditional specialist/audit escalation. | Workflows reuse current source, manifest, requirement, and feedback evidence; review lenses receive scoped excerpts but can request named omitted sources. Dedicated audits retain Sol verification for material or uncertain findings, while documented no-trigger/no-finding assessments avoid empty specialist and adversarial calls. |
+
 ## 2026-09-01 — Bounded edit delegation across workflows
 
 | Commit | Change | Regression boundary / known-good meaning |
