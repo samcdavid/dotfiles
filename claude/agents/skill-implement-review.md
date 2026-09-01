@@ -28,9 +28,9 @@ manufacturing a plan.
 
 ## Authority
 
-Dispatch `skill-my-validate`, `skill-my-review`, and the existing implementation
-executors; retain all review/repair iteration counting and terminal status here.
-Never dispatch `skill-my-implement` or perform initial plan execution. Do not
+Dispatch `skill-my-validate`, `skill-my-review`, and `my-implement` for bounded
+repairs; retain all review/repair iteration counting and terminal status here.
+Never use `my-implement` for initial plan execution from this runner. Do not
 write production code directly. Never push, publish, reply,
 resolve a thread, create or update a PR, deploy, or make another outward action.
 Every validated repair commits locally through `Skill(commit)`. In embedded mode

@@ -8,11 +8,11 @@ Systematically work through all pending review feedback on a PR. This skill is a
 
 - **Act I — Research** (condensed `my-research`): gather every comment and turn it into a **verified, classified finding** — substantiated by code you actually read, challenged adversarially, importance-filtered.
 - **Act II — Plan** (condensed `my-plan`): split confirmed fixes into **test-drivable behavioral phases** (sized one fix per phase, with RED tests and mechanical success criteria) versus **non-behavioral direct edits**.
-- **Act III — Implement** (condensed `my-implement`): dispatch each behavioral phase to a fresh **`implementation-executor`** subagent (the same agent `my-implement` uses), dispatch each non-behavioral edit to `quick-implement-agent`, re-verify each independently, and own loop detection.
+- **Act III — Implement** (condensed `my-implement`): invoke `my-implement` for every bounded behavioral or direct-edit phase. It delegates the edit to Claude Haiku; re-verify each result independently and own loop detection.
 
 Then commit locally through `Skill(commit)`, draft responses, validate and review the combined work, repair substantive findings within a three-pass cap, and return any outward work to the wrapper as an envelope.
 
-**You orchestrate; the executor implements the behavioral fixes.** You do not write production code or tests for a behavioral fix in the main context — you slice the work, dispatch it, and re-verify what comes back as a skeptical reviewer. The exception is non-behavioral trivia, which you apply directly because it has no honest failing test.
+**You orchestrate; `my-implement` delegates the fixes.** You do not write production code or tests for a fix in the main context — you slice the work, invoke `my-implement`, and re-verify what comes back as a skeptical reviewer. Non-behavioral trivia is a direct-edit phase, not an exception to delegation.
 
 ## Getting Started
 
@@ -220,16 +220,16 @@ Before planning slices, build the context the fixes need:
 
 For each **Confirmed Fix** and **Partially Correct** item that survived Act I, decide its track:
 
-- **Behavioral fix (→ executor phase).** The fix changes runtime behavior, and a test could fail before the fix and pass after it: bug fixes, logic changes, new edge-case handling, corrected return shapes, validation. These get a TDD phase dispatched to `implementation-executor`.
-- **Non-behavioral direct edit (→ quick-implement-agent).** The fix has no honest failing test: renames, comment/docstring wording, log-level changes, formatting, dead-code removal, doc files, pure config. You dispatch these as `direct_edit` phases to `quick-implement-agent` in Act III — they clear the same format/lint/test gate as behavioral fixes, since each phase commits and the pre-commit hook gates every commit.
+- **Behavioral fix (→ `my-implement` TDD phase).** The fix changes runtime behavior, and a test could fail before the fix and pass after it: bug fixes, logic changes, new edge-case handling, corrected return shapes, validation.
+- **Non-behavioral direct edit (→ `my-implement` direct-edit phase).** The fix has no honest failing test: renames, comment/docstring wording, log-level changes, formatting, dead-code removal, doc files, pure config. It still uses `my-implement`, which delegates it to Claude Haiku and applies the same validation and commit gate.
 
-When in doubt, prefer the executor track — but never invent a vacuous test just to route a fix through it. The executor **rejects a phase with no `red_tests`**; a fix that can't produce a genuine RED test belongs in the direct-edit track.
+When in doubt, prefer the TDD track — but never invent a vacuous test. A fix that cannot produce a genuine RED test belongs in the direct-edit track.
 
 ## Step 5 — Write the Phase Slices (behavioral track)
 
-Plan each behavioral fix as **one phase = one fix**, following `my-plan`'s sizing discipline: a single bounded behavior, the smallest set of files (ideally one production file + its test), completable by a subagent that sees only this slice. PR fixes are already granular; if one "fix" bundles several behaviors, split it into ordered phases.
+Plan each behavioral fix as **one phase = one fix**, following `my-plan`'s sizing discipline: a single bounded behavior, the smallest set of files (ideally one production file + its test), completable by one small delegated task. PR fixes are already granular; if one "fix" bundles several behaviors, split it into ordered phases.
 
-For each phase, define the slice the `implementation-executor` consumes (see the agent's `## Inputs`):
+For each phase, define the slice that `my-implement` will turn into a bounded Claude Haiku task:
 
 - `phase_name` / `phase_overview` — the reviewer's concern and what correct behavior looks like
 - `red_tests` — the failing test(s) that encode the corrected behavior (paths + what each asserts)
@@ -238,13 +238,13 @@ For each phase, define the slice the `implementation-executor` consumes (see the
 - `allowed_paths` — the file(s) this fix may touch + their tests
 - `verification_commands` — how to run tests/checks in this stack (derive from the project's Makefile/justfile/CI or Step 9's command list; see `my-implement/references/verification-commands.md`)
 - `architectural_constraints` — boundaries the fix must not violate (layer boundaries, dependency direction, naming) — draw from the Fix Quality Bar below
-- `working_context` — cwd, stack, and **any relevant gotcha** (e.g. Elixir multi-clause grouping, concurrent-index DSL) so the executor doesn't rediscover it the hard way
+- `working_context` — cwd, stack, and **any relevant gotcha** (e.g. Elixir multi-clause grouping, concurrent-index DSL) so the delegate does not rediscover it the hard way
 
 Create a TodoWrite list: one todo per behavioral phase, one todo per direct-edit phase.
 
 ### Fix Quality Bar (from `my-review`)
 
-These are the standards every fix — executor phase or direct edit — must meet. Encode the relevant ones as `architectural_constraints` in each slice, and apply them yourself when re-verifying (Step 6) and on direct edits.
+These are the standards every fix must meet. Encode the relevant ones as `architectural_constraints` in each slice, and apply them yourself when re-verifying (Step 6).
 
 **Correctness** — fix addresses the reviewer's *actual* concern; edge cases covered (for every conditional/pattern match touched, what else could the value be?); appropriate bang vs. non-bang; no lazy imports; Oban uniqueness/transaction config still correct; when adding a clause to a multi-clause Elixir function, all clauses of that name/arity stay grouped (`--warnings-as-errors` fails otherwise).
 **Layer boundaries** — no API/resolver concerns leaked into contexts (or vice versa); extracted helpers live at the right layer.
@@ -267,28 +267,28 @@ Execute the plan **one phase at a time, sequentially**. You are the orchestrator
 
 For each behavioral phase, in priority order (blocking before non-blocking):
 
-1. **Assemble the slice** — pass only what this phase needs (the fields from Step 5), not the whole triage or repo. Keep the executor's context small.
-2. **Dispatch ONE `implementation-executor`.** One at a time — never two in parallel; they share the working tree and fixes may touch overlapping files. Let it finish before doing anything else. (The executor commits its own validated phase, and the pre-commit hook runs format + lint + the changed tests before that commit lands — so a phase reporting a commit SHA has already cleared that gate.)
-3. **Re-verify independently — you are not the implementer.** Do not take the executor's report on faith:
+1. **Assemble the slice** — pass only what this phase needs (the fields from Step 5), not the whole triage or repo. Keep the Claude Haiku task small.
+2. **Invoke `my-implement` once.** It delegates exactly one bounded edit task to Claude Haiku. Never run phases in parallel; they share the working tree and fixes may touch overlapping files. A phase reporting a commit SHA has already cleared the pre-commit gate.
+3. **Re-verify independently — you are not the implementer.** Do not take the delegated report on faith:
    - Re-run the phase's mechanical `success_criteria` yourself and read the diff.
    - Check requirements conformance against the slice: does the code satisfy `phase_overview` and the reviewer's actual concern, fully? Do the tests genuinely exercise the corrected behavior, or are they vacuous? Was anything dropped or reinterpreted? Apply the **Fix Quality Bar** above.
    - Confirm the diff stayed within `allowed_paths`.
    - All criteria pass, diff in-bounds, requirements met → phase is genuinely done. Otherwise → Loop Detection.
-4. **Record and advance** — mark the phase's todo completed and move to the next. Maintain forward momentum: don't re-open finished phases, don't gold-plate, don't let an executor wander beyond its slice.
+4. **Record and advance** — mark the phase's todo completed and move to the next. Maintain forward momentum: don't re-open finished phases, don't gold-plate, and do not expand a delegated task beyond its slice.
 
 #### Loop Detection (orchestrator-owned)
 
-The executor stops itself after one repeated failure; **you** track failures across attempts:
+`my-implement` stops after a repeated failure; **you** track failures across attempts:
 
-- **First failure** (criterion fails / executor returns `ESCALATE`): diagnose from the report + diff. If the cause is a thin brief (missing path, ambiguous criterion), tighten the slice and re-dispatch **once**.
+- **First failure** (a criterion fails or `my-implement` escalates): diagnose from the report + diff. If the cause is a thin brief (missing path, ambiguous criterion), tighten the slice and re-dispatch **once**.
 - **Same check fails a second time** (3rd total): **STOP.** Do not re-dispatch. Surface to the user: what the fix is trying to do, what keeps failing (+ error output), what's been tried, your root-cause theory, and a suggested path forward.
 - **`escalation: phase-too-big`**: split the fix into smaller ordered phases and dispatch those, or ask the user.
 
 Escalation is efficiency, not failure. Never power through a 3-strike failure.
 
-### Direct edits — quick-implement-agent
+### Direct edits — `my-implement`
 
-For each non-behavioral direct edit, dispatch it as a `direct_edit` phase to `quick-implement-agent`. Direct edits clear the same gate as behavioral phases: the agent commits, and the pre-commit hook runs format + lint + changed tests first.
+For each non-behavioral direct edit, invoke `my-implement` in `direct_edit` mode. It delegates the edit to Claude Haiku and applies the same validation and commit gate as behavioral phases.
 
 Assemble the slice:
 - `phase_name` / `phase_overview` — the reviewer's concern and what the fix does
@@ -299,17 +299,17 @@ Assemble the slice:
 - `allowed_paths` — the file(s) for this fix
 - `verification_commands` — lint + relevant test command
 
-Dispatch ONE `quick-implement-agent` per direct-edit phase. Sequential — never parallel.
+Invoke `my-implement` once per direct-edit phase. Sequential — never parallel.
 
 Re-verify independently: read the diff, confirm the edit addressed the reviewer's underlying concern (not just the surface suggestion), confirm no ripple effects on callers or other files in the diff. Apply the **Fix Quality Bar** in your re-verify pass.
 
 ### Plan deviations
 
-If reality differs from the plan (reported by an executor or found on re-verify): **minor** — accept the adaptation, note it, continue; **major** (a file the plan assumed doesn't exist, an API changed, the fix needs files outside every `allowed_paths`) — STOP and discuss.
+If reality differs from the plan (reported by `my-implement` or found on re-verify): **minor** — accept the adaptation, note it, continue; **major** (a file the plan assumed doesn't exist, an API changed, the fix needs files outside every `allowed_paths`) — STOP and discuss.
 
 ## Step 7 — Local commits
 
-Each validated phase must be committed through `Skill(commit)`, scoped to that phase's files. The executor/direct-edit agent normally invokes it itself; if a valid phase remains uncommitted, invoke `Skill(commit)` rather than `git commit`. Keep one concern per commit where practical because drafted responses reference its SHA:
+Each validated phase must be committed through `Skill(commit)`, scoped to that phase's files. `my-implement` normally invokes it; if a valid phase remains uncommitted, invoke `Skill(commit)` rather than `git commit`. Keep one concern per commit where practical because drafted responses reference its SHA:
 
 ```
 Address review: [brief description of what changed]
@@ -408,8 +408,8 @@ Present all drafted responses to the user for review before posting, showing the
 ## Step 9 — Verify
 
 Read `~/.claude/skills/address-pr-feedback/references/execution-contract.md` (or
-the `~/.agents` equivalent) now. Per-phase work was already verified by the
-executor, by the pre-commit gate on its commit, and by your independent
+the `~/.agents` equivalent) now. Per-phase work was already verified by
+`my-implement`, by the pre-commit gate on its commit, and by your independent
 re-verify. During iteration, run the narrowest affected check first. This step
 is the **holistic gate** — run build/compile, lint/format, and the test suite
 once over the combined result, capturing every final exit status.
@@ -426,7 +426,7 @@ If any check fails, fix the issue before proceeding. Do not leave the branch in 
 
 ## Step 10 — Review and bounded repair loop
 
-After Step 9 passes, run `my-review` in local mode against the same base branch. If it reports Critical or substantive non-blocking findings, feed only those findings into the next repair iteration: dispatch the appropriate `implementation-executor` or `quick-implement-agent` phase, validate again, then review again. Count every `my-review` pass, including the first; cap the sequence at **3 review passes**.
+After Step 9 passes, run `my-review` in local mode against the same base branch. If it reports Critical or substantive non-blocking findings, feed only those findings into the next `my-implement` repair phase, validate again, then review again. Count every `my-review` pass, including the first; cap the sequence at **3 review passes**.
 
 Nits and clearly optional suggestions do not trigger a repair. If substantive findings remain after pass 3, stop with the surviving findings, iteration deltas, and a root-cause theory. Do not start a fourth pass. This loop is local-only: no push, reply, thread resolution, or re-request action happens here.
 
@@ -446,7 +446,7 @@ Present the final result:
 
 | #   | Reviewer | File        | Change              | Track            | Commit |
 | --- | -------- | ----------- | ------------------- | ---------------- | ------ |
-| 1   | [name]   | `file:line` | [brief description] | executor /direct | [SHA]  |
+| 1   | [name]   | `file:line` | [brief description] | TDD / direct edit | [SHA]  |
 
 ### Responses Drafted ([N])
 
@@ -466,7 +466,7 @@ Present the final result:
 
 ### Execution Notes
 
-- Phases dispatched to executor: [N] | Re-dispatches needed: [N] (a signal for tuning future fix granularity)
+- Phases delegated through `my-implement`: [N] | Re-dispatches needed: [N] (a signal for tuning future fix granularity)
 - Direct edits applied: [N]
 
 ### Dropped Items
@@ -493,9 +493,9 @@ Skip if Getting Started found no ledger. Otherwise this runs last — after loca
 ## Guidelines
 
 - **Research, then plan, then implement.** Don't jump to editing code — investigate every comment into a verified finding (Act I), slice the confirmed fixes (Act II), then execute (Act III).
-- **You orchestrate; the executor implements behavioral fixes.** Don't write a behavioral fix's tests or production code in the main context — dispatch it to `implementation-executor` and re-verify. Dispatch non-behavioral work to `quick-implement-agent` as a direct-edit phase.
-- **One executor at a time.** Fixes are sequential; they share the working tree and may touch overlapping files.
-- **TDD for behavioral fixes is not optional.** A behavioral phase with no honest RED test either gets a real test or moves to the direct-edit track — never a vacuous test to satisfy the executor.
+- **You orchestrate; `my-implement` delegates every fix.** Don't write a fix's tests or production code in the main context — invoke `my-implement` and re-verify its result.
+- **One delegated task at a time.** Fixes are sequential; they share the working tree and may touch overlapping files.
+- **TDD for behavioral fixes is not optional.** A behavioral phase with no honest RED test either gets a real test or moves to the direct-edit track — never a vacuous test to satisfy the process.
 - **Investigate first, act second.** Every comment — agree or disagree — deserves investigation before you decide how to respond.
 - **Fix first, respond second.** Apply all code changes before drafting responses, so responses can reference specific commits.
 - **Show your work.** Responses should demonstrate investigation — what you checked, what you found, why. "Fixed in abc123" without context tells the reviewer nothing.
@@ -518,4 +518,4 @@ Skip if Getting Started found no ledger. Otherwise this runs last — after loca
 
 ## Gotchas
 
-If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them. Pass any fix-relevant gotcha into the executor's slice (`working_context`) so it doesn't rediscover it the hard way.
+If a `gotchas.md` file exists in this skill's directory, read it before starting work. These are known failure patterns — avoid them. Pass any fix-relevant gotcha into the `my-implement` slice (`working_context`) so the Claude Haiku delegate does not rediscover it the hard way.

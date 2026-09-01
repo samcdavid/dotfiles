@@ -10,7 +10,6 @@ Default boundary for personal workflows:
 
 A local commit mutates nothing remote and is cheap to undo, so it is not gated by this rule. Implementation and fix phases **should** commit as they go, so a session leaves a reviewable history instead of one undifferentiated working tree.
 
-Commit when a phase has passed its own validation, scoped to that phase's files, via the `commit` skill. Specifically: `implementation-executor` and `quick-implement-agent` commit their phase before returning; `my-implement`, `my-quick`, and `address-pr-feedback` ensure every completed phase is committed.
+Commit when a phase has passed its own validation, scoped to that phase's files, via the `commit` skill. `my-implement` commits each verified delegated phase; `my-quick` and `address-pr-feedback` ensure every completed phase or fix is committed.
 
 Do not commit a phase that failed validation or escalated — leave it in the working tree for inspection. Never `git push` as part of this; the branch stays local until the user asks.
-

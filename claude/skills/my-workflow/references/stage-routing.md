@@ -24,7 +24,7 @@ multi-module work, architecture changes, and uncertain scope use
 | --- | --- | --- |
 | Collaborative planning | `skill-my-pair-plan` | living ledger + user dialogue + focused deep dives |
 | Preflight consistency | `skill-my-analyze` with `mode: ledger_preflight` | one-document readiness audit |
-| Implementation | `skill-my-implement` | unchanged sequential execution |
+| Implementation | `my-implement` | sequential Claude Haiku task delegation |
 | Review/repair | `skill-implement-review` | unchanged bounded terminal loop |
 
 `my-pair-plan` may dispatch existing specialists in `focused_advisory` mode:

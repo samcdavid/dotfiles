@@ -39,11 +39,11 @@ it does not prevent review from starting.
 3. If validation blocks, or review returns a Critical finding, unresolved
    requirement, or substantive non-blocking finding, repair only those verified
    findings before another pass. For behavior changes, dispatch one
-   `implementation-executor` per bounded finding with an honest RED test,
-   explicit allowed paths, relevant plan constraints when available, and the
-   verifier evidence. For unplanned-work behavioral repairs, the verified finding
-   supplies the bounded requirement; do not create a retrospective broad plan.
-   For a genuinely non-behavioral edit, dispatch `quick-implement-agent` with
+   `my-implement` per bounded finding with an honest RED test, explicit allowed
+   paths, relevant plan constraints when available, and verifier evidence. For
+   unplanned-work behavioral repairs, the verified finding supplies the bounded
+   requirement; do not create a retrospective broad plan. For a genuinely
+   non-behavioral edit, invoke `my-implement` in direct-edit repair mode with
    the same evidence and bounded paths. Re-verify each repair and require its
    local commit before continuing.
 4. Do not invoke `address-pr-feedback` local mode: it owns its own review loop

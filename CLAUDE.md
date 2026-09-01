@@ -34,7 +34,7 @@ When changing skills or agents:
 
 Git boundary for skills and agents:
 
-- Local commits are **expected**, not gated: `implementation-executor` and `quick-implement-agent` commit their phase via the `commit` skill once their own validation passes, and `my-implement`, `my-quick`, and `address-pr-feedback` ensure every validated phase or fix is committed. Work that failed validation or escalated stays uncommitted.
+- Local commits are **expected**, not gated: `my-implement` commits each verified delegated phase via the `commit` skill; `my-quick` and `address-pr-feedback` ensure every validated phase or fix is committed. Work that failed validation or escalated stays uncommitted.
 - The gated boundary is remote: no push, no PR create/update, no published replies or thread resolution without an explicit request. `claude/rules/no-outward-actions.md` is the single source.
 - `my-workflow` completes every planned phase through `my-implement` before it
   enters `implement-review`. Only then does the unattended five-pass

@@ -173,7 +173,7 @@ Continuously converge the ledger on:
 Trace every desired-outcome requirement `R-*` to one smallest `TS-*` contract
 and implementation phase. Trace architecture, observability, performance, and
 implementation constraints to a mechanical check without creating a test. Every
-phase must be small enough for one implementation executor. Preserve the
+phase must be small enough for one delegated implementation task. Preserve the
 existing RED → GREEN → VALIDATE contract.
 
 ## Step 7 — Propose synchronization

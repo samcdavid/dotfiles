@@ -85,7 +85,7 @@ If the mini-plan grows beyond ~3 bullet points, that's a volume signal — escal
 
 ## Step 5 — TDD Implement
 
-Strict red/green/validate, mirrored from `/my-implement`. (As a single-pass fast path, you run the cycle inline here rather than dispatching to an executor subagent.)
+Strict red/green/validate, mirrored from `/my-implement`. (As a single-pass fast path, you run the cycle inline here rather than delegating it.)
 
 ### RED — failing test first
 

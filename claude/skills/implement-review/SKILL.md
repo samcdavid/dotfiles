@@ -27,7 +27,7 @@ stage, authority: local_only }` and dispatch it to `skill-implement-review`.
   whole-branch review, then repair only verified substantive findings within the
   five-pass budget. Do not reject review merely because no plan exists.
 - The runner may make only locally validated, committed changes through
-  `implementation-executor` or `quick-implement-agent`. It never pushes,
+  `my-implement`, which delegates bounded edits to Claude Haiku. It never pushes,
   publishes, opens or updates a PR, or makes another outward action.
 
 ## Present
