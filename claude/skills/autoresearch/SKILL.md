@@ -17,7 +17,7 @@ Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md
 
 1. Define measurable objective, metric direction, limits, and verification command.
 2. Establish baseline.
-3. Iterate: propose change, apply small modification, run verification, keep if better, rollback if worse.
+3. Iterate: propose one experiment, invoke `my-implement` with deferred commit, run verification, keep if better, discard if worse.
 4. Log each iteration.
 5. Stop on cap, repeated failure, no improvement, destructive risk, or user interruption.
 

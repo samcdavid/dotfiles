@@ -29,22 +29,15 @@ Pick the NEXT change. Priority order:
 - Don't make multiple unrelated changes at once (can't attribute improvement)
 - Don't chase marginal gains with ugly complexity
 
-## Phase 3: Modify
+## Phase 3: Delegate
 
-- Make ONE focused change to in-scope files
-- The change should be explainable in one sentence
-- Write the description BEFORE making the change (forces clarity)
+- Select ONE focused change to in-scope files and write its one-sentence
+  description before editing (forces clarity).
+- Invoke `my-implement` with the experiment, explicit allowed paths,
+  verification command, and `commit_policy: defer`. It delegates one bounded
+  edit to Claude Haiku. Do not edit inline.
 
-## Phase 4: Commit
-
-```bash
-git add <changed-files>
-git commit -m "experiment: <one-sentence description>"
-```
-
-Commit BEFORE running verification so rollback is clean: `git reset --hard HEAD~1`
-
-## Phase 5: Verify
+## Phase 4: Verify
 
 Run the agreed-upon verification command. Capture output.
 
@@ -52,27 +45,23 @@ Run the agreed-upon verification command. Capture output.
 
 **Extract metric:** Parse the verification output for the specific metric number.
 
-## Phase 6: Decide
+## Phase 5: Decide
 
 ```
 IF metric_improved:
     STATUS = "keep"
-    # Do nothing — commit stays
+    Skill(commit) scoped to the experiment's changed paths
 ELIF metric_same_or_worse:
     STATUS = "discard"
-    git reset --hard HEAD~1
+    restore only the explicit in-scope paths to their clean pre-iteration state
 ELIF crashed:
-    # Attempt fix (max 3 tries)
-    IF fixable:
-        Fix -> re-commit -> re-verify
-    ELSE:
-        STATUS = "crash"
-        git reset --hard HEAD~1
+    STATUS = "crash"
+    restore only the explicit in-scope paths to their clean pre-iteration state
 ```
 
 **Simplicity override:** If metric barely improved but change adds significant complexity, treat as "discard". If metric unchanged but code is simpler, treat as "keep".
 
-## Phase 7: Log Results
+## Phase 6: Log Results
 
 Append to results log (TSV format):
 
@@ -83,6 +72,6 @@ iteration  commit   metric   delta   status   description
 44         -        0.0000   0.00    crash    double batch size (OOM)
 ```
 
-## Phase 8: Repeat
+## Phase 7: Repeat
 
 Go to Phase 1. NEVER STOP. NEVER ASK IF YOU SHOULD CONTINUE.

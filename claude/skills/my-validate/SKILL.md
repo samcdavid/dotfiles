@@ -18,7 +18,7 @@ Normalize the request into `{ mode, plan_path, artifact_inputs, base_ref, ledger
 - For `/my-workflow`, preserve its plan/base/ledger context and stage number, and dispatch in embedded mode. The runner returns its outcome for `my-workflow` to record rather than marking the workflow ledger complete itself.
 - Ask only when neither plan nor current-session evidence makes a mode safe to infer.
 
-The runner may make only obvious, scoped local repairs and must validate each repair before committing it through `Skill(commit)`. It must return any request to push, publish, create or update a PR, send, or otherwise change a remote system to this wrapper for explicit authorization.
+The runner may delegate only obvious, scoped local repairs through `my-implement`, then must independently validate each result. It must return any request to push, publish, create or update a PR, send, or otherwise change a remote system to this wrapper for explicit authorization.
 
 ## Present
 

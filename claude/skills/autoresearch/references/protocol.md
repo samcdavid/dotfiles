@@ -4,7 +4,10 @@ Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the
 
 ## Autoresearch — Autonomous Goal-Directed Iteration
 
-Inspired by Karpathy's autoresearch. Constraint-driven autonomous iteration: modify, verify, keep/discard, repeat. The main loop owns control, the results log, and limit checking; each iteration's read-modify-verify work runs inside the `autoresearch-iteration` agent so the main window stays small even across long runs.
+Inspired by Karpathy's autoresearch. Constraint-driven autonomous iteration:
+propose, delegate, verify, keep/discard, repeat. The main loop owns control,
+the results log, metric decisions, and limit checking. Each edit is delegated
+through `my-implement` to Claude Haiku with a deferred commit.
 
 ## Step 1 — Parse arguments
 
@@ -37,6 +40,8 @@ Before any iteration runs:
 2. **Define the verify command** — the exact shell command that produces the metric. Write it down. The agent uses it verbatim.
 3. **Define the metric extractor** — regex or one-line instruction for pulling the numeric metric from the verify command's output.
 4. **Define scope constraints** — `in_scope_paths` (modifiable) and `read_only_paths` (off-limits).
+   Require a clean working tree for every `in_scope_paths` before starting, so a
+   discarded experiment can never remove pre-existing user work.
 5. **Define metric direction** — `higher_is_better` or `lower_is_better`.
 6. **Create the results log** — see `references/results-logging.md`.
 7. **Establish baseline** — run the verify command on the current state. Record as iteration 0.
@@ -56,16 +61,22 @@ LOOP (until iteration limit reached, or forever if no limit):
      - baseline_metric: iteration 0's value
      - current_metric: the latest kept iteration's value (or baseline if no keeps yet)
 
-  2. Spawn the `autoresearch-iteration` agent with the bundle.
+  2. Review the bundle, choose one novel, one-sentence experiment, and invoke
+     `my-implement` with its exact allowed paths, validation commands, and
+     `commit_policy: defer`. It delegates one bounded edit to Claude Haiku but
+     leaves the verified diff uncommitted for this loop's metric decision.
 
-  3. The agent returns one Iteration Result block (status: keep | discard | crash | blocked, plus metric, delta, commit, description, notes).
+  3. Independently run `verify_command` verbatim, extract the metric, inspect
+     the diff, and return one Iteration Result block (status: keep | discard |
+     crash | blocked, plus metric, delta, commit, description, notes).
 
   4. Append the result to the results log (in the format defined in references/results-logging.md).
 
   5. Handle the status:
-     - keep: do nothing (the agent's commit stays); update current_metric
-     - discard: do nothing (the agent already reverted)
-     - crash: do nothing (the agent already reverted)
+     - keep: commit the verified experiment through `Skill(commit)`, then update
+       `current_metric`
+     - discard or crash: restore only the explicitly clean `in_scope_paths` to
+       their pre-iteration state, including newly created in-scope files
      - blocked: STOP the loop. Surface the agent's notes to the user. Wait for direction.
 
   6. Print a one-line status every 5 iterations: "iter N — metric M — keeps:K discards:D crashes:C".
@@ -98,11 +109,11 @@ When the loop ends (limit reached or blocked or user-interrupted), produce:
 
 - **NEVER STOP** (unless iteration limit reached, agent returns `blocked`, or user interrupts) — the user may be away.
 - **NEVER ASK** the user mid-loop. If genuinely stuck, the agent returns `blocked` and the loop halts.
-- **Git is memory** — every kept change is committed. The agent reads `git log` to learn patterns.
+- **Git is memory** — every kept change is committed. The loop reads `git log` to learn patterns.
 - **Mechanical only** — the verify command is the only judge. Subjective "looks good" is not used.
-- **Read-only paths are absolute.** If the agent reports it touched one, the iteration was already auto-discarded.
+- **Read-only paths are absolute.** If `my-implement` reports it touched one, discard the iteration and stop for review.
 
 ## References
 
-- `references/autonomous-loop-protocol.md` — detailed per-phase protocol (the agent reads this when needed).
+- `references/autonomous-loop-protocol.md` — detailed per-iteration protocol.
 - `references/results-logging.md` — results log format and location.

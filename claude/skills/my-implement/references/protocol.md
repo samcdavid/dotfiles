@@ -18,6 +18,11 @@ is not required for that repair mode. A behavioral repair needs RED and GREEN
 requirements. A genuinely non-behavioral repair is `direct_edit` and must not
 invent a test.
 
+`my-quick`, `ci-babysit`, `update-deps`, and `my-validate` may likewise supply
+one approved bounded slice. `autoresearch` may use `commit_policy: defer` for a
+single reversible experiment; after this skill verifies the edit, autoresearch
+alone compares its metric and either commits the kept experiment or discards it.
+
 Read the project's instructions, `tdd-phase.md`, `loop-detection.md`,
 `no-outward-actions.md`, this skill's `gotchas.md`, and
 `references/verification-commands.md` when relevant.
@@ -45,7 +50,9 @@ For each phase, in order:
    result stays in bounds, delivers the requested outcome, and that behavioral
    tests assert outcomes rather than implementation details.
 4. If verification passes, invoke `Skill(commit)` scoped to the phase's paths,
-   mark the phase done, and advance. Never commit failed or escalated work.
+   mark the phase done, and advance. With `commit_policy: defer`, return the
+   verified bounded diff uncommitted to `autoresearch` for its metric decision.
+   Never commit failed or escalated work.
 
 ## Retries and deviations
 

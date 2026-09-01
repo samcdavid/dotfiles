@@ -19,11 +19,10 @@ Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md
 2. Poll CircleCI status until pass, fail, cancel, or timeout.
 3. For failures, fetch logs and structured test results.
 4. Classify as flaky, regression, environment, dependency, or unknown.
-5. Apply small local fixes when clearly in scope; otherwise report blocker.
+5. For a clearly diagnosed, small local fix, invoke `my-implement` with the failing evidence, allowed paths, and reproduction command; otherwise report blocker.
 6. Re-run relevant local checks.
 7. Push or trigger remote actions only when explicitly allowed.
 
 ## Output
 
 Return final CI status, jobs inspected, failures diagnosed, fixes made, checks run, and any unresolved blocker.
-

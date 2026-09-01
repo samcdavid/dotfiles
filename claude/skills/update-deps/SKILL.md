@@ -18,7 +18,7 @@ Read `~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/loop-detection.md
 1. Detect package manager(s) and lockfiles.
 2. Inspect outdated dependencies and constraints.
 3. Prefer safe/minor/patch updates before breaking changes.
-4. Apply updates with the native package manager.
+4. Delegate each approved, bounded update batch to `my-implement`, including manifest/lockfile paths and native package-manager commands.
 5. Read changelogs or release notes for major/security-sensitive updates.
 6. Run install, tests, lint/typecheck, and dependency audit checks.
 7. Stop for breaking migration decisions.
@@ -26,4 +26,3 @@ Read `~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/loop-detection.md
 ## Output
 
 Return packages changed, versions before/after, commands run, failures fixed, breaking changes deferred, and remaining risk.
-

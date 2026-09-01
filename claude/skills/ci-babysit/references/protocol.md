@@ -100,16 +100,14 @@ Before fixing a test failure, check if it's a known flaky test:
 ### For Code Fixes
 
 1. **Read the failing code and tests** — understand what's broken before changing anything
-2. **Make the minimal fix** — fix only what's failing, nothing else
-3. **Run the check locally first if possible** — try to reproduce and verify the fix before pushing:
+2. **Delegate the minimal fix through `my-implement`** — supply the failure evidence, allowed paths, reproduction command, and explicit success criteria. It delegates one bounded edit to Claude Haiku; fix only what's failing, nothing else.
+3. **Run the check locally again** — independently reproduce and verify the returned fix before pushing:
    - Tests: run the specific failing test locally
    - Lint: run the linter locally
    - Build: compile locally
-4. **Commit the fix** using a clear message:
-   ```
-   Fix CI: [brief description of what was fixed]
-   ```
-5. **Push the fix**:
+4. **Confirm the delegated phase commit** is present and describes the CI fix.
+   Do not create a second commit.
+5. **Push the fix** only when the user explicitly authorized it:
    ```bash
    git push
    ```

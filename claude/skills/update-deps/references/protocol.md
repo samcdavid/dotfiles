@@ -76,7 +76,10 @@ Present the list to the user. Ask if they want to proceed with all updates, or s
 
 ## Step 3: Apply Safe Updates
 
-Run the update command for safe (non-breaking) dependencies first.
+For each approved safe update batch, invoke `my-implement` with the native update
+command, manifest/lockfile `allowed_paths`, and install/build/lint/test success
+criteria. It delegates the mechanical update to Claude Haiku; independently
+review the manifest and lockfile diff before proceeding.
 
 | Manager | Safe update command |
 |---------|-------------------|
@@ -106,7 +109,10 @@ For each dependency with a breaking major version change:
    - **Go**: Module docs or GitHub releases
    - **Ruby**: `https://rubygems.org/gems/{gem}` -> changelog link
 3. **Read the breaking changes** between the current and target versions.
-4. **Apply necessary code modifications.**
+4. **Delegate necessary code modifications through `my-implement`.** Supply one
+   bounded behavioral slice with an honest RED test, the affected paths, and
+   upgrade-guide constraints; do not let a dependency update broaden into an
+   unsliced refactor.
 5. **Verify** (Step 5) before moving to the next breaking change.
 
 ## Step 5: Verify
@@ -122,7 +128,9 @@ Run these checks after updates. The exact commands depend on the ecosystem.
 
 Run whatever subset applies to the project. If the project has a `Makefile`, `justfile`, or scripts in `package.json`, prefer those (e.g. `make check`, `just test`, `npm run lint`).
 
-If any check fails: fix the issue before proceeding.
+If any check fails and the cause is obvious and bounded, invoke `my-implement`
+for one repair slice before proceeding; otherwise stop for a breaking-migration
+decision.
 
 ## Step 6: Summary
 

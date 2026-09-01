@@ -50,12 +50,12 @@ For each claim, record: VERIFIED, STALE, INCORRECT, or UNVERIFIABLE (and why).
 
 For anything INCORRECT or STALE:
 1. **Diagnose**: What's actually true vs. what was claimed?
-2. **Correct**: Update the finding, fix the code, or flag the discrepancy
+2. **Correct**: Update the finding, or invoke `my-implement` with one bounded
+   repair slice when code must change; otherwise flag the discrepancy
 3. **Re-verify**: Confirm the correction is accurate
 
-When a scoped code repair is verified, invoke `Skill(commit)` with only its
-changed paths. Do not use a raw git commit command. Leave any unverified or
-escalated repair uncommitted.
+`my-implement` commits a verified delegated repair with only its changed paths.
+Leave any unverified or escalated repair uncommitted.
 
 If a correction can't be made confidently, escalate to the user.
 
@@ -127,7 +127,8 @@ Check for unintended drift:
 For each FAILURE from Step 2:
 
 1. **Diagnose**: Identify the root cause (not just the symptom)
-2. **Attempt fix**: Make the correction
+2. **Attempt fix**: Invoke `my-implement` with the failing check, required
+   outcome, allowed paths, and relevant plan constraints
 3. **Re-verify**: Run the same check again
 4. **Escalate if stuck**: If the same check fails after 2 repair attempts, STOP and present the problem to the user with:
    - What was expected
@@ -135,7 +136,7 @@ For each FAILURE from Step 2:
    - What you tried
    - Why you think it's failing
 
-After a verified scoped code repair, invoke `Skill(commit)` with only the
+After a verified scoped code repair, confirm `my-implement` committed only the
 repair paths. Do not commit a failed or escalated repair.
 
 ### Step 4 — Generate Validation Report

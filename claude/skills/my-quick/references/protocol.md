@@ -21,7 +21,7 @@ is the primary gate.
 
 ## Trade-off (explicit)
 
-This skill violates the global **Separate Implementer from Reviewer** principle from `~/.claude/CLAUDE.md` — the same Claude implements AND self-reviews. The fast lane accepts this trade for speed on small work. The skill's hand-off step explicitly recommends a follow-up `/my-review` whenever self-review surfaces real findings.
+This skill preserves the global **Separate Implementer from Reviewer** principle: it uses `my-implement` to delegate the one bounded edit task, then independently validates and self-reviews the result. The hand-off step explicitly recommends a follow-up `/my-review` whenever self-review surfaces real findings.
 
 ## $ARGUMENTS
 
@@ -83,39 +83,17 @@ Wait for OK before writing any code.
 
 If the mini-plan grows beyond ~3 bullet points, that's a volume signal — escalate back to Step 3.
 
-## Step 5 — TDD Implement
+## Step 5 — Delegate One Bounded Implementation
 
-Strict red/green/validate, mirrored from `/my-implement`. (As a single-pass fast path, you run the cycle inline here rather than delegating it.)
+Create one `my-implement` slice from the approved mini-plan: desired outcome,
+RED test and behavioral contract when behavior changes, GREEN change, allowed
+paths, constraints, and verification commands. Invoke `my-implement`; it sends
+the edit to Claude Haiku using its standard bounded-task protocol. Do not edit
+the code or test directly here.
 
-### RED — failing test first
-
-1. Write the test
-2. Run it — must FAIL for the right reason (missing behavior, not a syntax error)
-3. If it passes immediately, the test is wrong — rewrite
-
-**Hard rule:** do not proceed to GREEN until the test fails for the right reason.
-
-### GREEN — minimum code to pass
-
-1. Write the smallest production code change that satisfies the test
-2. Run the test — must PASS
-3. Run the broader test file/module — nothing unrelated should break
-
-### VALIDATE
-
-Confirm the change meets its requirements — that the behavior actually matches what was asked, not just that tests are green. Run the success criteria and the relevant suite as evidence; verify the tests genuinely encode the requirement. Fold in any obvious, behavior-preserving cleanup here (don't gold-plate); tests must still pass after.
-
-### Loop Detection
-
-If the SAME check fails 3 times across attempts, **STOP**. Present:
-
-- What I'm trying to accomplish
-- What keeps failing (with error output)
-- What I've tried
-- My best theory on root cause
-- Suggested next step (often: escalate to the full pipeline)
-
-Do NOT keep retrying. Escalation is efficiency, not failure.
+Independently inspect the returned diff and rerun the mini-plan's verification
+commands. If the same check fails twice after the initial attempt, stop with the
+evidence and recommend the full workflow. Do not re-delegate indefinitely.
 
 ## Step 6 — Mechanical Validation
 
@@ -149,16 +127,16 @@ Print:
   - `/create-pr` if ready for review
   - `/my-review` if any self-review finding looks substantial
 
-The work is already committed — you commit each change via the `commit` skill as it goes green. **Do NOT push or create PRs.** The hand-off IS the stopping point.
+The validated phase is already committed by `my-implement`. **Do NOT push or create PRs.** The hand-off IS the stopping point.
 
 ## Guidelines
 
 - The tripwire is the safety net. Trust it. False alarms are cheap; false negatives are expensive.
 - Self-review is a sanity check, not a quality gate. Recommend `/my-review` for non-trivial findings.
 - Don't generate spec/plan/analysis files. If you find yourself wanting to, that's a tripwire signal — escalate.
-- TDD discipline is non-negotiable. The fast lane skips planning ceremony, NOT correctness ceremony.
+- TDD discipline is non-negotiable. The fast lane skips planning ceremony, NOT correctness ceremony; behavioral edits still enter `my-implement` with an honest RED test.
 - One-pass means one pass. Don't re-implement after self-review unless I direct it.
-- Never auto-commit. The hand-off is the stopping point.
+- Do not create a second commit. The hand-off is the stopping point.
 
 ## References
 

@@ -21,11 +21,10 @@ Read `~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`,
 
 1. Confirm the change is small and well-bounded.
 2. Research only the directly relevant code and tests.
-3. Write or update focused tests first when behavior changes.
-4. Implement the minimal fix.
-5. Run targeted checks and any cheap broader checks.
+3. Build one bounded `my-implement` slice, including focused RED tests for behavior changes, allowed paths, and verification commands.
+4. Invoke `my-implement` to delegate the edit to Claude Haiku.
+5. Run targeted checks and any cheap broader checks independently.
 6. Self-review diff for correctness, scope creep, and missing tests.
-7. Commit the change via the `commit` skill once checks pass, scoped to the files you touched. If the work split into separable steps, commit each as it goes green rather than batching at the end. Leave failing work uncommitted.
 
 ## Trip Out
 

@@ -17,7 +17,7 @@ Accept `{ mode, plan_path, artifact_inputs, base_ref, ledger_path, stage, author
 
 ## Authority
 
-Run checks and inspect code first. Make a local repair only when its cause and scope are obvious, then re-run the same checks. After validated code changes, invoke `Skill(commit)` scoped to the repair. Stop and return a blocker when a repair needs a product decision, broader scope, or repeated attempts. Never push, publish, send, create/update a PR, deploy, or make another outward action; return such intent as `external_action_requested`. In embedded mode return the result to `my-workflow`; do not update its ledger or claim pipeline completion.
+Run checks and inspect code first. When a repair's cause and scope are obvious, invoke `my-implement` with one bounded repair slice, then re-run the same checks independently. Stop and return a blocker when a repair needs a product decision, broader scope, or repeated attempts. Never push, publish, send, create/update a PR, deploy, or make another outward action; return such intent as `external_action_requested`. In embedded mode return the result to `my-workflow`; do not update its ledger or claim pipeline completion.
 
 ## Output
 
