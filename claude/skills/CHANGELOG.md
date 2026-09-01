@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Direct bounded skill execution
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `55cb2e7` | Removed Haiku and Luna delegation from implementation, feedback, autoresearch, dependency-update, CI-fix, and prepared-review publication workflows. | `my-implement` now performs each bounded phase itself; callers retain scoped phases, independent verification, local commits, and remote-action limits. `publish-review` validates and publishes its immutable manifest directly through `gh api`. |
+
 ## 2026-09-01 — End-only implementation review
 
 | Commit | Change | Regression boundary / known-good meaning |
