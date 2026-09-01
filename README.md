@@ -71,6 +71,8 @@ tool-versions     # asdf runtime versions
 
 ## Updating Dotfiles
 
+After pulling changes, run `rcup` to create or refresh the managed symlinks from this repo into your home directory.
+
 ```bash
 rcup        # Re-symlink after pulling changes
 rcup -v     # Verbose output
