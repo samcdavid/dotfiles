@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Native Haiku edit tools
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `914e0d5` | Added Claude’s native Read and Edit tools to the explicit Bash allowlist for Haiku delegates. | Bounded implementation and review-publication delegates may use their native file tools as well as shell commands; their allowed-path, verification, and no-remote constraints remain unchanged. |
+
 ## 2026-09-01 — Bash-enabled Haiku delegation
 
 | Commit | Change | Regression boundary / known-good meaning |
