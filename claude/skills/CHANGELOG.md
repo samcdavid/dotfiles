@@ -34,6 +34,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
+| `9879b57` | Added an approved-local-edit fallback when Haiku twice returns only a proposal or permission request. | The retry uses Claude's `acceptEdits` mode for the same bounded paths; it neither enables permission bypass nor expands local or remote authority. |
 | `9145961` | Routed five additional edit-capable workflows through `my-implement` and removed the autoresearch iteration agent. | `my-quick`, `ci-babysit`, `update-deps`, and `my-validate` keep their judgment and independently verify one bounded Haiku-delegated edit. `autoresearch` retains metric-based keep/discard control and commits only accepted experiments. |
 
 ## 2026-09-01 — CLI-delegated implementation
