@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: high
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-my-architecture-plan
 runner-for: my-architecture-plan
 description: Produces evidence-grounded architectural plans with falsifiable constraints and compact workflow-stage envelopes.

@@ -1,5 +1,5 @@
 ---
-model: opus
+model: sonnet
 effort: xhigh
 name: this-important
 description: Filter previous findings through an importance bar so only issues worth raising or fixing survive.
@@ -25,4 +25,3 @@ Read `~/.claude/rules/review-finding-format.md` when available. Use `~/.agents/r
 ## Output
 
 Return KEEP / DOWNGRADE / DEFER / DROP per finding with one-sentence rationale and any revised severity.
-

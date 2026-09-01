@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: xhigh
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-my-research
 runner-for: my-research
 description: Conducts verified codebase research, challenges findings, saves a durable research artifact, and returns a compact workflow-stage envelope.

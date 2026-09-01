@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: xhigh
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-team-plan
 runner-for: team-plan
 description: Produces evidence-backed, demoable parallel milestones with small TDD issues and complete blocker graphs.

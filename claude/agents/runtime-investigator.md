@@ -1,6 +1,6 @@
 ---
-model: opus
-codex-model: gpt-5.6-sol
+model: sonnet
+codex-model: gpt-5.6-terra
 name: runtime-investigator
 description: Investigates production, runtime, CI, or test failures. Builds timeline, verifies blast radius, gathers evidence, ranks hypotheses, and stays read-only.
 disallowedTools: Edit, Write, NotebookEdit

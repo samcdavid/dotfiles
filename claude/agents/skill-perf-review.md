@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: high
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-perf-review
 runner-for: perf-review
 description: Runs a dedicated performance audit by routing evidence through the existing performance reviewer, verifier tiers, and adversarial challenge; returns a compact read-only audit envelope.

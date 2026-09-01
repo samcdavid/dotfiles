@@ -1,5 +1,5 @@
 ---
-model: opus
+model: sonnet
 name: git-resolve-conflicts
 description: Automatically resolve merge and rebase conflicts using intelligent analysis and editing. Reads both sides of each conflict, merges intent rather than picking a winner, stages resolved files, and continues the operation until it completes or genuinely needs you.
 when_to_use: "Use when a merge, rebase, or cherry-pick stops with conflicts, or the user asks to resolve them."

@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: high
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-my-test-strategy
 runner-for: my-test-strategy
 description: Designs behavior-first TDD test strategies with durable unit and integration assertions, implementation-detail guardrails, and flakiness controls.

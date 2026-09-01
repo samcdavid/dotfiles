@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: sonnet
 name: careful
 description: Activate guardrails that block destructive commands (rm -rf, DROP TABLE, force-push, kubectl delete). Use when working near production data or critical infrastructure.
 disable-model-invocation: false

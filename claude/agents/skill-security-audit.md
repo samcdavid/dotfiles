@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: high
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-security-audit
 runner-for: security-audit
 description: Runs a dedicated security audit by routing evidence through the existing security reviewer, verifier tiers, and adversarial challenge; returns a compact read-only audit envelope.

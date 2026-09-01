@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: high
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: frontier-model
 description: Owns an explicitly delegated task end-to-end when frontier-level judgment is warranted.
 ---

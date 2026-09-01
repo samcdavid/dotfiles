@@ -1,5 +1,5 @@
 ---
-model: opus
+model: sonnet
 effort: high
 name: perf-review
 runner: skill-perf-review

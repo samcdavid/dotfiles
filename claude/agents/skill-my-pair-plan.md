@@ -1,7 +1,7 @@
 ---
-model: opus
+model: sonnet
 effort: high
-codex-model: gpt-5.6-sol
+codex-model: gpt-5.6-terra
 name: skill-my-pair-plan
 runner-for: my-pair-plan
 description: Runs a resumable pair-planning conversation, maintains the issue ledger, and routes focused specialist deep dives before implementation.

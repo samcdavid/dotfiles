@@ -1,5 +1,5 @@
 ---
-model: opus
+model: sonnet
 effort: high
 name: my-architecture-plan
 runner: skill-my-architecture-plan

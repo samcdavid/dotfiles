@@ -1,5 +1,5 @@
 ---
-model: opus
+model: sonnet
 effort: xhigh
 name: my-investigate
 runner: skill-my-investigate
