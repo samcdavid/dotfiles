@@ -185,7 +185,11 @@ Pulled from the **requirements-tracer**'s Test Coverage column. For each `At-ris
 
 ## Step 5 — Adversarial Challenge
 
-Before presenting, spawn the **adversarial-debate** agent to challenge your audit findings. A requirements audit that raises false gaps wastes PM and engineering time — precision matters.
+Screen direct traceability and file-reference claims with **adversarial-screen** in
+`finding` mode and a fingerprinted evidence bundle. Escalate only surviving
+material coverage, scope, or regression conclusions involving inference or
+ambiguity to **adversarial-debate** in `finding` mode. A requirements audit that
+raises false gaps wastes PM and engineering time — precision matters.
 
 Format all findings (missing requirements, scope creep, edge case gaps, behavior drift, related-issue regression risks) as structured claims and pass them to the agent along with:
 - The requirements map from Step 1
@@ -202,7 +206,8 @@ The agent will:
 - Check that behavior verification reflects actual user experience, not just code reading — "you say the API response matches the spec, but did you check the serializer?"
 - Calibrate severity — distinguish "requirement not implemented" from "requirement implemented slightly differently than one reading of the spec"
 
-Apply the agent's verdicts:
+Apply the final adversary's verdicts when escalation occurred; otherwise apply
+the screen result and retain the bundle fingerprint:
 - **KEEP**: gap is real and correctly classified
 - **DOWNGRADE**: reclassify (e.g. "Missing" → "Partial" or "Covered with caveat")
 - **REVISE**: narrow the claim based on evidence

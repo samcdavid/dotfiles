@@ -78,7 +78,8 @@ Before declaring research complete, verify the **"Don't stop at external context
 
 ## Step 5 — Adversarial Challenge
 
-Before finalizing, spawn **adversarial-debate** to challenge any inference,
+Before finalizing, spawn **adversarial-debate** with `mode: finding` and the
+evidence-bundle fingerprint to challenge any inference,
 cross-source interpretation, ambiguity, or material recommendation. For a
 strictly factual inventory whose claims are direct, independently reread
 file/artifact facts with no interpretation, record that direct verification and

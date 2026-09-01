@@ -72,14 +72,14 @@ T:
 
 **Parking Lot** — only include a `PL:` section if there is something that genuinely needs to be discussed with the entire team. If nothing qualifies, omit the section entirely.
 
-**Adversarial verification — before saving.** Dispatch the `adversarial-debate` agent (via the `Agent` tool, `subagent_type: "adversarial-debate"`) with the drafted Y:/T:/OOO:/PL: text and the list of Linear ticket IDs cited. The agent must independently re-fetch each cited ticket with `get_issue` and challenge:
+**Citation screen — before saving.** Build an evidence-bundle fingerprint and dispatch `adversarial-screen` in `citation` mode with the drafted Y:/T:/OOO:/PL: text and cited IDs. It must independently re-fetch each cited ticket and check:
 - Every status word ("merged", "in review", "shipped", "blocked") against current Linear state.
 - Every PR link — does it resolve, and is it actually linked to the cited ticket?
 - Every T: item — is the ticket still open (`state.type` not `completed` or `canceled`)?
 - Any OOO claim — does it match a real calendar event found in Phase 1?
 - Every On-call: bullet — does it trace to a real `On Call` page reviewed in Phase 1, and does its date and resolution match that page's content (no invented incidents, no misattributed dates)?
 
-Apply every correction the agent surfaces before continuing. Do not save a draft the agent has open contradictions on. Do not copy the update to the clipboard or post it to Slack.
+Apply every correction the screen surfaces. Escalate only a contradiction, missing evidence, or material prioritization claim to `adversarial-debate` in `citation` or `decision` mode with the fingerprint. Do not save a draft with open contradictions or copy/post it to Slack.
 
 ## Phase 5 — Build Today's Checklist
 
@@ -109,7 +109,7 @@ Using the gathered context from Linear (assigned issues **and project-wide open 
 
 ## Phase 6 — Adversarial Verification of Today's Page
 
-After Phase 5 has drafted the checklist and milestone-review block (but **before** they are written to Notion via `notion-create-pages` / `notion-update-page`), dispatch the `adversarial-debate` agent (via the `Agent` tool, `subagent_type: "adversarial-debate"`) with the full drafted page content and the list of every Linear ticket ID, project, milestone, sender, and meeting it cites. The agent must independently re-verify, not trust the draft:
+After Phase 5 has drafted the checklist and milestone-review block (but **before** they are written to Notion), dispatch `adversarial-screen` in `citation` mode with the fingerprinted page evidence and every cited ticket, project, milestone, sender, and meeting. It must independently re-verify:
 
 - **Closed-work leakage**: re-fetch each checklist ticket with `get_issue`; flag any with `state.type` in `{completed, canceled}` (defense-in-depth on top of Phase 5 step 1).
 - **Priority/assignee claims**: every "Urgent — mine" / "Urgent — grabbable" / "High — unassigned bottleneck" ticket must currently match that priority and assignee state in Linear.
@@ -118,4 +118,4 @@ After Phase 5 has drafted the checklist and milestone-review block (but **before
 - **Email/meeting trace**: every email-sourced checklist row must trace back to a real Gmail message from Phase 1; every meeting row to a real calendar event from Phase 1.
 - **Recommended next-work order**: each recommendation's stated reason ("blocks X", "first sub-task of Y") must hold up against the cited relations.
 
-Apply every correction the agent surfaces. Do not write the page while open contradictions remain. Once clean, write the page.
+Apply every correction the screen surfaces. Escalate only an unresolved contradiction or consequential priority/dependency judgment to `adversarial-debate` with the same fingerprint. Do not write the page while open contradictions remain.

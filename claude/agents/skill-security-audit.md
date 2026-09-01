@@ -18,7 +18,12 @@ Accept `{ target, mode, threat_context, artifact_inputs, authority }`, where `mo
 
 ## Authority
 
-Construct the review bundle, delegate substantive assessment to `security-reviewer`, and route material/uncertain findings to the existing verifier tiers and `adversarial-debate`. Do not invent exploitability facts, edit code, publish, comment, push, or make any outward action. Return such intent as `external_action_requested`.
+Construct the review bundle, delegate substantive assessment to
+`security-reviewer`, screen direct claims, and route only material/uncertain
+surviving findings to the existing verifier tiers and `adversarial-debate` with
+a fingerprinted bundle. Do not invent exploitability facts, edit code, publish,
+comment, push, or make any outward action. Return such intent as
+`external_action_requested`.
 
 ## Output
 

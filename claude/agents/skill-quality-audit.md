@@ -18,7 +18,11 @@ Accept `{ target, mode, artifact_inputs, authority }`, where `mode` is PR, diff/
 
 ## Authority
 
-Construct the review bundle, delegate substantive assessment to `quality-reviewer`, and route material/uncertain findings to the existing verifier tiers and `adversarial-debate`. Do not edit code, publish, comment, push, or make any outward action. Return such intent as `external_action_requested`.
+Construct the review bundle, delegate substantive assessment to
+`quality-reviewer`, screen direct claims, and route only material/uncertain
+surviving findings to the existing verifier tiers and `adversarial-debate` with
+a fingerprinted bundle. Do not edit code, publish, comment, push, or make any
+outward action. Return such intent as `external_action_requested`.
 
 ## Output
 

@@ -137,7 +137,11 @@ For any **new** test or guard whose stated purpose is to catch a specific catego
 
 ## Step 6 — Adversarial Challenge
 
-Before presenting, spawn the **adversarial-debate** agent to challenge your quality findings. False gaps waste engineering effort writing unnecessary tests — precision matters.
+Screen direct test/file-reference claims with **adversarial-screen** in `finding`
+mode and a fingerprinted evidence bundle. Escalate only a surviving material
+test-fidelity or coverage conclusion involving ambiguity to
+**adversarial-debate** in `finding` mode. False gaps waste engineering effort
+writing unnecessary tests — precision matters.
 
 Format all findings as structured claims and pass them to the agent along with:
 - The test files and production files for each finding
@@ -152,7 +156,8 @@ The agent will:
 - Check mock fidelity claims against actual interfaces
 - Calibrate severity — distinguish "this gap will let a real bug through" from "this could theoretically be more thorough"
 
-Apply the agent's verdicts:
+Apply the final adversary's verdicts when escalation occurred; otherwise apply
+the screen result and retain the bundle fingerprint:
 - **KEEP**: gap is real and risk-justified
 - **DOWNGRADE**: adjust severity based on actual risk
 - **REVISE**: narrow the claim to what's demonstrated

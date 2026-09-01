@@ -46,7 +46,10 @@ Before presenting any question to the user, run it through this filter. The bar 
 3. **Does the answer change scope or direction?** If the spec looks the same either way, the question is decorative — drop it.
 4. **Independent of other open questions?** If question B's answer is contingent on question A, ask A alone first.
 
-When in doubt, run a quick adversarial pass: spawn an `adversarial-debate` agent (or do it yourself, fresh-eyed) on your draft question list — "which of these are actually load-bearing vs. thoroughness theater?" Keep only the load-bearing ones.
+When in doubt, screen the draft question list with `adversarial-screen` in
+`decision` mode and an evidence-bundle fingerprint — "which are load-bearing
+versus thoroughness theater?" Escalate only unresolved contradictory evidence
+or consequential scope choices to `adversarial-debate`.
 
 ## Step 4 — Ask the Survivors, One at a Time
 

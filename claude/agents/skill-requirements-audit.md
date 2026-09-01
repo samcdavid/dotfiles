@@ -18,7 +18,12 @@ Accept `{ target, mode, requirements_source, artifact_inputs, authority }`, wher
 
 ## Authority
 
-Construct the requirements map and review bundle, delegate substantive traceability to `requirements-reviewer`, and route material/uncertain findings to the existing verifier tiers and `adversarial-debate`. Do not edit code, publish, comment, push, or make any outward action. Return such intent as `external_action_requested`.
+Construct the requirements map and review bundle, delegate substantive
+traceability to `requirements-reviewer`, screen direct claims, and route only
+material/uncertain surviving findings to the existing verifier tiers and
+`adversarial-debate` with a fingerprinted bundle. Do not edit code, publish,
+comment, push, or make any outward action. Return such intent as
+`external_action_requested`.
 
 ## Output
 

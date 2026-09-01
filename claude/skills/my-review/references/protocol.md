@@ -317,6 +317,9 @@ If any compiled finding carries `Severity: Question`, ask it. The point is to ca
 
 Once I respond, spawn the **adversarial-debate** agent to challenge *my* answers. This is a separate pass from the Step 6 finding challenge — the target here is my context, not the assistant's findings.
 
+Pass `mode: decision`, the current review-bundle fingerprint, and only the
+question, answer, and cited context needed to test it.
+
 Pass to the agent:
 - The original question + the investigation context that surfaced it (diff, relevant files, the compiled findings)
 - My answer
@@ -461,6 +464,8 @@ is known to differ from the authenticated reviewer's login.
 ### Challenge the eligible verdict choice
 
 `REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. A pending PR operational-readiness state is likewise mechanical, so do not challenge it. For a third-party PR only, the remaining APPROVE/COMMENT choice after readiness is confirmed is discretionary and receives this whole-review adversarial pass. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-debate` with:
+
+- `mode: decision` and the current review-bundle fingerprint;
 
 - proposed APPROVE/COMMENT verdict
 - the final surviving non-blocking findings, with their risk and confidence levels

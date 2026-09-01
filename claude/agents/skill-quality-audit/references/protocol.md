@@ -8,7 +8,7 @@ The `quality-audit` wrapper selects scope and presents this result. This runner 
 2. Triage the manifest for changed behavior, tests, branches, error paths, fixtures, or mocks. For a PR/diff containing no production or test changes and no supplied test concern, return a documented no-trigger assessment. Otherwise dispatch only the discovery specialists needed to answer an unresolved question.
 3. Dispatch `quality-reviewer` with the complete bundle and discovery notes. It owns substantive application of the shared criteria; do not duplicate them here.
 4. Dedupe and normalize its flat findings. Route every material, high-risk, or uncertain claim to `finding-verifier-high`; route other claims to `finding-verifier-low`, escalating low-tier uncertainty. A missing test only survives if a realistic bug can escape.
-5. Dispatch `adversarial-debate` only for surviving material test-fidelity/coverage conclusions or ambiguity. Apply independent verdicts mechanically; a no-trigger or no-finding assessment needs no empty expensive challenge.
+5. Dispatch `adversarial-debate` only for surviving material test-fidelity/coverage conclusions or ambiguity, with `mode: finding` and the evidence-bundle fingerprint. Apply independent verdicts mechanically; a no-trigger or no-finding assessment needs no empty expensive challenge.
 6. Render the retained protocol's report shape: coverage matrix, fidelity/escape path, flakiness and mock-risk assessment, stronger-test recommendation, positive patterns, and dismissed concerns. Never edit, publish, or change a test suite.
 
 ## Output envelope

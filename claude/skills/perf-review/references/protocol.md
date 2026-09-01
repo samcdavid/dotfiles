@@ -99,7 +99,11 @@ Think beyond current load:
 
 ## Step 6 — Adversarial Challenge
 
-Before presenting, spawn the **adversarial-debate** agent to challenge your performance findings. False positives waste engineering effort on premature optimization — this step is critical.
+Screen direct code, query, and resource claims with **adversarial-screen** in
+`finding` mode and a fingerprinted evidence bundle. Escalate only surviving
+material load/scale conclusions, uncertain causality, or optimization tradeoffs
+to **adversarial-debate** in `finding` mode. False positives waste engineering
+effort on premature optimization — this step is critical.
 
 Format all findings as structured claims and pass them to the agent along with:
 - The file paths and code references for each finding
@@ -114,7 +118,8 @@ The agent will:
 - Check whether suggested optimizations would actually improve the bottleneck or just shift it
 - Calibrate impact — distinguish "will page oncall under load" from "could be marginally faster"
 
-Apply the agent's verdicts:
+Apply the final adversary's verdicts when escalation occurred; otherwise apply
+the screen result and retain the bundle fingerprint:
 - **KEEP**: finding is real and impact-justified
 - **DOWNGRADE**: adjust severity to match actual scale/frequency
 - **REVISE**: narrow the claim to what's actually demonstrated

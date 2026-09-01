@@ -44,7 +44,8 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    verdict until confirmation. Once confirmed, return `APPROVE` for
    self-authored and unknown-ownership PRs when no blocker survives.
    Only a third-party PR may choose between `APPROVE` and `COMMENT`; delegate
-   that confirmed-readiness choice to `adversarial-debate`.
+   that confirmed-readiness choice to `adversarial-debate` in `decision` mode
+   with the current review-bundle fingerprint.
 10. Enforce `review-contract.md` before returning the compact result envelope to
    the wrapper, `implement-review`, or `my-workflow`.
 

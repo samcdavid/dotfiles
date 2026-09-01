@@ -78,7 +78,11 @@ Do not recommend tests for trivial delegation, generated code, or implementation
 
 ## Step 4 — Challenge the strategy
 
-Send the behavior matrix and proposed assertion/fixture choices to `adversarial-debate`. Ask it to challenge:
+Screen the behavior matrix and proposed assertion/fixture choices with
+`adversarial-screen` in `decision` mode and the evidence-bundle fingerprint.
+Escalate to `adversarial-debate` in `decision` mode only for a disputed outcome,
+ambiguous test-level choice, or unresolved flakiness risk. Ask the final
+challenger to challenge:
 
 - Whether each assertion would fail for the intended broken behavior.
 - Whether any test exists only to prove telemetry, persistence/cache access,

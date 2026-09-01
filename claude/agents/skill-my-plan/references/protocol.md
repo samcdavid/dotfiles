@@ -219,7 +219,10 @@ Do not invoke `my-observe` from this runner. Return whether the plan needs an ob
 
 ## Step 6 — Adversarial Challenge (MANDATORY)
 
-Before presenting the plan, spawn the **adversarial-debate** agent to challenge your plan's assumptions and feasibility.
+Before presenting the plan, screen direct file and criterion claims with
+`adversarial-screen` in `decision` mode and the evidence-bundle fingerprint.
+Escalate only material feasibility uncertainty, contradictory evidence, or an
+irreversible architecture choice to **adversarial-debate** in `decision` mode.
 
 Format the plan's phases, assumptions, and constraints as structured claims and pass them to the agent along with:
 - The file paths referenced in each phase

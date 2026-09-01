@@ -27,7 +27,7 @@ The wrapper handles request/Linear coordination and approval. This runner owns a
 | Product requirements and acceptance criteria | `skill-my-spec` (Terra/high) | Always for a new project proposal or materially incomplete existing scope. Give it the product context and `authority: local_only`; consume its spec artifact and provisional decisions. |
 | Codebase and delivery-context gap research | `skill-my-research` (Sol/xhigh) | Always when a repository or existing system is in scope. Give it the accepted/current spec artifact, relevant Linear/doc context, and the question "what exists, what gaps remain, and what constrains delivery?" Its own protocol fans out locator, analyzer, and pattern discovery and adversarially verifies findings. |
 | Structural design | `skill-my-architecture-plan` (Sol/high) | Required when the project crosses module boundaries, introduces or changes a public contract, or changes persisted data. Pass the spec and research artifacts; turn its falsifiable constraints into issue boundaries and conflict rules. Skip only when research demonstrates a contained, single-module change. |
-| Final plan challenge | `adversarial-debate` (Sol/xhigh) | Always. Give it the requirements/spec, verified gaps, architecture constraints where present, job stories, issue/milestone drafts, dependencies, and conflict matrix. Apply supported corrections before presentation. |
+| Final plan challenge | `adversarial-screen` (Terra/medium), then `adversarial-debate` (Sol/xhigh) only if escalated | Screen direct graph/citation facts first; escalate conflicting evidence, irreversible dependency choices, or material feasibility uncertainty with the same fingerprint. |
 
 Use targeted `codebase-locator`, `codebase-analyzer`, and `codebase-pattern-finder` calls only as scoped follow-ups to the research or architecture runner, or when they need one bounded missing fact. Their Terra routing makes them suitable for parallel evidence gathering; they do not replace Sol's research synthesis. If the research, specification, and architecture outputs conflict, return the conflicting evidence to `skill-my-research` for Sol-led resolution before defining issues.
 
@@ -215,8 +215,10 @@ description, milestones to create/update, issue titles/descriptions, membership,
 the canonical direct blocker edge list, and any planned comments. Include
 existing valid blocker edges that must be preserved and list any proposed edge
 removal separately; no removal is implied by omission. Before returning it,
-dispatch `adversarial-debate` with the complete evidence bundle described in the
-routing table. Ask it specifically to challenge issues outside 3–5 meaningful
+dispatch `adversarial-screen` in `decision` mode with the fingerprinted evidence
+bundle. Escalate to `adversarial-debate` only for a screen contradiction,
+irreversible dependency choice, or material feasibility uncertainty. Ask the
+final challenger specifically to challenge issues outside 3–5 meaningful
 TDD commits, filler commits, milestones above 15 issues, non-runnable demos,
 false issue or milestone parallelism, missing blocker edges, cycles, and
 unresolved coordination. Apply its KEEP/REVISE/DROP/PROMOTE verdicts; do not

@@ -8,7 +8,7 @@ The `requirements-audit` wrapper selects the target and requirement source and p
 2. Build the requirements map the retained protocol requires, including explicit criteria and defensible implied edge cases. Normalize the implementation into a fingerprinted PR-safe or local evidence bundle and reuse it under `evidence-bundles.md`.
 3. Triage the requirements map against the manifest; dispatch only discovery specialists and `requirements-tracer` whose specific unresolved traceability question meets the retained protocol's review-scope conditions.
 4. Dispatch `requirements-reviewer` with the complete bundle, requirements map, and discovery notes. It owns substantive traceability; do not duplicate the shared checklist here.
-5. Dedupe and normalize its flat findings. Route every material, high-risk, or uncertain claim to `finding-verifier-high`; route other claims to `finding-verifier-low`, escalating low-tier uncertainty. Dispatch `adversarial-debate` only for surviving coverage, scope, or regression conclusions that involve inference or ambiguity.
+5. Dedupe and normalize its flat findings. Route every material, high-risk, or uncertain claim to `finding-verifier-high`; route other claims to `finding-verifier-low`, escalating low-tier uncertainty. Dispatch `adversarial-debate` only for surviving coverage, scope, or regression conclusions that involve inference or ambiguity, with `mode: finding` and the evidence-bundle fingerprint.
 6. Render the retained protocol's report shape: requirements map, traceability matrix, Covered/Partial/Missing/Excess/Unclear statuses, test evidence, scope analysis, positive patterns, and dismissed concerns. Never edit, publish, or change remote records.
 
 ## Output envelope

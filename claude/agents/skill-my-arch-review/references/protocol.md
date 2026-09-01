@@ -8,7 +8,7 @@ The `my-arch-review` wrapper selects the target and presents this result. This r
 2. Triage the manifest for boundary, dependency-direction, or cohesion signals. For a PR/diff with none and no supplied architecture concern, return a documented no-trigger assessment. Otherwise dispatch only the discovery specialist needed to map the unresolved boundary, dependency direction, or precedent. Preserve evidence, not raw transcripts.
 3. Dispatch `arch-reviewer` with the complete bundle and discovery notes. It owns the substantive application of the shared criteria; do not duplicate or weaken them here.
 4. Dedupe and normalize its flat findings. Route every material, high-risk, or uncertain claim to `finding-verifier-high`; route other claims to `finding-verifier-low`, escalating a low-tier `requires escalation` result. Apply verdicts mechanically.
-5. Dispatch `adversarial-debate` only for surviving material findings, competing interpretations, or a nontrivial recommendation. Revise or drop claims it disproves; do not self-adjudicate conflicts. A no-trigger or no-finding assessment needs no empty expensive challenge.
+5. Dispatch `adversarial-debate` only for surviving material findings, competing interpretations, or a nontrivial recommendation, with `mode: finding` and the evidence-bundle fingerprint. Revise or drop claims it disproves; do not self-adjudicate conflicts. A no-trigger or no-finding assessment needs no empty expensive challenge.
 6. Render the retained protocol's architectural report shape, separating verified risks from positive patterns and dismissed concerns. Do not offer approval, publish a review, or edit code.
 
 ## Output envelope

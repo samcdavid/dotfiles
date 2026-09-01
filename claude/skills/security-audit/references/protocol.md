@@ -141,7 +141,11 @@ Auditor: Claude
 
 ## Step 6 — Adversarial Challenge
 
-Before presenting, spawn the **adversarial-debate** agent to challenge your security findings. False positives erode trust in security audits — this step is critical.
+Screen direct code, data-flow, and dependency-version claims with
+**adversarial-screen** in `finding` mode and a fingerprinted evidence bundle.
+Escalate surviving material exploitability conclusions, ambiguous attack paths,
+or mitigation tradeoffs to **adversarial-debate** in `finding` mode. False
+positives erode trust in security audits — this step is critical.
 
 Format all findings (critical through low) as structured claims and pass them to the agent along with:
 - The file paths and code references for each finding
@@ -156,7 +160,8 @@ The agent will:
 - Verify that suggested fixes don't introduce new vulnerabilities
 - Check dependency CVEs against the ACTUAL versions in lockfiles (not just the package name)
 
-Apply the agent's verdicts:
+Apply the final adversary's verdicts when escalation occurred; otherwise apply
+the screen result and retain the bundle fingerprint:
 - **KEEP**: finding is exploitable and correctly severity-rated
 - **DOWNGRADE**: adjust severity to match actual risk
 - **REVISE**: narrow the claim to what's actually demonstrated

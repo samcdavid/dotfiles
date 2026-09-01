@@ -151,9 +151,11 @@ the user, or update the ledger. Apply a patch only after checking it against the
 current conversation and sources. Record the agent and evidence under `Deep
 Dives`.
 
-Use `adversarial-debate` for a consequential disputed choice or when the final
-plan has low-confidence architecture/test claims. Do not run it mechanically on
-every section.
+Screen direct plan assertions with `adversarial-screen` in `decision` mode and
+a fingerprinted evidence bundle. Use `adversarial-debate` in `decision` mode
+only for a consequential disputed choice, contradictory evidence, irreversible
+commitment, or low-confidence architecture/test claim that survives the screen.
+Do not run either mechanically on every section.
 
 ## Step 6 — Build implementation-ready sections
 

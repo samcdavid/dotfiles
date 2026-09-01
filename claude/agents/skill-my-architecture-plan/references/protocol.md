@@ -147,7 +147,10 @@ status: proposed
 
 ## Step 6 — Adversarial Challenge (MANDATORY)
 
-Before presenting the plan, spawn the **adversarial-debate** agent to challenge the proposed structure — the same rigor `my-arch-review`'s Step 6 applies to a diff, applied here to a design instead. Pass:
+Before presenting the plan, screen direct convention and file-reference claims
+with `adversarial-screen` in `decision` mode and an evidence-bundle fingerprint.
+Escalate to **adversarial-debate** in `decision` mode only for a competing
+structure, contradictory evidence, or irreversible boundary choice. Pass it:
 
 - The claimed existing conventions and the file:line evidence behind them.
 - The proposed structural placement, dependency/coupling design, and interface design.

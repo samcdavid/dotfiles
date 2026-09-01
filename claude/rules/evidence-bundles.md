@@ -14,4 +14,12 @@ specific question.
 
 Rebuild the bundle when the reviewed commit/range, working tree, requirements
 source, or existing-feedback index changes. A cached bundle is context, never a
-substitute for a final targeted check or an evidence citation.
+substitute for a final targeted check or an evidence citation. For adversarial
+work, pass the fingerprint, exact claim/decision/citation mode, source excerpts,
+and claimed impact; record the verdict, strongest counterargument, evidence
+checked, falsifying evidence, and residual uncertainty in the bundle.
+
+When later evidence overturns an adversarial verdict, append the original mode,
+screen/final result, correcting evidence, and threshold lesson to the workflow
+ledger or review learned-miss record. Tune escalation only from repeated,
+evidence-backed misses; never lower a threshold from convenience alone.

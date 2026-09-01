@@ -28,7 +28,11 @@ Read the my-review skill (`~/.claude/skills/my-review/SKILL.md`) Step 5 categori
 
 ## Output Validation
 
-Spawn the **adversarial-debate** agent to validate your response drafts and fix claims.
+Screen response drafts, cited SHAs, and direct fix claims with
+**adversarial-screen** in `citation` mode and a fingerprinted evidence bundle.
+Escalate only a contradiction, missing evidence, disputed causal claim, or
+consequential response decision to **adversarial-debate** in `citation` or
+`decision` mode.
 
 Format your responses and fix summaries as findings and pass them to the agent along with:
 
@@ -44,7 +48,9 @@ The agent will verify:
 - Code shown in responses matches actual committed code
 - Investigation claims still hold (e.g., "X can be nil here" — is that still true?)
 
-Apply verdicts — fix invalid references, weaken unverifiable claims, drop items that can't be salvaged after 2 attempts.
+Apply the final adversary's verdicts when escalation occurred; otherwise apply
+the screen result — fix invalid references, weaken unverifiable claims, and drop
+items that can't be salvaged after 2 attempts.
 
 ## Requirements Re-check
 

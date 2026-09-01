@@ -77,7 +77,7 @@ Rewrite the **## Notes** section:
 
 ## Phase 6 — Adversarial Verification
 
-Before writing anything to Notion, dispatch the `adversarial-debate` agent (via the `Agent` tool, `subagent_type: "adversarial-debate"`) with:
+Before writing anything to Notion, build an evidence-bundle fingerprint and dispatch `adversarial-screen` in `citation` mode with:
 - The drafted Linear Updates block (Phase 3).
 - The drafted Actions and Decisions section (Phase 4).
 - The drafted Notes section (Phase 5).
@@ -92,7 +92,7 @@ The agent must independently re-verify, not trust the drafts:
 - **Decision provenance**: each "decided X" entry traces to a real source (a comment, a meeting outcome, a thread). Not fabricated narrative.
 - **Drop checks**: nothing from the morning's milestone-review block should leak into the rewritten Notes unless tomorrow-relevant. Anything that *was* an open question this morning and is now resolved should appear in Actions/Decisions, not Notes.
 
-Apply every correction the agent surfaces. Do not write the page while open contradictions remain.
+Apply every correction the screen surfaces. Escalate only a contradiction, missing evidence, or consequential narrative decision to `adversarial-debate` in `citation` or `decision` mode with the fingerprint. Do not write the page while open contradictions remain.
 
 ## Phase 7 — Write to Notion
 

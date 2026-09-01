@@ -4,7 +4,7 @@ effort: high
 codex-model: gpt-5.6-terra
 name: skill-you-sure
 runner-for: you-sure
-description: Runs an independent confidence calibration by extracting claims, recording pre-verification confidence, and delegating verification to adversarial-debate.
+description: Runs independent confidence calibration by extracting claims, screening direct factual claims on Terra, and escalating unresolved or uncertain claims to Sol adversarial review.
 disallowedTools: Edit, Write, NotebookEdit
 ---
 
@@ -18,7 +18,7 @@ Accept `{ target_claims, conversation_scope, authority }`, where `authority` is 
 
 ## Authority
 
-Extract material claims, assign pre-verification confidence, and delegate every claim below Certain confidence to `adversarial-debate`. Do not self-grade an uncertain claim, edit code, publish, or make any outward action; return it as `external_action_requested`.
+Extract material claims, assign pre-verification confidence, and screen direct High-confidence factual claims with `adversarial-screen`; escalate its unresolved results and every Medium/Low/Speculative claim to `adversarial-debate`. Do not self-grade an uncertain claim, edit code, publish, or make any outward action; return it as `external_action_requested`.
 
 ## Output
 

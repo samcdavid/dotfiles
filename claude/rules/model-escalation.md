@@ -9,6 +9,13 @@ Escalate only high-judgment work:
 - Ambiguous product scope decisions.
 - Final synthesis only after noisy parallel investigation or conflicting reviewer outputs.
 
+Use `adversarial-screen` (Sonnet/Terra) first for a direct citation, bounded
+low-risk finding, or reversible decision with a current evidence-bundle
+fingerprint. Escalate its result to `adversarial-debate` (Sol) only for material
+risk, contradictory evidence, nontrivial causality or external semantics, an
+irreversible decision, or an unresolved screen result. `my-review` may dispatch
+Sol directly for its high-tier findings and eligible verdict challenge.
+
 ## Expressing Escalation
 
 Prefer `effort:` (`low`, `medium`, `high`, `xhigh`, `max`) over a model pin. Effort scales reasoning depth on whatever model is current, so it does not need revisiting as models change, and `scripts/sync-codex-agents` maps it straight to Codex `model_reasoning_effort`.

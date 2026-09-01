@@ -18,7 +18,12 @@ Accept `{ target_claims, conversation_scope, authority }`, where `authority` is 
 
 ## Authority
 
-Inventory claims, trace each to direct evidence, verify accessible trust debt, and retract or qualify unsupported claims. Use an existing verifier or `adversarial-debate` when an important claim cannot be independently checked in the current context. Do not edit code, publish, or make any outward action; return it as `external_action_requested`.
+Inventory claims, trace each to direct evidence, verify accessible trust debt,
+and retract or qualify unsupported claims. Screen a bounded direct factual claim
+with `adversarial-screen`; use an existing verifier or escalate only material,
+ambiguous, or unresolved claims to `adversarial-debate`, always with a
+fingerprinted evidence bundle. Do not edit code, publish, or make any outward
+action; return it as `external_action_requested`.
 
 ## Output
 

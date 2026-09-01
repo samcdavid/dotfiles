@@ -132,7 +132,10 @@ The feedback was already fixed in a subsequent commit but the reviewer wasn't no
 
 ### Adversarial Challenge
 
-Before presenting your triage, spawn the **adversarial-debate** agent to challenge your classifications.
+Before presenting triage, screen direct classification evidence with
+`adversarial-screen` in `finding` mode and the evidence-bundle fingerprint.
+Escalate material findings, contradictory evidence, or disputed scope decisions
+to **adversarial-debate** in `finding` or `decision` mode.
 
 Format each classification as a finding and pass it to the agent along with:
 

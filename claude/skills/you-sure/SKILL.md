@@ -17,7 +17,11 @@ Use `skill-you-sure` for the substantive independent confidence challenge. This 
 Normalize the request into `{ target_claims, conversation_scope, authority: local_only }` and dispatch it to `skill-you-sure`.
 
 - With a specific quoted claim or topic, restrict the challenge to that target; otherwise challenge the most recent substantive response.
-- The runner must use `adversarial-debate` for every claim below Certain confidence and return any request for access or an external action instead of performing it.
+- The runner screens direct High-confidence factual claims with
+  `adversarial-screen`; it escalates unresolved screen results and every
+  Medium/Low/Speculative claim to `adversarial-debate`, recording the
+  fingerprinted evidence bundle. Return any request for access or an external
+  action instead of performing it.
 
 ## Present
 
