@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Bounded edit delegation across workflows
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `9145961` | Routed five additional edit-capable workflows through `my-implement` and removed the autoresearch iteration agent. | `my-quick`, `ci-babysit`, `update-deps`, and `my-validate` keep their judgment and independently verify one bounded Haiku-delegated edit. `autoresearch` retains metric-based keep/discard control and commits only accepted experiments. |
+
 ## 2026-09-01 — CLI-delegated implementation
 
 | Commit | Change | Regression boundary / known-good meaning |
