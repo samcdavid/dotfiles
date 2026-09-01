@@ -29,13 +29,13 @@ Pick the NEXT change. Priority order:
 - Don't make multiple unrelated changes at once (can't attribute improvement)
 - Don't chase marginal gains with ugly complexity
 
-## Phase 3: Delegate
+## Phase 3: Implement
 
 - Select ONE focused change to in-scope files and write its one-sentence
   description before editing (forces clarity).
 - Invoke `my-implement` with the experiment, explicit allowed paths,
-  verification command, and `commit_policy: defer`. It delegates one bounded
-  edit to Claude Haiku. Do not edit inline.
+  verification command, and `commit_policy: defer`. It performs one bounded
+  edit. Do not edit inline.
 
 ## Phase 4: Verify
 

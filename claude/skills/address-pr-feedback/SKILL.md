@@ -9,7 +9,7 @@ when_to_use: "Use when the user asks to address, respond to, or work through rev
 
 # Address Review Feedback
 
-Use `skill-address-pr-feedback` for the substantive evidence, triage, fix-phase, validation, review, and bounded repair work. This wrapper determines the mode, keeps PR-mode authorization with the user, and is the only layer permitted to perform explicitly authorized outward actions. Edit phases must invoke `my-implement`, which delegates each bounded edit to Claude Haiku.
+Use `skill-address-pr-feedback` for the substantive evidence, triage, fix-phase, validation, review, and bounded repair work. This wrapper determines the mode, keeps PR-mode authorization with the user, and is the only layer permitted to perform explicitly authorized outward actions. Edit phases must invoke `my-implement`, which performs each bounded edit.
 
 Read `references/execution-contract.md` for triage context, combined validation,
 and authorized PR execution. Do not represent those workflow requirements as

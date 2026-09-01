@@ -24,7 +24,7 @@ running checks.
 1. Confirm the change is small and well-bounded.
 2. Research only the directly relevant code and tests.
 3. Build one bounded `my-implement` slice, including focused RED tests for behavior changes, allowed paths, and verification commands.
-4. Invoke `my-implement` to delegate the edit to Claude Haiku.
+4. Invoke `my-implement` to perform the bounded edit.
 5. Run targeted checks and any cheap broader checks independently.
 6. Self-review diff for correctness, scope creep, and missing tests.
 

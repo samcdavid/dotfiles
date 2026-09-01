@@ -5,9 +5,9 @@ Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the
 ## Autoresearch — Autonomous Goal-Directed Iteration
 
 Inspired by Karpathy's autoresearch. Constraint-driven autonomous iteration:
-propose, delegate, verify, keep/discard, repeat. The main loop owns control,
-the results log, metric decisions, and limit checking. Each edit is delegated
-through `my-implement` to Claude Haiku with a deferred commit.
+propose, implement, verify, keep/discard, repeat. The main loop owns control,
+the results log, metric decisions, and limit checking. Each edit is performed
+through `my-implement` with a deferred commit.
 
 ## Step 1 — Parse arguments
 
@@ -63,8 +63,8 @@ LOOP (until iteration limit reached, or forever if no limit):
 
   2. Review the bundle, choose one novel, one-sentence experiment, and invoke
      `my-implement` with its exact allowed paths, validation commands, and
-     `commit_policy: defer`. It delegates one bounded edit to Claude Haiku but
-     leaves the verified diff uncommitted for this loop's metric decision.
+     `commit_policy: defer`. It performs one bounded edit but leaves the
+     verified diff uncommitted for this loop's metric decision.
 
   3. Independently run `verify_command` verbatim, extract the metric, inspect
      the diff, and return one Iteration Result block (status: keep | discard |

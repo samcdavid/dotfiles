@@ -2,7 +2,7 @@
 model: sonnet
 effort: high
 name: my-implement
-description: Execute approved implementation work sequentially by delegating each bounded edit task to Claude Haiku, then independently verifying and committing it.
+description: Execute approved implementation work sequentially in bounded phases, verifying and committing each one.
 ---
 
 # Implement Plan
@@ -21,7 +21,7 @@ Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, sta
   `my-workflow` to record; do not claim workflow completion.
 - Do not dispatch if the plan has no RED tests or success criteria for its next unfinished phase.
 
-Delegate every edit task with `claude --model haiku --no-chrome --strict-mcp-config --allowed-tools Bash Edit Read --dangerously-skip-permissions -p "<task to complete>"`. If that Haiku invocation cannot run, `codex --model gpt-5.6-luna exec "<task to complete>"` is an acceptable fallback. The delegate has Bash, Read, and Edit explicitly allowed and all local permissions, so it must perform the bounded edit rather than ask for approval; the task still limits it to its allowed paths and forbids remote actions. Keep tasks sequential and bounded; independently verify the resulting diff and checks before committing through `Skill(commit)`. Do not invoke `implement-review` between phases: phase verification is sufficient until the plan is complete. Never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
+Perform every edit task yourself, staying within its allowed paths and following RED → GREEN → VALIDATE for behavioral work. Keep phases sequential and bounded; independently verify the resulting diff and checks before committing through `Skill(commit)`. Do not invoke `implement-review` between phases: phase verification is sufficient until the plan is complete. Never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
 
 ## Present
 
@@ -31,4 +31,4 @@ uncommitted or escalated work, the workflow-stage envelope when embedded, and
 the recommended next command: `implement-review` exactly once, only after every
 implementation phase and the holistic verification gate are complete. Name what
 each phase delivered and pair every SHA with its
-subject/effect. Do not include raw Claude transcripts.
+subject/effect. Do not include raw implementation transcripts.

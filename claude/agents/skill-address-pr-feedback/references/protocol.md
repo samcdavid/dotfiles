@@ -22,12 +22,9 @@ Load `feedback-triage.md` after collecting pending items. Every item needs
 evidence from the relevant code, test, requirement, or authoritative API docs
 before it is accepted, deferred, or challenged.
 
-For a clearly low-risk item (no behavior, security, data, public API, migration,
-or disputed scope), an isolated Haiku pass may extract the relevant code facts
-and propose a classification. Give it only the comment and relevant excerpts;
-it must not edit files or use GitHub mutation commands. Independently check its
-citations and classification before using them. The runner retains final
-judgment.
+For every item, extract the relevant code facts and classify it from the
+available evidence. The runner retains final judgment and independently checks
+citations and classification before using them.
 
 Load `pushback-patterns.md` only for a proposed pushback, deferral, or
 substantive design rationale. Do not load its examples for an ordinary confirmed
@@ -48,7 +45,7 @@ wait for an explicit amendment instead of treating a related ticket as one.
 After confirmed scope, load `fix-planning.md`. Turn each confirmed behavior
 into one bounded `my-implement` phase with an honest RED test and mechanical
 success criteria; send genuinely non-behavioral work through its direct-edit
-mode. `my-implement` delegates the edit to Haiku. Fixes are sequential, stay
+mode. `my-implement` performs the edit. Fixes are sequential, stay
 within their allowed paths, receive independent diff/check verification, and
 land as separate local commits only through `Skill(commit)`.
 

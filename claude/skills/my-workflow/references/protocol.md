@@ -169,8 +169,8 @@ authority: local_only
 ```
 
 The ledger's `Implementation Plan` is the plan and its `Test Strategy` is the
-binding behavior contract. `my-implement` retains sequential Claude Haiku task
-delegation, RED → GREEN → VALIDATE, independent re-verification, local commit,
+binding behavior contract. `my-implement` retains sequential bounded phases,
+RED → GREEN → VALIDATE, independent re-verification, local commit,
 loop detection, and holistic test behavior.
 
 Record the returned phase commits and evidence in `Execution Log`. If it blocks,

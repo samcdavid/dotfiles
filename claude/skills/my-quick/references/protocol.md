@@ -21,7 +21,7 @@ is the primary gate.
 
 ## Trade-off (explicit)
 
-This skill preserves the global **Separate Implementer from Reviewer** principle: it uses `my-implement` to delegate the one bounded edit task, then independently validates and self-reviews the result. The hand-off step explicitly recommends a follow-up `/my-review` whenever self-review surfaces real findings.
+This skill uses `my-implement` for one bounded edit task, then independently validates and self-reviews the result. The hand-off step explicitly recommends a follow-up `/my-review` whenever self-review surfaces real findings.
 
 ## $ARGUMENTS
 
@@ -83,17 +83,17 @@ Wait for OK before writing any code.
 
 If the mini-plan grows beyond ~3 bullet points, that's a volume signal — escalate back to Step 3.
 
-## Step 5 — Delegate One Bounded Implementation
+## Step 5 — Execute One Bounded Implementation
 
 Create one `my-implement` slice from the approved mini-plan: desired outcome,
 RED test and behavioral contract when behavior changes, GREEN change, allowed
-paths, constraints, and verification commands. Invoke `my-implement`; it sends
-the edit to Claude Haiku using its standard bounded-task protocol. Do not edit
-the code or test directly here.
+paths, constraints, and verification commands. Invoke `my-implement`; it
+performs the edit using its standard bounded-phase protocol. Do not edit the
+code or test directly here.
 
 Independently inspect the returned diff and rerun the mini-plan's verification
 commands. If the same check fails twice after the initial attempt, stop with the
-evidence and recommend the full workflow. Do not re-delegate indefinitely.
+evidence and recommend the full workflow. Do not retry indefinitely.
 
 ## Step 6 — Mechanical Validation
 

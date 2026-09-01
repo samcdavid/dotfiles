@@ -78,8 +78,8 @@ Present the list to the user. Ask if they want to proceed with all updates, or s
 
 For each approved safe update batch, invoke `my-implement` with the native update
 command, manifest/lockfile `allowed_paths`, and install/build/lint/test success
-criteria. It delegates the mechanical update to Claude Haiku; independently
-review the manifest and lockfile diff before proceeding.
+criteria. It performs the mechanical update; independently review the manifest
+and lockfile diff before proceeding.
 
 | Manager | Safe update command |
 |---------|-------------------|

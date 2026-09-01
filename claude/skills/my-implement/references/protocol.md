@@ -1,8 +1,7 @@
 # Protocol — my-implement
 
-`my-implement` owns sequential local implementation. It does not edit production
-code or tests itself: each bounded phase is delegated to Claude Haiku, then the
-orchestrator independently verifies the result and controls retries and commits.
+`my-implement` owns sequential local implementation. It performs each bounded
+phase itself, then verifies the result and controls retries and commits.
 
 ## Inputs and gates
 
@@ -35,26 +34,10 @@ For each phase, in order:
    TDD/direct-edit classification, RED tests when behavioral, GREEN changes,
    behavioral test contracts, allowed paths, architectural constraints,
    verification commands, and explicit success criteria.
-2. Tell the delegate it may change only `allowed_paths`; it must use RED → GREEN
-   → VALIDATE for behavioral work, must not push or make remote changes, and must
-   return commands, changed files, validation outcomes, deviations, and whether
-   the work is ready to commit. Local edits to those paths are already authorized:
-   it must perform them rather than propose them or request permission. Invoke it
-   initially as:
-
-   ```bash
-   claude --model haiku --no-chrome --strict-mcp-config --allowed-tools Bash Edit Read --dangerously-skip-permissions -p "<task to complete>"
-   ```
-
-   Escape or otherwise safely serialize task contents before invoking the shell.
-   If the Haiku command cannot run, the following is an acceptable fallback with
-   the identical serialized task and constraints:
-
-   ```bash
-   codex --model gpt-5.6-luna exec "<task to complete>"
-   ```
-
-   Run exactly one delegate at a time because phases share a working tree.
+2. Perform the phase yourself. Change only `allowed_paths`; use RED → GREEN →
+   VALIDATE for behavioral work; do not push or make remote changes. Record
+   commands, changed files, validation outcomes, deviations, and whether the
+   work is ready to commit. Local edits to those paths are already authorized.
 3. Independently read the diff and rerun every success criterion. Confirm the
    result stays in bounds, delivers the requested outcome, and that behavioral
    tests assert outcomes rather than implementation details.
@@ -70,11 +53,8 @@ validation below completes.
 
 ## Retries and deviations
 
-On a first failure, tighten the task with the observed gap and delegate once
-more. The initial command explicitly allows Bash, Read, and Edit and skips
-permission prompts, so a delegate that only proposes work or asks for
-permission is a failed attempt, not a reason to weaken the task's path or
-no-remote constraints. Treat any repeat root failure
+On a first failure, correct the observed gap and retry once without widening the
+phase's path or no-remote constraints. Treat any repeat root failure
 as an escalation and report
 the goal, evidence, attempts, root-cause theory, and proposed next step. If the
 phase needs paths outside its scope, a changed API, or a design decision, stop
