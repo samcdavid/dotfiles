@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Bash-enabled Haiku delegation
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `bc818e3` | Explicitly allowed Bash for Haiku implementation and isolated review-publication delegates. | The delegates can run shell commands as part of their bounded tasks while their allowed-path, verification, and no-remote constraints remain unchanged. |
+
 ## 2026-09-01 — Lower-context PR feedback and publishing
 
 | Commit | Change | Regression boundary / known-good meaning |
