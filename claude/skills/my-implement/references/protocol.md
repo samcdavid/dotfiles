@@ -43,7 +43,7 @@ For each phase, in order:
    initially as:
 
    ```bash
-   claude --model haiku --no-chrome --strict-mcp-config --dangerously-skip-permissions -p "<task to complete>"
+   claude --model haiku --no-chrome --strict-mcp-config --allowed-tools Bash --dangerously-skip-permissions -p "<task to complete>"
    ```
 
    Escape or otherwise safely serialize task contents before invoking the shell.
@@ -66,9 +66,9 @@ For each phase, in order:
 ## Retries and deviations
 
 On a first failure, tighten the task with the observed gap and delegate once
-more. The initial command already skips permission prompts, so a delegate that
-only proposes work or asks for permission is a failed attempt, not a reason to
-weaken the task's path or no-remote constraints. Treat any repeat root failure
+more. The initial command explicitly allows Bash and skips permission prompts,
+so a delegate that only proposes work or asks for permission is a failed
+attempt, not a reason to weaken the task's path or no-remote constraints. Treat any repeat root failure
 as an escalation and report
 the goal, evidence, attempts, root-cause theory, and proposed next step. If the
 phase needs paths outside its scope, a changed API, or a design decision, stop
