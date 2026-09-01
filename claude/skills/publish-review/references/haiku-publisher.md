@@ -32,8 +32,12 @@ Run one isolated delegate from the repository root. Give it the manifest path,
 not the surrounding conversation:
 
 ```bash
-claude --model haiku --no-chrome --strict-mcp-config --permission-mode bypassPermissions -p "Publish only the prepared review in <manifest-path>. Read that file. Fetch the current PR head, aggregate diff, and filtered review-thread data. Reject the entire publication if EXPECTED_HEAD_SHA is stale or an inline comment is not anchored in the aggregate diff. Deduplicate exact existing comments and normalize replies to their top-level comment. Do not rewrite, add, move, or turn an invalid new inline finding into a PR-level comment. Submit the review atomically, then permitted thread replies. Return only JSON: {head_sha, review_url, posted_inline_count, posted_reply_count, skipped:[{item, reason}], errors:[]}."
+claude --model haiku --no-chrome --strict-mcp-config --dangerously-skip-permissions -p "Publish only the prepared review in <manifest-path>. Read that file. Fetch the current PR head, aggregate diff, and filtered review-thread data. Reject the entire publication if EXPECTED_HEAD_SHA is stale or an inline comment is not anchored in the aggregate diff. Deduplicate exact existing comments and normalize replies to their top-level comment. Do not rewrite, add, move, or turn an invalid new inline finding into a PR-level comment. Submit the review atomically, then permitted thread replies. Return only JSON: {head_sha, review_url, posted_inline_count, posted_reply_count, skipped:[{item, reason}], errors:[]}."
 ```
+
+If the Haiku command cannot run, `codex --model gpt-5.6-luna exec "<same
+publication task>"` is an acceptable fallback. It receives the same manifest
+path and no additional authority.
 
 Before reporting success, check that the returned head SHA matches the one
 validated by the delegate and that posted counts plus skipped items account for
