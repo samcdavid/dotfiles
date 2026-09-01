@@ -63,6 +63,11 @@ For each phase, in order:
    verified bounded diff uncommitted to `autoresearch` for its metric decision.
    Never commit failed or escalated work.
 
+Do not invoke `implement-review` after an individual phase. The independent
+phase verification above is the required per-phase quality gate. Invoke
+`implement-review` once, after every phase has passed and the holistic
+validation below completes.
+
 ## Retries and deviations
 
 On a first failure, tighten the task with the observed gap and delegate once
