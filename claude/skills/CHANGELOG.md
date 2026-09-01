@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — CLI-delegated implementation
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `9fe5b7e` | Made `my-implement` the direct orchestrator and removed its runner, TDD executor, and direct-edit executor agents. | Every bounded implementation or repair edit is delegated sequentially with `claude --model haiku --no-chrome --strict-mcp-config -p "<task to complete>"`, independently verified, and locally committed only after validation. `address-pr-feedback` and `implement-review` invoke `my-implement` for their edits. |
+
 ## 2026-09-01 — High-capability model routing
 
 | Commit | Change | Regression boundary / known-good meaning |
