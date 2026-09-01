@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — High-capability model routing
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `2ffc51c` | Restricted Opus/Sol routing to `my-review`'s high-judgment review dependencies. | Every other skill uses Sonnet and every other pinned Codex agent uses Terra; their declared reasoning effort is unchanged. `adversarial-debate`, architecture/security/performance reviewers, and `finding-verifier-high` retain Opus/Sol because `my-review` dispatches them. |
+
 ## 2026-08-28 — Local migration validation boundary
 
 | Commit | Change | Regression boundary / known-good meaning |
