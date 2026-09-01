@@ -18,6 +18,13 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Lower-context PR feedback and publishing
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `f4cc01d` | Moved PR publication to an isolated Haiku manifest executor and made PR-feedback references, adversarial checks, importance filtering, and post-fix review risk-triggered. | Prepared review text remains immutable during publication; Haiku validates the current head, diff anchors, and deduplication before it posts. Every feedback item still receives evidence-backed triage, while expensive pushback examples, adversarial calls, requirements mapping, and full review passes load only when their risk trigger applies. |
+| `f4cc01d` | Granted the bounded Haiku implementation delegate all Claude CLI permissions. | The delegate still receives explicit allowed paths and no-remote instructions; the orchestrator independently verifies every change and retains the local-commit and remote-action boundaries. |
+
 ## 2026-09-01 — Tiered adversarial challenge
 
 | Commit | Change | Regression boundary / known-good meaning |
