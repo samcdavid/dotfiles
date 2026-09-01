@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Tiered adversarial challenge
+
+| Commit | Change | Regression boundary / known-good meaning |
+|---|---|---|
+| `5c980ec` | Added a Sonnet/Terra adversarial screen, explicit `finding`/`decision`/`citation` modes, evidence fingerprints, falsification records, and materiality-gated Sol escalation. | Direct factual and bounded claims receive an independent, low-cost screen. Sol remains the final challenger for material risk, contradictory evidence, uncertain causality, consequential or irreversible choices, and unresolved screens; its verdict records counterarguments, evidence, falsifiers, and residual uncertainty. |
+
 ## 2026-09-01 — Evidence-scoped workflow routing
 
 | Commit | Change | Regression boundary / known-good meaning |
