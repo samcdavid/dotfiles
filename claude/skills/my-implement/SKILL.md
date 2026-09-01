@@ -21,7 +21,7 @@ Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, sta
   `my-workflow` to record; do not claim workflow completion.
 - Do not dispatch if the plan has no RED tests or success criteria for its next unfinished phase.
 
-Delegate every edit task with `claude --model haiku --no-chrome --strict-mcp-config -p "<task to complete>"`. Keep tasks sequential and bounded; independently verify the resulting diff and checks before committing through `Skill(commit)`. Never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
+Delegate every edit task with `claude --model haiku --no-chrome --strict-mcp-config -p "<task to complete>"`. If that delegate twice produces no edit because it asks for permission or only proposes changes, retry once using its approved-local-edit mode as defined in the protocol. Keep tasks sequential and bounded; independently verify the resulting diff and checks before committing through `Skill(commit)`. Never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
 
 ## Present
 

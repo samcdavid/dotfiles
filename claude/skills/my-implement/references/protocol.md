@@ -38,7 +38,9 @@ For each phase, in order:
 2. Tell the delegate it may change only `allowed_paths`; it must use RED → GREEN
    → VALIDATE for behavioral work, must not push or make remote changes, and must
    return commands, changed files, validation outcomes, deviations, and whether
-   the work is ready to commit. Invoke it exactly as:
+   the work is ready to commit. Local edits to those paths are already authorized:
+   it must perform them rather than propose them or request permission. Invoke it
+   initially as:
 
    ```bash
    claude --model haiku --no-chrome --strict-mcp-config -p "<task to complete>"
@@ -57,8 +59,18 @@ For each phase, in order:
 ## Retries and deviations
 
 On a first failure, tighten the task with the observed gap and delegate once
-more. If the same root failure survives the second attempt, stop and report the
-goal, evidence, attempts, root-cause theory, and a proposed next step. If the
+more. If both attempts returned no edit solely because the delegate proposed
+work or asked for permission, make one final attempt with the same task and
+allowed paths, using:
+
+```bash
+claude --model haiku --no-chrome --strict-mcp-config --permission-mode acceptEdits -p "<task to complete>"
+```
+
+This is an implementation-path fallback, not broader authority: do not add
+paths, enable `bypassPermissions`, or permit remote actions. Treat any other
+repeat root failure, or failure of this fallback, as an escalation and report
+the goal, evidence, attempts, root-cause theory, and proposed next step. If the
 phase needs paths outside its scope, a changed API, or a design decision, stop
 for a major deviation. Minor adaptations may continue when recorded.
 
