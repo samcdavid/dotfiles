@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — End-only implementation review
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `f292f79` | Prohibited per-phase `implement-review` dispatches and required one review after all phases and holistic validation. | Each phase retains independent verification and a scoped local commit; the completed change set then receives the bounded review/repair loop once. |
+
 ## 2026-09-01 — Native Haiku edit tools
 
 | Commit | Change | Regression boundary / known-good meaning |
