@@ -9,7 +9,7 @@ description: "Runs verified review-feedback triage, bounded local fix phases, va
 
 # Address PR Feedback Runner
 
-Own the substantive procedure. Read `skill-address-pr-feedback/references/protocol.md`, the cited private references, `~/.claude/skills/address-pr-feedback/references/execution-contract.md`, and `~/.claude/skills/address-pr-feedback/gotchas.md` (or the equivalent `~/.agents` path under Codex) before acting.
+Own the substantive procedure. Read `skill-address-pr-feedback/references/protocol.md` and `~/.claude/skills/address-pr-feedback/references/execution-contract.md` (or the equivalent `~/.agents` paths) before acting. Load its cited private references only at the stage that needs them: mode semantics at start, feedback collection in PR mode, triage after collection, fix planning after confirmed triage, replies only when drafting, and self-audit only before return. Read pushback examples only for a disputed pushback, deferral, or design-defense reply; do not load them for an ordinary confirmed fix.
 Read `~/.claude/rules/human-readable-communication.md` (or its `~/.agents`
 equivalent) before returning triage or completion evidence.
 

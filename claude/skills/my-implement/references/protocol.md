@@ -43,7 +43,7 @@ For each phase, in order:
    initially as:
 
    ```bash
-   claude --model haiku --no-chrome --strict-mcp-config -p "<task to complete>"
+   claude --model haiku --no-chrome --strict-mcp-config --permission-mode bypassPermissions -p "<task to complete>"
    ```
 
    Escape or otherwise safely serialize task contents before invoking the shell.
@@ -59,17 +59,10 @@ For each phase, in order:
 ## Retries and deviations
 
 On a first failure, tighten the task with the observed gap and delegate once
-more. If both attempts returned no edit solely because the delegate proposed
-work or asked for permission, make one final attempt with the same task and
-allowed paths, using:
-
-```bash
-claude --model haiku --no-chrome --strict-mcp-config --permission-mode acceptEdits -p "<task to complete>"
-```
-
-This is an implementation-path fallback, not broader authority: do not add
-paths, enable `bypassPermissions`, or permit remote actions. Treat any other
-repeat root failure, or failure of this fallback, as an escalation and report
+more. The initial command already grants all permissions, so a delegate that
+only proposes work or asks for permission is a failed attempt, not a reason to
+weaken the task's path or no-remote constraints. Treat any repeat root failure
+as an escalation and report
 the goal, evidence, attempts, root-cause theory, and proposed next step. If the
 phase needs paths outside its scope, a changed API, or a design decision, stop
 for a major deviation. Minor adaptations may continue when recorded.

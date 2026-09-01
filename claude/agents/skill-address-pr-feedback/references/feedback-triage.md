@@ -6,12 +6,14 @@ For every pending comment:
 
 1. Read the comment in code context.
 2. Verify suggested utilities, patterns, library behavior, and caller impact.
-3. Consult `pushback-patterns.md` for calibrated response shapes.
+3. Consult `pushback-patterns.md` only for a proposed pushback, deferral, or
+   substantive design rationale.
 4. Classify as Confirmed Fix, Partially Correct, Question, Scope Decision Required, Valid Deferral, Disagree/Push Back, or Already Addressed.
-5. Screen direct classifications with `adversarial-screen` in `finding` mode and
-   a fingerprinted evidence bundle; escalate only material, contradictory, or
-   disputed-scope classifications to `adversarial-debate` in `finding` or
-   `decision` mode before acting.
+5. Screen only uncertain, behavior-changing, reviewer-challenging, or
+   non-obvious causal classifications with `adversarial-screen` in `finding`
+   mode and a fingerprinted evidence bundle. Escalate only material,
+   contradictory, or disputed-scope classifications to `adversarial-debate` in
+   `finding` or `decision` mode before acting.
 
 ## Scope decision required
 

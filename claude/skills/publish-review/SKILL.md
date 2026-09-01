@@ -6,22 +6,13 @@ description: Publish prepared PR review to GitHub inline comments, thread replie
 
 # Publish Review
 
-Publish already prepared and verified review comments.
+Publish an already prepared review through one isolated Claude Haiku session.
+Invoking this skill is the user's explicit approval to publish; otherwise do
+not invoke it. The wrapper must not reinterpret, rewrite, or invent findings.
 
-## Load Rules
-
-Read `~/.claude/rules/pr-mode-readonly.md`, `~/.claude/rules/pr-cost-control.md`, `~/.claude/rules/review-finding-format.md`, `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex.
-
-For GitHub API mapping details, read `references/protocol.md`.
-
-## Flow
-
-1. Confirm user explicitly wants review published.
-2. Identify PR, head SHA, diff positions, existing threads, prepared comments.
-3. Map each finding to correct inline location or thread reply.
-4. Validate comments deduped, actionable, not already posted.
-5. Publish via `gh api`.
-
-## Output
-
-Return posted review summary, inline comment count, thread replies, and any comments skipped with reasons.
+Create the compact plain-text review manifest described in
+`references/haiku-publisher.md`, then invoke its exact Haiku command. Supply
+only the PR identifier and the prepared review/comment text in that manifest;
+Haiku fetches the current, filtered GitHub state itself. It may publish only the
+manifest's review body, inline comments, and replies. Return its receipt and
+call out any item it rejected instead of silently changing it.
