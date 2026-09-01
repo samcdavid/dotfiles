@@ -4,11 +4,11 @@ The `my-arch-review` wrapper selects the target and presents this result. This r
 
 ## Dedicated audit flow
 
-1. Normalize the target into a PR-safe or local review bundle: target, mode, base/fork reference when relevant, full changed-file list/diff, adjacent source, linked artifacts, and supplied context. Follow the retained protocol's scope and evidence rules exactly.
-2. Dispatch the existing discovery specialists required by the retained protocol (`codebase-locator`, `codebase-analyzer`, and `codebase-pattern-finder`) to map boundaries, dependency direction, and precedent. Preserve their evidence, not raw transcripts.
+1. Normalize the target into a fingerprinted PR-safe or local evidence bundle: target, mode, base/fork reference when relevant, changed-file manifest/diff, adjacent source, linked artifacts, and supplied context. Reuse it under `evidence-bundles.md`; follow the retained protocol's scope and evidence rules exactly.
+2. Triage the manifest for boundary, dependency-direction, or cohesion signals. For a PR/diff with none and no supplied architecture concern, return a documented no-trigger assessment. Otherwise dispatch only the discovery specialist needed to map the unresolved boundary, dependency direction, or precedent. Preserve evidence, not raw transcripts.
 3. Dispatch `arch-reviewer` with the complete bundle and discovery notes. It owns the substantive application of the shared criteria; do not duplicate or weaken them here.
 4. Dedupe and normalize its flat findings. Route every material, high-risk, or uncertain claim to `finding-verifier-high`; route other claims to `finding-verifier-low`, escalating a low-tier `requires escalation` result. Apply verdicts mechanically.
-5. Dispatch `adversarial-debate` for the surviving audit assessment and conclusion. Revise or drop claims it disproves; do not self-adjudicate conflicts.
+5. Dispatch `adversarial-debate` only for surviving material findings, competing interpretations, or a nontrivial recommendation. Revise or drop claims it disproves; do not self-adjudicate conflicts. A no-trigger or no-finding assessment needs no empty expensive challenge.
 6. Render the retained protocol's architectural report shape, separating verified risks from positive patterns and dismissed concerns. Do not offer approval, publish a review, or edit code.
 
 ## Output envelope

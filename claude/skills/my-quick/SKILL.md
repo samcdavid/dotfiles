@@ -16,6 +16,8 @@ Read `~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`,
 `~/.agents/rules/` under Codex. For tripwires or full checklist, read
 `references/protocol.md`, `references/tripwire-signals.md`, and
 `references/self-review-checklist.md`.
+Read `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) before
+running checks.
 
 ## Flow
 

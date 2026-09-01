@@ -18,6 +18,10 @@ trigger checks pass; diff size or an empty candidate-finding list is not enough.
 
 ## Evidence Rules
 
+- Build and reuse one fingerprinted evidence bundle under
+  `~/.claude/rules/evidence-bundles.md` (or `~/.agents/rules/` under Codex).
+  Rebuild it only when its source identity, manifest, requirements source, or
+  feedback index changes.
 - Resolve an issue identifier from the branch name before saying requirements
   are unavailable.
 - Map every available acceptance criterion to the declared delivery increment

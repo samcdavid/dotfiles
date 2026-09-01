@@ -71,6 +71,10 @@ Fetch existing review comments and conversation threads using `~/.claude/rules/p
 
 Build `existing_comments_index`: file path, line range, substance summary, `thread_root_id`. Pass it to reviewer subagents for dedupe and use it again when merging findings.
 
+Build one fingerprinted review bundle: source/range, manifest, diff,
+requirements/delivery context, and comment index. Reuse it until its source,
+working tree, requirements, or feedback changes; see `evidence-bundles.md`.
+
 Compare the PR author's login with the authenticated GitHub login to resolve
 `review_relationship`. A missing login is `unknown_pr`, never an assumption that
 the PR belongs to someone else.
@@ -257,18 +261,18 @@ PR Mode Hard Constraints. The PR diff is the source of truth; the local working 
 
 ### Wave 1 — Research subagents (parallel, one message)
 
-Spawn these so the lens reviewers get shared deep context instead of each re-deriving it:
+Spawn only specialists needed for an unanswered question:
 
-- **codebase-analyzer** — deep-read the changed files AND their callers/consumers; map call chains, data flow, dependencies.
-- **codebase-pattern-finder** — find how similar changes were made elsewhere; specifically whether a utility/function/module already does what new code adds (duplication is a common finding).
-- **docs-researcher** — for new dependencies, or APIs/framework patterns used in ways you're not 100% sure are correct (version-specific behavior). Don't review library usage without checking the actual docs.
+- **codebase-analyzer** — unresolved control/data-flow question.
+- **codebase-pattern-finder** — new behavior, extraction, or suspected duplication.
+- **docs-researcher** — new dependency or uncertain version-specific API/framework behavior.
 - **requirements-tracer** — spawn only if any `tracer_triggers` flag is true. Pass `mode: review`, `scope: wide`, the primary Linear issue ID (if any), the PR number, and `plan_surfaces` if present (it diffs predicted-vs-actual and only re-runs related-issue discovery if they differ meaningfully).
 
 Collect their outputs into a **compact `research_notes` summary** — the load-bearing facts (call chains, duplication hits, doc gaps), not raw dumps. This is what you hand to the lens reviewers.
 
 ### Wave 2 — Lens reviewer subagents (parallel, one message)
 
-For each active lens from Step 2, spawn its reviewer. Send them all in a single message so they run concurrently. Pass each the bundle: `mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `project_context`, the PR-mode constraints block, plus any lens-specific extras.
+For each active lens, spawn its reviewer concurrently with a lens-specific bundle excerpt: triggering/dependent hunks, relevant manifest entries, and cited research facts, plus normal mode/context fields and extras. Pass the full diff only when scope cannot be isolated; reviewers may request a named omitted source.
 
 In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and `diff_text` is `git diff "$fork"`. Passing both means a reviewer that widens its own diff reproduces the branch-wide range instead of falling back to the working tree or the last commit. Research subagents get the same two values for the same reason.
 

@@ -35,9 +35,18 @@ Break the question into composable research areas. For each area, identify:
 
 ## Step 3 — Parallel Discovery
 
-Research every source before concluding anything is unknown — always answer your own question first. Spawn in parallel where possible:
+Build a fingerprinted evidence bundle first: question, explicit artifacts,
+workflow-ledger facts, source identities, and unresolved subquestions. Read
+`~/.claude/rules/evidence-bundles.md` (or `~/.agents/rules/` under Codex). Reuse
+the bundle across the investigation and rebuild it only when an input changes.
 
-- **Codebase** — `codebase-locator` (find all relevant files/directories), `codebase-analyzer` (deep-read key implementations), `codebase-pattern-finder` (related patterns and conventions).
+Research every source needed to answer an unresolved subquestion before
+concluding it is unknown. Spawn only the specialist that answers that specific
+gap; run independent needed specialists in parallel:
+
+- **Codebase** — `codebase-locator` when relevant paths are unknown,
+  `codebase-analyzer` when a call-chain/deep implementation question remains,
+  and `codebase-pattern-finder` only when a convention or duplicate is relevant.
 - **Linear** — the linked issue, its comments, linked issues, and project, for product intent and prior decisions.
 - **Notion** — `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes.
 - **Google Drive** — prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
@@ -67,9 +76,13 @@ Combine sub-agent results into a coherent picture. Resolve any contradictions �
 
 Before declaring research complete, verify the **"Don't stop at external context"** gotcha doesn't apply: if the ticket/spec/research brief named open questions or "verify against code" references, those must be resolved here — not handed back to the user as "remaining research." External context (Linear, Notion) is the starting point, not the deliverable.
 
-## Step 5 — Adversarial Challenge (MANDATORY)
+## Step 5 — Adversarial Challenge
 
-Before finalizing, spawn the **adversarial-debate** agent to challenge your findings.
+Before finalizing, spawn **adversarial-debate** to challenge any inference,
+cross-source interpretation, ambiguity, or material recommendation. For a
+strictly factual inventory whose claims are direct, independently reread
+file/artifact facts with no interpretation, record that direct verification and
+skip the challenge; do not call an expensive challenger merely to repeat facts.
 
 Format your detailed findings as structured claims and pass them to the agent along with:
 - The file paths and code references supporting each finding

@@ -4,11 +4,11 @@ The `security-audit` wrapper selects scope and presents this result. This runner
 
 ## Dedicated audit flow
 
-1. Normalize the target into a PR-safe or local review bundle. Preserve supplied asset, attacker, data-classification, and deployment context as context, not evidence. Follow the retained protocol's scope and evidence rules.
-2. Dispatch the retained protocol's discovery specialists to map entry points, trust boundaries, authorization, data stores, exits, dependencies, and relevant precedent. Use `docs-researcher` only when the retained protocol requires an external dependency/CVE check.
+1. Normalize the target into a PR-safe or local fingerprinted evidence bundle. Preserve supplied asset, attacker, data-classification, and deployment context as context, not evidence; reuse the bundle under `evidence-bundles.md` rather than rediscovering it per stage.
+2. Triage the changed-file manifest for security-relevant entry points, trust boundaries, authorization, data stores, exits, or dependencies. For a PR/diff with none and no supplied threat context, return a documented no-trigger assessment. Otherwise dispatch only the discovery specialists needed to answer an unresolved question. Use `docs-researcher` only for an external dependency/CVE check.
 3. Dispatch `security-reviewer` with the complete bundle and discovery notes. It owns substantive application of the shared criteria; do not copy or weaken them here.
 4. Dedupe and normalize its flat findings. Route every material, high-risk, or uncertain claim to `finding-verifier-high`; route other claims to `finding-verifier-low`, escalating low-tier uncertainty. An exploitability assertion without evidence is not a finding.
-5. Dispatch `adversarial-debate` for the surviving assessment and mitigation recommendations. Apply the independent verdicts instead of resolving disagreement by confidence alone.
+5. Dispatch `adversarial-debate` only for surviving material findings, ambiguity, or mitigation tradeoffs. A no-trigger or no-finding assessment retains its cited triage evidence without an empty expensive challenge.
 6. Render the retained protocol's report shape: affected asset/data, attacker or misuse path, evidence, impact, mitigation, dependencies, positive patterns, and dismissed concerns. Never exploit, edit, publish, or change production.
 
 ## Output envelope

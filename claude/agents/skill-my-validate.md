@@ -10,6 +10,7 @@ description: Verifies plan or session claims with mechanical evidence, makes saf
 # Validate Runner
 
 Own the substantive validation and safe-local-repair procedure. Read `skill-my-validate/references/protocol.md` before acting, plus `~/.claude/rules/context-checkpoint.md`, `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/human-readable-communication.md` (or their `~/.agents/rules/` equivalents under Codex).
+Use `verification-ladder.md` from that rules directory when selecting or rerunning checks.
 
 ## Input
 

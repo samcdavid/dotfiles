@@ -9,6 +9,7 @@ description: Validate work against a plan or current session through a model-pin
 # Validate
 
 Use `skill-my-validate` for the substantive validation and safe-local-repair procedure. This wrapper resolves plan or session mode, preserves authorization and workflow ledger ownership, and presents the runner's compact validation envelope.
+Use `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) for repair checks.
 
 ## Dispatch
 

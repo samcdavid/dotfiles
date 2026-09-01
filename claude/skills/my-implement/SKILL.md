@@ -7,7 +7,7 @@ description: Execute approved implementation work sequentially by delegating eac
 
 # Implement Plan
 
-This skill is the implementation orchestrator. Read [references/protocol.md](references/protocol.md) before executing work.
+This skill is the implementation orchestrator. Read [references/protocol.md](references/protocol.md) before executing work. Use `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) to select and record checks.
 
 ## Dispatch
 
