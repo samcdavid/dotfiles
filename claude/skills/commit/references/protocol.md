@@ -9,7 +9,7 @@ You are a staff-level software engineer committing changes to the codebase. You 
 ## Parse Arguments
 
 `$ARGUMENTS` may contain:
-- A ticket/card reference (e.g. `ENG-123`, a Linear URL, a GitHub issue) → include in Related Cards
+- A ticket/card reference (e.g. `ENG-123`, a Linear URL, a GitHub issue) → use as context for the template's requirement-satisfaction section
 - File paths or globs → only consider those files instead of all changes
 - `--amend` → amend the previous commit instead of creating a new one
 - A brief description of what the change does → use as context for writing the message, not as the message itself
@@ -89,32 +89,25 @@ Show the plan, then proceed immediately. Invoking this skill is the approval —
 
 ## Step 3 — Write Commit Messages
 
-For each commit in the plan, write a message following the `~/.gitmessage` template:
+For each commit in the plan, read `references/gitmessage`. It is a symlink to the repository's canonical `gitmessage`, which RCM installs as `~/.gitmessage` and Git uses through `commit.template`. Follow that template exactly; it is authoritative over examples or prior commit style.
 
 ```
 <subject line>
 
-Why
----
+Why are these changes introduced?
+---------------------------------
 
-- <reason 1>
-- <reason 2>
+<explanation>
 
-How
----
+Why do the changes satisfy the requirements?
+--------------------------------------------
 
-- <approach 1>
-- <approach 2>
+<explanation>
 
-Side Effects
-------------
+How do these changes affect existing functionality?
+---------------------------------------------------
 
-- <side effect 1>
-
-Related Cards
--------------
-
-- [Card Name](url)
+<explanation>
 ```
 
 ### Subject Line
@@ -123,35 +116,24 @@ Related Cards
 - No period at the end
 - Specific — "Add webhook retry logic" not "Update code"
 
-### Why
+### Why are these changes introduced?
 Explain the motivation — not what changed, but **why** it needed to change:
 - What problem was being solved?
 - What user need, bug, or technical debt drove this?
 - What was the previous behavior and why was it insufficient?
 - If the why is obvious from the subject line alone (e.g. a typo fix), a single brief bullet is fine
 
-### How
-Explain the approach taken — the key decisions and tradeoffs:
-- What strategy was chosen and why?
-- What alternatives were considered (if non-obvious)?
-- What's the high-level structure of the change?
-- For multi-file changes, describe how the pieces fit together
-- Don't just restate the diff — explain the thinking behind it
+### Why do the changes satisfy the requirements?
+Explain how the implementation meets the stated requirements. Describe the relevant approach and decisions without merely restating the diff.
 
-### Side Effects
+### How do these changes affect existing functionality?
 Describe anything this change affects beyond its primary intent:
 - Behavior changes in other parts of the system
 - New dependencies introduced
 - Migration or deploy steps required
 - Performance implications
 - Breaking changes to APIs or interfaces
-- If there are genuinely no side effects, write "- None"
-
-### Related Cards
-- If `$ARGUMENTS` included a ticket reference, link it here: `- [ENG-123](url)`
-- If the branch name contains a ticket reference, include it
-- If a Linear ticket is linked, fetch the title for the card name
-- If there are no related cards, write "- None"
+- If there are genuinely no effects, say so plainly
 
 ## Step 4 — Present for Confirmation
 
@@ -216,5 +198,5 @@ After all commits, show a summary:
 - **Never skip hooks** — if a pre-commit hook fails, diagnose and fix the issue rather than using `--no-verify`
 - **Never amend without warning** — if the previous commit is already pushed, warn about force-push implications before amending
 - **Subject line is not the whole message** — a commit that only has a subject line is incomplete. Every commit needs at least a Why section with substance.
-- **Why is not How** — "Refactored the auth module" is How. "Auth module was tightly coupled to the HTTP layer, making it untestable" is Why.
+- **The template is mandatory** — preserve its subject and all three prompted sections; do not substitute legacy headings such as Why, How, Side Effects, or Related Cards.
 - **Ask when unsure** — if a change is ambiguous or you can't determine its purpose from the diff and context, ask for clarification rather than guessing.

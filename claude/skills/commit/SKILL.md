@@ -11,7 +11,7 @@ Create one or more focused commits from the current working tree.
 
 ## Load Rules
 
-Read `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. For project-specific message templates or edge cases, read `references/protocol.md`.
+Read `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. Read `references/protocol.md` for the commit workflow. Before composing any message, read `references/gitmessage` and follow its headings and prompts exactly.
 
 ## Flow
 
@@ -25,4 +25,3 @@ Read `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rule
 ## Output
 
 Return commit SHA(s), subject(s), files included, and any uncommitted changes left behind.
-
