@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-02 — Context-bounded implementation phases
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `1f716cf` | Restored isolated sequential Terra implementation workers, made stack guidance conditional, and added path-aware verification-evidence reuse for quick and whole-plan validation. | Workers receive only the active phase contract and relevant excerpts; existing successful checks are reused only when their covered paths are unchanged, while scope, behavior, commit, and no-remote gates remain independent. Haiku is never an implementation delegate. |
+
 ## 2026-09-02 — Canonical commit-message template
 
 | Commit | Change | Regression boundary / known-good meaning |
