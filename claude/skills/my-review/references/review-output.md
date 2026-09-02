@@ -52,37 +52,31 @@ suppression and modified-existing-test anchors, plus the exact operational
 confirmation still required.
 This is publishing input, not review-body prose. Do not repeat it elsewhere.]
 
-[When a verified Critical or High-risk finding short-circuited lower-tier
-fact-checking, also include one inline comment per Medium/Low-risk candidate:
-**Not independently fact-checked:** A verified higher-priority finding consumed
-the review's fact-checking budget. This observation was not independently
-verified and does not affect the verdict; please assess whether `<observation>`
-at `<path:line>` needs action.]
+### Unverified Actionable Findings
+[Include every actionable finding that did not receive independent verification.
+They are verdict-neutral by default, regardless of severity or risk.]
 
-### Unverified Priority-Bypass Notices
-**Fact-check status:** Medium/Low-risk candidates were not independently
-fact-checked because verified Critical or High-risk findings were prioritized.
-They do not affect the verdict.
-
-#### 1. [Category]: [Concise observation]
-**Risk (unverified lens estimate):** Medium | Low
+#### 1. [Category]: [Concise issue title]
+**Risk:** [High | Medium | Low] · **Confidence:** [0–100] · **Verification:** not independently verified
 **File:** `path/to/file.ext:LINE`
-**Author notice:** [Observation to assess; not a verified defect]
+**Problem:** [What the whole-diff worker observed and why it may matter]
+**Suggested action:** [Concrete code, test, documentation change, decision, or author-only information request]
+**Verdict impact:** Does not affect the verdict without independent verification.
 
 ### Security Deep-Dive
-[Only when returned by the relevant lens]
+[Only when returned by the whole-diff worker]
 
 ### Architecture Assessment
-[Only when returned by the relevant lens]
+[Only when returned by the whole-diff worker]
 
 ### Performance Deep-Dive
-[Only when returned by the relevant lens]
+[Only when returned by the whole-diff worker]
 
 ### Quality Deep-Dive
-[Only when returned by the relevant lens]
+[Only when returned by the whole-diff worker]
 
 ### Requirements Traceability
-[Only when returned by the relevant lens. Show each eventual-feature
+[Only when returned by the whole-diff worker. Show each eventual-feature
 requirement's delivery classification so deferred work is not mistaken for a
 current defect.]
 
@@ -99,6 +93,6 @@ current defect.]
 - [What a verifier dropped and why]
 ```
 
-Omit empty conditional sections. Do not add a "What's Good" section: lens
-reviewers no longer return verified positives, so the orchestrator would be
-inventing praise.
+Omit empty conditional sections. Do not add a "What's Good" section: the
+whole-diff worker does not return verified positives, so the orchestrator would
+be inventing praise.

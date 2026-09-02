@@ -1,6 +1,6 @@
 # PR Author Calibration
 
-Load in PR mode before reviewer fan-out. Ask which skill level to calibrate
+Load in PR mode before dispatching the whole-diff worker. Ask which skill level to calibrate
 against; default to **Lead** if the user skips the question.
 
 | Level | Calibration |

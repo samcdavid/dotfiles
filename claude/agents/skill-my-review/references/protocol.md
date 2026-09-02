@@ -1,6 +1,6 @@
 # Protocol — my-review runner
 
-This runner owns the routing, fan-out, evidence collection, and result-envelope boundary for `my-review`. The substantive review procedure and calibration sources are deliberately retained under `~/.claude/skills/my-review/references/` (or `~/.agents/skills/my-review/references/` under Codex), because existing lens and verifier agents consume them directly.
+This runner owns routing, dispatch, evidence collection, and the result-envelope boundary for `my-review`. The substantive review procedure and calibration sources are deliberately retained under `~/.claude/skills/my-review/references/` (or `~/.agents/skills/my-review/references/` under Codex), because the whole-diff worker and verifier agents consume them directly.
 
 ## Required shared sources
 
@@ -11,7 +11,7 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 1. Normalize the input mode and build the diff source of truth exactly as the shared protocol requires.
 2. Classify aggregate change-set risk and scan human-acknowledgement triggers using
    `change-set-risk.md`. If it qualifies for Low-risk fast approval, return terse
-   `APPROVE` before fan-out.
+   `APPROVE` before review dispatch.
 3. Build at most one deduplicated human acknowledgement containing every
    migration, environment-variable, feature-flag, config, infra/operations, and
    newly added lint/tooling-suppression anchor, plus modified test files that

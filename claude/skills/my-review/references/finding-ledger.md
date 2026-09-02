@@ -44,7 +44,7 @@ settled it.
 
 ## Re-review behavior
 
-Before fan-out or feedback triage, read the latest row for each key. A new
+Before review dispatch or feedback triage, read the latest row for each key. A new
 candidate that matches a prior `resolved` or `deferred` row is not a fresh
 finding and must not consume another repair pass or be re-presented verbatim.
 Report it compactly as an existing disposition when useful.

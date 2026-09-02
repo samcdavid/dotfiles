@@ -24,6 +24,14 @@ def forbid(path: str, snippet: str, description: str) -> list[str]:
     return []
 
 
+def forbid_any(path: str, snippets: tuple[str, ...], description: str) -> list[str]:
+    contents = read(path).lower()
+    matches = [snippet for snippet in snippets if snippet.lower() in contents]
+    if matches:
+        return [f"{path}: contains retired {description}: {', '.join(matches)}"]
+    return []
+
+
 errors: list[str] = []
 protocol = "claude/skills/my-review/references/protocol.md"
 worker = "claude/agents/general-reviewer.md"
@@ -38,6 +46,55 @@ errors += forbid(protocol, "| QA | `quality-reviewer`", "specialist lens dispatc
 errors += forbid(protocol, "| PM | `requirements-reviewer`", "specialist lens dispatch")
 errors += require(worker, "whole aggregate diff", "whole-diff worker contract")
 errors += require(worker, "activated_coverage_criteria", "activated-criteria worker contract")
+
+for path in (
+    protocol,
+    "claude/skills/my-review/references/mode-routing.md",
+    "claude/skills/my-review/references/author-calibration.md",
+    "claude/skills/my-review/references/pr-mode.md",
+    "claude/skills/my-review/references/finding-ledger.md",
+    "claude/agents/skill-my-review.md",
+    "claude/agents/skill-my-review/references/protocol.md",
+):
+    errors += forbid_any(
+        path,
+        ("before fan-out", "before fanout", "review fan-out", "reviewer fan-out"),
+        "fan-out routing guidance",
+    )
+
+errors += forbid_any(
+    protocol,
+    (
+        "specialized lens reviewers",
+        "per-lens reviewers",
+        "research and lens reviewers alike",
+        "affected lens reviewers",
+        "affected lenses",
+    ),
+    "specialist reviewer fan-out guidance",
+)
+errors += forbid_any(
+    "claude/skills/my-review/references/finding-finalization.md",
+    ("after lens reviewers return", "across lenses", "lens reviewers assign", "lens reviewers no longer return"),
+    "multi-lens finalization guidance",
+)
+
+pr_mode = "claude/skills/my-review/references/pr-mode.md"
+errors += require(
+    pr_mode,
+    "whole-diff worker with the full aggregate merge-base-to-PR-HEAD\ndiff",
+    "full aggregate re-review scope",
+)
+errors += require(
+    pr_mode,
+    "never substitutes for the full review scope",
+    "delta-only re-review prohibition",
+)
+errors += forbid_any(
+    pr_mode,
+    ("then review the delta since that sha for regressions",),
+    "delta-only re-review guidance",
+)
 
 for path in (
     "claude/skills/pr-review-loop/references/protocol.md",
@@ -72,7 +129,14 @@ for path in (
     "claude/skills/my-review/references/review-output.md",
 ):
     errors += forbid(path, "**Confidence:** High | Medium | Low", "categorical confidence")
-errors += require("claude/skills/my-review/references/review-output.md", "not independently verified", "unverified output status")
+output_template = "claude/skills/my-review/references/review-output.md"
+errors += require(output_template, "not independently verified", "unverified output status")
+errors += require(output_template, "They are verdict-neutral by default", "default verdict-neutral unverified output")
+errors += forbid_any(
+    output_template,
+    ("priority-bypass", "priority bypass", "fact-checking budget", "unverified lens estimate"),
+    "priority-budget unverified output",
+)
 errors += require("claude/agents/finding-verifier-high.md", "codex-model: gpt-5.6-sol", "Sol high verifier")
 for path in ("claude/agents/general-reviewer.md", "claude/agents/finding-verifier-low.md", "claude/agents/skill-my-review.md"):
     errors += require(path, "codex-model: gpt-5.6-terra", "Terra default routing")

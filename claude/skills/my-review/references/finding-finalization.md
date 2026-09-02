@@ -1,6 +1,6 @@
 # Finding Finalization
 
-Load this after lens reviewers return.
+Load this after the whole-diff worker returns.
 
 This stage is skipped for `change-set-risk.md`'s Low-risk fast approval. The
 PR-only human acknowledgement is finalized separately from findings: one inline
@@ -14,9 +14,9 @@ operational-readiness confirmations use separate stable keys. Continue
 substantive review and always return the independent local code verdict when
 either is pending.
 
-1. Merge duplicate findings across lenses. Keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the merged pair — a finding two lenses read differently gets verified harder, not averaged.
+1. Merge duplicate findings from the whole-diff worker and bounded synthesis. Keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the merged pair — competing framings are not averaged.
 2. Dedupe against existing PR comments and threads.
-3. Confirm every finding carries all three levels from `references/finding-axes.md` — severity (per the shared review rule), risk, and confidence. Lens reviewers assign these; do not silently re-label them here. A fragment missing them means the reviewer ran an old contract — re-dispatch it rather than filling the levels in yourself.
+3. Confirm every finding carries all three levels from `references/finding-axes.md` — severity (per the shared review rule), risk, and confidence. The whole-diff worker assigns these; do not silently re-label them here. A fragment missing them means the worker ran an old contract — re-dispatch it rather than filling the levels in yourself.
 4. Verify only candidates that satisfy `(severity == Critical OR risk == High) AND confidence >= 80` with `finding-verifier-high`. Use `finding-verifier-low` only for an explicit `needs_confirmation` request with a named unresolved fact, exact query, and code-verdict or Opus-eligibility consequence. Every other finding is not independently verified and cannot affect the verdict.
 5. A targeted-Sonnet `requires clarification` becomes a targeted question. Re-route only a cited revision that satisfies the exact Opus predicate; otherwise do not add another verifier pass.
 7. Ask targeted questions only when user-only context determines whether a finding is valid.
@@ -54,4 +54,4 @@ or newly verified, plus any accepted local human-acknowledgement scope reused or
 Do not repeat a prior blocking finding or accepted confirmation verbatim when its
 covered state has not changed.
 
-Output actionable findings first, ordered by severity then risk, with file:line evidence and concrete fixes, decisions, or information requests. Make non-critical issues clearly non-blocking. There is no "What's Good" section — lens reviewers no longer return grounded positives, so writing one would mean inventing unverified praise.
+Output actionable findings first, ordered by severity then risk, with file:line evidence and concrete fixes, decisions, or information requests. Make non-critical issues clearly non-blocking. There is no "What's Good" section — the whole-diff worker does not return grounded positives, so writing one would mean inventing unverified praise.

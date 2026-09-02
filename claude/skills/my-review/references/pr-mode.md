@@ -18,7 +18,7 @@ Hard constraints:
 
 Every subagent prompt in PR mode must receive the same constraints and PR HEAD SHA.
 
-Before fan-out, apply `change-set-risk.md`: migrations, changed environment
+Before dispatch, apply `change-set-risk.md`: migrations, changed environment
 variables, feature flags, other config, infrastructure/operations surfaces, and
 newly added lint/tooling suppressions, and modified test files that existed at
 the comparison base produce one human acknowledgement for the entire PR. New
@@ -48,7 +48,9 @@ blocker survives and operational readiness is confirmed, or no verdict with
 
 Before re-reviewing a PR, record the prior reviewed SHA and a blocker ledger of
 surviving Critical, High-risk findings. Verify those findings against the new HEAD before
-running broad lenses. Then review the delta since that SHA for regressions.
+dispatching the whole-diff worker with the full aggregate merge-base-to-PR-HEAD
+diff. The delta since that SHA may provide supplemental regression context, but
+never substitutes for the full review scope.
 
 A requirement-changing workaround (for example, disabling a capability or moving
 the work to a related ticket) is not a fix unless the linked requirement has an

@@ -6,10 +6,11 @@ Full step flow for this skill. `SKILL.md` is the entrypoint; this file holds the
 
 Perform a thorough, high-quality code review. Works on local changes (unstaged/staged/committed) or GitHub pull requests.
 
-This skill is the **orchestrator**. It fans out research, then specialized lens
-reviewers, and owns triage, deduplication, targeted questions, isolated
-per-finding verification, whole-review challenges, the verdict, and pattern
-capture.
+This skill is the **orchestrator**. It dispatches focused research only for
+unanswered facts, then one whole-diff reviewer that applies every activated
+coverage checklist in retained context. It owns triage, deduplication, targeted
+questions, isolated per-finding verification, whole-review challenges, the
+verdict, and pattern capture.
 
 ## Getting Started
 
@@ -126,11 +127,14 @@ Hard constraints:
 
 State `base_ref`, commit count, and changed-file count in triage.
 
-Research subagents and lenses read changed files fully when needed.
+Research subagents and the whole-diff worker read changed files fully when
+needed.
 
-## Step 2 — Cursory Pass: Identify Review Lenses
+## Step 2 — Cursory Pass: Identify Coverage Criteria
 
-Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sections.
+Select the applicable review **lenses** as coverage criteria for the one
+whole-diff worker and its deep-dive sections; they never select specialist
+reviewer agents in ordinary `my-review`.
 
 ### Inputs
 
@@ -140,7 +144,7 @@ Pick applicable review **lenses**. They drive Step 3 reviewers and deep-dive sec
 - Existing reviewer assignments or labels on the PR
 
 Read `references/review-contract.md` before choosing lenses.
-Read `references/change-set-risk.md` before fan-out; classify the aggregate diff
+Read `references/change-set-risk.md` before dispatch; classify the aggregate diff
 and build the mode-specific human-acknowledgement item from its deterministic triggers.
 Read `references/incremental-delivery.md` and resolve the current change's
 promised increment before building the requirements checklist or choosing a
@@ -162,10 +166,11 @@ requirements verdict.
 | **Migration safety** | Lock risk, down-migration safety, column types, advisory locks, backfillers | Migration files in the diff |
 | **Dependency** | License, maintenance, attack surface of new packages | Lockfile changes, new dependency manifests |
 
-Except for the Low-risk fast-approval path, `general-reviewer` is the baseline
-for every non-empty code diff. Security, QA, Architecture, and Performance run
-only when their concrete trigger signals fire; record each skipped specialist
-and its diff-based reason in the Coverage Manifest.
+Except for the Low-risk fast-approval path, `general-reviewer` is the one
+whole-diff worker for every non-empty code diff. Security, QA, Architecture,
+and Performance are activated coverage criteria only when their concrete trigger
+signals fire; record every inactive criterion and its diff-based reason in the
+Coverage Manifest.
 
 ### Requirements checklist (if a ticket is linked)
 
@@ -188,7 +193,9 @@ is eligible for approval under `references/incremental-delivery.md`.
 
 ### Linear project context
 
-For a project ticket, read `references/project-context.md` and build `project_context` before fan-out. It informs duplicate non-Critical follow-ups only; planned work never accepts a current gap or Critical defect.
+For a project ticket, read `references/project-context.md` and build
+`project_context` before dispatch. It informs duplicate non-Critical follow-ups
+only; planned work never accepts a current gap or Critical defect.
 
 ### Tracer triggers
 
@@ -238,7 +245,7 @@ checks. Return the terse approval directly; Steps 3–8 do not run.
 Before Step 3 in any local mode, apply `change-set-risk.md`'s local checklist
 exactly. Uncovered trigger scope is review item 1. Keep advisory acknowledgement
 separate from operational confirmation for environment variables, feature
-flags, and migrations. Continue fan-out and return the substantive code verdict
+flags, and migrations. Continue the review pipeline and return the substantive code verdict
 in the same pass. Outstanding checklist items never withhold local `APPROVE` or
 manufacture `REQUEST_CHANGES`. Accepted scope suppresses only the matching
 repeat item, never ordinary defect analysis.
@@ -247,13 +254,18 @@ repeat item, never ordinary defect analysis.
 
 Load `references/author-calibration.md`. Skip this step in Local Mode.
 
-## Step 3 — Fan out, then compile
+## Step 3 — Dispatch Research and the Whole-Diff Worker
 
-You orchestrate in two waves: research first (shared context), then specialized per-lens reviewers (parallel), then you merge everything. The deep reasoning lives in the subagents; the synthesis lives here.
+You orchestrate in two waves: focused research first when a fact is unanswered,
+then exactly one `general-reviewer` that reviews the full aggregate diff against
+all activated coverage criteria. The worker retains the full context and returns
+one consolidated finding set; this skill performs the bounded synthesis.
 
 ### PR Mode — Hard Constraints, propagated to every subagent
 
-Subagents will silently read on-disk files unless told not to. In PR mode you MUST paste this block verbatim into **every** subagent prompt (research and lens reviewers alike):
+Subagents will silently read on-disk files unless told not to. In PR mode you
+MUST paste this block verbatim into every research, whole-diff-worker, and
+verifier prompt:
 
 ```
 PR Mode Hard Constraints. The PR diff is the source of truth; the local working tree is NOT (main often lags remote, and the PR branch may not exist locally).
@@ -424,8 +436,8 @@ Before Step 7, confirm:
 - dropped findings have one-line reasons
 - every targeted-Sonnet uncertainty is surfaced as a question, or was re-routed only after cited evidence satisfies the exact Opus predicate
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
-- every priority-bypass notice states that it was not fact-checked and cannot
-  affect the verdict
+- every actionable finding without independent verification is labeled `not
+  independently verified` and is verdict-neutral
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
 - overall change-set risk was classified independently from per-finding risk
 - a required PR human acknowledgement is one deduplicated inline annotation, not
@@ -539,7 +551,7 @@ If no `Worth-considering` items, skip the prompt entirely.
 
 ## References
 
-- `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, every lens reviewer, and both finding verifiers.
+- `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, the whole-diff worker, and both finding verifiers.
 - `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
   approval, the single human acknowledgement, and the approval-gating operational
   readiness confirmation.
@@ -555,13 +567,13 @@ If no `Worth-considering` items, skip the prompt entirely.
 - `references/promoted-misses.md` - audit archive of promoted/discarded entries, split out of `learned-misses.md` to stay under the reference word-budget cap.
 - `references/learned-miss-lifecycle.md` - capture/promote subcommands and queue auto-promotion. Load for those modes and at invocation start.
 - `references/team-review-patterns.md` - team-and-community review patterns distilled from multi-developer PR mining pass. Created by separate mining pass; fold only patterns matching the current diff into `relevant_patterns`.
-- `gotchas.md` - known failure patterns. This skill selects only the entries relevant to the current diff and passes that compact excerpt to the affected lens reviewers.
+- `gotchas.md` - known failure patterns. This skill selects only entries relevant to the current diff and passes that compact excerpt to the whole-diff worker.
 
 ## Gotchas
 
 Read `gotchas.md` before starting work. Pass only trigger-matched excerpts to
-affected lenses. Keep main-flow patterns here; pass investigation patterns only
-to the relevant reviewer.
+the whole-diff worker. Keep main-flow patterns here; pass investigation patterns
+only to the relevant research subagent or verifier.
 
 ## Never auto-publish
 

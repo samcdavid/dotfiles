@@ -21,7 +21,7 @@ Also read `~/.claude/rules/human-readable-communication.md` (or the
 
 ## Input
 
-Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `delivery_increment` is explicit caller scope or `infer`; resolve `infer` under `incremental-delivery.md` before requirements fan-out. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human explicitly confirmed the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
+Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `delivery_increment` is explicit caller scope or `infer`; resolve `infer` under `incremental-delivery.md` before coverage selection and one-worker dispatch. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human explicitly confirmed the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
 
 ## Authority
 
@@ -31,7 +31,7 @@ whole-diff Sonnet worker with every signal-triggered coverage criterion,
 dedupe its consolidated findings, and run exactly one whole-diff synthesis pass
 for cross-file or cross-finding interactions. Any new synthesis candidate must
 then enter the same eligible targeted-verification route. When a
-ledger is available, load its Finding Register before fan-out, but reopen a prior
+ledger is available, load its Finding Register before review dispatch, but reopen a prior
 entry when changed code touches its causal path or provides new evidence. Compute
 the verdict from verified, actionable outcomes only. Drop feedback without a
 concrete author-controlled fix, decision, or information request tied to a
@@ -68,8 +68,8 @@ Return a structured review envelope: mode/diff source, overall change-set risk,
 code verdict, PR approval status or local pre-stage human-acknowledgement status, delivery increment and deferred integration context, coverage manifest, the single PR acknowledgement or local checklist when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
-residual risks/questions, explicitly unverified priority-bypass notices when
-applicable, mode-constrained mechanical verdict, any applicable
+residual risks/questions, explicitly unverified actionable findings that are
+verdict-neutral by default, mode-constrained mechanical verdict, any applicable
 Terra adversarial-screen reconciliation when applicable, and embedded stage outcome. Every finding,
 requirement, and prior match must include its full human-readable meaning before
 its optional key. Do not include raw lens or verifier transcripts.
