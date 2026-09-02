@@ -31,5 +31,7 @@ uncommitted or escalated work, the workflow-stage envelope when embedded, and
 the recommended next command: for an embedded `my-workflow` run, `my-validate`
 exactly once after every implementation phase and the holistic verification gate
 are complete; otherwise `implement-review` exactly once after those conditions.
-Name what each phase delivered and pair every SHA with its subject/effect. Do not
-include raw implementation transcripts.
+Every 10th standalone phase, stop instead and recommend a `/clear` before
+resuming `my-implement` on the same plan. Name what each phase delivered and
+pair every SHA with its subject/effect. Do not include raw implementation
+transcripts.

@@ -9,7 +9,11 @@ commits. Workers never share a working tree concurrently.
 Read the plan index, the next unfinished phase, and only the test-strategy and
 architecture material that constrains that phase. Keep the whole-plan success
 criteria for completion. In embedded workflow mode, the `Implementation Plan`,
-`Test Strategy`, and `Architecture` sections have those roles. Refuse to execute
+`Test Strategy`, and `Architecture` sections have those roles. Read the plan or
+ledger file once per phase, not once per turn — hold the current phase's slice
+in working memory for the rest of that phase instead of re-reading it. Do not
+re-read a source file the current phase already edited; trust the worker's
+returned diff and the verification command's output instead. Refuse to execute
 a behavioral phase without an honest RED test, matching behavioral contract,
 allowed paths, and mechanical success criteria. Split a phase that contains more
 than one small behavior.
@@ -55,13 +59,23 @@ For each phase, in order:
    If that worker cannot run, perform the same bounded phase directly. Never
    delegate implementation to Haiku. Run exactly one worker at a time.
 3. Independently inspect the changed diff and evidence. Confirm scope, outcome,
-   and behavior-focused tests. Re-run only a success criterion without current
-   evidence after the last relevant edit; otherwise reuse the recorded command,
-   commit, covered paths, and result. Record that evidence for callers.
+   and behavior-focused tests from the worker's returned diff and command output
+   — do not re-`Read` the edited file to check the edit landed; a successful
+   Edit/Write plus passing verification output already proves it. Re-run only a
+   success criterion without current evidence after the last relevant edit;
+   otherwise reuse the recorded command, commit, covered paths, and result.
+   Record that evidence for callers.
 4. If verification passes, invoke `Skill(commit)` scoped to the phase's paths,
    mark the phase done, and advance. With `commit_policy: defer`, return the
    verified bounded diff uncommitted to `autoresearch` for its metric decision.
    Never commit failed or escalated work.
+5. After every 10th phase committed in this run (10, 20, 30, ...), stop instead
+   of dispatching the next worker. Report the phases completed so far, their
+   commit SHAs/subjects, and any carried deviations, then tell the caller their
+   context is safe to `/clear` and to resume with the same `plan_path` — the
+   next invocation picks up at the first unfinished phase from the plan/ledger
+   status. Skip this checkpoint in embedded `my-workflow` mode; the workflow's
+   own per-stage return already bounds context growth.
 
 Do not invoke `implement-review` after an individual phase. The independent
 phase verification above is the required per-phase quality gate. Invoke
