@@ -18,6 +18,13 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Cost-bounded whole-change review
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `e9999ff` | Routed `my-review` lens work and lower-tier verification to Terra, kept every pass on the full aggregate diff, and reserved Sol for isolated Critical or High-risk findings. | Supporting evidence and diff-matched patterns may be reused by fingerprint, but no review pass narrows to intervening commits. Specialist lenses require concrete triggers; the general pass remains the baseline. |
+| `e5f855e` | Added priority short-circuiting after high-tier verification. | When a Critical or High-risk finding survives, Medium/Low-risk candidates are not independently fact-checked; PRs receive explicitly unverified inline author notices and local reviews receive equivalent anchored notices. Those notices never affect the verdict. |
+
 ## 2026-09-01 — Whole-plan validation before review
 
 | Commit | Change | Regression boundary / known-good meaning |
