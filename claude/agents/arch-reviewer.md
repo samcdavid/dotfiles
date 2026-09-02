@@ -36,7 +36,7 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 3. Read the changed files and enough of their neighbors to judge boundaries (use `research_notes` for call chains rather than re-deriving them).
 4. **Map dependency directions** between the changed modules. Evaluate layering and cohesion. Identify hidden coupling and contract design. Distinguish **desirable** deviations from established convention (a deliberate, well-reasoned improvement) from **undesirable** ones (drift, shortcut, boundary violation).
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
-6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
+6. Assign **severity, risk, and numeric confidence (`0`–`100`)** per `~/.claude/skills/my-review/references/finding-axes.md`; cap confidence at 79 and name the missing fact when a causal prerequisite is unchecked.
 
 ## Output — return this fragment, nothing more
 
@@ -49,7 +49,7 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Lens:** Architecture
 - **Severity:** Critical | Non-blocking | Question | Nit
 - **Risk:** High | Medium | Low
-- **Confidence:** High | Medium | Low
+- **Confidence:** integer 0–100
 - **File:** `path:LINE`
 - **Changed-line causal link:** [why this aggregate PR change causes the issue]
 - **Problem:** [boundary/coupling/direction issue and why it matters long-term]

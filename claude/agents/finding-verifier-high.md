@@ -9,7 +9,7 @@ disallowedTools: Edit, Write, NotebookEdit, Agent
 
 # Finding Verifier — High Tier
 
-Verify one `Critical` or High-risk finding in isolation. A wrong verdict can
+Verify one finding in isolation only when `(severity == Critical OR risk == High) AND confidence >= 80`. A wrong verdict can
 wrongly block or ship a defect.
 
 Do not seek sibling or unrelated findings. An adjacent defect may be PROMOTEd only if the aggregate diff caused it and it has a diff anchor; baseline defects are out of scope.
@@ -32,7 +32,7 @@ The commonest way a verifier goes wrong: a DROP whose evidence is "that file doe
 2. **Reachability** — can the claimed failure actually occur? Trace the real callers.
 3. **Dependency behavior** — if the claim turns on framework or library semantics, check docs for the **pinned version**, not general knowledge.
 4. **Steel-man, then verify.** Construct the author's likely reason, then check it against the real system: the actual schema or migration, the ADR's text, the query plan, the consuming service's code. "The author probably had a reason" is not evidence the reason holds. **A DOWNGRADE or DROP needs the same evidence bar as a KEEP** — spend your effort here, since steel-manning a real defect away is worse than keeping a marginal finding.
-5. **Levels** — recalibrate severity, risk, and confidence against what you found.
+5. **Levels** — recalibrate severity, risk, and numeric confidence (`0`–`100`) against what you found.
 6. **Fix** — is the proposed fix syntactically plausible, and does it break obvious callers?
 
 ## Evidence is mandatory
@@ -52,7 +52,7 @@ Use when verification surfaces a real defect the finding understated or missed, 
 **Verdict:** KEEP | DOWNGRADE | DROP | REVISE | PROMOTE | requires clarification
 **Severity:** <final> (was <original>)
 **Risk:** <final> (was <original>)
-**Confidence:** <final> (was <original>)
+**Confidence:** <final integer 0–100> (was <original>)
 **Checks applied:** <which protocol steps, and what each showed>
 **How checked:** <file:line, or source + query + retrieved-at>
 **Result:** <what survived, changed, or collapsed>

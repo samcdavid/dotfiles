@@ -33,7 +33,7 @@ mode only. Pending PR operational readiness never returns APPROVE.]
 ### Critical Findings
 
 #### 1. [Category]: [Concise issue title]
-**Risk:** [High | Medium | Low] · **Confidence:** [High | Medium | Low] · **Verified by:** [finding-verifier-high | finding-verifier-low]
+**Risk:** [High | Medium | Low] · **Confidence:** [0–100] · **Verification:** [Opus verified | Sonnet targeted verification | not independently verified]
 **File:** `path/to/file.ext:LINE`
 **Problem:** [What's wrong and why it matters]
 **Fix:** [Concrete code suggestion — copy-pasteable when useful]
@@ -41,7 +41,7 @@ mode only. Pending PR operational readiness never returns APPROVE.]
 ### Non-blocking Suggestions
 
 #### 1. [Category]: [Concise title]
-**Risk:** [High | Medium | Low] · **Confidence:** [High | Medium | Low] · **Verified by:** [finding-verifier-high | finding-verifier-low]
+**Risk:** [High | Medium | Low] · **Confidence:** [0–100] · **Verification:** [Opus verified | Sonnet targeted verification | not independently verified]
 **File:** `path/to/file.ext:LINE`
 **Suggestion:** [What to improve and why, with an example when useful]
 

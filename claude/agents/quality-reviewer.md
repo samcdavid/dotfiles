@@ -35,7 +35,7 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 3. Read the changed files **and their tests** (PR-safe in PR mode).
 4. Identify functions with branching logic that lack unit tests. Flag **vacuously passing** tests (assert nothing meaningful, or assert on a mock's own return). Audit mock/stub **fidelity** — does the stub behave like the real dependency? Assess flakiness risk (time, ordering, network, shared state). Check whether the tests actually catch the bug/feature they claim to.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
-6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
+6. Assign **severity, risk, and numeric confidence (`0`–`100`)** per `~/.claude/skills/my-review/references/finding-axes.md`; cap confidence at 79 and name the missing fact when a causal prerequisite is unchecked.
 
 ## Output — return this fragment, nothing more
 
@@ -48,7 +48,7 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Lens:** QA
 - **Severity:** Critical | Non-blocking | Question | Nit
 - **Risk:** High | Medium | Low
-- **Confidence:** High | Medium | Low
+- **Confidence:** integer 0–100
 - **File:** `path:LINE`
 - **Changed-line causal link:** [why this aggregate PR change causes the issue]
 - **Problem:** [coverage gap / vacuous test / low-fidelity mock and why it matters]

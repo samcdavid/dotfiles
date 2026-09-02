@@ -56,14 +56,19 @@ Frontmatter conventions:
 Automation:
 
 - `.githooks/pre-commit` runs `scripts/check-agent-drift`; this repo configures `core.hooksPath=.githooks`.
-- In `my-review`, Terra performs lens discovery and low-tier verification; Sol is
-  reserved for isolated Critical or High-risk findings through
-  `finding-verifier-high`. `adversarial-debate` remains Sol-capable for the
-  workflows that explicitly route material findings to it.
+- In `my-review`, Terra performs discovery and one whole-diff review. Sol is
+  reserved for isolated findings only when `(severity == Critical OR risk ==
+  High) AND confidence >= 80`, through `finding-verifier-high`.
 - `scripts/sync-codex-agents` maps a source agent's `effort:` straight to `model_reasoning_effort`, falling back to `model: opus` -> `xhigh` for agents that have not moved to `effort:`.
 - A per-agent `codex-model:` in agent frontmatter pins that one agent's Codex model and takes precedence over the repo-wide `CODEX_CRITICAL_MODEL` env var. It exists because a tiered agent pair needs two different Codex models, which a single env var cannot express — `finding-verifier-high` pins `gpt-5.6-sol` and `finding-verifier-low` pins `gpt-5.6-terra`. `check-agent-drift` fails if a `codex-model:` and its generated `model =` disagree, since a silent mismatch would collapse both tiers onto one model with no visible symptom.
 - The `my-review` lens agents must point at each audit skill's `references/protocol.md`, not its `SKILL.md`. The entrypoint holds no checklist; the criteria live in the protocol file.
-- `my-review` splits reporting from verifying. Lens agents report a **flat** findings list, each finding tagged with severity, risk, and confidence per `claude/skills/my-review/references/finding-axes.md`; they do not tier, filter, or verify their own findings, and they no longer return "What's Good". Step 6 dispatches **one verifier per surviving finding** — never batched — routed mechanically: `finding-verifier-high` only for Critical or High-risk claims, `finding-verifier-low` otherwise. Low-tier uncertainty becomes a targeted clarification rather than a Sol escalation. `adversarial-screen` handles answer and APPROVE/COMMENT challenges in `my-review`.
+- `my-review` uses one whole-diff worker that reports a **flat** findings list,
+  with severity, risk, and numeric confidence per
+  `claude/skills/my-review/references/finding-axes.md`. It does not return
+  "What's Good". Step 6 verifies only the confidence-gated Opus candidates or
+  an explicit targeted-Sonnet `needs_confirmation` request; all other findings
+  remain visibly unverified and verdict-neutral. `adversarial-screen` handles
+  answer and APPROVE/COMMENT challenges in `my-review`.
 
 ## Portability
 

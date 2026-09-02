@@ -53,7 +53,7 @@ In local mode, `diff_text` is fork-to-HEAD plus uncommitted changes; re-derive o
 4. **Dedupe** against `existing_comments_index`: skip anything already threaded on the same `(file, line, substance)`. For an incomplete thread, record with `add_to_thread: <thread_root_id>`.
 5. **Ground every finding** in specific lines of the diff. No "this is generally true" findings.
 6. Calibrate tone to `author_calibration` (Junior → educational; Senior+ → concise, subtle bugs only).
-7. **Assign severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
+7. **Assign severity, risk, and numeric confidence (`0`–`100`)** per `~/.claude/skills/my-review/references/finding-axes.md`. Cap it at 79 when a causal prerequisite is unchecked, name that fact, and set `verification_need: needs_confirmation` only with the exact query and routing consequence required there.
 
 ## Lens focus
 
@@ -77,7 +77,8 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Lens:** [Backend | Ops | ...]
 - **Severity:** Critical | Non-blocking | Question | Nit
 - **Risk:** High | Medium | Low
-- **Confidence:** High | Medium | Low
+- **Confidence:** integer 0–100
+- **Verification need:** none | needs_confirmation (include named fact, exact query, and routing consequence when needed)
 - **File:** `path:LINE`
 - **Changed-line causal link:** [why this aggregate PR change causes the issue]
 - **Problem:** [what's wrong and why it matters]

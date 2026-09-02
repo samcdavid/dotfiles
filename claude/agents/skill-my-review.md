@@ -30,7 +30,7 @@ classify overall change-set risk, create a coverage manifest, route one
 whole-diff Sonnet worker with every signal-triggered coverage criterion,
 dedupe its consolidated findings, and run exactly one whole-diff synthesis pass
 for cross-file or cross-finding interactions. Any new synthesis candidate must
-then receive the same isolated verifier dispatch as every other finding. When a
+then enter the same eligible targeted-verification route. When a
 ledger is available, load its Finding Register before fan-out, but reopen a prior
 entry when changed code touches its causal path or provides new evidence. Compute
 the verdict from verified, actionable outcomes only. Drop feedback without a

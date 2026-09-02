@@ -1,76 +1,36 @@
 # Finding Axes — severity, risk, confidence
 
-Every finding a lens reviewer emits carries three independent levels. Lens reviewers **assign** them; the per-finding verifiers (`finding-verifier-high`, `finding-verifier-low`) may **revise** them with cited evidence. Nobody else adjusts them silently.
+Every actionable finding carries three independent axes. The whole-diff worker assigns them; an eligible verifier may revise them only with cited evidence.
 
-Read this file if you are a lens reviewer, a finding verifier, or the `my-review` orchestrator routing findings in Step 6.
-
-Axes apply only after a candidate passes `review-contract.md`'s Actionability
-Gate. Do not assign levels to an observation, preference, generalized suggestion,
-or speculative concern without a present changed-line consequence and a concrete
-author-controlled fix, decision, or specific information request.
-
-## The three axes
-
-They answer three different questions. Do not collapse them — a confidently-identified nit and a speculative catastrophe are both "medium" on any single combined score, and that is exactly the distinction the routing depends on.
-
-| Axis | Question it answers | Values |
+| Axis | Question | Values |
 |---|---|---|
-| **Severity** | If this claim is true, how bad is the impact? | `Critical` · `Non-blocking` · `Question` · `Nit` |
-| **Risk** | How likely is the failure to actually occur, and how wide is the blast radius when it does? | `High` · `Medium` · `Low` |
-| **Confidence** | How sure are you that the claim itself is true? | `High` · `Medium` · `Low` |
+| Severity | If true, how bad is the impact? | `Critical` · `Non-blocking` · `Question` · `Nit` |
+| Risk | How likely and wide is the failure, if true? | `High` · `Medium` · `Low` |
+| Confidence | How certain is the factual claim? | integer `0`–`100` |
 
-### Severity
+Severity is conditional impact. Risk is likelihood times blast radius assuming the claim is true. Confidence is a calibrated factual-belief estimate; do not collapse these axes.
 
-Use the shared vocabulary from `~/.claude/rules/review-finding-format.md` — that rule is the single source of truth for the `Critical` impact bar, and this file does not restate or relax it. `Critical` denotes the potential impact of likely production breakage, data loss/corruption/exposure, exploitable security or privacy risk, likely runtime break in a cross-service/API/persistence contract, or an omitted must-have acceptance criterion. It is not, by itself, a request-for-changes verdict.
+## Confidence calibration
 
-Severity is about impact **conditional on the claim being true**. Do not discount it because you are unsure — that is what `Confidence` is for.
+- `80`–`100`: the defect is directly visible after checking the relevant code and causal prerequisites.
+- `50`–`79`: the code suggests the claim, but one prerequisite remains unchecked.
+- `0`–`49`: the claim is substantially inferred or depends on unavailable facts.
 
-### Risk
+When reachability, a caller, schema, configuration, dependency behavior, or pinned-version semantic is not directly checked, confidence **must be at most 79**. Name the missing fact; never round it up merely to obtain deeper review.
 
-Likelihood × blast radius, assuming the claim is true.
+## Verification routing
 
-- `High` — triggers on a common path, or on an uncommon path whose failure is wide (all tenants, all requests, silent data corruption).
-- `Medium` — triggers under a realistic but narrower condition, or the blast radius is contained to one workflow or one tenant.
-- `Low` — needs an unlikely combination of conditions, or the effect is cosmetic, recoverable, or trivially retried.
-
-A `Nit` can carry `Low` risk and a `Critical` can carry `High` risk, but they are not locked together: a `Non-blocking` maintainability finding on a hot cross-service path can be `High` risk, and a `Critical`-severity claim guarded by a feature flag defaulting off can be `Low` risk. Findings block on the combination of verified `Critical` severity and `High` risk; otherwise the finding is non-blocking. Separately, `change-set-risk.md` may withhold approval pending human operational-readiness confirmation without turning that handoff into a finding or risk escalation. Say which and why.
-
-### Confidence
-
-Your calibrated belief that the claim is factually correct — read the actual code, not the diff hunk alone, before setting this.
-
-- `High` — you read the relevant code and the defect is visible in it. You could point at the line and defend it.
-- `Medium` — the code supports the claim, but it depends on a caller, a schema, a config value, or a library behavior you did not fully verify.
-- `Low` — pattern-matched, inferred from naming, or dependent on runtime/production facts you could not reach.
-
-`Low` confidence is a legitimate, useful answer. Do not inflate to `High` for the appearance of rigor, and do not drop a genuinely important finding just because confidence is `Low` — that is what the verifier pass exists to resolve. Never present an unverified claim as verified.
-
-## Routing (orchestrator, Step 6)
-
-Each finding is dispatched **individually** — one verifier per finding, never batched — to exactly one tier:
+The default review is already a complete Sonnet whole-diff review. Do not add a verifier merely because it emitted a finding.
 
 ```
-HIGH TIER -> finding-verifier-high   if ANY of:
-    severity   == Critical
-    risk       == High
+Opus: finding-verifier-high
+  if (severity == Critical OR risk == High) AND confidence >= 80
 
-LOW TIER  -> finding-verifier-low    otherwise
+Targeted Sonnet: finding-verifier-low
+  only if verification_need == needs_confirmation AND all of:
+  - a named unresolved fact
+  - an exact verification query
+  - routing_consequence == code verdict OR Opus eligibility
 ```
 
-Why this shape: Sol verification is bought only by the impact or blast radius of
-a wrong verdict. A `Critical` warrants deep verification because a false
-negative can ship a severe defect, and `High` risk earns it on blast radius
-alone. Low confidence alone stays in the Terra tier; if it cannot be resolved
-there, surface the exact missing evidence as a clarification rather than
-spending Sol on a non-Critical, non-High-risk claim.
-
-Compute the tier mechanically from the three levels. Do not hand-pick a tier because a finding "feels" important — if it feels important, that belongs in the levels themselves.
-
-## Escalation from the low tier
-
-`finding-verifier-low` returns `requires clarification` when honest verification
-needs depth beyond its brief (cross-service tracing, query plans,
-library-version semantics, or a long call chain). It must state the exact fact
-and query needed; it must not escalate a non-Critical, non-High-risk finding to
-Sol. If the low-tier verifier cites evidence that revises a finding to Critical
-or High risk, the orchestrator re-routes that revised finding to the high tier.
+All other actionable findings remain **not independently verified** and are verdict-neutral. Ask an author-only question when only the author can supply the missing fact. The targeted Sonnet verifier may revise axes with evidence; send its result to Opus only when the revised finding satisfies the exact Opus predicate. Never add a second verifier otherwise.

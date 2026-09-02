@@ -10,7 +10,7 @@ when_to_use: "Use when the user asks to review their changes, diff, branch, or a
 # Code Review
 
 Use `skill-my-review` for substantive review routing, evidence assembly,
-whole-diff synthesis, per-finding verification, and verdict construction. This
+whole-diff synthesis, targeted verification, and verdict construction. This
 wrapper determines the source and authorization context, preserves the
 user-facing publication boundary, and renders the runner's structured review
 envelope.

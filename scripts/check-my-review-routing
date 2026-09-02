@@ -53,6 +53,29 @@ errors += forbid(
     "`/my-review <lens>`",
     "lens-scoped my-review invocation",
 )
+
+axes = "claude/skills/my-review/references/finding-axes.md"
+errors += require(axes, "integer `0`–`100`", "numeric confidence")
+errors += require(axes, "must be at most 79", "unchecked-prerequisite confidence cap")
+predicate = "(severity == Critical OR risk == High) AND confidence >= 80"
+errors += require(axes, predicate, "exact Opus predicate")
+errors += require(protocol, predicate, "exact Opus dispatch predicate")
+errors += require(axes, "verification_need == needs_confirmation", "targeted Sonnet marker")
+errors += require(axes, "named unresolved fact", "targeted Sonnet fact")
+errors += require(axes, "exact verification query", "targeted Sonnet query")
+errors += require(axes, "code verdict OR Opus eligibility", "targeted Sonnet consequence")
+errors += forbid(protocol, "Only if no Critical/High-risk finding survives", "automatic lower-tier fallback")
+for path in (
+    "claude/agents/general-reviewer.md",
+    "claude/agents/finding-verifier-high.md",
+    "claude/agents/finding-verifier-low.md",
+    "claude/skills/my-review/references/review-output.md",
+):
+    errors += forbid(path, "**Confidence:** High | Medium | Low", "categorical confidence")
+errors += require("claude/skills/my-review/references/review-output.md", "not independently verified", "unverified output status")
+errors += require("claude/agents/finding-verifier-high.md", "codex-model: gpt-5.6-sol", "Sol high verifier")
+for path in ("claude/agents/general-reviewer.md", "claude/agents/finding-verifier-low.md", "claude/agents/skill-my-review.md"):
+    errors += require(path, "codex-model: gpt-5.6-terra", "Terra default routing")
 errors += forbid(
     "claude/skills/my-quick/references/tripwire-signals.md",
     "`/my-review security`",

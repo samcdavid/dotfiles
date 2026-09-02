@@ -36,7 +36,7 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 3. Read the changed files (PR-safe in PR mode).
 4. Identify queries on large tables, hot-path computation, N+1 access, and unbounded iteration. **Verify index usage matches operator semantics** (e.g. the index supports the actual `WHERE`/`ORDER BY`, not just the column). Check caching strategy and invalidation. Estimate load impact where the diff gives you enough to reason about it.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.
-6. Assign **severity, risk, and confidence** per `~/.claude/skills/my-review/references/finding-axes.md`. The orchestrator routes each finding to its verifier from these levels, so a mislabelled level buys the wrong depth of scrutiny. Report confidence honestly — `Low` is a valid answer; inflating it to look rigorous is the failure mode.
+6. Assign **severity, risk, and numeric confidence (`0`–`100`)** per `~/.claude/skills/my-review/references/finding-axes.md`; cap confidence at 79 and name the missing fact when a causal prerequisite is unchecked.
 
 ## Output — return this fragment, nothing more
 
@@ -49,7 +49,7 @@ One flat list. Do not group, tier, or rank — the three levels carry the judgme
 - **Lens:** Performance
 - **Severity:** Critical | Non-blocking | Question | Nit
 - **Risk:** High | Medium | Low
-- **Confidence:** High | Medium | Low
+- **Confidence:** integer 0–100
 - **File:** `path:LINE`
 - **Changed-line causal link:** [why this aggregate PR change causes the issue]
 - **Problem:** [the hot path / query / unbounded work and its impact]

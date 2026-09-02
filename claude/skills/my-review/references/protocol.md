@@ -353,48 +353,35 @@ Read `references/review-contract.md` and run its bounded synthesis pass before
 verifier routing. Synthesis candidates enter the normal verifier route; they
 never change a verdict directly.
 
-**Every** finding is verified on its own, by its own agent, with no knowledge of the others. Nothing is batched. A shared-context batch pass is a one-way valve — it can talk a real defect down but rarely talks one up, because the cheap findings around it set the tone. Isolation is what lets an under-classified defect get promoted instead of steel-manned away.
+The complete Sonnet whole-diff review is the default evidence pass. Verification is exceptional and isolated: it may deepen an eligible high-impact finding or resolve an explicitly named fact whose answer could change the verdict or Opus eligibility. Do not automatically verify every finding.
 
 ### Route each finding to a tier
 
 Read `references/finding-axes.md` and compute the tier mechanically from the finding's three levels:
 
 ```
-finding-verifier-high  if severity == Critical
-                       OR risk == High
-finding-verifier-low   otherwise
+finding-verifier-high  if (severity == Critical OR risk == High) AND confidence >= 80
+finding-verifier-low   only if verification_need == needs_confirmation, with a named unresolved fact, exact verification query, and a code-verdict or Opus-eligibility routing consequence
 ```
 
-Do not hand-pick a tier because a finding feels important — if it feels important, fix the levels and let the rule follow. Do not collapse everything to the high tier "to be safe"; that discards the cost control this split exists for.
+An unchecked causal prerequisite caps confidence at 79, preventing an Opus escalation until evidence exists. All other findings remain explicitly unverified and cannot affect the verdict.
 
 ### Dispatch
 
-Dispatch all Critical/High-risk candidates to the high tier in parallel before
-spending on lower-risk candidates.
-
-If any Critical or High-risk finding survives, do not dispatch Medium/Low-risk
-candidates to `finding-verifier-low` or `this-important`. In PR mode, prepare
-one inline notice per candidate; in local modes return anchored notices. Each
-states it was not independently fact-checked because a verified higher-priority
-finding was prioritized, cannot affect the verdict, and is an observation for
-the author to assess. Record the short-circuit in the manifest and output.
-
-Only if no Critical/High-risk finding survives, dispatch lower-tier candidates
-in parallel. Pass each verifier:
+Dispatch eligible Opus candidates in parallel. Dispatch targeted Sonnet candidates only when they meet every `needs_confirmation` condition; all other findings remain not independently verified. Pass each verifier:
 
 - `mode`, and the PR diff or local diff source of truth (plus `pr_head_sha`/`repo` and the PR-mode constraints block in PR mode)
 - that finding's file paths and lines only
-- the finding's claim, diff anchor, changed-line causal link, severity, risk, confidence, evidence, and proposed fix
+- the finding's claim, diff anchor, changed-line causal link, severity, risk, numeric confidence, evidence, and proposed fix
+- for targeted Sonnet only: `needs_confirmation`, named unresolved fact, exact verification query, and routing consequence
 - requirements checklist, if present and relevant to that finding
 - **nothing about the other findings** — each dispatch verifies its own claim in isolation so no verdict can be biased off a sibling
 
 High-tier returns KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`. Low-tier returns the same minus PROMOTE, plus `requires clarification`. Both must cite evidence (`file:line`, or `source` + `query` + `retrieved-at`).
 
-### Handle low-tier uncertainty
+### Handle targeted-Sonnet uncertainty
 
-A low-tier `requires clarification` becomes a targeted question; do not
-re-dispatch a non-Critical, non-High-risk finding to Sol. Re-dispatch only a
-`REVISE` supported by evidence that makes it Critical or High risk.
+A targeted-Sonnet `requires clarification` becomes a targeted question. Re-route only a `REVISE` supported by evidence that satisfies the exact Opus predicate.
 
 Never treat uncertainty as a DROP. A high-tier `requires clarification` is a
 question, not a loop (see `~/.claude/rules/loop-detection.md`).
@@ -422,14 +409,11 @@ preferences, generalized advice, speculative future concerns, and open-ended
 questions. Do not move rejected material into residual risk, deep-dive prose, or
 Nits.
 
-Without a priority short-circuit, run `/this-important strict` (unless the user
-asked for a broader sweep) on remaining **low-tier findings only**. It has no
-PROMOTE verdict and must not downgrade high-tier KEEP or PROMOTE.
+Run `/this-important strict` (unless the user asked for a broader sweep) on remaining unverified non-blocking findings. It has no PROMOTE verdict and must not downgrade an Opus-verified KEEP or PROMOTE.
 
 Before Step 7, confirm:
 
-- every Critical/High-risk candidate got a high-tier verifier; every lower-tier
-  candidate did too unless the short-circuit produced an unverified notice
+- every Opus-eligible candidate got a high-tier verifier; targeted Sonnet work had every required `needs_confirmation` field; all others are labeled unverified
 - no finding duplicates an existing PR thread
 - every PR finding has an aggregate-diff anchor and causal link; baseline-only issues never survive
 - every finding is grounded in the diff or verified source
@@ -438,8 +422,7 @@ Before Step 7, confirm:
   blocks the declared increment rather than merely belonging to the eventual
   feature
 - dropped findings have one-line reasons
-- every low-tier uncertainty is surfaced as a question, or was re-routed only
-  after cited evidence revised the finding to Critical or High risk
+- every targeted-Sonnet uncertainty is surfaced as a question, or was re-routed only after cited evidence satisfies the exact Opus predicate
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
 - every priority-bypass notice states that it was not fact-checked and cannot
   affect the verdict
