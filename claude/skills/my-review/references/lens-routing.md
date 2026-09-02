@@ -11,5 +11,6 @@ Activate lenses by changed surface:
 - Requirements: linked ticket, spec, acceptance criteria, product-facing behavior.
 - General reviewer: backend, frontend, full-stack, ops, migration, dependency changes.
 
-Run research agents first, summarize their load-bearing facts, then pass compact notes to lens reviewers.
-
+Run research agents only for unanswered facts. Then send the full aggregate
+diff, compact notes, and all activated coverage criteria to the one
+whole-diff `general-reviewer`; lenses are checklists, not default subagents.

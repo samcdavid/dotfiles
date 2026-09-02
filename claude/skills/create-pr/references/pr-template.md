@@ -55,7 +55,7 @@ The fenced block below is the literal body Markdown — copy its structure when 
 <details>
 <summary><b>Lens and trigger rationale</b></summary>
 
-- **Primary lens — <Backend | Frontend | Full-stack | Quality | Security | Architect | PM | Ops>:** <one-line why> — run `/my-review <lens>`
+- **Primary lens — <Backend | Frontend | Full-stack | Quality | Security | Architect | PM | Ops>:** <one-line why> — run `/my-review` over the whole change; treat this lens as focus context, not review scope
 - **Secondary lens — <…>:** <one-line why; omit subsection when none>
 - **Security:** <one-line reason + affected files> — run `/security-review`
 - **Architecture:** <one-line reason + affected files> — run `/my-arch-review`

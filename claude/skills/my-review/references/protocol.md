@@ -275,43 +275,34 @@ Spawn only specialists needed for an unanswered question:
 - **docs-researcher** — new dependency or uncertain version-specific API/framework behavior.
 - **requirements-tracer** — spawn only if any `tracer_triggers` flag is true. Pass `mode: review`, `scope: wide`, the primary Linear issue ID (if any), the PR number, and `plan_surfaces` if present (it diffs predicted-vs-actual and only re-runs related-issue discovery if they differ meaningfully).
 
-Collect their outputs into a **compact `research_notes` summary** — the load-bearing facts (call chains, duplication hits, doc gaps), not raw dumps. This is what you hand to the lens reviewers.
+Collect their outputs into a **compact `research_notes` summary** — the load-bearing facts (call chains, duplication hits, doc gaps), not raw dumps. This is what you hand to the whole-diff worker.
 
-### Wave 2 — Lens reviewer subagents (parallel, one message)
+### Wave 2 — One whole-diff reviewer
 
-For each active lens, spawn its reviewer concurrently with a lens-specific
-bundle excerpt: triggering/dependent hunks, relevant manifest entries, cited
-research facts, and only its `relevant_patterns`, plus normal mode/context fields
-and extras. Pass the full diff only when scope cannot be isolated; reviewers may
-request a named omitted source.
+For every non-empty review that did not take the Low-risk fast-approval path,
+dispatch exactly one `general-reviewer`. It is the Sonnet whole-diff worker, not
+a lens-specific pass: give it the full aggregate diff, changed-file manifest,
+requirements and delivery context, existing-comment index, compact research
+notes, trigger-matched patterns, and the complete list of activated coverage
+criteria (the activated criteria). Never substitute lens-specific excerpts or selective hunks for the
+full diff.
 
 In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and `diff_text` is `git diff "$fork"`. Passing both means a reviewer that widens its own diff reproduces the branch-wide range instead of falling back to the working tree or the last commit. Research subagents get the same two values for the same reason.
 
-| Active lens(es) | Reviewer agent | Extra input |
-|---|---|---|
-| Security | `security-reviewer` | — |
-| Architecture | `arch-reviewer` | — |
-| Performance | `perf-reviewer` | — |
-| QA | `quality-reviewer` | — |
-| PM | `requirements-reviewer` | `requirements_checklist`, `delivery_increment` |
-| Backend, Frontend, Full-stack, Ops, Migration, Dependency | `general-reviewer` | `assigned_lenses` (the subset that fired) |
-
-Spawn a reviewer only for lenses that actually fired in triage. Always include `general-reviewer` if any non-specialized lens is active (it also carries the cross-service-contract checks). Each reviewer reads its source-of-truth skill, applies the checklist, dedupes against `existing_comments_index`, and returns a findings fragment.
-
-Each fragment is a **flat** list: each finding has axes per `references/finding-axes.md`, a `File` anchor in `diff_text`, and changed-line causal link, plus its deep-dive block. Reviewers report levels only; Step 6 verifies and filters. Re-dispatch pre-grouped output with the axes file named.
+The worker applies the general checklist plus each activated specialist checklist
+in one retained context. The specialist agents remain available to their
+standalone audit workflows, but ordinary `my-review` does not dispatch them.
+It dedupes against `existing_comments_index` and returns one consolidated flat
+findings set with any applicable deep-dive or requirements-traceability blocks.
 
 ### Wave 3 — Compile
 
-Merge the lens reviewers' fragments into one findings set:
+Compile the whole-diff worker's findings set:
 
-1. **De-duplicate across reviewers.** Two lenses often flag the same line (e.g. security + general on the same input handler). Collapse to one finding, keeping the most precise framing and noting both lenses.
+1. **De-duplicate** the worker's findings by line and substance, retaining the most precise framing and all applicable coverage-area attribution.
 2. **Re-check dedupe against `existing_comments_index`** — a reviewer may have missed a thread; drop or `add_to_thread` anything already raised.
-3. **Assemble** one flat findings set — each finding keeping its `Severity`, `Risk`, `Confidence`, and lens attribution — plus the lens deep-dive subsections each reviewer returned (Security Deep-Dive, Architecture Assessment, Performance Deep-Dive, Quality Deep-Dive, Requirements Traceability), and — if the tracer ran — Related-Issue Regression Risks. When collapsing a duplicate, keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the two: a finding two lenses read differently is one to verify harder, not one to average out.
-4. **Sanity-check coverage**: every required lens in the Coverage Manifest
-   produced a fragment. If a reviewer returned an `## Error` (e.g. missing
-   `requirements_checklist`) or came back empty for a lens that clearly applies,
-   re-dispatch it once with a tightened brief before proceeding. Do not silently
-   drop a lens.
+3. **Assemble** one flat findings set — each finding keeping its `Severity`, `Risk`, `Confidence`, and coverage-area attribution — plus applicable deep-dive subsections and related-issue risks.
+4. **Sanity-check coverage**: the one worker accounted for every activated coverage criterion. If it returned an error or omitted a clearly applicable area, re-dispatch it once with a tightened brief; do not silently drop it.
 
 Before verifier dispatch, drop and record candidates that duplicate a thread,
 lack an anchor/causal link, or lack a concrete author-controlled action,

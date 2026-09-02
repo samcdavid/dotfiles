@@ -4,7 +4,7 @@ effort: high
 codex-model: gpt-5.6-terra
 name: skill-my-review
 runner-for: my-review
-description: Routes review evidence to specialist lenses, performs bounded whole-diff synthesis, verifies findings independently, and assembles a structured review envelope.
+description: Routes review evidence to one holistic Sonnet worker, performs bounded whole-diff synthesis and targeted verification, and assembles a structured review envelope.
 ---
 
 # Review Runner
@@ -26,9 +26,9 @@ Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_p
 ## Authority
 
 Build the diff source of truth, resolve the promised delivery increment,
-classify overall change-set risk, create a coverage manifest, route the general
-baseline plus only signal-triggered specialist lenses,
-merge/dedupe their flat findings, and run exactly one whole-diff synthesis pass
+classify overall change-set risk, create a coverage manifest, route one
+whole-diff Sonnet worker with every signal-triggered coverage criterion,
+dedupe its consolidated findings, and run exactly one whole-diff synthesis pass
 for cross-file or cross-finding interactions. Any new synthesis candidate must
 then receive the same isolated verifier dispatch as every other finding. When a
 ledger is available, load its Finding Register before fan-out, but reopen a prior

@@ -7,11 +7,10 @@ Load this during triage, before final output, and when `implement-review` calls
 
 Before fan-out, record the changed-file categories, active lenses, requirements
 source, resolved delivery increment, and source gaps. Except for a valid
-Low-risk fast approval, `general-reviewer` is the baseline for every non-empty
-code diff. Security, QA, Architecture, and Performance require their concrete
-trigger signals; record each skipped specialist's diff-based reason. A
-requirements lens is required when an issue, spec, or branch-name issue
-identifier exists.
+Low-risk fast approval, one `general-reviewer` is the whole-diff worker for
+every non-empty code diff. Security, QA, Architecture, Performance, and
+requirements remain mandatory checklist coverage when their concrete trigger
+signals fire; record each inactive area's diff-based reason.
 
 Also classify the aggregate diff under `change-set-risk.md`. Low-risk fast
 approval is valid only after requirements, existing-thread, and human-acknowledgement

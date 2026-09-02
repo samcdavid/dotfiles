@@ -25,9 +25,10 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    The wrapper records only an exact acknowledgement/confirmation in the ledger
    and re-dispatches; never infer it or write the ledger in this runner. Continue
    the substantive review while confirmation is pending.
-5. Dispatch research, the general baseline reviewer, and only the specialist
-   lenses with concrete trigger signals. Pass each lens only its compact,
-   diff-matched pattern excerpt, then merge and dedupe their flat findings.
+5. Dispatch focused research only for unanswered facts, then exactly one
+   `general-reviewer` with the full aggregate diff and every activated coverage
+   criterion. It applies the corresponding checklists in one retained context
+   and returns a consolidated finding set.
 6. Run one bounded whole-diff synthesis pass after lens compilation. It may emit
    only interaction candidates grounded in the diff and research evidence; every
    candidate must enter the same verifier route as lens findings.

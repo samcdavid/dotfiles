@@ -14,7 +14,7 @@ Tripwire is conservative by design. False alarms (escalating when it wasn't need
 
 ## Safety signals
 
-- **Auth / session / token / permission / policy code touched** — security review territory. Run `/security-audit` or `/my-review security` after.
+- **Auth / session / token / permission / policy code touched** — security review territory. Run `/security-audit` or `/my-review` over the whole change with Security as the focus after.
 - **Concurrency primitives** — locks, semaphores, transactions, queue ordering. Reasoning is rarely "well-known."
 - **External I/O at a new point** — new HTTP call, new file write, new shell-out. The full pipeline catches retry/idempotency concerns.
 

@@ -91,7 +91,7 @@ Shuffle in **both** modes, and re-shuffle each outer-loop iteration in auto-disc
 
 Shuffling is a contention *reduction*, not a correctness mechanism — two random orders can still overlap. Correctness comes from the claim ledger below, which is mandatory regardless of ordering.
 
-Within a single session, PRs are still processed **sequentially, not in parallel**: `my-review` fans out several lens-reviewer subagents per PR, and running multiple PRs' reviews concurrently would multiply that fan-out and risk colliding on GitHub's secondary rate limit (80 content-creating requests/minute) when publishing back to back.
+Within a single session, PRs are still processed **sequentially, not in parallel**: each `my-review` performs targeted research when needed, one complete full-diff Sonnet review, bounded confidence-gated verification, and a verdict. Running multiple reviews concurrently would multiply that work and risk colliding on GitHub's secondary rate limit (80 content-creating requests/minute) when publishing back to back.
 
 That rate limit is per-user, not per-session, so concurrent sessions share it. Two or three parallel sessions are fine; a dozen will start tripping secondary rate limits on publish no matter how well the claims behave. If publish steps begin failing with rate-limit errors across sessions, the fix is fewer sessions, not more retries.
 
@@ -142,7 +142,7 @@ A session that crashes mid-review leaves its claim file behind. Without expiry t
 
 Age comes from the claim's recorded timestamp, falling back to the file's mtime when the JSON cannot be parsed. The fallback is the point: an unreadable claim file ages out on the same TTL as any other rather than reading as epoch 0 and being instantly stealable, which would turn any momentary read failure into a stolen live claim.
 
-90 minutes is deliberately generous: a large PR with full lens fan-out can legitimately take a long time, and stealing a claim from a session that is merely slow causes the duplicate review the ledger is meant to prevent. If a genuinely stuck claim needs clearing sooner, delete the file or run `release-pr.sh ... --force`.
+90 minutes is deliberately generous: a large PR with a full whole-diff review can legitimately take a long time, and stealing a claim from a session that is merely slow causes the duplicate review the ledger is meant to prevent. If a genuinely stuck claim needs clearing sooner, delete the file or run `release-pr.sh ... --force`.
 
 One residual race is worth knowing: the steal path is unlink-then-create, which is not atomic the way the initial exclusive create is. Two sessions can both decide to steal the same stale claim; each re-reads the file afterward and only the session whose id actually landed proceeds. The loser yields. Worst case if that check were ever bypassed is a duplicated review, which `my-review`'s dedup already blunts — but it is not a licence to skip the claim step.
 
@@ -218,7 +218,7 @@ On `"reviewed": true`, another session (or an earlier run) already reviewed this
 
 ### Step 4 — Review
 
-Increment `reviews_started`, then invoke `my-review` (via the `Skill` tool) in PR mode, targeting this PR. Let it run its full flow — mode routing, lens fan-out, adversarial-debate on findings, verdict. Do not shortcut or summarize its inputs; it needs the real PR context to build its `existing_comments_index` and dedupe correctly. Once this step starts, the PR counts toward the run's three-review cap regardless of its eventual outcome.
+Increment `reviews_started`, then invoke `my-review` (via the `Skill` tool) in PR mode, targeting this PR. Let it run its full flow — mode routing, targeted research when needed, one complete full-diff Sonnet review, bounded confidence-gated verification, and verdict. Do not shortcut or summarize its inputs; it needs the real PR context to build its `existing_comments_index` and dedupe correctly. Once this step starts, the PR counts toward the run's three-review cap regardless of its eventual outcome.
 
 ### Step 5 — Publish
 

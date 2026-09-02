@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""Enforce the default my-review routing and full-scope policy."""
+
+from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def read(path: str) -> str:
+    return (ROOT / path).read_text()
+
+
+def require(path: str, snippet: str, description: str) -> list[str]:
+    if snippet not in read(path):
+        return [f"{path}: missing {description}"]
+    return []
+
+
+def forbid(path: str, snippet: str, description: str) -> list[str]:
+    if snippet in read(path):
+        return [f"{path}: contains retired {description}"]
+    return []
+
+
+errors: list[str] = []
+protocol = "claude/skills/my-review/references/protocol.md"
+worker = "claude/agents/general-reviewer.md"
+
+errors += require(protocol, "dispatch exactly one `general-reviewer`", "one-worker dispatch")
+errors += require(protocol, "full aggregate diff", "full-diff requirement")
+errors += require(protocol, "activated coverage\ncriteria", "activated-criteria input")
+errors += forbid(protocol, "| Security | `security-reviewer`", "specialist lens dispatch")
+errors += forbid(protocol, "| Architecture | `arch-reviewer`", "specialist lens dispatch")
+errors += forbid(protocol, "| Performance | `perf-reviewer`", "specialist lens dispatch")
+errors += forbid(protocol, "| QA | `quality-reviewer`", "specialist lens dispatch")
+errors += forbid(protocol, "| PM | `requirements-reviewer`", "specialist lens dispatch")
+errors += require(worker, "whole aggregate diff", "whole-diff worker contract")
+errors += require(worker, "activated_coverage_criteria", "activated-criteria worker contract")
+
+for path in (
+    "claude/skills/pr-review-loop/references/protocol.md",
+    "claude/skills/create-pr/references/pr-template.md",
+    "claude/skills/my-quick/references/tripwire-signals.md",
+):
+    errors += forbid(path, "lens fan-out", "stale lens-fan-out caller guidance")
+    errors += forbid(path, "lens-reviewer", "stale lens-reviewer caller guidance")
+    errors += forbid(path, "adversarial-debate on findings", "stale Sol caller guidance")
+
+errors += forbid(
+    "claude/skills/create-pr/references/pr-template.md",
+    "`/my-review <lens>`",
+    "lens-scoped my-review invocation",
+)
+errors += forbid(
+    "claude/skills/my-quick/references/tripwire-signals.md",
+    "`/my-review security`",
+    "lens-scoped my-review invocation",
+)
+
+if errors:
+    print("my-review routing policy check failed:", *errors, sep="\n- ")
+    sys.exit(1)
+
+print("my-review routing policy check passed")
