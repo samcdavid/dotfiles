@@ -222,6 +222,11 @@ Increment `reviews_started`, then invoke `my-review` (via the `Skill` tool) in P
 
 ### Step 5 — Publish
 
+If `my-review` returns `awaiting_user_triage`, checkpoint the PR number, head,
+and triage-state reference, release the claim, and stop the loop. Do not
+publish, mark reviewed, count the PR complete, or continue to another PR. On
+resume, revalidate the head and triage fingerprint before resuming or rebuilding.
+
 Immediately invoke `publish-review` (via the `Skill` tool) for the same PR. Per this skill's own convention ("Invoking this skill is the approval — publish immediately without asking for confirmation"), and per `pr-review-loop`'s own contract that invoking the loop is the batch's standing approval, do not pause for a separate per-PR confirmation here.
 
 **Why no extra dedup step is needed.** The loop always re-reviews every PR, even ones reviewed before at the same commit. This is safe against duplicate noise because `my-review` already builds an `existing_comments_index` (file/line/substance/thread-root) before its lens reviewers run, dedupes new findings against it during merge, and explicitly treats a PR with the reviewer's own prior pass as a re-review ("re-read the full diff and all comments... where authors may explain what changed"). `publish-review` separately validates every reply target against current comment state. Between the two, a repeat run over the same PR list should surface only genuinely new findings, not restate old ones — verify this holds by skimming `my-review`'s findings for repeats of clearly-already-addressed items before publishing; if dedup ever visibly fails, that's a `my-review` gotcha to capture, not something to patch inside this loop.
