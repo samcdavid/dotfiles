@@ -5,7 +5,7 @@ Load this during triage, before final output, and when `implement-review` calls
 
 ## Coverage Manifest
 
-Before fan-out, record the changed-file categories, active lenses, requirements
+Before review dispatch, record the changed-file categories, active lenses, requirements
 source, resolved delivery increment, and source gaps. Except for a valid
 Low-risk fast approval, one `general-reviewer` is the whole-diff worker for
 every non-empty code diff. Security, QA, Architecture, Performance, and

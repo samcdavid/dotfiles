@@ -1,6 +1,6 @@
 # Change-Set Risk and Human Acknowledgement
 
-Load during triage, before reviewer fan-out. This classifies the aggregate set of
+Load during triage, before review dispatch. This classifies the aggregate set of
 changes, not individual findings. Finding `Risk` in `finding-axes.md` remains a
 separate likelihood-and-blast-radius score.
 
@@ -33,7 +33,8 @@ and state the missing fact.
 
 When `overall_change_risk` is `Low`, stop after scope/intent validation and
 existing-comment dedupe. Return a terse `APPROVE` with the classification and
-rationale. Do not fan out research/lens/verifier agents, manufacture suggestions,
+rationale. Do not dispatch research agents, the whole-diff worker, or verifier
+agents; do not manufacture suggestions,
 or use `COMMENT`. This path is unavailable when requirements included in the
 declared delivery increment are missing or partial, when the increment is
 consequentially unclear, an existing unresolved thread concerns the changed

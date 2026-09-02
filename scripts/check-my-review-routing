@@ -62,6 +62,17 @@ for path in (
         "fan-out routing guidance",
     )
 
+for path in (
+    "claude/skills/my-review/SKILL.md",
+    "claude/skills/my-review/references/change-set-risk.md",
+    "claude/skills/my-review/references/review-contract.md",
+):
+    errors += forbid_any(
+        path,
+        ("before fan-out", "before reviewer fan-out", "fan out research/lens/verifier agents"),
+        "obsolete governing-file fan-out guidance",
+    )
+
 errors += forbid_any(
     protocol,
     (
