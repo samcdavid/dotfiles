@@ -20,11 +20,12 @@ paths under Codex).
 ## Input
 
 Accept `{ mode, plan_path, artifact_inputs, base_ref, ledger_path, stage,
-authority }`. `mode` is `standalone` or `embedded`. When a plan is supplied,
-require completed `my-implement` evidence for every phase and the holistic test
-gate. Return `blocked` with a `my-implement` handoff if work remains. With
-completed planned work or no plan, accept the available review context without
-manufacturing a plan.
+authority }`. `mode` is `standalone` or `embedded`. For an embedded workflow
+plan, require completed `my-implement` evidence for every phase and its
+holistic test gate, followed by a passing whole-plan `my-validate` outcome.
+Return `blocked` with the relevant `my-implement` or `my-validate` handoff when
+a prerequisite is absent. With completed standalone planned work or no plan,
+accept the available review context without manufacturing a plan.
 
 ## Authority
 

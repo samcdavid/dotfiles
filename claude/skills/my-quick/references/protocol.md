@@ -15,7 +15,7 @@ Use `/my-quick` when ALL of these are true:
 - Existing code in scope is familiar and well-named — no spelunking needed
 
 Use the full pipeline (`/my-workflow`: collaborative `my-pair-plan` → fresh
-pre-implementation gate → `my-implement` → `implement-review`) when ANY of those
+pre-implementation gate → `my-implement` → `my-validate` → `implement-review`) when ANY of those
 is false. The tripwire in Step 3 catches the common cases, but author judgment
 is the primary gate.
 

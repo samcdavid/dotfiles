@@ -10,11 +10,13 @@ agents; it does not reimplement their checklists or create a second repair loop.
 Read the available plan, behavior-first test strategy, base ref, workflow ledger,
 and implementation evidence before starting.
 
-- When a plan is supplied, require every phase/checklist item complete, plan
-  status `implemented`, and the successful holistic test gate from
-  `my-implement`. If any evidence is missing or any phase remains unfinished,
-  return `blocked` with the exact `my-implement` handoff. Do not implement the
-  missing phase, start a review pass, or spend loop budget.
+- For an embedded workflow plan, require every phase/checklist item complete,
+  plan status `implemented`, the successful holistic test gate from
+  `my-implement`, and a passing whole-plan `my-validate` outcome. If
+  implementation evidence is missing or any phase remains unfinished, return
+  `blocked` with the exact `my-implement` handoff. If the validation outcome is
+  missing or non-passing, return `blocked` with the exact `my-validate` handoff.
+  Do not run either prerequisite, start a review pass, or spend loop budget.
 - When no plan is supplied, treat the existing branch as unplanned completed
   work and review it directly. Do not manufacture a retrospective plan.
 
@@ -27,10 +29,10 @@ it does not prevent review from starting.
 ## Execution
 
 1. Start the loop only after the preconditions above pass. Pass 1 dispatches
-   `skill-my-review` directly and records the completed `my-implement` holistic
-   test evidence as `validation: implementation_gate` (or `not_run` for
-   unplanned existing work). If it is clean, exit without inventing another
-   validation run.
+   `skill-my-review` directly and records the completed whole-plan validation
+   outcome as `validation: whole_plan_gate` (or `implementation_gate` for
+   standalone planned work, or `not_run` for unplanned existing work). If it is
+   clean, exit without inventing another validation run.
 2. Run up to **five** review passes. After a repair, each later pass dispatches
    `skill-my-validate` in session/embedded mode against the repair evidence,
    then `skill-my-review`.

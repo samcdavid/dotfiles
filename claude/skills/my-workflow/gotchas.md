@@ -53,11 +53,12 @@ rerun the one-document audit for the current version.
 Record the route, reason, scope, and handoff in the ledger, present it, and wait
 for approval. Migration work never uses `my-quick`.
 
-## Entering review before implementation completes
+## Skipping whole-plan validation before review
 
-`my-implement` owns every plan phase and the holistic test gate.
-`implement-review` begins only after that completion and remains the sole
-review/repair-loop owner.
+`my-implement` owns every plan phase and its holistic test gate. Run one
+whole-plan `my-validate` after that completion; `implement-review` begins only
+when it passes and remains the sole review/repair-loop owner. Validation after a
+review repair remains inside the review loop.
 
 ## Requiring staging migration proof before local review
 

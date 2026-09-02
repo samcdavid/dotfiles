@@ -24,9 +24,10 @@ workflow ledger is both the resume source of truth and the approved plan.
    deep dive so clearing context never loses planning state.
 7. **Sync is not implementation authority.** A synchronized plan must pass the
    fresh pre-implementation gate, then receive separate explicit authorization.
-8. **Implementation before review.** `my-implement` completes every phase and
-   holistic test gate before `implement-review` begins. Keep both procedures and
-   the five-pass review cap unchanged.
+8. **Whole-plan validation before review.** `my-implement` completes every
+   phase and its holistic test gate, then `my-validate` runs once against the
+   completed plan before `implement-review` begins. Validation after a review
+   repair remains part of `implement-review`; keep its five-pass cap unchanged.
 9. **Migration safety remains a hard gate.** Apply `migration-safety.md` without
    weakening its history, compatibility, validation, or override rules.
 10. **No outward actions.** Local planning writes and validated implementation
@@ -42,7 +43,8 @@ workflow ledger is both the resume source of truth and the approved plan.
 | 2 | Pre-implementation gate | refreshed sources, consistency audit, sibling check | overlap, drift, or gate failure |
 | 3 | Implementation authorization | explicit user approval recorded | always before code changes |
 | 4 | `my-implement` | phase commits + holistic test evidence | only if blocked |
-| 5 | `implement-review` | bounded review/repair outcome | terminal result |
+| 5 | `my-validate` | one whole-plan validation outcome | validation failure/blocker |
+| 6 | `implement-review` | bounded review/repair outcome | terminal result |
 
 ## Step 0 — Intake and ledger detection
 
@@ -176,10 +178,35 @@ loop detection, and holistic test behavior.
 Record the returned phase commits and evidence in `Execution Log`. If it blocks,
 stop. Only complete implementation permits stage 5.
 
-## Step 5 — Existing review loop
+## Step 5 — Whole-plan validation
 
-Dispatch `skill-implement-review` with completed implementation evidence, the
-ledger as requirements/plan/test context, base ref, and local-only authority.
+Dispatch `my-validate` once in embedded mode with the completed implementation
+evidence and the same plan, ledger, and base context:
+
+```yaml
+mode: embedded
+plan_path: <ledger path>
+ledger_path: <same ledger path>
+artifact_inputs:
+  planning_document: <ledger path>
+  test_strategy: <ledger path>#test-strategy
+  architecture: <ledger path>#architecture
+  implementation_evidence: <Step 4 outcome>
+stage: post_implementation_validation
+authority: local_only
+```
+
+Record its checks, coverage, repairs, local commits, residual risks, and
+outcome in `Execution Log`. A blocked or failed result stops the workflow. Only
+a passing result permits review; do not run this whole-plan gate again between
+review passes. Validation that `implement-review` performs after a repair stays
+within that review loop.
+
+## Step 6 — Existing review loop
+
+Dispatch `skill-implement-review` with completed implementation and whole-plan
+validation evidence, the ledger as requirements/plan/test context, base ref,
+and local-only authority.
 It remains the sole owner of `my-review` → repair → `my-validate` → `my-review`,
 capped at five review passes. Do not interleave implementation or run a second
 repair loop.
@@ -195,7 +222,8 @@ Read the ledger first and route from durable state:
 - `synchronized` without a passing current-version preflight → Step 2;
 - preflight passed without current-version authorization → Step 3;
 - authorized implementation incomplete → Step 4;
-- implementation complete, review incomplete → Step 5;
+- implementation complete, whole-plan validation incomplete → Step 5;
+- whole-plan validation passed, review incomplete → Step 6;
 - review terminal → final report.
 
 Never infer completion from loose artifacts, conversation memory, old plan

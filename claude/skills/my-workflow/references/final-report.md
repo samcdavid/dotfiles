@@ -16,6 +16,8 @@ Report:
 - Files changed.
 - Tests and validation commands.
 - `my-implement` completion status, every phase commit, and holistic test gate.
+- One whole-plan `my-validate` outcome, including checks, repairs, local commits,
+  and residual risks.
 - `implement-review` terminal status, review-clean flag, every post-implementation
   review pass, and the repair commits each produced.
 - When migrations were in scope: the migration-history matrix, validation result for each history, release-health evidence, and any explicit override of a blocked gate.

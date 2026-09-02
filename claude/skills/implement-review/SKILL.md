@@ -20,9 +20,12 @@ stage, authority: local_only }` and dispatch it to `skill-implement-review`.
 
 - `mode` is `standalone` or `embedded`. Embedded callers supply the approved
   plan, test strategy, base, ledger, and stage context.
-- When a plan is supplied, require proof that `my-implement` completed every
-  phase and its holistic test gate. If any phase remains unfinished, return
-  `blocked` with the exact `/my-implement <plan>` handoff; never execute it here.
+- When an embedded workflow plan is supplied, require proof that
+  `my-implement` completed every phase and its holistic test gate, followed by
+  a passing whole-plan `my-validate` outcome. If implementation remains
+  unfinished, return `blocked` with the exact `/my-implement <plan>` handoff;
+  if that validation is absent or failed, return `blocked` with the exact
+  `/my-validate <plan>` handoff. Never execute either prerequisite here.
 - With completed planned work or unplanned existing work, start with a
   whole-branch review, then repair only verified substantive findings within the
   five-pass budget. Do not reject review merely because no plan exists.

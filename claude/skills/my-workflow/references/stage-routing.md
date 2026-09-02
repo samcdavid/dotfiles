@@ -25,6 +25,7 @@ multi-module work, architecture changes, and uncertain scope use
 | Collaborative planning | `skill-my-pair-plan` | living ledger + user dialogue + focused deep dives |
 | Preflight consistency | `skill-my-analyze` with `mode: ledger_preflight` | one-document readiness audit |
 | Implementation | `my-implement` | sequential bounded implementation phases |
+| Whole-plan validation | `my-validate` | one final validation of completed planned work |
 | Review/repair | `skill-implement-review` | unchanged bounded terminal loop |
 
 `my-pair-plan` may dispatch existing specialists in `focused_advisory` mode:
@@ -47,7 +48,9 @@ remain available outside `my-workflow`.
   authorization.
 - Authorized current version with incomplete implementation: run
   `my-implement`.
-- Implementation complete with nonterminal review: run `implement-review`.
+- Implementation complete without passing whole-plan validation: run
+  `my-validate` once.
+- Whole-plan validation passed with nonterminal review: run `implement-review`.
 - Terminal review: final report.
 
 ## Implementation gate
@@ -71,9 +74,9 @@ Never repair the planning gap inside `my-implement`.
 ## Review-loop gate
 
 Dispatch `implement-review` only when the ledger records every implementation
-phase complete, all phase commits, successful holistic verification, and plan
-status `implemented`. Missing or failed evidence blocks review without consuming
-pass 1.
+phase complete, all phase commits, successful holistic verification, and a
+passing `post_implementation_validation` outcome from `my-validate`. Missing or
+failed evidence blocks review without consuming pass 1.
 
 Legacy ledgers with the former stages 1–9 must be synthesized into the living
 ledger and explicitly synchronized before using the new gate. A previously

@@ -28,7 +28,8 @@ Perform every edit task yourself, staying within its allowed paths and following
 Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
 Return completed phases, commit SHAs, holistic verification evidence, deviations,
 uncommitted or escalated work, the workflow-stage envelope when embedded, and
-the recommended next command: `implement-review` exactly once, only after every
-implementation phase and the holistic verification gate are complete. Name what
-each phase delivered and pair every SHA with its
-subject/effect. Do not include raw implementation transcripts.
+the recommended next command: for an embedded `my-workflow` run, `my-validate`
+exactly once after every implementation phase and the holistic verification gate
+are complete; otherwise `implement-review` exactly once after those conditions.
+Name what each phase delivered and pair every SHA with its subject/effect. Do not
+include raw implementation transcripts.

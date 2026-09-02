@@ -48,8 +48,10 @@ For each phase, in order:
 
 Do not invoke `implement-review` after an individual phase. The independent
 phase verification above is the required per-phase quality gate. Invoke
-`implement-review` once, after every phase has passed and the holistic
-validation below completes.
+`implement-review` once only after every phase has passed and the holistic
+validation below completes. In embedded `my-workflow` mode, return to the
+workflow instead: it runs one whole-plan `my-validate` gate before invoking
+`implement-review`.
 
 ## Retries and deviations
 

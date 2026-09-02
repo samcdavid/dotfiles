@@ -120,7 +120,7 @@ updated: <timestamp>
 
 ## Execution Log
 
-<!-- Existing my-implement and implement-review outcomes append here. -->
+<!-- Existing my-implement, whole-plan my-validate, and implement-review outcomes append here. -->
 
 ## Finding Register
 

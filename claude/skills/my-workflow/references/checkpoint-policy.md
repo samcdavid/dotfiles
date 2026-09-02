@@ -33,8 +33,9 @@ invalidated sections.
 ## Implementation and review
 
 `my-implement` stops only if blocked; otherwise it completes all phases before
-`implement-review`. The review skill owns its bounded loop and terminal stop.
-Do not insert planning checkpoints into either procedure.
+one whole-plan `my-validate` gate. `implement-review` starts only after that
+gate passes and owns its bounded loop and terminal stop. Do not insert planning
+checkpoints into those procedures.
 
 Resume exclusively from ledger state. A plan-version change invalidates sync,
 preflight, and implementation authorization.
