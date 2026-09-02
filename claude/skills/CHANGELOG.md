@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-01 — Whole-plan validation before review
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `6f60572` | Added one embedded `my-validate` gate between completed `my-implement` phases and `implement-review` in `my-workflow`. | Full workflows now record a passing whole-plan validation outcome before review pass 1. `implement-review` retains validation after review repairs and its five-pass cap; standalone review behavior is unchanged. |
+
 ## 2026-09-01 — Direct bounded skill execution
 
 | Commit | Change | Regression boundary / known-good meaning |
