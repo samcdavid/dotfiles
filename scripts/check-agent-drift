@@ -17,9 +17,6 @@ ENTRYPOINT_LIMIT = 700
 REFERENCE_LIMIT = 6000
 CRITICAL_AGENT_NAMES = {
     "adversarial-debate",
-    "arch-reviewer",
-    "perf-reviewer",
-    "security-reviewer",
 }
 
 # Must mirror EFFORT_TO_CODEX in scripts/sync-codex-agents.

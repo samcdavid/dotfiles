@@ -16,9 +16,6 @@ CLAUDE_AGENTS = ROOT / "claude" / "agents"
 CODEX_AGENTS = ROOT / "codex" / "agents"
 CRITICAL_AGENT_NAMES = {
     "adversarial-debate",
-    "arch-reviewer",
-    "perf-reviewer",
-    "security-reviewer",
 }
 
 

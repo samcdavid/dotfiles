@@ -53,17 +53,24 @@ Each finding is dispatched **individually** — one verifier per finding, never 
 HIGH TIER -> finding-verifier-high   if ANY of:
     severity   == Critical
     risk       == High
-    confidence == Low  AND severity not in (Nit, Question)
 
 LOW TIER  -> finding-verifier-low    otherwise
 ```
 
-Why this shape: expensive verification is bought by the cost of a wrong verdict. A `Critical` warrants deep verification because a false negative can ship a severe defect, and a Critical, High-risk finding can correctly block a merge. `High` risk earns it on blast radius alone. And a non-trivial finding the reviewer is shaky on is the single highest-value thing to verify hard — it is simultaneously the most likely to be wrong and the most expensive to get wrong. Nits and Questions stay cheap regardless of confidence, because no verdict they produce can change the review outcome much.
+Why this shape: Sol verification is bought only by the impact or blast radius of
+a wrong verdict. A `Critical` warrants deep verification because a false
+negative can ship a severe defect, and `High` risk earns it on blast radius
+alone. Low confidence alone stays in the Terra tier; if it cannot be resolved
+there, surface the exact missing evidence as a clarification rather than
+spending Sol on a non-Critical, non-High-risk claim.
 
 Compute the tier mechanically from the three levels. Do not hand-pick a tier because a finding "feels" important — if it feels important, that belongs in the levels themselves.
 
 ## Escalation from the low tier
 
-`finding-verifier-low` may return `requires escalation` when honest verification of its finding needs depth beyond its brief (cross-service tracing, query plans, library-version semantics, a long call chain). The orchestrator then re-dispatches that finding to `finding-verifier-high`.
-
-This is a one-way ratchet and it is not optional: a low-tier verifier must escalate rather than guess. An escalation is cheap; a fabricated "verified" verdict on a real defect is not. Do not escalate merely to avoid the work — say which specific fact was out of reach.
+`finding-verifier-low` returns `requires clarification` when honest verification
+needs depth beyond its brief (cross-service tracing, query plans,
+library-version semantics, or a long call chain). It must state the exact fact
+and query needed; it must not escalate a non-Critical, non-High-risk finding to
+Sol. If the low-tier verifier cites evidence that revises a finding to Critical
+or High risk, the orchestrator re-routes that revised finding to the high tier.

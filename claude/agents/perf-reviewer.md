@@ -1,6 +1,7 @@
 ---
-model: opus
-codex-model: gpt-5.6-sol
+model: sonnet
+effort: high
+codex-model: gpt-5.6-terra
 name: perf-reviewer
 description: Performance lens reviewer for the `my-review` orchestrator. Extracts the perf-review skill's criteria and applies them to a diff — hot-path queries, N+1, index coverage, unbounded iteration, caching. Returns a structured findings fragment plus a performance deep-dive. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent
@@ -14,7 +15,7 @@ Read `~/.claude/rules/read-only-verification.md` (or `~/.agents/rules/` under Co
 
 ## Inputs (from the orchestrator)
 
-`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `relevant_patterns`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
 
 ## PR Mode — read-only via `gh`
 
@@ -31,7 +32,7 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 ## What to do
 
 1. Load the `perf-review` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/perf-review/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth for this lens — apply its criteria, don't reinvent them or stop at `SKILL.md`.
-2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
+2. Apply only `relevant_patterns`; do not reload the pattern queue.
 3. Read the changed files (PR-safe in PR mode).
 4. Identify queries on large tables, hot-path computation, N+1 access, and unbounded iteration. **Verify index usage matches operator semantics** (e.g. the index supports the actual `WHERE`/`ORDER BY`, not just the column). Check caching strategy and invalidation. Estimate load impact where the diff gives you enough to reason about it.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.

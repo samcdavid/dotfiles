@@ -3,13 +3,14 @@ model: opus
 effort: xhigh
 name: finding-verifier-high
 codex-model: gpt-5.6-sol
-description: "Deep per-finding verifier for `my-review`. Independently verifies ONE high-severity, high-risk, or low-confidence review finding against the real system and returns a KEEP/DOWNGRADE/DROP/REVISE/PROMOTE verdict with cited evidence. Read-only — never edits code, never publishes."
+description: "Deep per-finding verifier for `my-review`. Independently verifies ONE Critical or High-risk review finding against the real system and returns a KEEP/DOWNGRADE/DROP/REVISE/PROMOTE verdict with cited evidence. Read-only — never edits code, never publishes."
 disallowedTools: Edit, Write, NotebookEdit, Agent
 ---
 
 # Finding Verifier — High Tier
 
-Verify one `Critical`, high-risk, or low-confidence finding in isolation. A wrong verdict can wrongly block or ship a defect.
+Verify one `Critical` or High-risk finding in isolation. A wrong verdict can
+wrongly block or ship a defect.
 
 Do not seek sibling or unrelated findings. An adjacent defect may be PROMOTEd only if the aggregate diff caused it and it has a diff anchor; baseline defects are out of scope.
 

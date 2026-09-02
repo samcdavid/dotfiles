@@ -14,7 +14,7 @@ Read `read-only-verification.md`; use read-only tools only. Read-only Linear tic
 
 ## Inputs (from the orchestrator)
 
-`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`, and:
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `relevant_patterns`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`, and:
 
 - `requirements_checklist`: linked-ticket criteria. If absent, say so and review only obvious scope creep.
 - `delivery_increment`: the current change's promised outcomes, supporting
@@ -36,7 +36,7 @@ In local mode, `diff_text` is fork-to-HEAD plus uncommitted changes; re-derive o
 ## What to do
 
 1. Load the `requirements-audit` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/requirements-audit/references/protocol.md`. Also read `~/.claude/skills/my-review/references/incremental-delivery.md`. Apply the audit criteria to the declared increment, not automatically to the entire eventual feature.
-2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
+2. Apply only `relevant_patterns`; do not reload the pattern queue.
 3. Read the changed files (PR-safe in PR mode).
 4. **Map every acceptance criterion to the delivery increment and code.**
    Classify it as Included now, Foundation for later integration, Deferred to a

@@ -6,11 +6,12 @@ Load this during triage, before final output, and when `implement-review` calls
 ## Coverage Manifest
 
 Before fan-out, record the changed-file categories, active lenses, requirements
-source, resolved delivery increment, and source gaps. Except for a valid Low-risk fast approval, Security,
-QA, and the applicable general-reviewer lenses are the baseline for every
-non-empty code diff. A requirements lens is
-required when an issue, spec, or branch-name issue identifier exists. A lens may
-be skipped only with a concrete diff-based reason in the manifest.
+source, resolved delivery increment, and source gaps. Except for a valid
+Low-risk fast approval, `general-reviewer` is the baseline for every non-empty
+code diff. Security, QA, Architecture, and Performance require their concrete
+trigger signals; record each skipped specialist's diff-based reason. A
+requirements lens is required when an issue, spec, or branch-name issue
+identifier exists.
 
 Also classify the aggregate diff under `change-set-risk.md`. Low-risk fast
 approval is valid only after requirements, existing-thread, and human-acknowledgement
@@ -21,7 +22,8 @@ trigger checks pass; diff size or an empty candidate-finding list is not enough.
 - Build and reuse one fingerprinted evidence bundle under
   `~/.claude/rules/evidence-bundles.md` (or `~/.agents/rules/` under Codex).
   Rebuild it only when its source identity, manifest, requirements source, or
-  feedback index changes.
+  feedback index changes. Reuse only stable supporting evidence; every review
+  pass still examines the current full aggregate diff from the original base.
 - Resolve an issue identifier from the branch name before saying requirements
   are unavailable.
 - Map every available acceptance criterion to the declared delivery increment
@@ -73,10 +75,12 @@ verification; synthesis never changes the verdict directly.
 
 ## Final Integrity Gate
 
-Immediately before returning a PR envelope, refresh both the GraphQL review
-thread index and the filtered REST review-comment index. Drop substantive
-duplicates, including bot comments anchored at a different line. Re-run the
-Actionability Gate, then recompute the verdict. Do not publish or recommend
+Immediately before returning a PR envelope, compare the current PR-head and
+review-feedback fingerprints with the bundle. Re-fetch both the GraphQL review
+thread index and filtered REST review-comment index only when either changed;
+otherwise reuse the indexed result. Drop substantive duplicates, including bot
+comments anchored at a different line. Re-run the Actionability Gate, then
+recompute the verdict. Do not publish or recommend
 `REQUEST_CHANGES` unless at least one surviving Critical, High-risk finding
 passes every evidence rule above.
 

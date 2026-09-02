@@ -17,10 +17,12 @@ either is pending.
 1. Merge duplicate findings across lenses. Keep the **highest** severity, the **highest** risk, and the **lowest** confidence of the merged pair — a finding two lenses read differently gets verified harder, not averaged.
 2. Dedupe against existing PR comments and threads.
 3. Confirm every finding carries all three levels from `references/finding-axes.md` — severity (per the shared review rule), risk, and confidence. Lens reviewers assign these; do not silently re-label them here. A fragment missing them means the reviewer ran an old contract — re-dispatch it rather than filling the levels in yourself.
-4. Verify **every** finding individually (see `references/protocol.md` Step 6) — one agent per finding, all dispatched in one parallel message, none batched. Tier is mechanical:
-   - `finding-verifier-high` — severity is Critical, **or** risk is High, **or** confidence is Low on a non-Nit/non-Question finding.
+4. Verify every surviving candidate individually (see `references/protocol.md` Step 6) — one agent per finding, all dispatched in one parallel message, none batched. Candidates without a deduplicated changed-line anchor, causal link, and concrete action are dropped before this stage. Tier is mechanical:
+   - `finding-verifier-high` — severity is Critical **or** risk is High.
    - `finding-verifier-low` — everything else.
-5. Re-dispatch any low-tier `requires escalation` to `finding-verifier-high`. An escalation is an unverified finding, not a disproven one — never resolve it in the main window and never treat it as a DROP.
+5. A low-tier `requires clarification` becomes a targeted question; do not
+   escalate it to Sol. Re-route only a low-tier `REVISE` that cites evidence
+   changing the finding to Critical or High risk.
 6. Ask targeted questions only when user-only context determines whether a finding is valid.
 7. Apply `review-contract.md`'s Actionability Gate to every surviving finding and question. Drop anything without a concrete author-controlled fix, decision, or specific information request tied to a changed-line risk; do not move it into residual-risk or deep-dive prose.
 8. Run `/this-important strict` on **low-tier findings only** — high-tier findings already got the deep per-finding pass and aren't re-filtered here.

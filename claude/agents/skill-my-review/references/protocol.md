@@ -25,13 +25,18 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    The wrapper records only an exact acknowledgement/confirmation in the ledger
    and re-dispatches; never infer it or write the ledger in this runner. Continue
    the substantive review while confirmation is pending.
-5. Dispatch research and active lens reviewers, then merge and dedupe only their flat findings.
+5. Dispatch research, the general baseline reviewer, and only the specialist
+   lenses with concrete trigger signals. Pass each lens only its compact,
+   diff-matched pattern excerpt, then merge and dedupe their flat findings.
 6. Run one bounded whole-diff synthesis pass after lens compilation. It may emit
    only interaction candidates grounded in the diff and research evidence; every
    candidate must enter the same verifier route as lens findings.
-7. Route every finding to exactly one isolated verifier from its severity, risk,
-   and confidence. Re-dispatch low-tier escalations to the high tier; do not
-   self-adjudicate them.
+7. Before verifier dispatch, drop duplicates and candidates missing a
+   changed-line anchor, causal link, or concrete author-controlled action. Route
+   every survivor to exactly one isolated verifier: Sol only for Critical or
+   High-risk findings, Terra otherwise. A low-tier uncertainty becomes a
+   targeted clarification; re-route only a cited revision to Critical or High
+   risk.
 8. Apply `review-contract.md`'s Actionability Gate after verification. A finding
    or question survives only when it requests a concrete author-controlled
    change, decision, or specific information tied to a changed-line risk.
@@ -43,9 +48,10 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    A third-party PR may use `COMMENT`, while other PR relationships have no
    verdict until confirmation. Once confirmed, return `APPROVE` for
    self-authored and unknown-ownership PRs when no blocker survives.
-   Only a third-party PR may choose between `APPROVE` and `COMMENT`; delegate
-   that confirmed-readiness choice to `adversarial-debate` in `decision` mode
-   with the current review-bundle fingerprint.
+   Only a third-party PR may choose between `APPROVE` and `COMMENT`; challenge
+   that confirmed-readiness choice with `adversarial-screen` in `decision` mode
+   and the current review-bundle fingerprint. A material risk it identifies
+   becomes a normal finding and reaches Sol only when Critical or High risk.
 10. Enforce `review-contract.md` before returning the compact result envelope to
    the wrapper, `implement-review`, or `my-workflow`.
 

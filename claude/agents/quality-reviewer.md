@@ -14,7 +14,7 @@ Read `~/.claude/rules/read-only-verification.md` (or `~/.agents/rules/` under Co
 
 ## Inputs (from the orchestrator)
 
-`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `relevant_patterns`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
 
 ## PR Mode — read-only via `gh`
 
@@ -31,7 +31,7 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 ## What to do
 
 1. Load the `quality-audit` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist lives in `~/.claude/skills/quality-audit/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth for this lens — apply its criteria, don't reinvent them or stop at `SKILL.md`.
-2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
+2. Apply only `relevant_patterns`; do not reload the pattern queue.
 3. Read the changed files **and their tests** (PR-safe in PR mode).
 4. Identify functions with branching logic that lack unit tests. Flag **vacuously passing** tests (assert nothing meaningful, or assert on a mock's own return). Audit mock/stub **fidelity** — does the stub behave like the real dependency? Assess flakiness risk (time, ordering, network, shared state). Check whether the tests actually catch the bug/feature they claim to.
 5. Dedupe against `existing_comments_index`. Ground each finding in specific lines. Calibrate to `author_calibration`.

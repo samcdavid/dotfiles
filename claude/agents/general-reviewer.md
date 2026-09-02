@@ -14,9 +14,9 @@ Read `read-only-verification.md`; use read-only tools only.
 
 ## Inputs (from the orchestrator)
 
-`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`, and:
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `relevant_patterns`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`, and:
 
-- `assigned_lenses`: the subset of {Backend, Frontend, Full-stack, Ops, Migration, Dependency} that fired in triage.
+- `assigned_lenses`: the subset of {Backend, Frontend, Full-stack, Ops, Migration, Dependency} that fired in triage; it may be empty when this baseline pass found no category-specific signal.
 
 ## PR Mode — read-only via `gh`
 
@@ -35,7 +35,8 @@ In local mode, `diff_text` is fork-to-HEAD plus uncommitted changes; re-derive o
 1. **Read the source of truth** for your checklist:
    - `~/.claude/skills/my-review/references/general-checklist.md` — cross-cutting Critical / non-blocking categories.
    - `~/.claude/skills/my-review/references/cross-service-contracts.md` — when the diff crosses a service boundary.
-   - `~/.claude/skills/my-review/gotchas.md` — known failure patterns; internalize before producing findings.
+   - `relevant_patterns` — matching known failure patterns; do not reload the
+     full queue.
 2. **Read the changed files** in full (not just hunks) within your lenses' scope, PR-safe in PR mode.
 3. **Apply the checklist** plus the lens focus below. Use `research_notes` instead of re-deriving call chains it already answers.
 4. **Dedupe** against `existing_comments_index`: skip anything already threaded on the same `(file, line, substance)`. For an incomplete thread, record with `add_to_thread: <thread_root_id>`.

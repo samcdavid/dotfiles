@@ -1,6 +1,7 @@
 ---
-model: opus
-codex-model: gpt-5.6-sol
+model: sonnet
+effort: high
+codex-model: gpt-5.6-terra
 name: security-reviewer
 description: Security lens reviewer for the `my-review` orchestrator. Extracts the security-audit skill's checklist and applies it to a diff — auth/authz, input validation, injection, secrets, token exposure. Returns a structured findings fragment plus a security deep-dive. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent
@@ -14,7 +15,7 @@ Read `~/.claude/rules/read-only-verification.md` (or `~/.agents/rules/` under Co
 
 ## Inputs (from the orchestrator)
 
-`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
+`mode`, `pr_head_sha`, `repo`, `base_ref`, `fork_sha`, `diff_text`, `changed_files`, `research_notes`, `relevant_patterns`, `author_calibration`, `existing_comments_index`, `pr_mode_constraints`.
 
 ## PR Mode — read-only via `gh`
 
@@ -31,7 +32,7 @@ When `mode == "local"`, `diff_text` already spans every commit since `fork_sha` 
 ## What to do
 
 1. Load the `security-audit` skill's criteria. `SKILL.md` is only the entrypoint — the actual checklist (OWASP top 10, auth/authz patterns, data exposure, injection vectors, dependency CVEs, secrets) lives in `~/.claude/skills/security-audit/references/protocol.md`. Read it and apply the parts relevant to this diff. That skill is the single source of truth — apply its criteria, don't reinvent them or stop at `SKILL.md`.
-2. Read `~/.claude/skills/my-review/gotchas.md` for known failure patterns.
+2. Apply only `relevant_patterns`; do not reload the pattern queue.
 3. Read the changed files (full contents, PR-safe in PR mode).
 4. **Trace every user input** from entry → processing → storage → output. Verify auth/authz checks at the **data layer**, not just the edge. Audit token/secret exposure in logs, URLs, and error messages.
 5. Dedupe against `existing_comments_index`; skip anything already threaded on the same `(file, line, substance)`.

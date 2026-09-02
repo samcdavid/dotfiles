@@ -26,8 +26,8 @@ Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_p
 ## Authority
 
 Build the diff source of truth, resolve the promised delivery increment,
-classify overall change-set risk, create a
-coverage manifest, route active lenses,
+classify overall change-set risk, create a coverage manifest, route the general
+baseline plus only signal-triggered specialist lenses,
 merge/dedupe their flat findings, and run exactly one whole-diff synthesis pass
 for cross-file or cross-finding interactions. Any new synthesis candidate must
 then receive the same isolated verifier dispatch as every other finding. When a
@@ -69,6 +69,6 @@ code verdict, PR approval status or local pre-stage human-acknowledgement status
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
 residual risks/questions, mode-constrained mechanical verdict, any applicable
-adversarial verdict reconciliation, and embedded stage outcome. Every finding,
+Terra adversarial-screen reconciliation when applicable, and embedded stage outcome. Every finding,
 requirement, and prior match must include its full human-readable meaning before
 its optional key. Do not include raw lens or verifier transcripts.

@@ -71,15 +71,20 @@ Fetch existing review comments and conversation threads using `~/.claude/rules/p
 
 Build `existing_comments_index`: file path, line range, substance summary, `thread_root_id`. Pass it to reviewer subagents for dedupe and use it again when merging findings.
 
-Build one fingerprinted review bundle: source/range, manifest, diff,
-requirements/delivery context, and comment index. Reuse it until its source,
-working tree, requirements, or feedback changes; see `evidence-bundles.md`.
+Build one fingerprinted review bundle: source/range, manifest, full aggregate
+diff, requirements/delivery context, comment index, and a short
+`relevant_patterns` excerpt matched to diff triggers. Reuse stable auxiliary
+evidence until its fingerprint changes; see `evidence-bundles.md`. The cache
+never narrows scope: every pass reviews the full aggregate change from the
+original merge base to current HEAD.
 
 Compare the PR author's login with the authenticated GitHub login to resolve
 `review_relationship`. A missing login is `unknown_pr`, never an assumption that
 the PR belongs to someone else.
 
-If existing comments include your own prior review pass, treat as re-review: re-read the full diff and all comments, including issue-level threads where authors may explain what changed.
+If existing comments include your own prior pass, re-read the full aggregate
+diff and all comments, including issue-level threads. Reuse only fingerprinted
+requirements, project, dependency, and prior-disposition evidence.
 
 **Local Mode:**
 
@@ -157,8 +162,10 @@ requirements verdict.
 | **Migration safety** | Lock risk, down-migration safety, column types, advisory locks, backfillers | Migration files in the diff |
 | **Dependency** | License, maintenance, attack surface of new packages | Lockfile changes, new dependency manifests |
 
-Except for the Low-risk fast-approval path, Security, QA, and a general-reviewer
-lens (Backend when none is obvious) are baseline for every non-empty code diff.
+Except for the Low-risk fast-approval path, `general-reviewer` is the baseline
+for every non-empty code diff. Security, QA, Architecture, and Performance run
+only when their concrete trigger signals fire; record each skipped specialist
+and its diff-based reason in the Coverage Manifest.
 
 ### Requirements checklist (if a ticket is linked)
 
@@ -272,7 +279,11 @@ Collect their outputs into a **compact `research_notes` summary** — the load-b
 
 ### Wave 2 — Lens reviewer subagents (parallel, one message)
 
-For each active lens, spawn its reviewer concurrently with a lens-specific bundle excerpt: triggering/dependent hunks, relevant manifest entries, and cited research facts, plus normal mode/context fields and extras. Pass the full diff only when scope cannot be isolated; reviewers may request a named omitted source.
+For each active lens, spawn its reviewer concurrently with a lens-specific
+bundle excerpt: triggering/dependent hunks, relevant manifest entries, cited
+research facts, and only its `relevant_patterns`, plus normal mode/context fields
+and extras. Pass the full diff only when scope cannot be isolated; reviewers may
+request a named omitted source.
 
 In local mode, `base_ref` and `fork_sha` are the values resolved in Step 1, and `diff_text` is `git diff "$fork"`. Passing both means a reviewer that widens its own diff reproduces the branch-wide range instead of falling back to the working tree or the last commit. Research subagents get the same two values for the same reason.
 
@@ -302,10 +313,10 @@ Merge the lens reviewers' fragments into one findings set:
    re-dispatch it once with a tightened brief before proceeding. Do not silently
    drop a lens.
 
-At compilation, reject any candidate that cannot name a concrete
-author-controlled change, explicit decision, or specific information request
-that resolves a present changed-line risk. Do not keep observations or general
-advice around for the verifier to turn into feedback later.
+Before verifier dispatch, drop and record candidates that duplicate a thread,
+lack an anchor/causal link, or lack a concrete author-controlled action,
+decision, or information request. Do not send observations or general advice to
+a verifier.
 
 This compiled set is what Steps 4–8 operate on.
 
@@ -315,7 +326,9 @@ If any compiled finding carries `Severity: Question`, ask it. The point is to ca
 
 ### After I answer — challenge my answers
 
-Once I respond, spawn the **adversarial-debate** agent to challenge *my* answers. This is a separate pass from the Step 6 finding challenge — the target here is my context, not the assistant's findings.
+Once I respond, use **adversarial-screen** to challenge the answer. Do not
+escalate a decision challenge to Sol; a material risk becomes a finding and
+follows the normal Critical/High-risk verifier route.
 
 Pass `mode: decision`, the current review-bundle fingerprint, and only the
 question, answer, and cited context needed to test it.
@@ -324,15 +337,13 @@ Pass to the agent:
 - The original question + the investigation context that surfaced it (diff, relevant files, the compiled findings)
 - My answer
 
-The agent returns a verdict per answer:
-- **ACCEPT** — answer holds up; move on
-- **PROBE_FURTHER** — answer has gaps, unverified claims, or optimism bias; the agent supplies a follow-up question to ask me
-- **FLAG** — answer reveals a real risk (e.g., "we didn't actually check that", "no, that team wasn't told") that should become a finding
+The screen returns one of `PASS`, `REVISE`, `ESCALATE`, or `NEEDS_EVIDENCE`.
 
-Apply the verdicts:
-- ACCEPT → record the answer and proceed
-- PROBE_FURTHER → ask me the follow-up question; re-run adversarial debate on the new answer (max 2 cycles, then accept or flag)
-- FLAG → record as a structured finding with its own severity/risk/confidence (it gets its own verifier dispatch in Step 6 along with every other finding)
+Apply the result:
+- PASS → record the answer and proceed.
+- REVISE → correct the factual mismatch and ask one follow-up question if it remains load-bearing.
+- ESCALATE or NEEDS_EVIDENCE → record the gap as a Question. Route it to Sol
+  only if it establishes a concrete Critical or High-risk finding.
 
 ### When to skip
 
@@ -360,7 +371,6 @@ Read `references/finding-axes.md` and compute the tier mechanically from the fin
 ```
 finding-verifier-high  if severity == Critical
                        OR risk == High
-                       OR (confidence == Low AND severity not in (Nit, Question))
 finding-verifier-low   otherwise
 ```
 
@@ -376,13 +386,16 @@ Send **all** dispatches — both tiers — in a single message so they run in pa
 - requirements checklist, if present and relevant to that finding
 - **nothing about the other findings** — each dispatch verifies its own claim in isolation so no verdict can be biased off a sibling
 
-High-tier returns KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`. Low-tier returns the same minus PROMOTE, plus `requires escalation`. Both must cite evidence (`file:line`, or `source` + `query` + `retrieved-at`).
+High-tier returns KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`. Low-tier returns the same minus PROMOTE, plus `requires clarification`. Both must cite evidence (`file:line`, or `source` + `query` + `retrieved-at`).
 
-### Handle escalations
+### Handle low-tier uncertainty
 
-A low-tier `requires escalation` means the cheap pass could not honestly verify the claim. Re-dispatch that finding to `finding-verifier-high` and use the high-tier verdict. Escalations from one round can be re-dispatched together in one message.
+A low-tier `requires clarification` becomes a targeted question; do not
+re-dispatch a non-Critical, non-High-risk finding to Sol. Re-dispatch only a
+`REVISE` supported by evidence that makes it Critical or High risk.
 
-Never resolve an escalation yourself by reasoning about it in the main window, and never treat an escalation as a DROP — an unverified finding is unverified, not disproven. If a re-dispatched finding escalates again or returns `requires clarification`, surface it as a question rather than looping (see `~/.claude/rules/loop-detection.md`).
+Never treat uncertainty as a DROP. A high-tier `requires clarification` is a
+question, not a loop (see `~/.claude/rules/loop-detection.md`).
 
 ### PR mode caveat
 
@@ -420,7 +433,8 @@ Before Step 7, confirm:
   blocks the declared increment rather than merely belonging to the eventual
   feature
 - dropped findings have one-line reasons
-- every escalation was re-dispatched, not silently resolved or dropped
+- every low-tier uncertainty is surfaced as a question, or was re-routed only
+  after cited evidence revised the finding to Critical or High risk
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
 - overall change-set risk was classified independently from per-finding risk
@@ -463,7 +477,7 @@ is known to differ from the authenticated reviewer's login.
 
 ### Challenge the eligible verdict choice
 
-`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. A pending PR operational-readiness state is likewise mechanical, so do not challenge it. For a third-party PR only, the remaining APPROVE/COMMENT choice after readiness is confirmed is discretionary and receives this whole-review adversarial pass. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-debate` with:
+`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. A pending PR operational-readiness state is likewise mechanical, so do not challenge it. For a third-party PR only, the remaining APPROVE/COMMENT choice after readiness is confirmed is discretionary and receives a Terra adversarial screen. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-screen` with:
 
 - `mode: decision` and the current review-bundle fingerprint;
 
@@ -550,12 +564,14 @@ If no `Worth-considering` items, skip the prompt entirely.
 - `references/learned-misses.md` - active pattern queue. Auto-promote check runs top invocation; triage block reports promotions.
 - `references/promoted-misses.md` - audit archive of promoted/discarded entries, split out of `learned-misses.md` to stay under the reference word-budget cap.
 - `references/learned-miss-lifecycle.md` - capture/promote subcommands and queue auto-promotion. Load for those modes and at invocation start.
-- `references/team-review-patterns.md` - team-and-community review patterns distilled from multi-developer PR mining pass. Created by separate mining pass; pass into lens reviewers (or fold relevant patterns into briefs) when present.
-- `gotchas.md` - known failure patterns. This skill every lens reviewer read it.
+- `references/team-review-patterns.md` - team-and-community review patterns distilled from multi-developer PR mining pass. Created by separate mining pass; fold only patterns matching the current diff into `relevant_patterns`.
+- `gotchas.md` - known failure patterns. This skill selects only the entries relevant to the current diff and passes that compact excerpt to the affected lens reviewers.
 
 ## Gotchas
 
-Read `gotchas.md` before starting work. Every lens reviewer reads it independently before producing findings. Patterns belonging in this skill's main flow (don't auto-publish, re-review means full re-review, propagating PR Mode constraints into subagents) are enforced here; patterns belonging in the deep per-lens investigation (lazy imports, cross-service contracts, brand capitalization) are enforced inside the reviewer agents.
+Read `gotchas.md` before starting work. Pass only trigger-matched excerpts to
+affected lenses. Keep main-flow patterns here; pass investigation patterns only
+to the relevant reviewer.
 
 ## Never auto-publish
 
