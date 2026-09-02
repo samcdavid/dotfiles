@@ -32,10 +32,12 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    only interaction candidates grounded in the diff and research evidence; every
    candidate must enter the same verifier route as lens findings.
 7. Before verifier dispatch, drop duplicates and candidates missing a
-   changed-line anchor, causal link, or concrete author-controlled action. Route
-   every survivor to exactly one isolated verifier: Sol only for Critical or
-   High-risk findings, Terra otherwise. A low-tier uncertainty becomes a
-   targeted clarification; re-route only a cited revision to Critical or High
+   changed-line anchor, causal link, or concrete author-controlled action. Send
+   Critical/High-risk survivors to Sol first. If one survives, bypass all
+   Medium/Low-risk fact-checking and render each as an explicitly unverified
+   inline PR notice (or anchored local notice) that cannot affect the verdict.
+   Otherwise send lower-tier survivors to Terra. A low-tier uncertainty becomes
+   a targeted clarification; re-route only a cited revision to Critical or High
    risk.
 8. Apply `review-contract.md`'s Actionability Gate after verification. A finding
    or question survives only when it requests a concrete author-controlled

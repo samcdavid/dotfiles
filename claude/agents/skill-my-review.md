@@ -68,7 +68,8 @@ Return a structured review envelope: mode/diff source, overall change-set risk,
 code verdict, PR approval status or local pre-stage human-acknowledgement status, delivery increment and deferred integration context, coverage manifest, the single PR acknowledgement or local checklist when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
-residual risks/questions, mode-constrained mechanical verdict, any applicable
+residual risks/questions, explicitly unverified priority-bypass notices when
+applicable, mode-constrained mechanical verdict, any applicable
 Terra adversarial-screen reconciliation when applicable, and embedded stage outcome. Every finding,
 requirement, and prior match must include its full human-readable meaning before
 its optional key. Do not include raw lens or verifier transcripts.

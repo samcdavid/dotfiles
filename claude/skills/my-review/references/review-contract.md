@@ -63,6 +63,12 @@ body commentary, deep-dive prose, or a downgraded Nit. Deep-dive sections may
 summarize evidence, but may not introduce unactionable feedback that bypassed
 the finding gate.
 
+When a verified Critical or High-risk finding short-circuits lower-tier
+fact-checking, lower-tier candidates that already passed this gate may be shown
+only as explicitly unverified author notices. They must keep their changed-line
+anchor, state that the observation was not independently fact-checked because
+high-priority findings were prioritized, and never affect the verdict.
+
 ## Bounded Whole-Diff Synthesis
 
 After lens compilation and before verifier routing, inspect the full diff,

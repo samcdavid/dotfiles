@@ -378,7 +378,18 @@ Do not hand-pick a tier because a finding feels important — if it feels import
 
 ### Dispatch
 
-Send **all** dispatches — both tiers — in a single message so they run in parallel. Never sequentially. Pass each dispatch:
+Dispatch all Critical/High-risk candidates to the high tier in parallel before
+spending on lower-risk candidates.
+
+If any Critical or High-risk finding survives, do not dispatch Medium/Low-risk
+candidates to `finding-verifier-low` or `this-important`. In PR mode, prepare
+one inline notice per candidate; in local modes return anchored notices. Each
+states it was not independently fact-checked because a verified higher-priority
+finding was prioritized, cannot affect the verdict, and is an observation for
+the author to assess. Record the short-circuit in the manifest and output.
+
+Only if no Critical/High-risk finding survives, dispatch lower-tier candidates
+in parallel. Pass each verifier:
 
 - `mode`, and the PR diff or local diff source of truth (plus `pr_head_sha`/`repo` and the PR-mode constraints block in PR mode)
 - that finding's file paths and lines only
@@ -420,11 +431,14 @@ preferences, generalized advice, speculative future concerns, and open-ended
 questions. Do not move rejected material into residual risk, deep-dive prose, or
 Nits.
 
-Then run `/this-important strict` (unless the user asked for a broader sweep) on the remaining **low-tier findings only**. `/this-important` has no PROMOTE verdict and must not downgrade any high-tier KEEP or PROMOTE.
+Without a priority short-circuit, run `/this-important strict` (unless the user
+asked for a broader sweep) on remaining **low-tier findings only**. It has no
+PROMOTE verdict and must not downgrade high-tier KEEP or PROMOTE.
 
 Before Step 7, confirm:
 
-- every finding got its own verifier dispatch — none was batched or skipped
+- every Critical/High-risk candidate got a high-tier verifier; every lower-tier
+  candidate did too unless the short-circuit produced an unverified notice
 - no finding duplicates an existing PR thread
 - every PR finding has an aggregate-diff anchor and causal link; baseline-only issues never survive
 - every finding is grounded in the diff or verified source
@@ -436,6 +450,8 @@ Before Step 7, confirm:
 - every low-tier uncertainty is surfaced as a question, or was re-routed only
   after cited evidence revised the finding to Critical or High risk
 - every `requires clarification` finding is surfaced as a question, not silently resolved either way
+- every priority-bypass notice states that it was not fact-checked and cannot
+  affect the verdict
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
 - overall change-set risk was classified independently from per-finding risk
 - a required PR human acknowledgement is one deduplicated inline annotation, not
