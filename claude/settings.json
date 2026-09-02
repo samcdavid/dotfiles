@@ -237,5 +237,9 @@
   },
   "tui": "fullscreen",
   "skipAutoPermissionPrompt": true,
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/claude-daily-spend-statusline.sh"
+  }
 }
