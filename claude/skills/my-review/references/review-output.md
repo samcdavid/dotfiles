@@ -87,7 +87,12 @@ current defect.]
 [Only when an active/upcoming issue exactly covers a duplicate non-blocking follow-up]
 
 ### Questions
-- [Exact author-only information or decision needed to resolve a changed-line risk]
+
+#### 1. [Category]: [Concise question title]
+**Risk:** [High | Medium | Low] · **Confidence:** [0–100] · **Verification:** [Sonnet targeted verification | not independently verified]
+**File:** `path/to/file.ext:LINE`
+**Question:** [Exact author-only information or decision needed to resolve a changed-line risk]
+**Verdict impact:** Cannot independently affect the verdict without independent verification.
 
 ### Dropped Findings
 - [What a verifier dropped and why]

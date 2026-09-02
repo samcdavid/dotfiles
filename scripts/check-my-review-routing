@@ -143,6 +143,16 @@ for path in (
 output_template = "claude/skills/my-review/references/review-output.md"
 errors += require(output_template, "not independently verified", "unverified output status")
 errors += require(output_template, "They are verdict-neutral by default", "default verdict-neutral unverified output")
+errors += require(
+    output_template,
+    "### Questions\n\n#### 1. [Category]: [Concise question title]\n**Risk:** [High | Medium | Low] · **Confidence:** [0–100] · **Verification:",
+    "numeric-confidence question template",
+)
+errors += require(
+    output_template,
+    "**Verdict impact:** Cannot independently affect the verdict without independent verification.",
+    "verdict-neutral question template",
+)
 errors += forbid_any(
     output_template,
     ("priority-bypass", "priority bypass", "fact-checking budget", "unverified lens estimate"),
