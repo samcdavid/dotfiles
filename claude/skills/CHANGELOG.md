@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-02 — Canonical commit-message template
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `a0a9756` | Made the `commit` skill read a tracked symlink to the RCM-managed `gitmessage` and follow its prompts exactly. | Commit messages retain the canonical subject plus all three template sections, and future template edits flow into the skill without duplicated wording. |
+
 ## 2026-09-02 — Holistic, confidence-gated review routing
 
 | Commit | Change | Regression boundary / known-good meaning |
