@@ -22,6 +22,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 | --- | --- | --- |
+| `f9f11b0`, `dcf0efa`, `63aa67e` | Removed legacy fan-out and delta-only re-review wording; re-reviews retain full aggregate scope; Questions retain numeric confidence, verification, and verdict neutrality. | Ordinary review dispatch remains one holistic worker, and every actionable finding—including a question—preserves the confidence-gated verification contract. |
 | `0deda4a`, `1f96983` | Replaced ordinary multi-lens review fan-out with one Sonnet whole-diff worker, changed confidence to a numeric 0–100 estimate capped at 79 for unchecked causal facts, and gated Opus on `(Critical OR High risk) AND confidence >= 80`. | Normal reviews retain complete aggregate-diff context. Only the explicit `needs_confirmation` exception can use targeted Sonnet verification; all other findings are visibly unverified and verdict-neutral. |
 
 ## 2026-09-01 — Cost-bounded whole-change review
