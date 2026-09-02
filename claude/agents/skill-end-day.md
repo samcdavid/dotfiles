@@ -1,7 +1,7 @@
 ---
-model: sonnet
+model: haiku
 effort: medium
-codex-model: gpt-5.6-terra
+codex-model: gpt-5.6-luna
 name: skill-end-day
 runner-for: end-day
 description: Runs the substantive end-day consolidation procedure and returns a clean Daily ToDo record. It may update the requested Notion entry but never posts externally.

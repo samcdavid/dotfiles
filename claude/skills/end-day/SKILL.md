@@ -1,5 +1,5 @@
 ---
-model: sonnet
+model: haiku
 effort: medium
 name: end-day
 runner: skill-end-day

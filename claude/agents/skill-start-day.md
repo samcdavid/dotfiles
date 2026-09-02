@@ -1,7 +1,7 @@
 ---
-model: sonnet
+model: haiku
 effort: high
-codex-model: gpt-5.6-terra
+codex-model: gpt-5.6-luna
 name: skill-start-day
 runner-for: start-day
 description: Runs the substantive start-day planning procedure and returns a reviewable Daily ToDo update. It may update the requested Notion entry but never posts externally.
