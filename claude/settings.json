@@ -227,19 +227,19 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/claude-daily-spend-statusline.sh"
+  },
   "enabledPlugins": {
     "dscout-data-mcp@dscout-claude-plugins": true
   },
   "modelSettings": {
     "claude-sonnet-5": {
-      "effortLevel": "medium"
+      "effortLevel": "low"
     }
   },
   "tui": "fullscreen",
-  "skipAutoPermissionPrompt": true,
   "skipDangerousModePermissionPrompt": true,
-  "statusLine": {
-    "type": "command",
-    "command": "bash ~/.claude/scripts/claude-daily-spend-statusline.sh"
-  }
+  "skipAutoPermissionPrompt": true
 }
