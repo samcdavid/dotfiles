@@ -17,7 +17,7 @@ envelope.
 
 ## Dispatch
 
-Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
+Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, triage_state_ref: none, resume_identity: none, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
 
 - Infer `mode` as capture/promote, PR, branch/range, local, or local issue only from the supplied argument and current context; load the runner's retained shared routing references before resolving ambiguity.
 - Set `review_relationship` to `local`, `self_authored_pr`, or `third_party_pr`. In PR mode, compare the PR author's login with the authenticated GitHub login; if either cannot be established, use `unknown_pr`, which is not eligible for `COMMENT`.
@@ -45,7 +45,7 @@ Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normaliz
 ## Present
 
 Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
-Return overall change-set risk, the code verdict, readiness status, and the
+For `awaiting_user_triage`, present the state reference and next item without a verdict. Otherwise return change-set risk, code verdict, readiness status, and
 current delivery increment first, then the coverage manifest and actionable
 findings with file:line evidence and concrete author-controlled fixes, decisions,
 or information requests, the single PR human acknowledgement or first-item local
@@ -53,11 +53,10 @@ pre-stage checklist when required,
 verdict, questions, residual risk, requirements coverage including what is
 intentionally deferred from this increment,
 dropped findings, prior resolved/deferred/accepted matches, and the compact workflow-stage
-envelope when embedded. Finding keys may follow the complete title, problem,
-consequence, and fix, but may never replace them. Drop observations, preferences, and speculative concerns
+envelope when embedded. Drop observations, preferences, and speculative concerns
 that do not ask the author to do something concrete. Use `REQUEST_CHANGES` only
 for verified findings that are both `Critical` and `High` risk. Local,
-branch/range, local-issue, and embedded-local reviews always return the code
+branch/range, local-issue, and embedded-local reviews return the code verdict only after the matching walk-through completes; 
 verdict; pre-stage human-acknowledgement items never replace it. PR reviews return
 `needs_input` with approval pending when required operational readiness is
 unconfirmed. `COMMENT` is

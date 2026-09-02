@@ -323,6 +323,14 @@ a verifier.
 
 This compiled set is what Steps 4–8 operate on.
 
+## Step 3.5 — User candidate walk-through
+
+Before any candidate-specific question, verifier dispatch, importance or adversarial pass, or verdict computation, create or resume `~/.claude/thoughts/shared/review-triage/<scope-fingerprint>.md`. Keep scope identity, candidate fingerprint, serialized candidates, current key, and append-only resolutions there; it is not the final Finding Register.
+
+Invoke `/walk-through` over every actionable compiled candidate, including synthesis candidates. Show one item at a time with its key, lens, severity, risk, numeric confidence, causal link, problem/fix, verification need, and **not yet independently verified** status. Before advancing, record one user outcome—`dismiss`, `retain unverified`, `ask author`, or `authorize targeted research`—with rationale, owner, and follow-up.
+
+Only explicitly authorized research may reach a verifier. `ask author` queues only that question after the complete walk-through; dismissals and retained items are per-review, verdict-neutral dispositions. A changed scope or candidate fingerprint invalidates the state. While incomplete, return `awaiting_user_triage` with no verdict, investigation, importance/adversarial pass, publication input, or repair. On completion, finalize the interim state as non-final workflow history and resume only authorized candidates.
+
 ## Step 4 — Targeted Questions
 
 If any compiled finding carries `Severity: Question`, ask it. The point is to catch things where the situation depends on context only I have.

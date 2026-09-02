@@ -43,6 +43,8 @@ external intent as `external_action_requested`; return fresh keyed findings and
 prior-disposition matches to `implement-review` or `my-workflow` for final ledger
 settlement, without updating the ledger yourself.
 
+After compiling actionable candidates, persist and resume the fingerprinted walk-through state under `~/.claude/thoughts/shared/review-triage/`. Return `awaiting_user_triage` with no verdict until every candidate has a recorded user disposition. Only candidates explicitly authorized for targeted research may enter question or verifier routing.
+
 Return one human-acknowledgement item containing all trigger content. In local mode it
 is a pre-stage checklist, not a code-approval gate;
 compare advisory and operational tuples against their separate `accepted`

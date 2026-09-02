@@ -159,6 +159,10 @@ errors += forbid_any(
     "priority-budget unverified output",
 )
 errors += require("claude/agents/finding-verifier-high.md", "codex-model: gpt-5.6-sol", "Sol high verifier")
+errors += require(protocol, "## Step 3.5 — User candidate walk-through", "mandatory candidate walk-through")
+errors += require(protocol, "`dismiss`, `retain unverified`, `ask author`, or `authorize targeted research`", "four triage outcomes")
+errors += require(protocol, "awaiting_user_triage", "triage pause")
+errors += require("claude/skills/my-review/SKILL.md", "triage_state_ref", "triage resume input")
 for path in ("claude/agents/general-reviewer.md", "claude/agents/finding-verifier-low.md", "claude/agents/skill-my-review.md"):
     errors += require(path, "codex-model: gpt-5.6-terra", "Terra default routing")
 errors += forbid(
