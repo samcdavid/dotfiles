@@ -25,7 +25,7 @@ running checks.
 2. Research only the directly relevant code and tests.
 3. Build one bounded `my-implement` slice, including focused RED tests for behavior changes, allowed paths, and verification commands.
 4. Invoke `my-implement` to perform the bounded edit.
-5. Run targeted checks and any cheap broader checks independently.
+5. Reuse current implementation evidence; run only targeted or broader checks it does not cover.
 6. Self-review diff for correctness, scope creep, and missing tests.
 
 ## Trip Out

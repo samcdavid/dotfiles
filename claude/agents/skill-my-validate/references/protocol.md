@@ -105,9 +105,12 @@ For each phase in the plan:
 - Read every file listed in "Changes Required" — was the change actually made?
 
 #### 2b. Mechanical Success Criteria
-Run EVERY command listed in success criteria. For each:
-- Record: PASS or FAIL
-- If FAIL: capture the error output
+Start with `implementation_evidence`. Reuse a passing command when its recorded
+commit is `HEAD`, or when none of its covered paths changed between that commit
+and `HEAD`. Run every remaining criterion, plus any whole-plan criterion not
+owned by a phase. For each result, record the command, PASS or FAIL, commit, and
+covered paths. Capture only the diagnostic tail on failure; do not retain
+passing logs.
 
 #### 2c. Architectural Constraint Check
 Verify no architectural constraints were violated:

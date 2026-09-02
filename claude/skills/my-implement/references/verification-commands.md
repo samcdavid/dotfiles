@@ -1,6 +1,8 @@
 # Verification Commands by Stack
 
-Quick reference for common verification commands. **Always check the project's CLAUDE.md for project-specific CI commands — those take precedence.**
+Fallback reference only when an approved phase lacks a verification command and
+project instructions do not supply one. **Always check the project's CLAUDE.md
+for project-specific CI commands — those take precedence.**
 
 ## TDD Cycle Commands
 

@@ -7,11 +7,11 @@ description: Execute approved implementation work sequentially in bounded phases
 
 # Implement Plan
 
-This skill is the implementation orchestrator. Read [references/protocol.md](references/protocol.md) before executing work. Use `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) to select and record checks.
+This skill is the sequential implementation coordinator. Read [references/protocol.md](references/protocol.md) before executing work. Use `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) to select and reuse checks.
 
 ## Dispatch
 
-Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, stage, authority: local_only }` and execute its phases directly.
+Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, stage, authority: local_only }`. Dispatch one isolated worker per phase; retain coordination, independent verification, and commits here.
 
 - For a standalone request, derive `plan_path` from `$ARGUMENTS`. If it is absent, list plans in `~/.claude/thoughts/shared/plans/` and ask the user which approved plan to execute.
 - For `/my-workflow`, the synchronized workflow ledger may be both `plan_path`
@@ -21,7 +21,7 @@ Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, sta
   `my-workflow` to record; do not claim workflow completion.
 - Do not dispatch if the plan has no RED tests or success criteria for its next unfinished phase.
 
-Perform every edit task yourself, staying within its allowed paths and following RED → GREEN → VALIDATE for behavioral work. Keep phases sequential and bounded; independently verify the resulting diff and checks before committing through `Skill(commit)`. Do not invoke `implement-review` between phases: phase verification is sufficient until the plan is complete. Never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
+Give a worker only its phase contract, relevant code/test excerpts, and the project instructions it needs. Keep phases sequential and bounded; independently verify the resulting diff and uncovered checks before committing through `Skill(commit)`. Do not invoke `implement-review` between phases: phase verification is sufficient until the plan is complete. Never infer authorization to push, publish, create or update a PR, or otherwise change a remote system.
 
 ## Present
 

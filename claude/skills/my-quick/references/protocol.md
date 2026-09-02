@@ -91,13 +91,14 @@ paths, constraints, and verification commands. Invoke `my-implement`; it
 performs the edit using its standard bounded-phase protocol. Do not edit the
 code or test directly here.
 
-Independently inspect the returned diff and rerun the mini-plan's verification
-commands. If the same check fails twice after the initial attempt, stop with the
-evidence and recommend the full workflow. Do not retry indefinitely.
+Independently inspect the returned diff and its evidence. Do not rerun a command
+that passed at the current commit; run only a missing proof or an additional
+cheap broader check. If the same check fails twice after the initial attempt,
+stop with the evidence and recommend the full workflow. Do not retry indefinitely.
 
 ## Step 6 — Mechanical Validation
 
-Run, in order:
+Run, in order, only when the implementation evidence does not already cover it:
 
 1. The full test file for the changed area
 2. Linter / formatter scoped to changed files
