@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-02 — Holistic, confidence-gated review routing
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `0deda4a`, `1f96983` | Replaced ordinary multi-lens review fan-out with one Sonnet whole-diff worker, changed confidence to a numeric 0–100 estimate capped at 79 for unchecked causal facts, and gated Opus on `(Critical OR High risk) AND confidence >= 80`. | Normal reviews retain complete aggregate-diff context. Only the explicit `needs_confirmation` exception can use targeted Sonnet verification; all other findings are visibly unverified and verdict-neutral. |
+
 ## 2026-09-01 — Cost-bounded whole-change review
 
 | Commit | Change | Regression boundary / known-good meaning |
