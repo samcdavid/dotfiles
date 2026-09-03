@@ -44,9 +44,13 @@ before dispatching `my-implement`.
 
 ## Reusing a stale preflight
 
-Any plan-version change invalidates synchronization, preflight, and
-implementation authorization. Refresh the full deterministic issue scope and
-rerun the one-document audit for the current version.
+A moderate-or-higher plan-version change invalidates synchronization,
+preflight, and implementation authorization. A minor amendment discovered
+during the pre-implementation gate is the narrow exception: record its
+classification, changed sections, and carried-forward evidence, then ask for
+fresh implementation authorization without re-syncing or rerunning the gate.
+Never use that exception for a requirement, scope, contract, architecture,
+test, migration/operations, phase-order change, or uncertain impact.
 
 ## Silently switching to my-quick
 

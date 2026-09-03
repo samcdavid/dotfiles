@@ -24,6 +24,9 @@ workflow ledger is both the resume source of truth and the approved plan.
    deep dive so clearing context never loses planning state.
 7. **Sync is not implementation authority.** A synchronized plan must pass the
    fresh pre-implementation gate, then receive separate explicit authorization.
+   A minor amendment discovered by that gate carries its successful gate
+   evidence forward; a moderate or higher correction requires a new sync and
+   gate.
 8. **Whole-plan validation before review.** `my-implement` completes every
    phase and its holistic test gate, then `my-validate` runs once against the
    completed plan before `implement-review` begins. Validation after a review
@@ -129,9 +132,27 @@ sync turn.
    current-database inspection, historical-state reconstruction, or staging
    results at this local gate.
 
-If any check needs a planning correction, set `planning_status: pairing`,
-increment `plan_version`, record the reason, and resume `my-pair-plan`. When all
-checks pass, record:
+If a check needs a planning correction, classify it before changing the ledger:
+
+- **Minor:** a clarification, wording correction, or implementation-detail
+  adjustment that preserves the approved need, requirements and non-goals,
+  affected files/modules/contracts, architecture, test contracts, migration and
+  operational obligations, and phase ordering. Make this amendment directly in
+  the synchronized ledger; increment `plan_version`; retain
+  `planning_status: synchronized` and `pre_implementation_check: passed`; set
+  `checked_plan_version` to the new version; and append the reason, changed
+  sections, classification, and carried-forward gate evidence under
+  `Pre-Implementation Check`. Do not re-sync or rerun the source refresh,
+  ledger audit, sibling check, or migration check. Continue directly to Step 3
+  and ask for explicit implementation authorization for the amended plan.
+- **Moderate or higher:** any change to the approved need, requirement,
+  non-goal, scope/affected surface, contract, architecture, test contract,
+  migration/operational obligation, phase ordering, or a change whose impact is
+  uncertain. Set `planning_status: pairing`, increment `plan_version`, clear
+  the sync, preflight, and authorization state, record the reason, and resume
+  `my-pair-plan`; it must be synchronized and pass a fresh gate.
+
+When all checks pass without a correction, record:
 
 ```yaml
 pre_implementation_check: passed
@@ -155,9 +176,11 @@ user already knows their meaning.
 
 Only an affirmative response sets `implementation_authorized: true`,
 `authorized_plan_version: <current version>`, and
-`implementation_authorized_at: <timestamp>`. Any planning correction clears
-the sync, gate, and authorization fields and returns to pairing. Never reuse
-authorization after the plan version changes.
+`implementation_authorized_at: <timestamp>`. A moderate-or-higher planning
+correction clears the sync, gate, and authorization fields and returns to
+pairing. A minor amendment made during Step 2 has already carried its gate
+evidence to its new version, but still requires this fresh authorization. Never
+reuse authorization after the plan version changes.
 
 ## Step 4 — Existing implementation loop
 

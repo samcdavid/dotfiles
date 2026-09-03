@@ -46,6 +46,11 @@ increment `plan_version` and clear `planning_synced_at`,
 `pre_implementation_checked_at`, `implementation_authorized`,
 `authorized_plan_version`, and `implementation_authorized_at`. Reset the two
 booleans/statuses to `false` and `not_run`; reset the remaining fields to null.
+This applies to planning changes handled by this runner. The coordinator may
+make a narrowly defined minor amendment discovered during the
+pre-implementation gate without returning to pairing; its protocol records how
+it carries the passing gate forward and still requires fresh implementation
+authorization.
 
 On every resume, read the ledger first. Apply `user_response` to the pending
 decision or sync proposal before doing more work. Preserve rejected alternatives

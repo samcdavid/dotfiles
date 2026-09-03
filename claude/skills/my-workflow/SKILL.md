@@ -16,8 +16,10 @@ runner.
 `my-pair-plan` owns issue intake, brief code orientation, conversation,
 on-demand specialist deep dives, and the single living workflow ledger. It
 returns across as many user turns as needed. Once the user synchronizes the
-ledger, run the fresh pre-implementation gate; only then request explicit
-implementation authorization and dispatch `my-implement`, one whole-plan
+ledger, run the fresh pre-implementation gate. A minor gate-discovered plan
+amendment may be recorded directly and carry that gate forward; moderate or
+higher changes must return through synchronization and a fresh gate. Then
+request explicit implementation authorization and dispatch `my-implement`, one whole-plan
 `my-validate` gate after implementation completes, then `implement-review`.
 
 Never infer implementation permission. Migration work always uses this full
@@ -52,7 +54,9 @@ and `references/migration-safety.md` whenever persisted schema/data is involved.
    ledger is explicitly synchronized.
 3. Run the pre-implementation gate against that synchronized plan version:
    refresh issue/sibling context, run the ledger consistency/traceability audit,
-   and check current sibling overlap.
+   and check current sibling overlap. Record a minor correction directly and
+   request implementation authorization; send moderate or higher corrections
+   back through pairing, synchronization, and the gate.
 4. Stop for explicit implementation authorization.
 5. Dispatch `my-implement` with the ledger as the approved plan and test
    strategy. Let it complete every phase and its holistic test gate.

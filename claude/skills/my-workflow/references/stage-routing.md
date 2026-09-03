@@ -43,7 +43,9 @@ remain available outside `my-workflow`.
   `my-quick`.
 - `planning_status: context | pairing | sync_pending`: resume `my-pair-plan`.
 - `planning_status: synchronized` and preflight missing/stale: run the
-  pre-implementation gate.
+  pre-implementation gate. A recorded minor gate amendment with a passed
+  `checked_plan_version` equal to `plan_version` routes directly to
+  authorization; moderate or higher changes route through pairing and sync.
 - Current-version preflight passed but implementation unauthorized: stop for
   authorization.
 - Authorized current version with incomplete implementation: run

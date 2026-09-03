@@ -37,5 +37,8 @@ one whole-plan `my-validate` gate. `implement-review` starts only after that
 gate passes and owns its bounded loop and terminal stop. Do not insert planning
 checkpoints into those procedures.
 
-Resume exclusively from ledger state. A plan-version change invalidates sync,
-preflight, and implementation authorization.
+Resume exclusively from ledger state. A moderate-or-higher plan-version change
+invalidates sync, preflight, and implementation authorization. A minor
+amendment made during the pre-implementation gate records its classification,
+changed sections, and carried-forward evidence, retains the passing gate for
+the new version, and stops for fresh implementation authorization.
