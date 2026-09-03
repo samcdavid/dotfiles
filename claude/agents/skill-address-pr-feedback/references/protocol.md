@@ -11,6 +11,16 @@ branch workflow ledger; load `workflow-ledger-context.md` only when one exists.
 Its settled requirements, decisions, and Finding Register are evidence. Do not
 create a ledger merely for feedback.
 
+At triage completion, each combined validation gate, and each review pass,
+record the compact handoff required by `context-checkpoint.md`. Use the branch
+workflow ledger when it exists; otherwise write a self-contained handoff under
+`~/.claude/thoughts/shared/feedback/` (or the equivalent active artifact root)
+and return its path as `feedback_handoff`. Include only the PR/branch and
+evidence fingerprint, root-cause batch, settled dispositions, commits, final
+command statuses, review outcome, and next action. Resume from that handoff
+instead of re-collecting a full diff or prior logs. End and resume in fresh
+context before roughly 80k retained tokens.
+
 In PR mode, load `feedback-collection.md`; use its filtered GitHub queries and
 the PR head/diff as truth. In local mode, use the full branch diff against the
 provided base and the supplied findings. In either mode, exclude resolved or
@@ -43,11 +53,24 @@ wait for an explicit amendment instead of treating a related ticket as one.
 ## Fix and validate
 
 After confirmed scope, load `fix-planning.md`. Turn each confirmed behavior
-into one bounded `my-implement` phase with an honest RED test and mechanical
-success criteria; send genuinely non-behavioral work through its direct-edit
-mode. `my-implement` performs the edit. Fixes are sequential, stay
-within their allowed paths, receive independent diff/check verification, and
-land as separate local commits only through `Skill(commit)`.
+into a bounded root-cause batch. Compatible comments may share one phase only
+when they repair the same cause, use the same focused test setup and allowed
+paths, and retain one behavior contract. Independent causes remain separate
+batches. A behavioral batch has an honest RED test and mechanical success
+criteria; genuinely non-behavioral work uses direct-edit mode.
+`my-implement` performs the edit. Fixes are sequential, stay within their
+allowed paths, receive independent diff/check verification, and land as
+separate local commits only through `Skill(commit)`.
+
+Before dispatching the normal repair path, classify a batch for the **feedback
+fast lane**. It is eligible only when it is one confirmed root cause, changes
+at most two existing source/test/doc files, has no migration, auth, permission,
+security, public-contract, dependency, configuration, concurrency, external-I/O,
+or requirements-scope impact, and has a focused proving check. Dispatch this
+pre-confirmed micro-fix through `my-quick` with the triage evidence, allowed
+paths, and check. Its normal tripwires still apply; any tripwire, failed check,
+or scope expansion exits the fast lane and returns here for the normal path.
+Never use the fast lane for a disputed, deferred, or partially-correct item.
 
 Run the narrowest affected checks while iterating, then the combined
 build/compile, lint/format, and test gate from `execution-contract.md` once.
@@ -55,9 +78,10 @@ Never call work complete if a required check is failed or inconclusive.
 
 Use post-fix review in proportion to risk:
 
-- Documentation, comments, formatting, and other no-behavior direct edits:
-  independent diff inspection plus their targeted check; no `my-review` pass.
-- Ordinary behavioral or multi-file fixes: one `my-review` pass after the
+- Feedback-fast-lane fixes, documentation, comments, formatting, and other
+  no-behavior direct edits: independent diff inspection plus their focused
+  check and `my-quick` self-review where applicable; no `my-review` pass.
+- Medium-risk behavioral or multi-file fixes: one `my-review` pass after the
   combined gate; repair only a substantive result and re-review once.
 - Security, data, migration, public-contract, or otherwise high-risk fixes:
   retain the existing repair loop, capped at three total `my-review` passes.

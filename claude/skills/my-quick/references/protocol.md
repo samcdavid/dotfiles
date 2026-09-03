@@ -33,6 +33,18 @@ A short description of the change. Examples:
 
 If empty, ask me what to change.
 
+### Pre-confirmed feedback micro-fix
+
+`address-pr-feedback` may invoke this workflow with a
+`preconfirmed_feedback_microfix` contract after review triage. It must contain
+the accepted root cause, exact behavior contract, allowed paths, and focused
+proving check. Reuse that confirmation in place of the Step 1 and Step 4 user
+approval pauses; it is not blanket permission to widen scope. Apply every
+tripwire normally. If one fires, a check fails, or the diff exceeds the
+contract, stop and return the evidence to `address-pr-feedback` for its normal
+repair path. Do not ask the user to choose a lane from inside this embedded
+invocation.
+
 ## Step 1 — Intake and Two-Translation
 
 Read the request. State back:

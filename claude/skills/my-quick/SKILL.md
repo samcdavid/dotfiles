@@ -21,7 +21,11 @@ running checks.
 
 ## Flow
 
-1. Confirm the change is small and well-bounded.
+1. Confirm the change is small and well-bounded. A caller may supply a
+   `preconfirmed_feedback_microfix` contract only after evidence-backed review
+   triage has accepted its exact behavior, allowed paths, and focused proving
+   check; in that case, reuse that confirmation rather than asking the user to
+   approve the same scope again.
 2. Research only the directly relevant code and tests.
 3. Build one bounded `my-implement` slice, including focused RED tests for behavior changes, allowed paths, and verification commands.
 4. Invoke `my-implement` to perform the bounded edit.
@@ -31,6 +35,9 @@ running checks.
 ## Trip Out
 
 Stop and recommend full workflow if scope expands, requirements are unclear, many modules are touched, architecture changes emerge, or repeated failures occur.
+For a preconfirmed feedback micro-fix, return control to the feedback runner
+instead of asking the user whether to continue; it chooses the normal repair
+path and preserves the reviewer triage record.
 
 ## Output
 

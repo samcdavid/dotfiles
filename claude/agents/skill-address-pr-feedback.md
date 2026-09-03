@@ -23,6 +23,13 @@ Read `~/.claude/rules/no-outward-actions.md` or `~/.agents/rules/no-outward-acti
 
 For authorized execution, invoke `my-implement` for every behavioral fix and non-behavioral edit. It performs each bounded edit. Re-verify every phase and ensure every validated local fix is committed only through `Skill(commit)`. Run the bounded implement -> validate -> review -> repair loop in the protocol, capped at 3 review passes and lowered further by a caller-supplied `remaining_review_passes`. Return any outward work as a structured `external_action_requested` envelope for the wrapper.
 
+For a batch meeting the protocol's feedback-fast-lane criteria, invoke
+`my-quick` with its pre-confirmed micro-fix contract instead. It retains its
+tripwire, implementation, check, and commit gates, and must return to this
+runner for normal handling on any tripwire, failed check, or scope expansion.
+Persist a compact `feedback_handoff` at each required context checkpoint; do
+not continue a repair/review coordinator beyond roughly 80k retained tokens.
+
 ## Output
 
 Return compact evidence: mode, triage/status, fix phases described by their
@@ -30,5 +37,6 @@ changes, local commit SHAs with subjects/effects, validation/review results, loo
 iteration, resolved/deferred findings with full descriptions before optional
 keys, surviving findings with concrete next actions, ledger round, and
 `external_action_requested` (`actions`, targets, draft replies, evidence) when
-applicable. Do not include raw tool transcripts, key-only lists, or claim an
-external action was completed.
+applicable. Include `feedback_handoff` with its durable path whenever a context
+checkpoint was written. Do not include raw tool transcripts, key-only lists,
+or claim an external action was completed.
