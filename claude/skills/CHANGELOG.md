@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-03 — Minor pre-implementation amendments
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `1ae2c92` | Allowed a narrowly defined minor correction discovered during `my-workflow` pre-implementation to amend the synchronized ledger directly. | The carried-forward gate still requires fresh implementation authorization; requirements, scope, contracts, architecture, tests, migration/operations, phase order, and uncertain changes remain moderate-or-higher and require re-pairing, re-sync, and a new gate. |
+
 ## 2026-09-03 — Cost-bounded review-feedback repairs
 
 | Commit | Change | Regression boundary / known-good meaning |
