@@ -1,6 +1,6 @@
 # Ecto Migration Planning
 
-Load this reference when the project changes Ecto migrations, persisted schema, constraints, indexes, or data that requires a migration/backfill. It complements the repository-wide migration-history and compatibility requirements in `../../my-workflow/references/migration-safety.md`; read that reference too when it is available.
+Load this reference when the project changes Ecto migrations, persisted schema, constraints, indexes, or data that requires a migration/backfill. It complements the repository-wide local-test and staging-validation requirements in `../../my-workflow/references/migration-safety.md`; read that reference too when it is available.
 
 ## Ticket boundary and release ordering
 
@@ -28,7 +28,7 @@ Use the relevant recipe from [fly-apps/safe-ecto-migrations](https://github.com/
 - Type, column, and table renames/removals: prefer a compatible field/source mapping when possible. Otherwise add a new shape, dual-write, backfill, move reads, remove old application references, then separately drop the old shape.
 - JSON: use `jsonb` rather than `json` on PostgreSQL unless the research proves a different type is required.
 
-The guide is recipe-oriented rather than a substitute for repository-specific evidence. The issue must also state table size/traffic assumptions, database version, affected deployment histories, lock/rollback risk, history audit and compatibility-matrix rows, migration validation commands, and the staging/production health signals required before unblocking functional work.
+The guide is recipe-oriented rather than a substitute for repository-specific evidence. The issue must also state table size/traffic assumptions, database version, lock/rollback risk, the test-suite migration validation command, and the staging/production health signals required before unblocking functional work. Current database state is validated by the developer during the staging deployment, not reconstructed locally.
 
 ## Required issue acceptance criteria
 
@@ -37,7 +37,7 @@ Each migration-only issue must say:
 1. The exact schema/data change and Safe Ecto recipe used.
 2. The compatibility guarantee for old and new application versions.
 3. Any backfill/constraint-validation phase and the required observation or completion evidence.
-4. The histories/environments the migration must support and how they will be validated.
+4. The staging validation criteria for the actual deployed migration state.
 5. The dependent functional issue IDs and the condition that unblocks them.
 
-Do not declare a migration ready based only on a fresh database. The implementation workflow must perform the history audit and compatibility matrix in `../../my-workflow/references/migration-safety.md` before validation or release claims.
+Do not declare a migration staging-validated until the developer has deployed it to staging and checked the criteria in `../../my-workflow/references/migration-safety.md`. Local implementation readiness requires the migration design and a passing test suite, whose normal setup applies migrations; it does not require a local reconstruction of deployed histories.

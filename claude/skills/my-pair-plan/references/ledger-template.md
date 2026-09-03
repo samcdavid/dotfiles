@@ -78,7 +78,8 @@ updated: <timestamp>
 
 ## Migration and Operational Readiness
 
-<!-- Compatibility matrix, rollout needs, env vars, flags, or not_applicable. -->
+<!-- Migration design; test-suite command and expected evidence; staging
+validation checklist/status; rollout needs; env vars; flags; or not_applicable. -->
 
 ## Implementation Plan
 

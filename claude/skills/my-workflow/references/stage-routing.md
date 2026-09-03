@@ -64,7 +64,9 @@ All conditions are mandatory:
   observability/evaluation/migration sections are complete.
 - `pre_implementation_check: passed` and `checked_plan_version` equals the
   synchronized `plan_version`, after the sync turn.
-- Migration safety evidence is complete when required.
+- For migration work, the local migration design, test-suite validation plan,
+  and staging-validation checklist are complete. Successful staging validation
+  is a later developer deployment responsibility, not an implementation gate.
 - `implementation_authorized: true` and `authorized_plan_version` equals that
   same plan version.
 

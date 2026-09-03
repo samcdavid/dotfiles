@@ -20,7 +20,9 @@ Report:
   and residual risks.
 - `implement-review` terminal status, review-clean flag, every post-implementation
   review pass, and the repair commits each produced.
-- When migrations were in scope: the migration-history matrix, validation result for each history, release-health evidence, and any explicit override of a blocked gate.
+- When migrations were in scope: the local test-suite migration evidence, the
+  staging-validation checklist and its status, and any staging findings or
+  follow-up.
 - Surviving findings and root-cause theory when `implement-review` is `blocked`
   or `cap_reached`; do not present either state as completion.
 - Suggested next command.

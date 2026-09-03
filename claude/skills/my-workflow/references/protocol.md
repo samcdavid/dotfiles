@@ -28,8 +28,11 @@ workflow ledger is both the resume source of truth and the approved plan.
    phase and its holistic test gate, then `my-validate` runs once against the
    completed plan before `implement-review` begins. Validation after a review
    repair remains part of `implement-review`; keep its five-pass cap unchanged.
-9. **Migration safety remains a hard gate.** Apply `migration-safety.md` without
-   weakening its history, compatibility, validation, or override rules.
+9. **Migration safety is staged.** Before implementation, require a migration
+   design, test-suite migration execution, and a concrete staging-validation
+   plan from `migration-safety.md`. Validate current database state only during
+   the developer's staging deployment; its pending result does not block local
+   planning, implementation, validation, or review.
 10. **No outward actions.** Local planning writes and validated implementation
     commits are allowed. Pushes, PR mutations, published messages, deployments,
     and other remote changes require explicit authorization.
@@ -120,9 +123,11 @@ sync turn.
 3. **Coordinate siblings.** Apply the fresh overlap check in
    `cross-workflow-coordination.md` against exact planned files, modules,
    contracts, and requirements. Stop only for a material overlap decision.
-4. **Check migrations.** When required, confirm the ledger contains the history
-   audit, compatibility matrix, per-history validation plan, and rollout health
-   checks from `migration-safety.md`.
+4. **Check migrations.** When required, confirm the ledger contains the
+   migration design, test-suite command and expected migration evidence, and
+   staging-validation checklist from `migration-safety.md`. Do not require
+   current-database inspection, historical-state reconstruction, or staging
+   results at this local gate.
 
 If any check needs a planning correction, set `planning_status: pairing`,
 increment `plan_version`, record the reason, and resume `my-pair-plan`. When all

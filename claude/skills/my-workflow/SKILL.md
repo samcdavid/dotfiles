@@ -21,8 +21,10 @@ implementation authorization and dispatch `my-implement`, one whole-plan
 `my-validate` gate after implementation completes, then `implement-review`.
 
 Never infer implementation permission. Migration work always uses this full
-flow and the safety gate in `references/migration-safety.md`. `my-quick` remains
-an explicit, ledgered alternative for qualifying small work.
+flow and the staged safety process in `references/migration-safety.md`:
+the test suite provides local migration execution evidence, and the developer
+validates current migration state during a staging deployment. `my-quick`
+remains an explicit, ledgered alternative for qualifying small work.
 
 ## Load Rules
 
