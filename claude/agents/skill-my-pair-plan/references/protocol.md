@@ -114,6 +114,15 @@ For each candidate question:
    ask one question, give the recommended answer and evidence, and explain what
    changes if the recommendation is wrong.
 
+Before asking, check whether the current candidate question is clearly coupled
+to another pending candidate question — same function/interface/boundary, or
+the answer to one constrains the answer to the other. If so, resolve both
+together in a single turn: one combined excerpt (or the smallest set that
+covers both boundaries), one message stating both hypotheses and confidences,
+and one round of answers. Do not batch questions that are independent merely
+because they occur near each other in the plan — batching is for genuine
+coupling, not for reducing turn count on its own.
+
 Before returning that question, re-read the relevant source so the excerpt is
 current. Select the smallest complete block that lets the user understand the
 choice—usually the function/interface plus the relevant branch or call site.
@@ -127,10 +136,11 @@ choice concrete. Say explicitly that it is a sketch, not repository code. A
 product-only question must still show the proposed behavior at the nearest code
 boundary rather than asking in the abstract.
 
-After every answer, update the affected ledger sections and append a decision
-row with status `confirmed`, `revised`, or `rejected`. Increment `plan_version`,
-set `updated`, and return a compact delta before the next question. Do not wait
-until final sync to persist conversation state.
+After every answer (or, for a batched turn, after each answer in that turn),
+update the affected ledger sections and append a decision row with status
+`confirmed`, `revised`, or `rejected`. Increment `plan_version`, set `updated`,
+and return a compact delta before the next question. Do not wait until final
+sync to persist conversation state.
 
 ## Step 5 — Route focused deep dives
 

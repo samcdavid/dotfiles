@@ -9,14 +9,19 @@ Migration work always uses the full workflow. Read `migration-safety.md` and set
 `migration_safety: required` when the task touches migration versions,
 persisted schema/data, or deployment-database repair.
 
-Offer `my-quick` only for a small, well-understood refactor, semantic-free
-rename, cleanup, or targeted fix whose before/after behavior and complete scope
-are already predictable. Record the proposed route, reason, scope, and handoff
-in the ledger, then wait for approval before invoking it.
+Default to `my-quick` for any issue whose scope, before/after behavior, and
+affected files can already be stated in a sentence or two from the issue text
+and a quick look at the code — this covers most refactors, renames, cleanups,
+targeted fixes, and small well-specified bug fixes, not only semantic-free
+ones. Record the proposed route, reason, scope, and handoff in the ledger,
+then wait for approval before invoking it.
 
-All new functionality, contract-affecting behavior, test-specified bug fixes,
-multi-module work, architecture changes, and uncertain scope use
-`my-pair-plan`.
+Route to `my-pair-plan` instead only when scope is genuinely uncertain, or the
+work is new functionality, contract-affecting behavior, multi-module, or an
+architecture change — i.e. when stating "before/after behavior and complete
+scope" would require guessing rather than reading. When unsure which side a
+task falls on, say so and let the user pick rather than defaulting to the
+heavier route.
 
 ## Embedded dispatch
 
