@@ -24,6 +24,12 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 | --- | --- | --- |
 | `d434803` | Added root-cause feedback batching, a narrowly pre-confirmed `my-quick` micro-fix lane, risk-tiered post-fix review, and mandatory durable handoffs before 80k retained context. | Straightforward, fully verified feedback avoids redundant whole-diff review; tripwires, failed checks, disputed scope, and risky changes return to the normal implementation/validation/review path. |
 
+## 2026-09-03 — Staging-owned migration-state validation
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `9dd21bb` | Moved current migration-state validation from the local `my-workflow` gate to developer-performed staging deployment, while retaining migration design and test-suite execution as local requirements. | Local workflow synchronization, implementation, validation, and review do not require historical-state reconstruction or staging evidence. A passing test suite supplies local migration execution evidence; staging verifies the real database schema, retry/rerun behavior, and application startup. |
+
 ## 2026-09-02 — Context-bounded implementation phases
 
 | Commit | Change | Regression boundary / known-good meaning |
