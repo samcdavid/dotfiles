@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-03 — Batched pairing decisions, wider my-quick default
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `bf0dc2a` | `my-pair-plan` now resolves clearly coupled candidate decisions (same boundary, answer constrains answer) in one combined turn instead of one re-read-and-ask cycle per decision; `my-workflow` now defaults to `my-quick` for any issue whose scope/behavior/files can be stated from a quick read, not only semantic-free renames. | Independent decisions still ask separately; genuinely uncertain or new/contract/architecture/multi-module work still routes to `my-pair-plan`. If pairing starts skipping real decision coupling checks or `my-quick` starts absorbing uncertain-scope work, revert to `1ae2c92`. |
+
 ## 2026-09-03 — Minor pre-implementation amendments
 
 | Commit | Change | Regression boundary / known-good meaning |
