@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-03 — Cost-bounded review-feedback repairs
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `d434803` | Added root-cause feedback batching, a narrowly pre-confirmed `my-quick` micro-fix lane, risk-tiered post-fix review, and mandatory durable handoffs before 80k retained context. | Straightforward, fully verified feedback avoids redundant whole-diff review; tripwires, failed checks, disputed scope, and risky changes return to the normal implementation/validation/review path. |
+
 ## 2026-09-02 — Context-bounded implementation phases
 
 | Commit | Change | Regression boundary / known-good meaning |
