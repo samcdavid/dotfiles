@@ -200,30 +200,6 @@
             "command": "[ -n \"$TMUX_PANE\" ] && printf '\\a' > \"$(tmux display-message -t \"$TMUX_PANE\" -p '#{pane_tty}')\" 2>/dev/null; true"
           }
         ]
-      },
-      {
-        "matcher": "Skill",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/checks.sh",
-            "if": "Skill(commit)",
-            "timeout": 600,
-            "statusMessage": "Format/lint/test gate (pre-commit)"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.dotfiles/claude/hooks/format-file.sh",
-            "statusMessage": "Formatting edited file"
-          }
-        ]
       }
     ]
   },

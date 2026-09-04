@@ -8,9 +8,10 @@ gotchas.
 
 - Discover the branch workflow ledger before classifying feedback. Its settled
   decisions and Finding Register are evidence, not optional context.
-- The combined gate runs the repository's relevant build/compile, lint,
-  formatter, and test commands. Capture each final exit status. A targeted check
-  supplements this gate; it never replaces it.
+- The combined gate runs the repository's relevant build/compile and test
+  commands. Lint and formatting are the project's own pre-commit hooks'
+  responsibility, not this gate's. Capture each final exit status. A targeted
+  check supplements this gate; it never replaces it.
 - Do not report a fix complete while a required check is failed or inconclusive.
 
 ## Authorized PR Execution

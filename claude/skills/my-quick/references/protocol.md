@@ -113,10 +113,9 @@ stop with the evidence and recommend the full workflow. Do not retry indefinitel
 Run, in order, only when the implementation evidence does not already cover it:
 
 1. The full test file for the changed area
-2. Linter / formatter scoped to changed files
-3. Type checker if the language has one
+2. Type checker if the language has one
 
-Self-repair is allowed for trivial failures (formatting, lint nits). For type errors or test failures that aren't trivially fixable, surface them — don't blunt-force.
+Lint and formatting are enforced by the project's own pre-commit hooks, not run here. For type errors or test failures that aren't trivially fixable, surface them — don't blunt-force.
 
 ## Step 7 — Self-Review
 

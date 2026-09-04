@@ -25,9 +25,7 @@ mix test test/path/specific_test.exs --seed 0
 # GREEN — run specific test, then full suite
 mix test test/path/specific_test.exs
 mix test
-# Static analysis
-mix credo --strict                # static analysis
-mix format --check-formatted      # formatting check
+# Static analysis (lint/format are the project's pre-commit hooks' job)
 mix compile --warnings-as-errors  # catch warnings
 mix dialyzer                      # type checking (if configured)
 ```
@@ -57,9 +55,7 @@ $RUN pytest tests/path/test_file.py::test_name -x
 # GREEN — run specific test, then full suite
 $RUN pytest tests/path/test_file.py
 $RUN pytest
-# Static analysis
-$RUN ruff check .                 # linting
-$RUN ruff format --check .        # formatting check
+# Static analysis (lint/format are the project's pre-commit hooks' job)
 $RUN bandit -r src/               # security linting
 $RUN mypy src/                    # type checking (if configured)
 ```
@@ -88,8 +84,7 @@ $PM test -- --testPathPattern=path/to/test --no-coverage
 # GREEN — run specific test, then full suite
 $PM test -- --testPathPattern=path/to/test
 $PM test
-# Static analysis
-$PM run lint                      # check package.json for script name
+# Static analysis (lint/format are the project's pre-commit hooks' job)
 $PM run typecheck                 # or: npx tsc --noEmit
 ```
 
@@ -100,8 +95,7 @@ bundle exec rspec spec/path/file_spec.rb:LINE
 # GREEN — run specific test, then full suite
 bundle exec rspec spec/path/file_spec.rb
 bundle exec rspec
-# Static analysis
-bundle exec rubocop               # linting
+# Lint/format are the project's pre-commit hooks' job.
 ```
 
 ## E2E (Playwright)

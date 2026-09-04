@@ -41,7 +41,7 @@ Git boundary for skills and agents:
   then does the unattended five-pass review/repair loop begin: `my-review` ->
   bounded repair -> `my-validate` -> `my-review`. `implement-review` never
   performs initial plan execution, and nits never trigger another pass.
-- The format/lint/test gate (`claude/hooks/checks.sh`) runs in exactly one place: `PreToolUse` with `if: Skill(commit)`. Because every code change lands through the `commit` skill, gating commits gates everything. The former `SubagentStop` and `Stop` copies were removed as duplicates, along with the `apf-mark.sh` marker they needed.
+- Lint and format enforcement is delegated to each project's own pre-commit hooks, not to Claude-side tooling. The `claude/hooks/checks.sh` PreToolUse gate (`if: Skill(commit)`) was removed 2026-09-04: it never reliably blocked a bad commit, so it added latency without enforcement. Skills also no longer instruct the model to manually run lint/format commands as part of their own verification — that duplicates work a working pre-commit hook already does, and duplicates work an absent one won't do either way.
 
 Frontmatter conventions:
 
