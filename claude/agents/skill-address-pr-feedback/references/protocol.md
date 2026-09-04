@@ -76,13 +76,17 @@ Run the narrowest affected checks while iterating, then the combined
 build/compile, lint/format, and test gate from `execution-contract.md` once.
 Never call work complete if a required check is failed or inconclusive.
 
-Use post-fix review in proportion to risk:
+Use post-fix review in proportion to risk. Default every batch to the lowest
+tier its classification qualifies for; escalate a tier only when a specific
+risk factor is present in that batch, never as a blanket default:
 
 - Feedback-fast-lane fixes, documentation, comments, formatting, and other
   no-behavior direct edits: independent diff inspection plus their focused
   check and `my-quick` self-review where applicable; no `my-review` pass.
 - Medium-risk behavioral or multi-file fixes: one `my-review` pass after the
-  combined gate; repair only a substantive result and re-review once.
+  combined gate; repair only a substantive result and re-review once. This is
+  the default tier for ordinary review comments — do not apply the high-risk
+  loop without a named security/data/migration/public-contract factor.
 - Security, data, migration, public-contract, or otherwise high-risk fixes:
   retain the existing repair loop, capped at three total `my-review` passes.
 

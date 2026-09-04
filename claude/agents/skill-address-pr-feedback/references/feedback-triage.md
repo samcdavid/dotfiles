@@ -13,7 +13,8 @@ For every pending comment:
    non-obvious causal classifications with `adversarial-screen` in `finding`
    mode and a fingerprinted evidence bundle. Escalate only material,
    contradictory, or disputed-scope classifications to `adversarial-debate` in
-   `finding` or `decision` mode before acting.
+   `finding` or `decision` mode before acting. An ordinary confirmed fix or
+   factual question skips both — do not screen or escalate it "to be safe."
 
 ## Scope decision required
 
