@@ -134,9 +134,8 @@ Save the rendered body to a tempfile (`mktemp`) so `gh` can read it via `--body-
 
 Print the title and full body to the terminal. Wait for explicit direction:
 
-- "create it" / "looks good" / "ship it" → Step 7
+- "create it" / "looks good" / "ship it" → Step 7 (always opens as a draft; see below)
 - "edit X" / "rephrase Y" / "drop the Security trigger" / "downgrade to Low" → revise and re-show
-- "draft" → Step 7 with `--draft`
 
 **Do not** call `gh pr create` or `gh pr edit` before I approve. Publishing the PR is a visible action and hard to retract cleanly.
 
@@ -147,9 +146,9 @@ If the branch has no upstream (preflight noted this), push it first as part of t
 git push -u origin <branch>
 ```
 
-**Create mode:**
+**Create mode (always opens as a draft):**
 ```bash
-gh pr create --title "<title>" --body-file <tmpfile> --base <base-branch> [--draft]
+gh pr create --title "<title>" --body-file <tmpfile> --base <base-branch> --draft
 ```
 
 **Update mode:**
