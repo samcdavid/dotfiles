@@ -63,10 +63,13 @@ allowed paths, receive independent diff/check verification, and land as
 separate local commits only through `Skill(commit)`.
 
 Before dispatching the normal repair path, classify a batch for the **feedback
-fast lane**. It is eligible only when it is one confirmed root cause, changes
-at most two existing source/test/doc files, has no migration, auth, permission,
-security, public-contract, dependency, configuration, concurrency, external-I/O,
-or requirements-scope impact, and has a focused proving check. Dispatch this
+fast lane**. Default to the fast lane whenever eligibility is ambiguous; route
+to the full `my-implement` path only when a listed risk factor is actually
+present in that batch's behavior, not merely nearby in the file. It is eligible
+when it is one confirmed root cause, changes at most four existing
+source/test/doc files, has no migration, auth, permission, security,
+public-contract, dependency, configuration, concurrency, external-I/O, or
+requirements-scope impact, and has a focused proving check. Dispatch this
 pre-confirmed micro-fix through `my-quick` with the triage evidence, allowed
 paths, and check. Its normal tripwires still apply; any tripwire, failed check,
 or scope expansion exits the fast lane and returns here for the normal path.

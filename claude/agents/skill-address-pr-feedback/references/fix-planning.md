@@ -14,7 +14,10 @@ because they are nearby in the diff. Re-verify each batch independently before
 marking every included comment addressed.
 
 Classify each batch against the feedback-fast-lane criteria in `protocol.md`.
-For an eligible batch, pass a pre-confirmed micro-fix contract to `my-quick`:
+Ordinary confirmed fixes are fast-lane eligible by default — route to
+`my-implement`'s full RED/GREEN/VALIDATE ceremony only when the batch actually
+carries a listed risk factor, not because it touches source code at all. For
+an eligible batch, pass a pre-confirmed micro-fix contract to `my-quick`:
 triage evidence, one behavior contract, allowed paths, and the focused proving
 check. `my-quick` must return to normal feedback handling when its tripwire
 fires. All other batches use `my-implement` directly.
