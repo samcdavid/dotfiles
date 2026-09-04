@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-04 — Agent-tool dispatch for phase implementation
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| (pending) | `my-implement`'s phase-worker dispatch no longer shells out to `codex --model gpt-5.6-terra exec` via Bash; it now dispatches through the `Agent` tool to a new dedicated `phase-implementer` agent (`model: haiku`). | Bounded phase execution, allowed-path restriction, RED/GREEN/VALIDATE discipline, and no-remote-action boundaries are unchanged. `frontier-model` is not used for this dispatch and remains available only when a caller explicitly asks for it. If phase work regresses, check the new `phase-implementer` agent and the `my-implement` protocol against `e1fcf9e`. |
+
 ## 2026-09-03 — Batched pairing decisions, wider my-quick default
 
 | Commit | Change | Regression boundary / known-good meaning |

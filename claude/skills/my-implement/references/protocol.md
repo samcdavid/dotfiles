@@ -45,19 +45,15 @@ For each phase, in order:
    behavioral test contracts, allowed paths, relevant architecture constraints,
    verification commands, explicit success criteria, and minimal relevant
    code/test excerpts. Do not include earlier phases or unrelated plan sections.
-2. Run one worker with that contract. It may change only `allowed_paths`, must
-   use RED → GREEN → VALIDATE for behavioral work, and must not push or make
-   remote changes. Local edits to those paths are authorized. It returns compact
+2. Run one worker with that contract via the `Agent` tool, dispatched to the
+   `phase-implementer` agent. It may change only `allowed_paths`, must use RED →
+   GREEN → VALIDATE for behavioral work, and must not push or make remote
+   changes. Local edits to those paths are authorized. It returns compact
    evidence: commands, exit status, changed files, deviations, and readiness.
    Truncate failure output to the diagnostic tail; do not return passing logs.
-   Invoke it with the serialized contract:
-
-   ```bash
-   codex --model gpt-5.6-terra exec "<phase contract>"
-   ```
-
-   If that worker cannot run, perform the same bounded phase directly. Never
-   delegate implementation to Haiku. Run exactly one worker at a time.
+   Never invoke `claude` or `codex` directly via Bash — dispatch only through
+   the `Agent` tool. If the agent dispatch cannot run, perform the same
+   bounded phase directly. Run exactly one worker at a time.
 3. Independently inspect the changed diff and evidence. Confirm scope, outcome,
    and behavior-focused tests from the worker's returned diff and command output
    — do not re-`Read` the edited file to check the edit landed; a successful
