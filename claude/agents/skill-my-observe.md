@@ -1,6 +1,6 @@
 ---
 model: sonnet
-effort: high
+effort: medium
 codex-model: gpt-5.6-terra
 name: skill-my-observe
 runner-for: my-observe

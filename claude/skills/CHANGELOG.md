@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-04 — Downgraded three over-pinned runner effort levels
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| (pending) | `skill-my-observe` and `skill-prove-it` dropped from `effort: high` to `medium`; `skill-team-plan` dropped from `xhigh` to `high`. Audited against `model-escalation.md`'s escalation-category bar: observability-plan drafting and evidence citation-matching are templated/mechanical rather than ambiguous-judgment work, and milestone/issue drafting doesn't meet the noisy-parallel-synthesis or irreversible-decision bar for `xhigh`. | If any of these three runners starts missing real judgment calls (e.g. `my-observe` glossing over a genuinely ambiguous alerting tradeoff, `prove-it` missing a subtle evidence contradiction, `team-plan` mis-scoping a milestone dependency), restore the prior effort value and re-run `scripts/sync-codex-agents`. |
+
 ## 2026-09-04 — Agent-tool dispatch for phase implementation
 
 | Commit | Change | Regression boundary / known-good meaning |

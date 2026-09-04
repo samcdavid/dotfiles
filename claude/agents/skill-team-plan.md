@@ -1,6 +1,6 @@
 ---
 model: sonnet
-effort: xhigh
+effort: high
 codex-model: gpt-5.6-terra
 name: skill-team-plan
 runner-for: team-plan
