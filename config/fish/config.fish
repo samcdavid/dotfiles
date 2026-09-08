@@ -1,3 +1,7 @@
+# The following lines were added by Docker Desktop to add commands to your PATH.
+export PATH="$PATH:/Users/sammcdavid/.docker/bin"
+# End of Docker Desktop section.
+
 if status is-interactive
     # Use Fish's built-in vi mode
     set -g fish_key_bindings fish_vi_key_bindings
