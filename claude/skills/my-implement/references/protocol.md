@@ -65,13 +65,18 @@ For each phase, in order:
    mark the phase done, and advance. With `commit_policy: defer`, return the
    verified bounded diff uncommitted to `autoresearch` for its metric decision.
    Never commit failed or escalated work.
-5. After every 10th phase committed in this run (10, 20, 30, ...), stop instead
-   of dispatching the next worker. Report the phases completed so far, their
-   commit SHAs/subjects, and any carried deviations, then tell the caller their
-   context is safe to `/clear` and to resume with the same `plan_path` — the
-   next invocation picks up at the first unfinished phase from the plan/ledger
-   status. Skip this checkpoint in embedded `my-workflow` mode; the workflow's
-   own per-stage return already bounds context growth.
+5. After every phase is committed (or returned uncommitted under
+   `commit_policy: defer`), stop and report that one phase before dispatching
+   the next worker: phase name, outcome, commit SHA/subject, verification
+   evidence, and any deviations. Ask the caller to confirm before continuing to
+   the next phase. Do not dispatch the next phase's worker in the same turn as
+   this report. In embedded `my-workflow` mode, this per-phase pause still
+   applies — return the phase outcome to the workflow and wait for it to
+   resume `my-implement` rather than chaining straight into the next phase.
+6. After every 10th phase committed in this run (10, 20, 30, ...), also note
+   in that phase's stop that the caller's context is safe to `/clear`, and that
+   the next invocation of `my-implement` on the same `plan_path` resumes at the
+   first unfinished phase from the plan/ledger status.
 
 Do not invoke `implement-review` after an individual phase. The independent
 phase verification above is the required per-phase quality gate. Invoke
