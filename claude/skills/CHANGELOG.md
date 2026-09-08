@@ -62,6 +62,12 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 | --- | --- | --- |
 | `3915be8` | `skill-my-observe` and `skill-prove-it` dropped from `effort: high` to `medium`; `skill-team-plan` dropped from `xhigh` to `high`. Audited against `model-escalation.md`'s escalation-category bar: observability-plan drafting and evidence citation-matching are templated/mechanical rather than ambiguous-judgment work, and milestone/issue drafting doesn't meet the noisy-parallel-synthesis or irreversible-decision bar for `xhigh`. | If any of these three runners starts missing real judgment calls (e.g. `my-observe` glossing over a genuinely ambiguous alerting tradeoff, `prove-it` missing a subtle evidence contradiction, `team-plan` mis-scoping a milestone dependency), restore the prior effort value and re-run `scripts/sync-codex-agents`. |
 
+## 2026-09-08 — my-implement pauses for confirmation after every phase
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `af40ecf` | `my-implement` now stops and reports each phase's outcome (name, commit SHA/subject, verification evidence, deviations) and waits for the caller to confirm before dispatching the next phase's worker, instead of chaining phases automatically. This applies in embedded `my-workflow` mode too. The prior every-10th-phase `/clear` checkpoint still fires, layered on top of the per-phase pause. | If `my-implement` starts auto-advancing through multiple phases without stopping, or `my-workflow` never gets a chance to resume it between phases, check the phase-loop step 5 wording against `af40ecf`. |
+
 ## 2026-09-04 — Agent-tool dispatch for phase implementation
 
 | Commit | Change | Regression boundary / known-good meaning |
