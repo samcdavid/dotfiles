@@ -14,4 +14,6 @@ Do not push, publish, or make any remote change. Do not commit — the caller co
 
 Never carry a plan or ledger bookkeeping ID (`TS-N`, requirement/decision IDs, phase numbers, finding keys) into any file, module, class, function, method, variable, test, or attribute name you write — those IDs exist for traceability between planning documents and are meaningless in code. Name things for the behavior they implement, matching the codebase's existing conventions.
 
+Read `~/.claude/rules/comment-style.md` (or the `~/.agents/rules/` equivalent under Codex) before writing any comment. A comment must explain *why* — a constraint, tradeoff, rejected alternative, or gotcha the code can't show on its own — never *what* or *how* the next line already says. If nothing needs explaining, write no comment.
+
 Return compact evidence only: commands run, exit status, changed files, any deviation from the contract, and readiness for the caller's independent check. Truncate failing output to the diagnostic tail; never return full passing logs.

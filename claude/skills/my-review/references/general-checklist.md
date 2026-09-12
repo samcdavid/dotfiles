@@ -138,7 +138,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Temporary fields or workarounds should be documented: why is it needed, how do we know when it can be removed?
 
 ### Clarity for Future Readers
-- Comments explaining "why not" for non-obvious decisions
+- Comments explain *why* (a constraint, tradeoff, rejected alternative, or non-obvious decision) — never *what* or *how* the next line already shows. Flag a comment that narrates control flow or restates the code in prose; recommend a better name or deletion instead. See `~/.claude/rules/comment-style.md`.
 - Guards scoped to known types rather than catch-all else clauses
 - Log levels — is the level appropriate for the severity? (`info` for normal operations, `warning` for degraded but functional, `error` for failures that need attention)
 

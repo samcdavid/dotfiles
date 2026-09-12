@@ -28,3 +28,7 @@ Tolerate small non-blocking issues. Batch quality passes rather than blocking pr
 ## Separate Implementer from Reviewer
 
 The one reviewing should not be the one who wrote the code. When reviewing your own work (via /my-validate or /my-review), approach it as a skeptical outsider. Re-read the code fresh — do not rely on what you "remember" writing.
+
+## Comments Explain Why, Not What or How
+
+Code is the record of what happens and how; a comment earns its place only by carrying reasoning the code can't show on its own — a constraint, a tradeoff, a rejected alternative, a gotcha. Never write a comment that narrates the next line, restates control flow, or describes a mechanism already legible from the code itself — if a comment adds nothing beyond the syntax, delete it rather than write it. When a comment could instead be a better name, rename instead of commenting. Code that needs no comment to be understood should have none.

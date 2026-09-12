@@ -30,7 +30,7 @@ Used by Step 7 of `/my-quick`. Walk the diff against these categories. Surface f
 - Dead code, unused imports, orphaned helpers?
 - Names match domain concepts? (A variable called `type` when it means `screener_type` costs future readers.)
 - Magic numbers / strings extracted to constants where it matters?
-- Comments only where the WHY isn't obvious from the code?
+- Comments explain *why* (a constraint, tradeoff, rejected alternative, gotcha) — never *what* or *how* the code already shows? See `~/.claude/rules/comment-style.md`.
 
 ## Lint / Format Discipline
 
