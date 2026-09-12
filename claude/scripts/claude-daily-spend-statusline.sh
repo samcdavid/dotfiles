@@ -33,12 +33,14 @@
 # will be misleading.
 #
 # ── Requirements ─────────────────────────────────────────────────────────
-#   - macOS (uses the Keychain — this script is not written for Linux)
-#   - jq        (brew install jq)
-#   - curl      (already on macOS)
-#   - macOS Keychain entry "Claude Code-credentials" (created automatically
-#     the first time you log in to Claude Code) — this is where your OAuth
-#     token lives.
+#   - macOS or Linux
+#   - jq        (brew install jq / apt install jq)
+#   - curl      (already on macOS; apt install curl on Linux)
+#   - The OAuth token Claude Code logged in with, wherever this OS keeps it:
+#       macOS:  Keychain entry "Claude Code-credentials" (created
+#               automatically on first login)
+#       Linux:  ~/.claude/.credentials.json (created the same way; no
+#               Keychain equivalent, so Claude Code just writes the file)
 #   - A Claude Enterprise/Team account with usage credits enabled. Individual
 #     Pro/Max plans don't have a dollar credit limit and this segment will
 #     print nothing for you (silently, on purpose).
@@ -92,13 +94,38 @@ COLOR_RESET=$'\033[2;37m'
 command -v jq >/dev/null 2>&1 || exit 0
 command -v curl >/dev/null 2>&1 || exit 0
 
-# Pull the OAuth access token Claude Code already logged in with, from the
-# macOS Keychain entry Claude Code itself created.
+# Pull the OAuth access token Claude Code already logged in with, from
+# wherever this OS keeps it: macOS Keychain, or the plain credentials file
+# Claude Code writes on Linux (no Keychain equivalent there).
 read_access_token() {
   local blob
-  blob="$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)" || return 1
+
+  if command -v security >/dev/null 2>&1; then
+    blob="$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)" || return 1
+  else
+    local creds="${CLAUDE_CREDENTIALS_FILE:-$HOME/.claude/.credentials.json}"
+    [[ -s "$creds" ]] || return 1
+    blob="$(cat "$creds")" || return 1
+  fi
+
   [[ -n "$blob" ]] || return 1
   printf '%s' "$blob" | jq -r '.claudeAiOauth.accessToken // empty'
+}
+
+# Portable last-modified epoch for a file. BSD stat (macOS) wants `-f
+# '%m'`; GNU stat (Linux) wants `-c %Y`. Can't just chain these with `||` on
+# exit code: some GNU-alike `stat` builds treat unrecognized `-f '%m'` as a
+# different flag entirely (filesystem info, not format) and still dump
+# multi-line junk to stdout before failing, which `2>/dev/null` doesn't
+# catch — so each attempt's output is validated as a plain integer before
+# it's trusted.
+file_mtime() {
+  local f="$1" out
+  out="$(stat -f '%m' "$f" 2>/dev/null)"
+  [[ "$out" =~ ^[0-9]+$ ]] && { printf '%s' "$out"; return 0; }
+  out="$(stat -c %Y "$f" 2>/dev/null)"
+  [[ "$out" =~ ^[0-9]+$ ]] && { printf '%s' "$out"; return 0; }
+  printf '0'
 }
 
 # Cached globally for 5 minutes so re-rendering the status line on every
@@ -107,7 +134,7 @@ read_access_token() {
 fetch_usage() {
   local age token json
   if [[ -s "$CACHE" ]]; then
-    age=$(($(date +%s) - $(stat -f %m "$CACHE" 2>/dev/null || echo 0)))
+    age=$(($(date +%s) - $(file_mtime "$CACHE")))
     if ((age < TTL)); then
       cat "$CACHE"
       return 0
