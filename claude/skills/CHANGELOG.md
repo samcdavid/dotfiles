@@ -18,6 +18,13 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-12 — PlusCal concurrency modeling step; banned bookkeeping IDs in code
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `d128718` | `skill-my-architecture-plan/references/protocol.md` gained Step 2b: when a planned change introduces or modifies a GenServer/OTP process/actor/goroutine+channel/thread+lock/distributed node whose correctness depends on interleaving, write a PlusCal spec (state per process, a safety invariant, liveness only if the design actually promises progress), run it through TLC if the toolchain is present or say plainly it's unchecked, and carry the resulting invariant into `## Architectural Constraints`. Step 6's adversarial challenge and confirm checklist now also verify the model's variables match real process state and that TLC wasn't silently skipped. The standalone artifact template and the `my-pair-plan` ledger's Architecture section both gained a `Concurrency Model (PlusCal)` section/subsection to hold it. | If a concurrency-bearing architecture plan stops including a PlusCal model, check whether Step 2b still exists and still triggers on GenServer/process/actor changes, not just literal "concurrency" wording. If a model is present but nobody says whether TLC actually ran, the Step 6 checklist line regressed. |
+| `55a41a5` | `~/.claude/rules/tdd-phase.md` and `phase-implementer.md` now state that plan/ledger bookkeeping IDs (`TS-N`, requirement/decision IDs, phase numbers, finding keys — including PlusCal variable/process/label names carried out of Step 2b) are traceability-only and must never appear inside a file, module, class, function, method, variable, test, or attribute name. The plan template and the `my-pair-plan` ledger template got matching inline notes next to every ID column/placeholder so the constraint is visible where the ID is authored, not just where it's consumed. | If implementation output starts naming things like `test_TS_3_...` or a function/module carrying a bare requirement/decision id, check whether `tdd-phase.md`'s naming paragraph and `phase-implementer.md`'s matching sentence still exist — this rule has no mechanical enforcement (no lint/CI check), so it depends on the agent reading and applying it. |
+
 ## 2026-09-12 — Added structural-code-search rule
 
 | Commit | Change | Regression boundary / known-good meaning |
