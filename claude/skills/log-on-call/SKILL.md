@@ -11,7 +11,7 @@ Record an on-call incident in the daily Notion entry.
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For Notion formatting details, read `references/protocol.md`.
+`~/.claude/rules/question-policy.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex. For Notion formatting details, read `references/protocol.md`.
 
 ## Flow
 

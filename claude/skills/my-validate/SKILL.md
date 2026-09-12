@@ -9,7 +9,7 @@ description: Validate work against a plan or current session through a model-pin
 # Validate
 
 Use `skill-my-validate` for the substantive validation and safe-local-repair procedure. This wrapper resolves plan or session mode, preserves authorization and workflow ledger ownership, and presents the runner's compact validation envelope.
-Use `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) for repair checks.
+Apply `~/.claude/rules/verification-ladder.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex — for repair checks.
 
 ## Dispatch
 
@@ -23,7 +23,7 @@ The runner may delegate only obvious, scoped local repairs through `my-implement
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return checks and coverage, repairs and local commit SHAs with their subjects and
 effects, residual risks, blockers, report/artifact paths, and the workflow-stage
 envelope when embedded. Expand every internal status/key. Do not include raw

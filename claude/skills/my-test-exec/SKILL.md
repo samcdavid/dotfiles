@@ -11,7 +11,7 @@ Run a manual E2E test plan and report observed results.
 
 ## Load Rules
 
-Read `~/.claude/rules/no-outward-actions.md` and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For browser/GIF/PR posting details, read `references/protocol.md`.
+`~/.claude/rules/no-outward-actions.md` and `~/.claude/rules/context-checkpoint.md` are already loaded as memory under Claude Code — apply them without re-reading; read their `~/.agents/rules/` equivalents explicitly under Codex. For browser/GIF/PR posting details, read `references/protocol.md`.
 
 ## Flow
 

@@ -35,7 +35,7 @@ stage, authority: local_only }` and dispatch it to `skill-implement-review`.
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return the supplied implementation evidence, each review-pass result, repairs,
 validation evidence, final status (`clean`, `blocked`, or `cap_reached`),
 surviving findings with their full problem and required fix, and the

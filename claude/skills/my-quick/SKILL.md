@@ -10,14 +10,13 @@ Handle small changes end-to-end without running the full workflow.
 
 ## Load Rules
 
-Read `~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`,
-`~/.claude/rules/no-outward-actions.md`, and
-`~/.claude/rules/human-readable-communication.md` when available. Use
-`~/.agents/rules/` under Codex. For tripwires or full checklist, read
-`references/protocol.md`, `references/tripwire-signals.md`, and
-`references/self-review-checklist.md`.
-Read `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) before
-running checks.
+`~/.claude/rules/tdd-phase.md`, `~/.claude/rules/loop-detection.md`,
+`~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/human-readable-communication.md`,
+and `~/.claude/rules/verification-ladder.md` are already loaded as memory under
+Claude Code — apply them without re-reading. Under Codex, read their
+`~/.agents/rules/` equivalents explicitly before running checks. For tripwires
+or full checklist, read `references/protocol.md`, `references/tripwire-signals.md`,
+and `references/self-review-checklist.md`.
 
 ## Flow
 

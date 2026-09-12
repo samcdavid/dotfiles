@@ -23,5 +23,5 @@ The runner may create a local evaluation-plan artifact. In embedded mode it retu
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return the evaluation-plan path, scorer definitions, dataset plan, baseline targets, instrumentation needs, assumptions, provisional decisions, and compact decision/artifact envelope.

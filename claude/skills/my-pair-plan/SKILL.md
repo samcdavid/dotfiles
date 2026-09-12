@@ -38,8 +38,9 @@ stage: collaborative_planning, authority: local_only }` and dispatch it to
 
 Show the compact ledger delta, current confidence, any focused deep dive that
 ran, and either the next single decision or the final synchronization proposal.
-Read `~/.claude/rules/human-readable-communication.md` (or the `~/.agents`
-equivalent) and state the actual changed requirement, decision, evidence, and
+`~/.claude/rules/human-readable-communication.md` is already loaded as memory
+under Claude Code — apply it without re-reading (read the `~/.agents/rules/`
+equivalent explicitly under Codex) and state the actual changed requirement, decision, evidence, and
 consequence before any optional ledger ID. Before every decision or question,
 show the supplied current-code excerpt with file and line, or a clearly labeled
 proposed-code block when no implementation exists yet. Explain which lines make

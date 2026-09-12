@@ -7,7 +7,7 @@ description: Execute approved implementation work sequentially in bounded phases
 
 # Implement Plan
 
-This skill is the sequential implementation coordinator. Read [references/protocol.md](references/protocol.md) before executing work. Use `~/.claude/rules/verification-ladder.md` (or `~/.agents/rules/`) to select and reuse checks.
+This skill is the sequential implementation coordinator. Read [references/protocol.md](references/protocol.md) before executing work. Apply `~/.claude/rules/verification-ladder.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex — to select and reuse checks.
 
 ## Dispatch
 
@@ -25,7 +25,7 @@ Give a worker only its phase contract, relevant code/test excerpts, and the proj
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return completed phases, commit SHAs, holistic verification evidence, deviations,
 uncommitted or escalated work, the workflow-stage envelope when embedded, and
 the recommended next command: for an embedded `my-workflow` run, `my-validate`

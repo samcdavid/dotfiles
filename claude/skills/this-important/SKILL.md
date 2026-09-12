@@ -12,7 +12,7 @@ Calibrate findings for real importance. Do not re-review from scratch.
 
 ## Load Rules
 
-Read `~/.claude/rules/review-finding-format.md` when available. Use `~/.agents/rules/` under Codex. For calibration examples, read `references/protocol.md`.
+`~/.claude/rules/review-finding-format.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex. For calibration examples, read `references/protocol.md`.
 
 ## Flow
 

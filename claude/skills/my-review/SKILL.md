@@ -40,11 +40,11 @@ Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normaliz
   differ.
   If no ledger exists, do not create one; disclose that confirmation cannot be
   durably suppressed.
-- Do not invoke publication from this wrapper unless the user explicitly asks after reviewing the completed result. A runner may never publish a review, reply, resolve a thread, push, create/update a PR, or widen that authorization.
+- Do not invoke publication from this wrapper unless the user explicitly asks after review. A runner may never publish a review, reply, resolve a thread, push, create/update a PR, or widen that authorization.
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` (loaded as memory; Codex reads `~/.agents/rules/`).
 For `awaiting_user_triage`, present the state reference and next item without a verdict. Otherwise return change-set risk, code verdict, readiness status, and
 current delivery increment first, then the coverage manifest and actionable
 findings with file:line evidence and concrete author-controlled fixes, decisions,
@@ -56,8 +56,7 @@ dropped findings, prior resolved/deferred/accepted matches, and the compact work
 envelope when embedded. Drop observations, preferences, and speculative concerns
 that do not ask the author to do something concrete. Use `REQUEST_CHANGES` only
 for verified findings that are both `Critical` and `High` risk. Local,
-branch/range, local-issue, and embedded-local reviews return the code verdict only after the matching walk-through completes; 
-verdict; pre-stage human-acknowledgement items never replace it. PR reviews return
+branch/range, local-issue, and embedded-local reviews return the code verdict only after the matching walk-through completes; pre-stage human-acknowledgement items never replace it. PR reviews return
 `needs_input` with approval pending when required operational readiness is
 unconfirmed. `COMMENT` is
 available only for an actual PR whose author differs from the authenticated

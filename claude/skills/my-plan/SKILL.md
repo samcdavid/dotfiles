@@ -24,5 +24,5 @@ The runner may create a local implementation plan. In embedded mode it returns t
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return the plan path, phase summary, mechanical success criteria, architectural constraints, assumptions, provisional decisions, observability recommendation, recommended next command, and compact decision/artifact envelope.

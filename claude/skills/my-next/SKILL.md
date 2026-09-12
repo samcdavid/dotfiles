@@ -11,9 +11,10 @@ Clarify the path forward from current context.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md`, `~/.claude/rules/question-policy.md`,
-and `~/.claude/rules/human-readable-communication.md` when available. Use
-`~/.agents/rules/` under Codex.
+`~/.claude/rules/context-checkpoint.md`, `~/.claude/rules/question-policy.md`,
+and `~/.claude/rules/human-readable-communication.md` are already loaded as
+memory under Claude Code — apply them without re-reading. Under Codex, read
+their `~/.agents/rules/` equivalents explicitly.
 
 ## Flow
 

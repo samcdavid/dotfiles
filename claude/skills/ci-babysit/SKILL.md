@@ -11,8 +11,7 @@ Watch CI and drive failures to resolution.
 
 ## Load Rules
 
-Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For CircleCI polling and fix-loop details, read `references/protocol.md`.
-Use `verification-ladder.md` from the same rules directory for local fix checks.
+`~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/question-policy.md`, and `~/.claude/rules/verification-ladder.md` are already loaded as memory under Claude Code — apply them without re-reading; read their `~/.agents/rules/` equivalents explicitly under Codex. For CircleCI polling and fix-loop details, read `references/protocol.md`.
 
 ## Flow
 

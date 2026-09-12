@@ -21,7 +21,7 @@ more than five meaningful cycles.
 
 ## Dispatch
 
-Read `~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` when available, or their `~/.agents/rules/` equivalents under Codex. Read `references/protocol.md` for the complete workflow.
+`~/.claude/rules/question-policy.md` and `~/.claude/rules/context-checkpoint.md` are already loaded as memory under Claude Code — apply them without re-reading; read their `~/.agents/rules/` equivalents explicitly under Codex. Read `references/protocol.md` for the complete workflow.
 
 1. Resolve the request from `$ARGUMENTS` and conversation. For a supplied project, milestone, or issue URL, collect the bounded, read-only Linear inventory needed to plan it. Do not write to Linear.
 2. Dispatch `skill-team-plan` with `{ task, linear_context, artifact_inputs, authority: local_only }`. The runner may create local artifacts and call the required spec, research, architecture, and adversarial runners; it must return a draft only.

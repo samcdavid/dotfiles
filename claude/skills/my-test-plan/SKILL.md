@@ -10,7 +10,7 @@ Design manual test scenarios that validate the intended behavior and likely regr
 
 ## Load Rules
 
-Read `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex.
+`~/.claude/rules/question-policy.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex.
 
 ## Flow
 

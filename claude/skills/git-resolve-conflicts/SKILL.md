@@ -12,7 +12,7 @@ Drive an in-progress merge, rebase, or cherry-pick to completion, preserving the
 
 ## Load Rules
 
-Read `~/.claude/rules/loop-detection.md` and `~/.claude/rules/no-outward-actions.md` when available. Use `~/.agents/rules/` under Codex. For per-conflict analysis detail, the continue loop, and stop conditions, read `references/protocol.md`.
+`~/.claude/rules/loop-detection.md` and `~/.claude/rules/no-outward-actions.md` are already loaded as memory under Claude Code — apply them without re-reading; read their `~/.agents/rules/` equivalents explicitly under Codex. For per-conflict analysis detail, the continue loop, and stop conditions, read `references/protocol.md`.
 
 ## Constraints
 

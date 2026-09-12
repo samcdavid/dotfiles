@@ -23,5 +23,5 @@ The runner may create a local observability companion artifact. In embedded mode
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return the observability-plan path, recommended signals, alert criteria, dashboard ideas, validation checks, assumptions, provisional decisions, and compact decision/artifact envelope.

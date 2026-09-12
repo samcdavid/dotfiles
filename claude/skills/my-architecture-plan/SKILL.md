@@ -24,5 +24,5 @@ The runner may create a local architecture artifact. In embedded mode it returns
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return the architecture-plan path, proposed placement, falsifiable constraints, flagged deviations, assumptions, provisional decisions, recommended next command, and compact decision/artifact envelope.

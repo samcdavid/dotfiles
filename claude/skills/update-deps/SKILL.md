@@ -11,8 +11,7 @@ Update dependencies while preserving behavior.
 
 ## Load Rules
 
-Read `~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/loop-detection.md`, and `~/.claude/rules/question-policy.md` when available. Use `~/.agents/rules/` under Codex. For manager-specific details, read `references/protocol.md`.
-Use `verification-ladder.md` from the same rules directory for update checks.
+`~/.claude/rules/no-outward-actions.md`, `~/.claude/rules/loop-detection.md`, `~/.claude/rules/question-policy.md`, and `~/.claude/rules/verification-ladder.md` are already loaded as memory under Claude Code — apply them without re-reading; read their `~/.agents/rules/` equivalents explicitly under Codex. For manager-specific details, read `references/protocol.md`.
 
 ## Flow
 

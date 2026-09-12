@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-12 — Removed redundant rule re-reads across 33 skills
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| (pending) | 33 skills' "Load Rules"/"Present" sections no longer instruct Claude Code to `Read` `~/.claude/rules/*.md` files — those are already auto-loaded into every session as memory (confirmed via `/context`'s "Memory files" breakdown), so the explicit `Read` was a pure duplicate tool call plus tool result on every invocation. Reworded to "already loaded as memory — apply without re-reading" while preserving the real `Read` instruction for Codex (`~/.agents/rules/`, which has no equivalent auto-load) and for skill-local `references/*.md` files (never auto-loaded in either runtime). | Behavior is unchanged — every referenced rule still applies, just without a redundant re-read. If a skill starts ignoring a rule it used to follow reliably, check whether its "Load Rules"/"Present" section still names that rule file and still reads as "apply this," not "this no longer matters." `my-review`'s `SKILL.md` also picked up two unrelated word-count trims (a duplicate "verdict;" fragment on the `walk-through`-completion line, and a shortened publication-boundary sentence) to stay under the 700-word entrypoint cap after this change. |
+
 ## 2026-09-04 — Downgraded three over-pinned runner effort levels
 
 | Commit | Change | Regression boundary / known-good meaning |

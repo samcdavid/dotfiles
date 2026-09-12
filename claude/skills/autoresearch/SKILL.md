@@ -11,7 +11,7 @@ Iterate toward a measurable goal without drifting.
 
 ## Load Rules
 
-Read `~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex. For loop protocol and logging, read `references/protocol.md` plus specific reference files as needed.
+`~/.claude/rules/loop-detection.md`, `~/.claude/rules/no-outward-actions.md`, and `~/.claude/rules/context-checkpoint.md` are already loaded as memory under Claude Code — apply them without re-reading; read their `~/.agents/rules/` equivalents explicitly under Codex. For loop protocol and logging, read `references/protocol.md` plus specific reference files as needed.
 
 ## Flow
 

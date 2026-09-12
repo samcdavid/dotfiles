@@ -11,7 +11,7 @@ Record a reusable failure pattern where future agents will see it.
 
 ## Load Rules
 
-Read `~/.claude/rules/context-checkpoint.md` when available. Use `~/.agents/rules/` under Codex.
+`~/.claude/rules/context-checkpoint.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex.
 
 ## Flow
 

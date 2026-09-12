@@ -31,7 +31,7 @@ Present the runner's triage, planned fixes, draft replies, and proposed external
 
 ## Present
 
-Apply `~/.claude/rules/human-readable-communication.md` (or `~/.agents/rules/`).
+Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
 Return the runner's triage or completed local-fix report: fix commits with
 subjects/effects, validation and review evidence, resolved/deferred findings
 with their full meaning before optional keys, surviving findings with concrete

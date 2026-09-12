@@ -11,14 +11,14 @@ Review and publish up to three PRs sequentially, then stop for a fresh context. 
 
 ## Load Rules
 
-Read first:
+Already loaded as memory under Claude Code — apply without re-reading:
 
 - `~/.claude/rules/no-outward-actions.md`
 - `~/.claude/rules/loop-detection.md`
 - `~/.claude/rules/context-checkpoint.md`
 - `~/.claude/rules/pr-cost-control.md`
 
-Use `~/.agents/rules/` under Codex.
+Under Codex, read the `~/.agents/rules/` equivalents explicitly.
 
 For PR-list parsing (explicit and auto-discovery), per-PR skip conditions, failure handling, the claim ledger's concurrency guarantees, and the dedup rationale, read `references/protocol.md`.
 

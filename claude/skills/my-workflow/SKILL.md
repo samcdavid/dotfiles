@@ -30,7 +30,7 @@ remains an explicit, ledgered alternative for qualifying small work.
 
 ## Load Rules
 
-Read first:
+Already loaded as memory under Claude Code — apply without re-reading:
 
 - `~/.claude/rules/question-policy.md`
 - `~/.claude/rules/context-checkpoint.md`
@@ -38,12 +38,13 @@ Read first:
 - `~/.claude/rules/loop-detection.md`
 - `~/.claude/rules/model-escalation.md`
 - `~/.claude/rules/human-readable-communication.md`
-- `references/stage-routing.md`
 
-Use `~/.agents/rules/` under Codex. Load `references/protocol.md` for the full
-flow, `references/checkpoint-policy.md` before a stop,
-`references/cross-workflow-coordination.md` for Linear context and refreshes,
-and `references/migration-safety.md` whenever persisted schema/data is involved.
+Under Codex, read the `~/.agents/rules/` equivalents explicitly. Also read (not
+auto-loaded, in either runtime): `references/stage-routing.md`, always;
+`references/protocol.md` for the full flow; `references/checkpoint-policy.md`
+before a stop; `references/cross-workflow-coordination.md` for Linear context
+and refreshes; and `references/migration-safety.md` whenever persisted
+schema/data is involved.
 
 ## Pipeline
 
