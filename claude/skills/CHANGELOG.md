@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-12 — Comments must explain why, not what/how
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `e6eeba0` | New shared rule (`~/.claude/rules/comment-style.md`) states the constraint: a comment earns its place only by explaining *why* the code exists or behaves as it does (a constraint, tradeoff, rejected alternative, gotcha) — never *what* or *how* the code already shows, with good/bad examples. Wired into `phase-implementer.md` (the single choke point every implementation/repair path routes through via `my-implement`), and strengthened the matching bullets in `my-quick`'s self-review checklist and `my-review`'s general checklist so the same bar applies on review, not just on write. The same principle, condensed, was added to the global principles file (canonically claude/AGENTS.md, symlinked to `~/.claude/CLAUDE.md`) so it applies regardless of project. `codex/agents/phase-implementer.toml` regenerated via `scripts/sync-codex-agents`. | If generated code or review output starts accepting comments that narrate control flow or restate the next line in prose, check whether `comment-style.md` still exists and whether `phase-implementer.md`'s pointer to it, or the two checklist bullets, got dropped — this has no mechanical enforcement (no lint/CI check), so it depends on the agent reading and applying it, same caveat as the `55a41a5` bookkeeping-ID rule below. |
+
 ## 2026-09-12 — PlusCal concurrency modeling step; banned bookkeeping IDs in code
 
 | Commit | Change | Regression boundary / known-good meaning |
