@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-12 — Added structural-code-search rule
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `ed85252` | New global rule (`structural-code-search.md` in the shared rules directory) tells Claude to reach for `tree-sitter tags`/`tree-sitter query` before grep/ripgrep whenever the search is structural — finding a name's definitions, its call sites, or an AST-shaped pattern — while leaving plain text/substring search on grep/ripgrep. Companion commit `efb6306` set up the actual tooling this rule depends on: `tree-sitter-cli` added to both OS bootstrap scripts, plus grammars for Python, JavaScript, TypeScript, Ruby, Go, Bash, Lua, JSON, YAML, Fish, and Elixir cloned into `~/.local/share/tree-sitter/grammars`. | If Claude reverts to reaching for grep on an obviously structural search (e.g. "find every caller of `foo`"), check whether this rule file still exists and still reads as "prefer tree-sitter for this," not "text search is fine here." If `tree-sitter tags`/`query` starts failing with "No language found" for a previously-working language, the grammar clone or its `parser-directories` registration regressed — see the Ubuntu setup README's "Notable decisions" section for the known gotchas (zero grammars ship with the apt/brew package; `tree-sitter-fish` needs a hand-authored `tree-sitter.json`). |
+
 ## 2026-09-12 — Removed redundant rule re-reads across 33 skills
 
 | Commit | Change | Regression boundary / known-good meaning |
