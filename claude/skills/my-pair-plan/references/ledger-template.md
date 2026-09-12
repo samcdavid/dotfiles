@@ -47,6 +47,8 @@ updated: <timestamp>
 
 ## Requirements
 
+<!-- IDs below are for cross-referencing this ledger only — never carry one into a file, module, class, function, method, variable, test, or attribute name. -->
+
 | ID | Requirement | Type (`outcome` or `constraint`) | Source | Status |
 | --- | --- | --- | --- | --- |
 
@@ -61,9 +63,21 @@ updated: <timestamp>
 
 ### Interfaces and Dependencies
 
+### Concurrency Model (PlusCal)
+
+<!-- Required only when this change introduces or modifies a GenServer, OTP
+process, actor, or other primitive whose correctness depends on interleaving
+or shared state across concurrent execution. See
+skill-my-architecture-plan/references/protocol.md Step 2b. Include the
+PlusCal source, its safety/liveness invariant, the TLC result (or an explicit
+note that it is unchecked), and a plain-language paragraph of what it proves.
+Otherwise: not_applicable. -->
+
 ### Architectural Constraints
 
 ## Test Strategy
+
+<!-- `TS-N` ids are for traceability only — never carry one into an actual test name, file name, or any other code identifier. -->
 
 | ID | Desired outcome | Level | Setup/control | Outcome assertion | Do not assert |
 | --- | --- | --- | --- | --- | --- |
@@ -91,7 +105,7 @@ validation checklist/status; rollout needs; env vars; flags; or not_applicable. 
 
 #### Tests First (RED)
 
-- [ ] `<TS-ID>` — <test and expected failure>
+- [ ] `<TS-ID>` — <test and expected failure> (id is for traceability only — never carry it into the test's actual name)
 
 #### Changes Required (GREEN)
 

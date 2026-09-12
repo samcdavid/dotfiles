@@ -74,6 +74,51 @@ Applies whenever the planned change adds, extends, or crosses a public interface
 - **Prefer addition over modification.** When extending an existing contract, design new optional fields/methods rather than changing or removing existing ones. A breaking change to a contract with existing consumers is a deviation — route it through Step 3's Desirable/Undesirable classification, don't let it pass as a silent edit.
 - **Predictable naming.** Name new interface members consistently with sibling interfaces already in the codebase (verb/noun conventions, pluralization, casing) — grounded in Step 1 evidence, not personal preference.
 
+## Step 2b — Concurrency Modeling (PlusCal)
+
+Applies whenever the planned change introduces or modifies a GenServer, OTP
+process, an Agent/Task under a Supervisor, an actor, a goroutine/channel pair,
+a thread/lock, a distributed node, or any other primitive whose correctness
+depends on interleaving, message ordering, or state shared across concurrent
+execution. Skip this step for single-process/sequential code, even code that
+merely calls into a GenServer to read fixed state with no concurrent writers.
+
+- **Model the primitives, not the language.** Represent each concurrent
+  primitive as a PlusCal `process` (or `fair process` if a liveness property
+  depends on it eventually running) with local variables mirroring its actual
+  state fields. Model client `call`/`cast` or message send/receive as labeled
+  atomic steps — a label marks each point where another process can interleave.
+- **State the safety invariant.** Every model needs at least one `Invariant ==`
+  capturing the property that must never break under any interleaving — e.g.
+  "at most one process holds the lock," "the counter never goes negative,"
+  "every reply matches an outstanding request." This is the actual point of
+  formalizing it: interleavings a person won't enumerate by hand.
+- **State liveness only when it's the actual risk.** Add a temporal formula
+  (`Spec == Init /\ [][Next]_vars /\ WF_vars(...)`) only when the design's
+  correctness includes a progress guarantee (e.g. "every request eventually
+  gets a reply") — don't add liveness machinery to a spec that's only a safety
+  concern.
+- **Check it if you can, say so if you can't.** If a TLC toolchain
+  (`tlc`/`tla2tools.jar`) is available in this environment, run it against the
+  spec and report the result — states explored, invariant held, or a concrete
+  counterexample trace. If it isn't installed, write the spec anyway but say
+  plainly that it is unchecked; never claim a model "proves" something that
+  was only written, not run.
+- **The spec is a design aid, not something to hand the implementer verbatim.**
+  Once the model is written and, where possible, checked, translate its
+  states and invariant into one plain-language paragraph: what must always be
+  true, and which of the target language's actual primitives (a GenServer's
+  state, a lock, a channel) enforces it. `my-plan`'s phases and
+  `phase-implementer` implement that translation in the target language; per
+  `~/.claude/rules/tdd-phase.md`, they must never copy PlusCal variable,
+  process, or label names into the codebase's actual identifiers.
+- Save the PlusCal source and its TLC result (or unchecked note) under a
+  `## Concurrency Model (PlusCal)` section in the architecture artifact
+  (standalone mode), or as a patch to the ledger's
+  `### Concurrency Model (PlusCal)` subsection (embedded/advisory mode). Carry
+  the resulting invariant forward into `## Architectural Constraints` as a
+  falsifiable statement `my-plan`/`my-implement` can hold the implementation to.
+
 ## Step 3 — Evaluate Deviations from Convention
 
 Not every convention needs following, but every break needs to be a decision, not an accident. Before writing the plan, classify anything the proposed structure does differently from established convention:
@@ -130,6 +175,9 @@ status: proposed
 ## Interface & Contract Design
 [Public interfaces/contracts this change introduces or modifies. Keep minimal. Cover error semantics, boundary validation, and addition-vs-modification for any existing contract touched. Note backward-compatibility/versioning if crossing a service boundary. Omit this section if Step 2a did not apply]
 
+## Concurrency Model (PlusCal)
+[PlusCal spec for any GenServer/process/concurrency primitive this change introduces or modifies, its safety/liveness invariant, and the TLC result if the tooling was available — or an explicit note that it is unchecked. Include a one-paragraph plain-language translation of what the model proves. Omit this section if Step 2b did not apply]
+
 ## Deviations from Convention
 
 ### Desirable
@@ -163,6 +211,7 @@ The agent must:
 - Check for contradictions — approving a pattern in one section while implicitly relying on its absence elsewhere.
 - Verify dependency-direction claims against the actual import graph from Step 1, not the plan's assertion of it.
 - When Step 2a applied: challenge whether the contract is genuinely minimal (a Hyrum's-Law audit — does it expose behavior beyond what's meant to be relied on?), whether error semantics match the codebase's existing convention or deviate without justification, and whether an "addition" to an existing contract is actually a breaking change in disguise.
+- When Step 2b applied: verify the modeled state variables actually correspond to the real GenServer/process state (not a simplified strawman that trivially satisfies the invariant), that the invariant targets the actual risk rather than restating something trivially true, and that TLC was actually run when the tooling was available rather than skipped silently.
 
 Apply every correction before presenting. Then confirm:
 - [ ] Every claimed convention has file:line or pattern-count evidence.
@@ -170,6 +219,7 @@ Apply every correction before presenting. Then confirm:
 - [ ] Desirable vs. rejected deviations are clearly distinguished with rationale.
 - [ ] The proposed placement and dependency design are grounded in Step 1's actual findings, not assumption.
 - [ ] If Step 2a applied: the contract is minimal (Hyrum's-Law audit passed), error semantics are stated and justified against existing convention, and no "addition" silently breaks an existing consumer.
+- [ ] If Step 2b applied: the model's variables correspond to real process state, the invariant targets the actual risk, and TLC was run when available (or explicitly flagged unchecked).
 
 ## Step 7 — Review and Iterate
 
@@ -187,6 +237,8 @@ Present the plan. Incorporate user feedback on the proposed structure — this i
 
 - `~/.claude/skills/my-arch-review/references/protocol.md` — criteria source of truth (Structural Fit, Coupling, Cohesion, Boundary Integrity, Dependency Health, Desirable/Undesirable Deviations). Read it directly rather than trusting a paraphrase — if it changes, this skill's criteria should track it automatically rather than drift from a stale copy.
 - Step 2a's interface/contract principles (Hyrum's Law, contract-first, error semantics, boundary validation, addition-over-modification) live only in this skill — they apply to prospective design, not `my-arch-review`'s retrospective diff criteria.
+- Step 2b's concurrency-modeling principles (PlusCal, safety/liveness invariants, TLC) also live only in this skill — `my-arch-review` reviews a diff after the fact and has no equivalent formal-modeling step.
+- `~/.claude/rules/tdd-phase.md` — bars any plan/ledger/formal-model identifier (including PlusCal variable, process, or label names) from leaking into actual code or test names.
 - `~/.claude/skills/my-plan/references/plan-template.md` — the plan this artifact feeds; its `## Architectural Constraints` section should be seeded from this artifact's, not re-derived.
 
 ## Gotchas
