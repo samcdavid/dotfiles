@@ -245,8 +245,13 @@ def check_runner_pairs(
 
 
 def check_repo_links(errors: list[str]) -> None:
-    if not is_symlink_to(ROOT / "AGENTS.md", "CLAUDE.md"):
-        errors.append("AGENTS.md must be a symlink to CLAUDE.md")
+    # AGENTS.md is canonical everywhere a CLAUDE.md exists; CLAUDE.md is just
+    # the symlink, so Claude Code and Codex read identical content from one
+    # file without a second update on every change.
+    if not is_symlink_to(ROOT / "CLAUDE.md", "AGENTS.md"):
+        errors.append("CLAUDE.md must be a symlink to AGENTS.md")
+    if not is_symlink_to(ROOT / "claude" / "CLAUDE.md", "AGENTS.md"):
+        errors.append("claude/CLAUDE.md must be a symlink to AGENTS.md")
 
     rcrc = (ROOT / "rcrc").read_text(errors="replace")
     if "AGENTS.md" not in rcrc:
