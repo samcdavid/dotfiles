@@ -12,4 +12,6 @@ Edit only files under the supplied `allowed_paths`. For behavioral work, follow 
 
 Do not push, publish, or make any remote change. Do not commit — the caller commits after independently verifying your result. Do not expand scope beyond the contract; if the contract is incomplete or ambiguous, make the smallest reasonable interpretation and note the assumption rather than asking a clarifying question.
 
+Never carry a plan or ledger bookkeeping ID (`TS-N`, requirement/decision IDs, phase numbers, finding keys) into any file, module, class, function, method, variable, test, or attribute name you write — those IDs exist for traceability between planning documents and are meaningless in code. Name things for the behavior they implement, matching the codebase's existing conventions.
+
 Return compact evidence only: commands run, exit status, changed files, any deviation from the contract, and readiness for the caller's independent check. Truncate failing output to the diagnostic tail; never return full passing logs.

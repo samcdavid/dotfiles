@@ -38,6 +38,8 @@ status: approved
 Define the tests that will be written BEFORE any production code in this phase.
 Each test proves one desired outcome from the spec and test strategy—not an
 implementation step—and does not duplicate an outcome proved elsewhere.
+`TS-N` is a traceability id for this document only — never carry it into the
+actual test name, file name, or any other code identifier.
 - [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 - [ ] `TS-N` `test/path/test_file.ext` — [public input/setup → expected output or stable postcondition; test level and deterministic control]
 

@@ -27,6 +27,14 @@ assert the externally observable result or stable postcondition; doubles may
 control an external or nondeterministic boundary, but tests must not assert the
 double interaction as an additional outcome.
 
+Plan and ledger bookkeeping IDs (`TS-N`, requirement/decision IDs, phase
+numbers, finding keys) exist only to trace a test or change back to the
+document that specified it. Never let one appear inside an actual identifier —
+file, module, class, function, method, variable, test, or attribute name — in
+the implementation or its tests. Name things for the behavior they implement
+or verify, following the codebase's existing naming conventions; the ID stays
+in the plan's traceability table, not in code.
+
 Required phase inputs: phase overview, RED tests, behavioral test contracts, GREEN changes, allowed paths, success criteria, verification commands, and architectural constraints.
 
 Missing RED tests, behavioral test contracts, or success criteria is a planning failure; stop instead of inventing them.
