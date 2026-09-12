@@ -89,7 +89,7 @@ Show the plan, then proceed immediately. Invoking this skill is the approval —
 
 ## Step 3 — Write Commit Messages
 
-For each commit in the plan, read `references/gitmessage`. It is a symlink to the repository's canonical `gitmessage`, which RCM installs as `~/.gitmessage` and Git uses through `commit.template`. Follow that template exactly; it is authoritative over examples or prior commit style.
+For each commit in the plan, read `~/.gitmessage` — RCM symlinks the repository's canonical `gitmessage` there, and Git uses it through `commit.template`. Follow that template exactly; it is authoritative over examples or prior commit style.
 
 ```
 <subject line>

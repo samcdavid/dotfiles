@@ -11,7 +11,7 @@ Create one or more focused commits from the current working tree.
 
 ## Load Rules
 
-`~/.claude/rules/no-outward-actions.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex. Read `references/protocol.md` for the commit workflow. Before composing any message, read `references/gitmessage` and follow its headings and prompts exactly.
+`~/.claude/rules/no-outward-actions.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex. Read `references/protocol.md` for the commit workflow. Before composing any message, read `~/.gitmessage` and follow its headings and prompts exactly.
 
 ## Flow
 
