@@ -28,10 +28,14 @@ see `../README.md` for how the two are kept in sync.
 10. Install Oh My Fish + packages
 11. Install Neovim plugins (headless Lazy sync)
 12. Install tmux plugins via TPM (git-clone install to `~/.tmux/plugins/tpm`)
-13. Generate a GPG key, configure commit signing, upload the key to GitHub
-14. Run `preferences` — GNOME trackpad, F6 mic-mute hotkey, always-visible
+13. Install tree-sitter language grammars (git-clone into
+    `~/.local/share/tree-sitter/grammars`, registered in
+    `~/.config/tree-sitter/config.json`) for Python, JavaScript,
+    TypeScript, Ruby, Go, Bash, Lua, JSON, YAML, Fish, and Elixir
+14. Generate a GPG key, configure commit signing, upload the key to GitHub
+15. Run `preferences` — GNOME trackpad, F6 mic-mute hotkey, always-visible
     mic indicator
-15. **Last, deliberately:** if an NVIDIA GPU is detected, install the driver
+16. **Last, deliberately:** if an NVIDIA GPU is detected, install the driver
     (`ubuntu-drivers autoinstall`) and `cuda-toolkit` together — this is the
     only step in the whole run that needs a reboot to take effect, so it's
     placed dead last on purpose. Everything above it works before that reboot.
@@ -229,3 +233,13 @@ preferences            # GNOME trackpad, F6 mic-mute hotkey, mic indicator
   email.
 - **No `~/.laptop.local` local-overrides hook** — deliberate, for
   cross-machine consistency; see `../README.md`.
+- **tree-sitter-cli ships with zero language grammars** — apt's
+  `tree-sitter-cli` package is only the parser/query engine; `tree-sitter
+  parse`/`query`/`tags` fail with "No language found" until grammars are
+  cloned somewhere in `parser-directories` (`~/.config/tree-sitter/config.json`).
+  `install` clones them into a dedicated `~/.local/share/tree-sitter/grammars`
+  rather than `~/github`, so they don't mix with real project checkouts.
+  **`tree-sitter-fish` needs a hand-written `tree-sitter.json`** — field-tested:
+  that repo predates the CLI's manifest convention and has no `"tree-sitter"`
+  key in `package.json` either, so without the shim `dump-languages` lists it
+  with a blank scope and no file types, and parsing any `.fish` file fails.

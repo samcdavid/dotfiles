@@ -18,8 +18,12 @@ Apple Silicon (`/opt/homebrew`) — `install` detects the prefix from `uname -m`
 7. Install Oh My Fish + packages
 8. Install Neovim plugins (headless Lazy sync)
 9. Install tmux plugins via TPM (git-clone install to `~/.tmux/plugins/tpm`)
-10. Generate a GPG key, configure commit signing, upload the key to GitHub
-11. Run `preferences` — Dock/Finder/trackpad defaults + text-replacement import
+10. Install tree-sitter language grammars (git-clone into
+    `~/.local/share/tree-sitter/grammars`, registered in
+    `~/.config/tree-sitter/config.json`) for Python, JavaScript,
+    TypeScript, Ruby, Go, Bash, Lua, JSON, YAML, Fish, and Elixir
+11. Generate a GPG key, configure commit signing, upload the key to GitHub
+12. Run `preferences` — Dock/Finder/trackpad defaults + text-replacement import
 
 Each run logs to `~/laptop.log` (auto-numbered on re-runs).
 

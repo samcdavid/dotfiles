@@ -247,6 +247,72 @@ fi
 fancy_echo "Installing tmux plugins..."
 "$HOME/.tmux/plugins/tpm/bin/install_plugins"
 
+# Install tree-sitter language grammars (git-clone method — the CLI compiles
+# each one on first use). They live in a dedicated directory rather than
+# ~/github so they don't mix with actual project checkouts; config.json's
+# parser-directories points at it below.
+fancy_echo "Configuring tree-sitter..."
+if [ ! -f "$HOME/.config/tree-sitter/config.json" ]; then
+  tree-sitter init-config
+fi
+GRAMMAR_DIR="$HOME/.local/share/tree-sitter/grammars"
+mkdir -p "$GRAMMAR_DIR"
+TS_CONFIG="$HOME/.config/tree-sitter/config.json"
+if ! jq -e --arg d "$GRAMMAR_DIR" '.["parser-directories"] | index($d)' "$TS_CONFIG" >/dev/null; then
+  jq --arg d "$GRAMMAR_DIR" '.["parser-directories"] |= [$d] + .' "$TS_CONFIG" > "$TS_CONFIG.tmp"
+  mv "$TS_CONFIG.tmp" "$TS_CONFIG"
+fi
+
+fancy_echo "Installing tree-sitter grammars..."
+for repo in \
+  tree-sitter/tree-sitter-python \
+  tree-sitter/tree-sitter-javascript \
+  tree-sitter/tree-sitter-typescript \
+  tree-sitter/tree-sitter-ruby \
+  tree-sitter/tree-sitter-go \
+  tree-sitter/tree-sitter-bash \
+  tree-sitter/tree-sitter-json \
+  tree-sitter-grammars/tree-sitter-yaml \
+  tree-sitter-grammars/tree-sitter-lua \
+  ram02z/tree-sitter-fish \
+  elixir-lang/tree-sitter-elixir \
+  ; do
+  name="$(basename "$repo")"
+  dest="$GRAMMAR_DIR/$name"
+  [ -d "$dest" ] && continue
+  git clone --depth 1 "https://github.com/$repo.git" "$dest"
+done
+
+# tree-sitter-fish predates the CLI's tree-sitter.json manifest convention
+# and has no "tree-sitter" key in package.json either, so the CLI can't
+# auto-discover its scope/file-type without this shim (field-tested on
+# tree-sitter-cli 0.25.9 — dump-languages otherwise lists it with a blank
+# scope and no file_types, and `tree-sitter parse *.fish` fails).
+FISH_GRAMMAR="$GRAMMAR_DIR/tree-sitter-fish"
+if [ -d "$FISH_GRAMMAR" ] && [ ! -f "$FISH_GRAMMAR/tree-sitter.json" ]; then
+  cat > "$FISH_GRAMMAR/tree-sitter.json" <<'EOF'
+{
+  "grammars": [
+    {
+      "name": "fish",
+      "camelcase": "Fish",
+      "scope": "source.fish",
+      "path": ".",
+      "file-types": ["fish"],
+      "highlights": "queries/highlights.scm",
+      "injection-regex": "^fish$"
+    }
+  ],
+  "metadata": {
+    "version": "3.7.0",
+    "license": "MIT",
+    "description": "Fish grammar for tree-sitter",
+    "links": { "repository": "https://github.com/ram02z/tree-sitter-fish" }
+  }
+}
+EOF
+fi
+
 # Generate GPG key for commit signing
 GPG_EMAIL="sam@mcdavid.us"
 if ! gpg --list-secret-keys "$GPG_EMAIL" >/dev/null 2>&1; then

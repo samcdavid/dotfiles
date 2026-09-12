@@ -102,6 +102,7 @@ ripgrep
 shellcheck
 htop
 tree
+tree-sitter-cli
 unixodbc-dev
 wget
 libwxgtk3.2-dev
