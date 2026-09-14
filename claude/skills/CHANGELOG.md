@@ -18,6 +18,13 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-13 — my-workflow stage stops; my-review verifier scoped to one hunk
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `112d532` | `my-workflow` now stops after `my-implement` completes and after `my-validate` passes, before dispatching the next stage, instead of chaining `my-implement` -> `my-validate` -> `implement-review` straight through on a clean run. Changed the pipeline table, Step 4/5 bodies, and a new governing constraint in `references/protocol.md`, the "Implementation and review" section of `references/checkpoint-policy.md`, and `SKILL.md`'s pipeline summary/step list. Each stop is context-clear-safe: the workflow ledger already records the completed stage's evidence, and the existing resume rules already route a fresh invocation straight to the next stage from that state. | If `my-workflow` starts running `my-implement` and `my-validate` (or `my-validate` and `implement-review`) back to back in one uninterrupted turn on a passing run, check whether the stop language in these three files got merged back into "only if blocked" wording. `implement-review`'s own internal bounded loop is untouched by this — no checkpoint was added inside it. |
+| `1eff9e6` | `my-review` Step 6's per-finding verifier dispatch stopped passing the full aggregate diff to every isolated Opus/Sonnet verifier. It now passes only that finding's file and diff hunk (`diff_text` slice in PR mode, `git diff "$fork" -- <path>` locally), fetching the file's full content at PR HEAD via the existing `gh api contents?ref=` pattern only if the hunk can't resolve the claim. The PR mode caveat for existence/fabrication checks was updated to match. | If per-finding verification starts costing roughly as much as the whole-diff review pass on a PR with several flagged findings, check whether Step 6's dispatch bullets regressed back to "the PR diff or local diff source of truth." The Wave 2 whole-diff worker (`general-reviewer`) is unaffected by this — it still receives, and needs, the full aggregate diff. |
+
 ## 2026-09-12 — Comments must explain why, not what/how
 
 | Commit | Change | Regression boundary / known-good meaning |
