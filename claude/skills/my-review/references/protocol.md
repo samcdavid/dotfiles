@@ -390,12 +390,12 @@ An unchecked causal prerequisite caps confidence at 79, preventing an Opus escal
 
 Dispatch eligible Opus candidates in parallel. Dispatch targeted Sonnet candidates only when they meet every `needs_confirmation` condition; all other findings remain not independently verified. Pass each verifier:
 
-- `mode`, and the PR diff or local diff source of truth (plus `pr_head_sha`/`repo` and the PR-mode constraints block in PR mode)
-- that finding's file paths and lines only
+- `mode`; that finding's file path and only that file's diff hunk(s) — extracted from `diff_text` in PR mode, or `git diff "$fork" -- <path>` in local mode. Never paste the full aggregate diff into a verifier prompt; a verifier isolates one finding and does not need the other changed files to do it.
+- `pr_head_sha`/`repo` and the PR-mode constraints block in PR mode, so the verifier can fetch that one file's full content at PR HEAD (`gh api repos/{repo}/contents/{path}?ref={pr_head_sha}`) if the hunk alone can't resolve the claim
 - the finding's claim, diff anchor, changed-line causal link, severity, risk, numeric confidence, evidence, and proposed fix
 - for targeted Sonnet only: `needs_confirmation`, named unresolved fact, exact verification query, and routing consequence
 - requirements checklist, if present and relevant to that finding
-- **nothing about the other findings** — each dispatch verifies its own claim in isolation so no verdict can be biased off a sibling
+- **nothing about the other findings, and no other file's hunk** — each dispatch verifies its own claim in isolation so no verdict can be biased off a sibling
 
 High-tier returns KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification`. Low-tier returns the same minus PROMOTE, plus `requires clarification`. Both must cite evidence (`file:line`, or `source` + `query` + `retrieved-at`).
 
@@ -408,7 +408,7 @@ question, not a loop (see `~/.claude/rules/loop-detection.md`).
 
 ### PR mode caveat
 
-Verifier agents can accidentally read the local working tree. If any DROP or REVISE rests on "file does not exist," "identifier is fabricated," or "function cannot be found," verify against the PR diff or PR HEAD before applying it — a PR that adds a file means the file is real and just isn't checked out.
+Verifier agents can accidentally read the local working tree. If any DROP or REVISE rests on "file does not exist," "identifier is fabricated," or "function cannot be found," verify against that file's diff hunk or a fresh `gh api contents?ref={pr_head_sha}` fetch before applying it — a PR that adds a file means the file is real and just isn't checked out.
 
 ### Apply verdicts
 
