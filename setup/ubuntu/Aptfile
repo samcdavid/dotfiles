@@ -92,6 +92,7 @@ direnv
 ffmpeg
 fswatch
 fzf
+inotify-tools
 jq
 libxslt1-dev
 llvm
@@ -101,6 +102,7 @@ pipx
 ripgrep
 shellcheck
 htop
+sqlite3
 tree
 tree-sitter-cli
 unixodbc-dev
