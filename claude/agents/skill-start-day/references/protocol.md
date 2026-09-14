@@ -12,6 +12,16 @@ The wrapper input must contain a **Notion database URL** for the Daily ToDo data
 
 If it is missing, ask the user before proceeding. Once present:
 - **Fetch the Notion database** using the URL to discover its data source ID (look for the `<data-source url="collection://...">` tag in the fetch result). Use this data source ID for all subsequent Notion queries and page creation.
+- **Resolve today's title and date mechanically, once:**
+  ```bash
+  date +'%A, %B %-d, %Y'   # -> today_title, e.g. "Wednesday, September 16, 2026"
+  date +%Y-%m-%d           # -> today_iso, e.g. "2026-09-16"
+  ```
+  Never infer the day-of-week from the date by arithmetic — the current-date
+  context injected at session start never states the weekday, and computing it
+  from the date is a reliable way to title the page wrong. Hold `today_title`
+  and `today_iso` for the rest of the run; every phase that writes today's page
+  (Phase 5) uses these two values verbatim, never a re-derived or re-typed one.
 
 ## Phase 1 — Gather Context
 
@@ -91,10 +101,32 @@ Using the gathered context from Linear (assigned issues **and project-wide open 
 
 1. **Filter completed work before write.** For every Linear ticket that is a candidate for today's checklist (yesterday's leftovers, assigned issues, email/calendar mentions), call `get_issue` and **drop any whose `state.type` is `completed` or `canceled`**. A ticket that closed yesterday — even one that appeared in Phase 4's Y: block — must not be written as today's T: item or checklist row. This is a hard gate, not a heuristic.
 
-2. **Create or update today's page.** If an entry for today already exists, update that page rather than creating a duplicate. Otherwise, create it using `notion-create-pages` with the data source ID resolved in Phase 0:
-   - Properties: `Day` = "<DayOfWeek>, <Month> <Day>, <Year>", `date:Date:start` = "<YYYY-MM-DD>", `Status` = "Active", `Day Type` = "Workday" (or "PTO"/"Holiday" if applicable)
-   - Content: Start with `## Daily Update` containing the Phase 4 draft, then `## Checklist` containing prioritized items, followed by empty `## Actions and decisions`, `## Notes`, and `## Summary` sections. Keep the daily update at the top so the user can review and edit it in Notion.
-   - For an existing page, add or replace `## Daily Update` with the Phase 4 draft and position it before every other section; preserve its historical sections except for the checklist and Notes content this workflow regenerates.
+2. **Create or update today's page** using the fixed template below — same properties, same section order, every run. If an entry for today already exists, update that page rather than creating a duplicate.
+
+   **Properties** (identical every run; `today_title`/`today_iso` are the values resolved once in Phase 0, never re-derived here):
+   - `Day` (title) = `today_title`
+   - `date:Date:start` = `today_iso`
+   - `Status` = "Active"
+   - `Day Type` = "Workday" (or "PTO"/"Holiday" if today itself is a day off)
+
+   **Content** (identical section order every run):
+   ```
+   ## Daily Update
+   <Phase 4 draft>
+
+   ## Checklist
+   <Phase 5 prioritized items>
+
+   ## Actions and decisions
+
+   ## Notes
+   <Phase 5 step 4 milestone-review block>
+
+   ## Summary
+   ```
+
+   **New page:** create with `notion-create-pages` using the data source ID resolved in Phase 0, with exactly this property set and section order.
+   **Existing page:** replace `## Daily Update`, `## Checklist`, and `## Notes` in place with this run's content; leave `## Actions and decisions` and `## Summary` as already present. Never reorder, drop, or add a section — this five-section shape is the template, not a starting point.
 
 3. **Order checklist items** from highest to lowest priority. Include meetings at the appropriate priority level based on their importance and timing. For email-sourced items, include enough context to act on them (sender, subject, what's needed) without needing to re-read the email.
 
