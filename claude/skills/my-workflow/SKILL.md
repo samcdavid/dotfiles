@@ -20,7 +20,9 @@ ledger, run the fresh pre-implementation gate. A minor gate-discovered plan
 amendment may be recorded directly and carry that gate forward; moderate or
 higher changes must return through synchronization and a fresh gate. Then
 request explicit implementation authorization and dispatch `my-implement`, one whole-plan
-`my-validate` gate after implementation completes, then `implement-review`.
+`my-validate` gate after implementation completes, then `implement-review` —
+stopping for the user between each of these three stages so context can be
+cleared between them.
 
 Never infer implementation permission. Migration work always uses this full
 flow and the staged safety process in `references/migration-safety.md`:
@@ -60,11 +62,14 @@ schema/data is involved.
    back through pairing, synchronization, and the gate.
 4. Stop for explicit implementation authorization.
 5. Dispatch `my-implement` with the ledger as the approved plan and test
-   strategy. Let it complete every phase and its holistic test gate.
+   strategy. Let it complete every phase and its holistic test gate, then stop
+   and report before continuing — the ledger already holds the completed
+   state, so the user may clear context here and resume straight into stage 6.
 6. Dispatch `my-validate` once against the completed plan and implementation
-   evidence. Stop if its whole-plan validation cannot pass.
-7. Dispatch `implement-review` only after that validation passes; preserve its
-   bounded review/repair loop unchanged.
+   evidence. Stop if its whole-plan validation cannot pass; on a pass, stop and
+   report before continuing — again safe to clear context and resume.
+7. Dispatch `implement-review` only after the user continues past that stop;
+   preserve its bounded review/repair loop unchanged.
 
 Update the ledger after every planning turn, gate, implementation phase result,
 validation result, and review outcome. Local commits are expected from the existing execution

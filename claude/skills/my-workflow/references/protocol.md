@@ -31,12 +31,17 @@ workflow ledger is both the resume source of truth and the approved plan.
    phase and its holistic test gate, then `my-validate` runs once against the
    completed plan before `implement-review` begins. Validation after a review
    repair remains part of `implement-review`; keep its five-pass cap unchanged.
-9. **Migration safety is staged.** Before implementation, require a migration
+9. **Stage boundaries stop for the user.** After `my-implement` completes and
+   after `my-validate` passes, stop and report before dispatching the next
+   stage — never chain stages 4-5-6 in the same turn. Each stop is
+   context-clear-safe: the ledger already records the completed stage's
+   evidence, so resume rules route straight to the next stage from that state.
+10. **Migration safety is staged.** Before implementation, require a migration
    design, test-suite migration execution, and a concrete staging-validation
    plan from `migration-safety.md`. Validate current database state only during
    the developer's staging deployment; its pending result does not block local
    planning, implementation, validation, or review.
-10. **No outward actions.** Local planning writes and validated implementation
+11. **No outward actions.** Local planning writes and validated implementation
     commits are allowed. Pushes, PR mutations, published messages, deployments,
     and other remote changes require explicit authorization.
 
@@ -48,8 +53,8 @@ workflow ledger is both the resume source of truth and the approved plan.
 | 1 | `my-pair-plan` | living ledger at synchronized plan version | every conversational turn; final planning sync |
 | 2 | Pre-implementation gate | refreshed sources, consistency audit, sibling check | overlap, drift, or gate failure |
 | 3 | Implementation authorization | explicit user approval recorded | always before code changes |
-| 4 | `my-implement` | phase commits + holistic test evidence | only if blocked |
-| 5 | `my-validate` | one whole-plan validation outcome | validation failure/blocker |
+| 4 | `my-implement` | phase commits + holistic test evidence | always, before stage 5 |
+| 5 | `my-validate` | one whole-plan validation outcome | always on pass; blocker if failed |
 | 6 | `implement-review` | bounded review/repair outcome | terminal result |
 
 ## Step 0 — Intake and ledger detection
@@ -204,7 +209,10 @@ RED → GREEN → VALIDATE, independent re-verification, local commit,
 loop detection, and holistic test behavior.
 
 Record the returned phase commits and evidence in `Execution Log`. If it blocks,
-stop. Only complete implementation permits stage 5.
+stop. On completion, also stop: report the phase commits and evidence, and end
+the turn before dispatching stage 5. This stop is context-clear-safe — the
+ledger already carries the completed-implementation state, so a fresh
+invocation resumes straight into Step 5.
 
 ## Step 5 — Whole-plan validation
 
@@ -225,10 +233,13 @@ authority: local_only
 ```
 
 Record its checks, coverage, repairs, local commits, residual risks, and
-outcome in `Execution Log`. A blocked or failed result stops the workflow. Only
-a passing result permits review; do not run this whole-plan gate again between
-review passes. Validation that `implement-review` performs after a repair stays
-within that review loop.
+outcome in `Execution Log`. A blocked or failed result stops the workflow. On a
+passing result, also stop: report the validation evidence and end the turn
+before dispatching stage 6. This stop is context-clear-safe — the ledger
+already carries the passing-validation state, so a fresh invocation resumes
+straight into Step 6. Do not run this whole-plan gate again between review
+passes. Validation that `implement-review` performs after a repair stays within
+that review loop.
 
 ## Step 6 — Existing review loop
 

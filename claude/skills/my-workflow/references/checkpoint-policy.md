@@ -33,9 +33,23 @@ invalidated sections.
 ## Implementation and review
 
 `my-implement` stops only if blocked; otherwise it completes all phases before
-one whole-plan `my-validate` gate. `implement-review` starts only after that
-gate passes and owns its bounded loop and terminal stop. Do not insert planning
-checkpoints into those procedures.
+one whole-plan `my-validate` gate. Do not insert planning checkpoints into that
+procedure.
+
+Stage boundaries stop for the user on success, not only on a block: report the
+outcome and end the turn.
+
+- After `my-implement` completes, stop before dispatching `my-validate`. Do not
+  run `my-validate` in the same turn implementation finished.
+- After `my-validate` passes, stop before dispatching `implement-review`. Do
+  not run `implement-review` in the same turn validation finished.
+
+Each stop is context-clear-safe: the ledger already records the completed
+stage's evidence, so the user may clear context there and resume — the resume
+rules route straight to the next stage from ledger state.
+`implement-review` starts only after the continuation past the `my-validate`
+stop, and owns its own bounded loop and terminal stop unchanged; do not insert
+checkpoints inside that loop.
 
 Resume exclusively from ledger state. A moderate-or-higher plan-version change
 invalidates sync, preflight, and implementation authorization. A minor
