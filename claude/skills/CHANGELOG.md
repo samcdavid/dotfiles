@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-13 — start-day: mechanical weekday, fixed page template
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `da34df8` | `skill-start-day/references/protocol.md` Phase 0 now resolves today's title and ISO date via `date +'%A, %B %-d, %Y'` / `date +%Y-%m-%d` once, and every later phase reuses those two values verbatim instead of letting the model infer the weekday from a bare date (the injected current-date context never states the weekday, so that inference was the actual source of wrong-weekday titles). Phase 5 step 2's page template (the `Day`/`date:Date:start`/`Status`/`Day Type` properties and the five-section `## Daily Update` / `## Checklist` / `## Actions and decisions` / `## Notes` / `## Summary` content shape) is now a fixed block instead of prose, so the structure can't drift run to run. | If a start-day page title has the wrong weekday for its date again, check whether Phase 0 still shells out to `date` for both values, or whether something reintroduced model-computed weekday text. If the page's section order or property set varies between days, check whether Phase 5 step 2 still points at the fixed template block instead of paraphrasing it fresh each run. |
+
 ## 2026-09-13 — my-workflow stage stops; my-review verifier scoped to one hunk
 
 | Commit | Change | Regression boundary / known-good meaning |
