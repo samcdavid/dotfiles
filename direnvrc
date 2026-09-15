@@ -11,3 +11,17 @@ layout_uv() {
   export UV_ACTIVE=1
   PATH_add "$VIRTUAL_ENV/bin"
 }
+
+# direnv can only export env vars, not shell aliases/functions, so project
+# .envrc files use this to drop an executable shim on PATH instead.
+export_alias() {
+  local name=$1
+  shift
+  local alias_dir="$PWD/.direnv/aliases"
+  local target="$alias_dir/$name"
+  mkdir -p "$alias_dir"
+  PATH_add "$alias_dir"
+  echo "#!/usr/bin/env bash" > "$target"
+  echo "$@" >> "$target"
+  chmod +x "$target"
+}

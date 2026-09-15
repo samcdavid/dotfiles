@@ -47,7 +47,7 @@ config/
 ├── nvim/         # Neovim LazyVim setup
 ├── omf/          # Oh My Fish packages
 └── tmuxinator/   # Tmuxinator project sessions
-direnvrc          # direnv layouts (uv)
+direnvrc          # direnv layouts (uv) + export_alias helper
 editorconfig      # Editor defaults
 envrc             # Environment variables
 gitconfig         # Git with GPG signing (signing key/credential helper come from the untracked ~/.gitconfig.local)
@@ -68,6 +68,23 @@ tool-versions     # asdf runtime versions
 | Docker | `stop_docker`, `rm_docker`, `rmi_docker` |
 | Tmux | `mux`, `muxc`, `muxn`, `muxs` |
 | System | `ll`, `myip`, `vim`, `tf`, `cleanpyc`, `update_nvim` |
+
+## Project-Specific Aliases via direnv
+
+`direnv` can only export environment variables into your shell, not aliases
+or functions — so `direnvrc` (symlinked to `~/.direnvrc`) defines an
+`export_alias` helper that writes an executable shim into `.direnv/aliases/`
+and puts it on `PATH` for that directory. Works the same regardless of
+interactive shell (fish, bash, zsh), since the shim itself is a bash script.
+
+In a project's own `.envrc`:
+
+```bash
+export_alias pi-install-ext "pushd .pi/extensions/mcp-remote-bridge && npm install && popd"
+```
+
+Then run `direnv allow` in that project. The alias is local to that project
+(via its gitignored `.direnv/`) and isn't tracked in this repo.
 
 ## Updating Dotfiles
 
