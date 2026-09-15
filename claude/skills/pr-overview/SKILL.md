@@ -45,7 +45,9 @@ A category with nothing to report is simply omitted from the output — do not l
 
 ## Review Activity (PR mode only)
 
-Local diffs have no reviewers — skip this section outside PR mode. For a PR, fetch existing reviews/comments via `pr-cost-control.md`'s scoped GraphQL query and follow `references/protocol.md`'s "Review Activity Summary" section to report, in plain language: each reviewer's latest formal state (`APPROVED`/`CHANGES_REQUESTED`/`COMMENTED`), how many unresolved threads remain, and a one-line factual lean ("two approvals, no unresolved threads — trending toward merge"), not this skill's own opinion. State plainly when there's no review activity yet.
+Local diffs have no reviewers — skip this section outside PR mode. For a PR, fetch existing reviews/comments via `pr-cost-control.md`'s scoped GraphQL query and follow `references/protocol.md`'s "Review Activity Summary" section to report, in plain language: each reviewer's latest stance (`APPROVED`/`CHANGES_REQUESTED`/`COMMENTED`), how many unresolved threads remain, and a one-line factual lean ("two approvals, no unresolved threads — trending toward merge"), not this skill's own opinion. State plainly when there's no review activity yet.
+
+A stance comes from the formal review event **or** from a comment's own text — read every comment body, not just its GitHub event type. At least one automated review bot on this org posts its verdict as plain comment text (e.g. the words "APPROVE" or "REQUEST_CHANGES" inside a regular issue/PR comment) rather than submitting a real GitHub review event, so a state pulled only from `gh api .../reviews` will silently miss it. `references/protocol.md` has the parsing rule.
 
 ## Output
 

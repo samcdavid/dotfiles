@@ -51,6 +51,15 @@ Applies only in PR mode. Use the GraphQL `reviewThreads` query already defined i
 - **Leaning read**: this is a factual summary of the vote/thread counts, not a prediction. Phrase it as "N approvals, M change-requested, K unresolved threads" and only add a one-clause plain-language gloss ("trending toward merge" / "still has open concerns") when the counts make it unambiguous. If reviewers are split or there's only `COMMENTED` activity with no formal state, say that plainly instead of forcing a lean.
 - A reviewer who commented but never submitted a formal review (no `APPROVED`/`CHANGES_REQUESTED`/`COMMENTED` review object, just inline comments) counts toward thread/comment activity but not toward the approval tally — note them separately if their comments raise substantive concerns.
 
+## Comment-Stated Verdicts
+
+Some automated reviewers post their verdict as text inside a plain issue/PR comment or review-thread comment instead of submitting a real GitHub review event, so `gh api .../reviews`'s `state` field never reflects them. Read the body of every comment returned by the `reviewThreads` query and by `gh api repos/{owner}/{repo}/issues/{N}/comments`, not just each comment's GitHub-level type:
+
+- Look for the review-event vocabulary appearing as text in the comment body — `APPROVE`/`APPROVED`, `REQUEST_CHANGES`/`CHANGES_REQUESTED`, `COMMENT`/`COMMENTED` — typically near the start of the comment or in a bolded/heading line (e.g. `**Verdict: REQUEST_CHANGES**`). Case-insensitive; tolerate the word appearing with or without surrounding markdown emphasis.
+- A comment-stated verdict is authored by whatever bot/account posted the comment. Treat it exactly like a formal review from that account for the per-reviewer tally and the latest-wins dedup rule above — compare its timestamp against that account's other reviews/comments and keep only the latest.
+- Do not infer a verdict from tone or general sentiment (e.g. a comment that merely sounds positive or negative). Only count it when the comment text names an explicit review-verdict word; otherwise it's ordinary comment activity, not a stance.
+- If the same bot has posted multiple comments with different stated verdicts (e.g. it re-posts a fresh summary each run), keep only the most recent one by comment `created_at`.
+
 # Diff Acquisition Notes
 
 - PR mode: `gh pr diff <N>` gives the full unified diff; combine with the scoped GraphQL/REST field projections from `pr-cost-control.md` only if per-file/per-line metadata (not diff content) is needed. Do not fetch full file contents unless a hunk's context is insufficient to categorize — then use `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` per `pr-mode-readonly.md`, never the local working tree.
