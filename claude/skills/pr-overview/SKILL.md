@@ -2,7 +2,7 @@
 model: sonnet
 effort: low
 name: pr-overview
-description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, modified tests, migrations, signature changes, public interface changes, branching-condition changes, and feature-flag use."
+description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, modified tests, migrations, signature changes, public interface changes, branching-condition changes, and feature-flag use. For a PR, also summarizes existing review comments and where reviewers are leaning."
 when_to_use: "Use when the user wants a quick orientation on a PR (number/URL) or the current local diff before reading it in full, rather than a full review or verdict."
 disallowed-tools: Edit, Write, NotebookEdit
 ---
@@ -43,6 +43,10 @@ Read `references/protocol.md` for how to detect each category (file patterns, gr
 
 A category with nothing to report is simply omitted from the output — do not list it as "none found."
 
+## Review Activity (PR mode only)
+
+Local diffs have no reviewers — skip this section outside PR mode. For a PR, fetch existing reviews/comments via `pr-cost-control.md`'s scoped GraphQL query and follow `references/protocol.md`'s "Review Activity Summary" section to report, in plain language: each reviewer's latest formal state (`APPROVED`/`CHANGES_REQUESTED`/`COMMENTED`), how many unresolved threads remain, and a one-line factual lean ("two approvals, no unresolved threads — trending toward merge"), not this skill's own opinion. State plainly when there's no review activity yet.
+
 ## Output
 
-Lead with one or two sentences: what the PR/diff does at a high level. Then a compact list per non-empty category, each entry as `file:line` plus a one-line plain-language description of the change (not a copy of the diff hunk). Close with a one-line file-count/size gauge (files changed, lines +/-) so the user can judge how long a full read will take. No verdict, no recommendation to approve/request changes — that's `my-review`'s job, and this skill should point there if the user asks for one.
+Lead with one or two sentences: what the PR/diff does at a high level. Then a compact list per non-empty category, each entry as `file:line` plus a one-line plain-language description of the change (not a copy of the diff hunk). In PR mode, follow with the Review Activity summary. Close with a one-line file-count/size gauge (files changed, lines +/-) so the user can judge how long a full read will take. No verdict, no recommendation to approve/request changes — that's `my-review`'s job, and this skill should point there if the user asks for one.

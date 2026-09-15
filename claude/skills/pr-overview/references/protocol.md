@@ -42,6 +42,15 @@ These are starting heuristics, not an exhaustive spec — the point is to catch 
 - Existing flag check removed (flag being retired/cleaned up) — note this distinctly from a new flag being added, since cleanup and new-gating carry different review attention.
 - Changed flag default/rollout percentage in a config file.
 
+# Review Activity Summary
+
+Applies only in PR mode. Use the GraphQL `reviewThreads` query already defined in `pr-cost-control.md` — it returns `isResolved`/`isOutdated` per thread and each comment's author, so no separate REST call for review state is needed. Pair it with `gh api repos/{owner}/{repo}/pulls/{N}/reviews --jq '[.[] | {user: .user.login, state, submitted_at}]'` for each reviewer's formal review state (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`, `PENDING` — drop `PENDING`, it's not yet visible to others).
+
+- **Per-reviewer state**: group reviews by `user.login`, keep only the review with the latest `submitted_at` per reviewer — an earlier `CHANGES_REQUESTED` followed by a later `APPROVED` from the same person means they approved, full stop.
+- **Unresolved threads**: count `reviewThreads` entries where `isResolved: false` and `isOutdated: false`. An outdated thread (the diff moved past it) is not "still open" in a meaningful sense — mention it only if the count of genuinely unresolved current threads is zero and outdated ones exist, so the user isn't misled into thinking there's no discussion at all.
+- **Leaning read**: this is a factual summary of the vote/thread counts, not a prediction. Phrase it as "N approvals, M change-requested, K unresolved threads" and only add a one-clause plain-language gloss ("trending toward merge" / "still has open concerns") when the counts make it unambiguous. If reviewers are split or there's only `COMMENTED` activity with no formal state, say that plainly instead of forcing a lean.
+- A reviewer who commented but never submitted a formal review (no `APPROVED`/`CHANGES_REQUESTED`/`COMMENTED` review object, just inline comments) counts toward thread/comment activity but not toward the approval tally — note them separately if their comments raise substantive concerns.
+
 # Diff Acquisition Notes
 
 - PR mode: `gh pr diff <N>` gives the full unified diff; combine with the scoped GraphQL/REST field projections from `pr-cost-control.md` only if per-file/per-line metadata (not diff content) is needed. Do not fetch full file contents unless a hunk's context is insufficient to categorize — then use `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` per `pr-mode-readonly.md`, never the local working tree.
