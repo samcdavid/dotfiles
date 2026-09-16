@@ -12,14 +12,18 @@ The wrapper input must contain a **Notion database URL** for the Daily ToDo data
 
 If it is missing, ask the user before proceeding. Once present:
 - **Fetch the Notion database** using the URL to discover its data source ID (look for the `<data-source url="collection://...">` tag in the fetch result). Use this data source ID for all subsequent Notion queries and page creation.
-- **Resolve today's title and date mechanically, once:**
+- **Resolve today's title and date mechanically, once, by running the script:**
   ```bash
-  date +'%A, %B %-d, %Y'   # -> today_title, e.g. "Wednesday, September 16, 2026"
-  date +%Y-%m-%d           # -> today_iso, e.g. "2026-09-16"
+  sh ~/.claude/agents/skill-start-day/references/today_title.sh
+  # or under Codex: sh ~/.agents/skill-start-day/references/today_title.sh
+  # -> today_title=Wednesday, September 16, 2026
+  # -> today_iso=2026-09-16
   ```
-  Never infer the day-of-week from the date by arithmetic — the current-date
-  context injected at session start never states the weekday, and computing it
-  from the date is a reliable way to title the page wrong. Hold `today_title`
+  Run this script and read its output — do not type out or hand-compute the
+  `date` invocation yourself, and never infer the day-of-week from the date by
+  arithmetic. The current-date context injected at session start never states
+  the weekday, and computing it from the date (by hand or by re-typing the
+  format string) is a reliable way to title the page wrong. Hold `today_title`
   and `today_iso` for the rest of the run; every phase that writes today's page
   (Phase 5) uses these two values verbatim, never a re-derived or re-typed one.
 
