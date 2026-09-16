@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-16 — pr-overview: new comment-quality category
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `8b1c18e` | Added an 8th `pr-overview` category, "Comment quality", flagging comments that cite a Linear issue ID outside a `TODO`, cite an agent-generated bookkeeping ID, reference dead code, or narrate what/how instead of why. Heuristics and reporting format live in `pr-overview/references/protocol.md`; the category list and frontmatter description in `pr-overview/SKILL.md` were updated to match. | If `pr-overview` stops surfacing comment-quality issues, check whether `SKILL.md`'s category 8 and the protocol file's "Comment quality" section still exist and agree. If unrelated categories start missing output, check whether the word-count trims made alongside this change (shortened intro/scope sentences) accidentally dropped instructions. |
+
 ## 2026-09-13 — start-day: mechanical weekday, fixed page template
 
 | Commit | Change | Regression boundary / known-good meaning |
