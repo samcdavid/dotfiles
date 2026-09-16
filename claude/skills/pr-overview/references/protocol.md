@@ -42,6 +42,17 @@ These are starting heuristics, not an exhaustive spec — the point is to catch 
 - Existing flag check removed (flag being retired/cleaned up) — note this distinctly from a new flag being added, since cleanup and new-gating carry different review attention.
 - Changed flag default/rollout percentage in a config file.
 
+## Comment quality
+
+Scan added/changed comment lines (not comment bodies unchanged by the diff) for:
+
+- **Linear issue ID outside a `TODO`** — a comment containing a Linear-style key (e.g. `ENG-1234`, `ABC-42`) that is not itself a `TODO`/`FIXME` comment. A `TODO(ENG-1234): ...` is fine; a plain `# see ENG-1234` or `// fixed per ENG-1234` explaining current behavior is not — the issue tracker, not the comment, should carry that history.
+- **Agent-generated identifiers** — references to session/task/run IDs, model-generated ticket numbers, or other machine-bookkeeping keys that only make sense to an agent's own tooling (e.g. `TS-2`, a UUID-looking run ID, a phase number from a plan). These have no meaning to a future reader and should not appear in code or comments.
+- **Dead code references** — a comment describing code that no longer exists in the diff's result (leftover "previously this did X" or "replaces the old Y" narration pointing at something removed), or a comment inside/above code that is itself commented out or unreachable.
+- **What/how narration instead of why** — a comment that restates the next line or block in prose (what the code does, or how it does it mechanically) rather than carrying a reason the code can't show on its own (a constraint, tradeoff, rejected alternative, gotcha, business rule). Flag comments that merely narrate; do not flag comments that explain why, even if terse.
+
+Report each hit as `file:line` plus the comment text (trimmed) and which rule it violates. This category never flags comment *removal* or comments left unchanged by the diff.
+
 # Review Activity Summary
 
 Applies only in PR mode. Use the GraphQL `reviewThreads` query already defined in `pr-cost-control.md` — it returns `isResolved`/`isOutdated` per thread and each comment's author, so no separate REST call for review state is needed. Pair it with `gh api repos/{owner}/{repo}/pulls/{N}/reviews --jq '[.[] | {user: .user.login, state, submitted_at}]'` for each reviewer's formal review state (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`, `PENDING` — drop `PENDING`, it's not yet visible to others).
