@@ -24,7 +24,9 @@ if command -v tree-sitter >/dev/null 2>&1; then
   : # already installed
 elif command -v brew >/dev/null 2>&1; then
   fancy_echo "Installing tree-sitter via Homebrew..."
-  brew install tree-sitter
+  # brew's "tree-sitter" formula is library-only (libtree-sitter) as of
+  # tree-sitter 0.25+; the CLI is the separate "tree-sitter-cli" formula.
+  brew install tree-sitter-cli
 elif command -v apt >/dev/null 2>&1; then
   fancy_echo "Installing tree-sitter-cli via apt..."
   sudo apt install -y tree-sitter-cli
@@ -106,4 +108,4 @@ if [ -d "$FISH_GRAMMAR" ] && [ ! -f "$FISH_GRAMMAR/tree-sitter.json" ]; then
 EOF
 fi
 
-fancy_echo "tree-sitter ready: %s languages configured" "$(tree-sitter dump-languages 2>/dev/null | grep -c '^scope:')"
+fancy_echo "tree-sitter ready: %s languages configured" "$(tree-sitter dump-languages 2>&1 | grep -c '^scope:')"
