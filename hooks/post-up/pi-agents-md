@@ -1,0 +1,20 @@
+#!/bin/sh
+# rcup's global EXCLUDES="... AGENTS.md ..." matches AGENTS.md by basename
+# anywhere in the repo (rcm tests both the full relative path and the
+# basename against each exclude glob), not just the dotfiles-repo-root
+# AGENTS.md it was written to exclude. rcup has no rcrc-persisted include
+# override for that (only a one-off -I flag), so pi/agent/AGENTS.md — the
+# global context file pi needs at exactly that name — never gets its normal
+# per-file symlink pass. Link it here instead; idempotent, safe to rerun.
+set -e
+
+src="$HOME/.dotfiles/pi/agent/AGENTS.md"
+dest="$HOME/.pi/agent/AGENTS.md"
+
+mkdir -p "$(dirname "$dest")"
+
+if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+	exit 0
+fi
+
+ln -sf "$src" "$dest"
