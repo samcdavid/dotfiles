@@ -78,6 +78,21 @@ for repo in \
   git clone --depth 1 "https://github.com/$repo.git" "$dest"
 done
 
+# tree-sitter-typescript's tags/highlights queries reference
+# node_modules/tree-sitter-javascript/queries/*.scm (it reuses the JS
+# grammar's queries rather than duplicating them) but the CLI only clones
+# the repo — it doesn't run npm install. Without this, `tree-sitter tags`
+# fails on every .ts/.tsx file with "No such file or directory".
+TS_GRAMMAR="$GRAMMAR_DIR/tree-sitter-typescript"
+if [ -d "$TS_GRAMMAR" ] && [ ! -d "$TS_GRAMMAR/node_modules/tree-sitter-javascript" ]; then
+  if command -v npm >/dev/null 2>&1; then
+    fancy_echo "Installing tree-sitter-typescript's query dependency..."
+    (cd "$TS_GRAMMAR" && npm install --omit=dev --ignore-scripts --no-audit --no-fund)
+  else
+    fancy_echo "Warning: npm not found — tree-sitter-typescript's tags/highlights queries will fail until 'npm install' is run in %s" "$TS_GRAMMAR"
+  fi
+fi
+
 # tree-sitter-fish predates the CLI's tree-sitter.json manifest convention
 # and has no "tree-sitter" key in package.json either, so the CLI can't
 # auto-discover its scope/file-type without this shim (field-tested on
