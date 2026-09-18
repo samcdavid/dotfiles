@@ -218,6 +218,12 @@ if [ ! -f "$FONT_DIR/Hack Regular Nerd Font Complete.ttf" ]; then
   fc-cache -f "$FONT_DIR"
 fi
 
+# --- OpenCode (official installer — not in apt/snap) ----------------------
+if ! command -v opencode >/dev/null; then
+  fancy_echo "Installing OpenCode..."
+  curl -fsSL https://opencode.ai/install | bash
+fi
+
 # --- Ollama (official installer — not in apt/snap; sets up its own systemd
 #     service and auto-detects the NVIDIA GPU/CUDA for hardware acceleration) -
 if ! command -v ollama >/dev/null; then
