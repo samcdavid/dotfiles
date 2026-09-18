@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: sonnet
 name: start-day
 runner: skill-start-day
 description: Build a daily work brief from yesterday/off-hours activity plus today's Linear, Calendar, Gmail, and Notion context; update Notion with a reviewable daily update and checklist.

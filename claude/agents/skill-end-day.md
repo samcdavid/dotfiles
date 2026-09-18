@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: sonnet
 effort: medium
 codex-model: gpt-5.6-luna
 name: skill-end-day
