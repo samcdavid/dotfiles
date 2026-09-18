@@ -7,8 +7,10 @@ import argparse
 import json
 import os
 from pathlib import Path
-import re
 import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib.agent_frontmatter import parse_agent  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,33 +19,6 @@ CODEX_AGENTS = ROOT / "codex" / "agents"
 CRITICAL_AGENT_NAMES = {
     "adversarial-debate",
 }
-
-
-def parse_agent(path: Path) -> tuple[dict[str, str], str]:
-    text = path.read_text()
-    if not text.startswith("---"):
-        raise ValueError(f"{path} does not start with frontmatter")
-
-    match = re.match(r"\A---\s*\n(.*?)\n---\s*\n?(.*)\Z", text, re.DOTALL)
-    if not match:
-        raise ValueError(f"{path} has malformed frontmatter")
-
-    raw_frontmatter, body = match.groups()
-    frontmatter: dict[str, str] = {}
-    for line in raw_frontmatter.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if ":" not in line:
-            raise ValueError(f"{path} frontmatter line is not key/value: {line!r}")
-        key, value = line.split(":", 1)
-        frontmatter[key.strip()] = value.strip().strip("\"'")
-
-    for required in ("name", "description"):
-        if not frontmatter.get(required):
-            raise ValueError(f"{path} is missing required frontmatter key: {required}")
-
-    return frontmatter, body.strip() + "\n"
 
 
 def toml_string(value: str) -> str:

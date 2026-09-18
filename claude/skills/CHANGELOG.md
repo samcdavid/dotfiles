@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-18 — added OpenCode agent generation, alongside Codex
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| _pending_ | Added `scripts/sync-opencode-agents`, which renders `config/opencode/agents/*.md` (OpenCode's subagent markdown format) from the same `claude/agents/*.md` source Codex already reads. Extracted the shared frontmatter parser both generators use into `scripts/lib/agent_frontmatter.py`. Added `config/opencode/agents` to `rcrc`'s `SYMLINK_DIRS` so `rcup` links it to `~/.config/opencode/agents`, and added a `--check` invocation to `.githooks/pre-commit`. Skills needed no generation step — OpenCode already discovers `~/.agents/skills/<name>/SKILL.md` (its documented "Agent-compatible" skill path), which RCM already populates. | If OpenCode subagents go missing or stale, check `scripts/sync-opencode-agents --check` and confirm `~/.config/opencode/agents` still resolves to `config/opencode/agents`. If Codex agent generation regresses at the same time, check that the `scripts/lib/agent_frontmatter.py` extraction didn't change `parse_agent`'s behavior. |
+
 ## 2026-09-18 — start-day/end-day: reverted to sonnet
 
 | Commit | Change | Regression boundary / known-good meaning |

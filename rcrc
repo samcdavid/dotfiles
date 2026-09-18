@@ -1,2 +1,2 @@
-SYMLINK_DIRS="claude/agents claude/rules agents/skills agents/rules codex/agents"
+SYMLINK_DIRS="claude/agents claude/rules agents/skills agents/rules codex/agents config/opencode/agents"
 EXCLUDES="setup AGENTS.md config/fish/fish_variables"

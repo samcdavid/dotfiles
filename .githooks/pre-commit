@@ -3,3 +3,4 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 asdf exec python3 scripts/check-agent-drift
+asdf exec python3 scripts/sync-opencode-agents --check
