@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-18 — start-day/end-day: reverted to sonnet
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `f40a232` | Reverted `start-day`/`end-day` and their `skill-start-day`/`skill-end-day` runner agents from `model: haiku` back to `model: sonnet`. | If these skills produce weak or shallow daily briefs/consolidations again, check whether `model:` in `start-day/SKILL.md`, `end-day/SKILL.md`, `../agents/skill-start-day.md`, or `../agents/skill-end-day.md` drifted back to `haiku`. |
+
 ## 2026-09-16 — pr-overview: new comment-quality category
 
 | Commit | Change | Regression boundary / known-good meaning |
