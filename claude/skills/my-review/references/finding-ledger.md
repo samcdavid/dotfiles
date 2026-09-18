@@ -1,7 +1,7 @@
 # Finding Ledger
 
 Workflow ledgers live in Claude Thoughts at
-`~/.claude/thoughts/shared/workflows/`, never in the repository. Discover the
+`~/.thoughts/workflows/`, never in the repository. Discover the
 matching ledger there before deciding whether one is available, then use this
 reference whenever one is found. It gives review and feedback work one durable,
 append-only record of a finding's final disposition. It is not a replacement for

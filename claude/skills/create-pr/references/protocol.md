@@ -57,7 +57,7 @@ The PR must carry a concise, auditable record of decisions made while the change
 
 ```bash
 branch=$(git branch --show-current)
-rg -l -F -e "branch: ${branch}" -e "branch: \"${branch}\"" ~/.claude/thoughts/shared/workflows/ 2>/dev/null
+rg -l -F -e "branch: ${branch}" -e "branch: \"${branch}\"" ~/.thoughts/workflows/ 2>/dev/null
 ```
 
 Open candidates and compare the `branch:` scalar exactly, including its optional YAML quotes; do not select a similarly named branch.

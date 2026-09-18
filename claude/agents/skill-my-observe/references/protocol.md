@@ -173,7 +173,7 @@ Keep it to ONE dashboard with the critical signals — not a sprawling collectio
 
 ## Workflow Ledger and Output Envelope
 
-When working from a workflow plan, save a companion observability plan to `~/.claude/thoughts/shared/plans/NNNa_{ticket}_observability.md`, using the main plan's number with an `a` suffix and `parent_plan: <main-plan-path>` in frontmatter. Append its outcome to an existing ledger only in standalone mode. In embedded mode return it for `my-workflow` to record.
+When working from a workflow plan, save a companion observability plan to `~/.thoughts/plans/NNNa_{ticket}_observability.md`, using the main plan's number with an `a` suffix and `parent_plan: <main-plan-path>` in frontmatter. Append its outcome to an existing ledger only in standalone mode. In embedded mode return it for `my-workflow` to record.
 
 Return a compact result, never raw tool or subagent transcripts:
 

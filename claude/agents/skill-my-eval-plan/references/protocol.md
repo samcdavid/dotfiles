@@ -150,7 +150,7 @@ Deliver the plan as a structured document with:
 
 ## Workflow Ledger and Output Envelope
 
-When working from a workflow plan, save a companion evaluation plan under `~/.claude/thoughts/shared/plans/` and include `parent_plan: <main-plan-path>` in frontmatter. Append its outcome to an existing ledger only in standalone mode. In embedded mode return it for `my-workflow` to record.
+When working from a workflow plan, save a companion evaluation plan under `~/.thoughts/plans/` and include `parent_plan: <main-plan-path>` in frontmatter. Append its outcome to an existing ledger only in standalone mode. In embedded mode return it for `my-workflow` to record.
 
 Return a compact result, never raw tool or subagent transcripts:
 

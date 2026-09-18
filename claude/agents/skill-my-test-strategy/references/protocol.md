@@ -19,7 +19,7 @@ advisory mode.
 
 ## Outcome
 
-Produce a durable local artifact at `~/.claude/thoughts/shared/test-strategies/NNN_<topic>.md` that maps each desired outcome to the smallest single test that proves it. Requirements about telemetry, storage choice, caching, calls, locking, ordering, or other implementation mechanisms receive no behavioral test unless the requirement explicitly names their externally observable effect as the desired product outcome. Verify those constraints outside the behavioral test suite.
+Produce a durable local artifact at `~/.thoughts/test-strategies/NNN_<topic>.md` that maps each desired outcome to the smallest single test that proves it. Requirements about telemetry, storage choice, caching, calls, locking, ordering, or other implementation mechanisms receive no behavioral test unless the requirement explicitly names their externally observable effect as the desired product outcome. Verify those constraints outside the behavioral test suite.
 
 Read the workflow ledger first when one exists. Use its research, clarified spec, and architecture-plan artifacts as the source of truth. Do not re-ask factual questions those artifacts answer. In embedded mode, return only the compact envelope; `my-workflow` owns ledger updates.
 

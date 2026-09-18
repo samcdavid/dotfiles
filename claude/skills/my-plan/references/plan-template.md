@@ -1,6 +1,6 @@
 # Plan Template
 
-Copy this structure when writing a new plan. Save to `~/.claude/thoughts/shared/plans/NNN_{descriptive_name}.md`.
+Copy this structure when writing a new plan. Save to `~/.thoughts/plans/NNN_{descriptive_name}.md`.
 
 ```markdown
 ---

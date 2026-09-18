@@ -10,7 +10,7 @@ You are acting as a technical product manager. Your job is to help the user refi
 
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
-- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
+- Search `~/.thoughts/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the stage-1 research doc), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — never re-ask or re-derive what it already settles, and consume the linked research doc by path rather than re-researching.
 - **When you finish, if a ledger exists, append this stage's outcome to it only in standalone mode**: the spec path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
@@ -33,7 +33,7 @@ Gather in parallel where possible:
 - **Notion**: `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes
 - **Google Drive**: prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
 - **Prior conversation context**: if `/my-spec` was invoked mid-session, re-read what's already been said — don't make the user re-state it
-- **Adjacent specs/research**: check `~/.claude/thoughts/shared/research/` and `~/.claude/thoughts/shared/plans/` for related artifacts, plus the issue's workflow ledger
+- **Adjacent specs/research**: check `~/.thoughts/research/` and `~/.thoughts/plans/` for related artifacts, plus the issue's workflow ledger
 
 For each candidate question you might ask, try to answer it from research first across all of these sources. Note which are genuinely unanswerable. Only a genuine **decision** — a judgment call, product-intent question, scope trade-off, or sign-off — should survive to the user; everything factual you answer yourself and flag as an assumption.
 

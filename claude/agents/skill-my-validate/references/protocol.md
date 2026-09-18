@@ -17,7 +17,7 @@ Operates in one of two modes depending on context.
 - If `$ARGUMENTS` is `session` or empty and there is no plan context, use **Session Mode**.
 - If ambiguous, ask the user which mode they want.
 
-Regardless of mode: after identifying the active plan (from `$ARGUMENTS` or session context), check for a companion observability plan. Look in `~/.claude/thoughts/shared/plans/` for a file matching `*a_*observability*` whose `parent_plan` frontmatter points to the active plan. If found, run **Observability Validation** as an additional phase appended to the normal validation report.
+Regardless of mode: after identifying the active plan (from `$ARGUMENTS` or session context), check for a companion observability plan. Look in `~/.thoughts/plans/` for a file matching `*a_*observability*` whose `parent_plan` frontmatter points to the active plan. If found, run **Observability Validation** as an additional phase appended to the normal validation report.
 
 ---
 
@@ -88,7 +88,7 @@ Use this mode to verify that an implementation correctly matches a plan.
 
 ### Step 1 — Context Discovery
 
-1. Read the plan file (from `$ARGUMENTS` or list plans in `~/.claude/thoughts/shared/plans/` and ask)
+1. Read the plan file (from `$ARGUMENTS` or list plans in `~/.thoughts/plans/` and ask)
 2. Identify ALL files that should have changed
 3. Collect ALL success criteria (mechanical checks)
 4. Collect ALL architectural constraints

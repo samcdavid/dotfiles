@@ -10,7 +10,7 @@ Conduct comprehensive, VERIFIED codebase research. Every finding must be substan
 
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
-- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
+- Search `~/.thoughts/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — never re-ask or re-derive what it already settles, and prefer its artifact paths over re-discovering them.
 - **When you finish, if a ledger exists, append this stage's outcome to it only in standalone mode**: the research doc path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
@@ -50,7 +50,7 @@ gap; run independent needed specialists in parallel:
 - **Linear** — the linked issue, its comments, linked issues, and project, for product intent and prior decisions.
 - **Notion** — `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes.
 - **Google Drive** — prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
-- **Thoughts artifacts** — adjacent research/specs/plans in `~/.claude/thoughts/shared/` and the issue's workflow ledger.
+- **Thoughts artifacts** — adjacent research/specs/plans in `~/.thoughts/` and the issue's workflow ledger.
 
 External context (Linear/Notion/Drive) is the starting point for the question, not a substitute for reading code — per the **"Don't stop at external context"** gotcha, every open question or "verify against code" reference it surfaces must be chased into the codebase, not handed back.
 
@@ -111,7 +111,7 @@ Do NOT present unverified claims.
 
 ## Step 6 — Save Research Document
 
-Save to `~/.claude/thoughts/shared/research/NNN_topic.md` using 3-digit sequential numbering.
+Save to `~/.thoughts/research/NNN_topic.md` using 3-digit sequential numbering.
 
 Format:
 ```markdown

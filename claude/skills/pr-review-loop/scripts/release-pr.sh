@@ -50,7 +50,7 @@ case "$number" in
   '' | *[!0-9]*) usage ;;
 esac
 
-dir="${PR_REVIEW_CLAIM_DIR:-$HOME/.claude/thoughts/shared/pr-review-claims}"
+dir="${PR_REVIEW_CLAIM_DIR:-$HOME/.thoughts/pr-review-claims}"
 file="$dir/${owner}__${repo}__${number}.json"
 
 if [ ! -e "$file" ]; then

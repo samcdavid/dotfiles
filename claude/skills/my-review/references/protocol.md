@@ -203,7 +203,7 @@ Set `tracer_triggers.neighbor_commits_heuristic = true` if any of the diff's cha
 
 ### Plan-file lookup
 
-Check `~/.claude/thoughts/shared/plans/` for a plan file matching the linked Linear ticket (filename or `feature:` frontmatter). If found, read the plan's surfaces (Phase sections, "Changes Required" lists, "What We're NOT Doing") and hold them as `plan_surfaces` — you'll pass them to `requirements-tracer` if it runs in Step 3.
+Check `~/.thoughts/plans/` for a plan file matching the linked Linear ticket (filename or `feature:` frontmatter). If found, read the plan's surfaces (Phase sections, "Changes Required" lists, "What We're NOT Doing") and hold them as `plan_surfaces` — you'll pass them to `requirements-tracer` if it runs in Step 3.
 
 ### Triage output
 
@@ -325,7 +325,7 @@ This compiled set is what Steps 4–8 operate on.
 
 ## Step 3.5 — User candidate walk-through
 
-Before any candidate-specific question, verifier dispatch, importance or adversarial pass, or verdict computation, create or resume `~/.claude/thoughts/shared/review-triage/<scope-fingerprint>.md`. Keep scope identity, candidate fingerprint, serialized candidates, current key, and append-only resolutions there; it is not the final Finding Register.
+Before any candidate-specific question, verifier dispatch, importance or adversarial pass, or verdict computation, create or resume `~/.thoughts/review-triage/<scope-fingerprint>.md`. Keep scope identity, candidate fingerprint, serialized candidates, current key, and append-only resolutions there; it is not the final Finding Register.
 
 Invoke `/walk-through` over every actionable compiled candidate, including synthesis candidates. Show one item at a time with its key, lens, severity, risk, numeric confidence, causal link, problem/fix, verification need, and **not yet independently verified** status. Before advancing, record one user outcome—`dismiss`, `retain unverified`, `ask author`, or `authorize targeted research`—with rationale, owner, and follow-up.
 

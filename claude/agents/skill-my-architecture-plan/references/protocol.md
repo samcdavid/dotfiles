@@ -22,7 +22,7 @@ applies only outside advisory mode.
 
 This skill runs both standalone and as a stage inside `/my-workflow`, positioned after `my-clarify` and before `my-plan`. Before anything else, look for the task's workflow ledger:
 
-- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by current git branch first, then Linear ID, ticket slug, or topic — same detection order `my-workflow` itself uses).
+- Search `~/.thoughts/workflows/` for a ledger matching this task (by current git branch first, then Linear ID, ticket slug, or topic — same detection order `my-workflow` itself uses).
 - **If one exists, read it fully.** Consume the linked research doc and clarified spec by path rather than re-discovering them — the problem statement, acceptance criteria, and scope decisions are already settled there. This skill only adds the *structural* design layer on top.
 - **When you finish, if a ledger exists, append this stage's outcome only in standalone mode**: the architecture-plan path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
@@ -147,7 +147,7 @@ Think beyond the immediate change:
 
 ## Step 5 — Write the Architecture Plan
 
-Save to `~/.claude/thoughts/shared/architecture/NNN_{descriptive_name}.md` using 3-digit sequential numbering, local to this directory (same convention as `research/`, `specs/`, and `plans/` — each directory keeps its own counter; numbers are not synchronized across artifact types for the same task).
+Save to `~/.thoughts/architecture/NNN_{descriptive_name}.md` using 3-digit sequential numbering, local to this directory (same convention as `research/`, `specs/`, and `plans/` — each directory keeps its own counter; numbers are not synchronized across artifact types for the same task).
 
 ```markdown
 ---

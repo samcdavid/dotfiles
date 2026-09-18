@@ -62,7 +62,7 @@ case "$number" in
   '' | *[!0-9]*) usage ;;
 esac
 
-dir="${PR_REVIEW_DONE_DIR:-$HOME/.claude/thoughts/shared/pr-review-done}"
+dir="${PR_REVIEW_DONE_DIR:-$HOME/.thoughts/pr-review-done}"
 mkdir -p "$dir" || exit 1
 file="$dir/${owner}__${repo}__${number}.json"
 tmp="${file}.tmp.$$"

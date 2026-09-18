@@ -14,7 +14,7 @@ create a ledger merely for feedback.
 At triage completion, each combined validation gate, and each review pass,
 record the compact handoff required by `context-checkpoint.md`. Use the branch
 workflow ledger when it exists; otherwise write a self-contained handoff under
-`~/.claude/thoughts/shared/feedback/` (or the equivalent active artifact root)
+`~/.thoughts/feedback/` (or the equivalent active artifact root)
 and return its path as `feedback_handoff`. Include only the PR/branch and
 evidence fingerprint, root-cause batch, settled dispositions, commits, final
 command statuses, review outcome, and next action. Resume from that handoff

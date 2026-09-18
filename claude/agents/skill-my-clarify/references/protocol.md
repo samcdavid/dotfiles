@@ -12,7 +12,7 @@ You do NOT fix the document. You produce a structured list of issues for the use
 
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
-- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
+- Search `~/.thoughts/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the spec being clarified), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — an ambiguity the ledger already resolves is not an ambiguity; drop it.
 - **When you finish, if a ledger exists, append resolved blocking issues only in standalone mode** as decisions so the next stage does not reopen them. In embedded mode, return them in the output envelope so `my-workflow` records them itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
@@ -23,7 +23,7 @@ Determine what to clarify:
 - If `$ARGUMENTS` contains a path → read that file
 - If `$ARGUMENTS` contains a Linear issue ID → fetch the issue
 - If `$ARGUMENTS` contains a URL → fetch and extract
-- If empty → check the workflow ledger and `~/.claude/thoughts/shared/research/` and `~/.claude/thoughts/shared/plans/` for recent artifacts; infer the most likely document from context and propose it rather than asking blankly. Only ask which to clarify when context is genuinely ambiguous.
+- If empty → check the workflow ledger and `~/.thoughts/research/` and `~/.thoughts/plans/` for recent artifacts; infer the most likely document from context and propose it rather than asking blankly. Only ask which to clarify when context is genuinely ambiguous.
 
 Identify the document type (spec or research) — the analysis adapts accordingly.
 

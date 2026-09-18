@@ -17,7 +17,7 @@ envelope.
 
 ## Dispatch
 
-Resolve `ledger_path` only from `~/.claude/thoughts/shared/workflows/`. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, triage_state_ref: none, resume_identity: none, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
+Resolve `ledger_path` only from `~/.thoughts/workflows/`. Normalize the request into `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, triage_state_ref: none, resume_identity: none, delivery_increment: infer, accepted_trigger_scope: none, confirmed_operational_scope: none, stage, authority: local_only, publication_authorization: none }` and dispatch it to `skill-my-review`.
 
 - Infer `mode` as capture/promote, PR, branch/range, local, or local issue only from the supplied argument and current context; load the runner's retained shared routing references before resolving ambiguity.
 - Set `review_relationship` to `local`, `self_authored_pr`, or `third_party_pr`. In PR mode, compare the PR author's login with the authenticated GitHub login; if either cannot be established, use `unknown_pr`, which is not eligible for `COMMENT`.

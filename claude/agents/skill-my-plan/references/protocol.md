@@ -10,7 +10,7 @@ Create a detailed, verified implementation plan through interactive collaboratio
 
 This skill runs both standalone and as a stage inside `/my-workflow`. Before anything else, look for the issue's workflow ledger:
 
-- Search `~/.claude/thoughts/shared/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
+- Search `~/.thoughts/workflows/` for a ledger matching this task (by Linear ID, ticket slug, or topic).
 - **If one exists, read it fully.** It is the plan-of-record for the whole issue: the task framing, which stages have run, the artifacts they produced (with paths — especially the research doc, spec, `my-architecture-plan`, and `my-test-strategy` artifacts this plan builds on), and the running "Autonomous decisions & assumptions" list. Treat it as authoritative shared context — consume the linked research, spec, architecture plan, and test strategy by path rather than re-discovering them, and honor decisions the ledger already records. When an architecture plan exists, its `## Architectural Constraints` section is the source for this plan's own; when a test strategy exists, its behavior-to-test matrix is the source for this plan's RED tests and isolation controls.
 - **When you finish, if a ledger exists, append this stage's outcome only in standalone mode**: the plan path and any assumptions/decisions recorded here. In embedded mode, return that data in the output envelope so `my-workflow` records it itself.
 - If no ledger exists, proceed without one — do not create a workflow ledger yourself (that is `/my-workflow`'s job).
@@ -33,7 +33,7 @@ Determine the task without a blank prompt:
    - **Linear**: the linked issue, its comments, linked issues, and project, for product intent and prior decisions
    - **Notion**: `notion-search` / `notion-query-data-sources` for design docs, RFCs, PRDs, and meeting notes
    - **Google Drive**: prefer an installed, authenticated `gws` CLI (`gws drive files list` to search, `gws docs documents get` for Google Docs, or `gws drive files get` with `alt=media` and `--output` for non-Docs; consult `gws schema` for request shape). Fall back to `Google_Drive__search_files` + `read_file_content` / `download_file_content` only when `gws` is absent, unauthenticated, lacks the required capability, or still fails after correcting the request once. Do not initiate interactive CLI auth or export credentials.
-3. Check for existing research/specs in `~/.claude/thoughts/shared/research/` and `/specs/` that's relevant
+3. Check for existing research/specs in `~/.thoughts/research/` and `/specs/` that's relevant
 4. Wait for all sub-agents to complete
 
 Per the **"Plans and tickets are not verified facts"** gotcha: when this step or later phases reference another ticket's work as already shipped, or reason about what a component does based on its interface alone, **read the actual code**. A `[x]` in another plan does not mean the code exists. A function "accepting" a parameter does not mean it enforces coherence. Verify mechanism, not just interface — unverified claims compound.
@@ -104,7 +104,7 @@ Confirm alignment before writing the full plan.
 
 ## Step 4 — Write the Plan
 
-Save to `~/.claude/thoughts/shared/plans/NNN_{descriptive_name}.md` using 3-digit sequential numbering.
+Save to `~/.thoughts/plans/NNN_{descriptive_name}.md` using 3-digit sequential numbering.
 
 Format:
 ```markdown

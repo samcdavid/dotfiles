@@ -6,7 +6,7 @@ The ledger is both an input and an output here: steps 1-3 read it, and step 4 ap
 
 ## Step 1 — Detect
 
-Run `git branch --show-current`, then search `~/.claude/thoughts/shared/workflows/` for a ledger whose `branch` field matches — the same branch-first convention `my-workflow` uses for its own ledger detection. No match means this branch has no tracked workflow; proceed with the rest of this skill exactly as it works standalone, no further action needed here.
+Run `git branch --show-current`, then search `~/.thoughts/workflows/` for a ledger whose `branch` field matches — the same branch-first convention `my-workflow` uses for its own ledger detection. No match means this branch has no tracked workflow; proceed with the rest of this skill exactly as it works standalone, no further action needed here.
 
 ## Step 2 — Read
 
@@ -81,7 +81,7 @@ What belongs in "Things worth remembering" is the material that would change how
   may be mid-run.
 - **Corrections are new text, not edits.** If this round proves an earlier ledger claim wrong, say so in the new section and point back at the section it corrects. Leaving the original wrong claim visible next to its correction is the point — that history is why the ledger is worth keeping.
 - **Update the frontmatter `updated:` date, and `pr:` if this run is the first to have a PR.** Those two fields are safe; leave every other frontmatter key alone.
-- **A ledger write is not an outward action.** It is a local file under `~/.claude/thoughts/`, so `no-outward-actions.md` does not gate it. It is also not a substitute for the Step 11 summary — write both.
+- **A ledger write is not an outward action.** It is a local file under `~/.thoughts/`, so `no-outward-actions.md` does not gate it. It is also not a substitute for the Step 11 summary — write both.
 - **Never create a ledger.** If no ledger matches the branch, there is nothing to append to; skip this step silently. Do not open one on this skill's behalf — ledger creation is `my-workflow`'s Step 0.
 
 If no ledger exists for the branch, this whole reference adds nothing and blocks nothing — the skill runs exactly as it did before it existed.

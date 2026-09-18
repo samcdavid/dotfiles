@@ -20,7 +20,7 @@
 # commit already been reviewed". Concurrent collisions need the first;
 # back-to-back duplicate work needs the second.
 #
-# Env: PR_REVIEW_DONE_DIR (default ~/.claude/thoughts/shared/pr-review-done)
+# Env: PR_REVIEW_DONE_DIR (default ~/.thoughts/pr-review-done)
 set -uo pipefail
 
 usage() {
@@ -52,7 +52,7 @@ case "$number" in
   '' | *[!0-9]*) usage ;;
 esac
 
-dir="${PR_REVIEW_DONE_DIR:-$HOME/.claude/thoughts/shared/pr-review-done}"
+dir="${PR_REVIEW_DONE_DIR:-$HOME/.thoughts/pr-review-done}"
 file="$dir/${owner}__${repo}__${number}.json"
 
 if [ ! -e "$file" ]; then

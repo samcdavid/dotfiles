@@ -35,7 +35,7 @@ second ledger for a branch unless the user explicitly replaces the prior
 workflow.
 
 For a new workflow, create
-`~/.claude/thoughts/shared/workflows/<issue-or-topic-slug>.md` from the retained
+`~/.thoughts/workflows/<issue-or-topic-slug>.md` from the retained
 template at `~/.claude/skills/my-pair-plan/references/ledger-template.md` (or the
 equivalent `~/.agents` path). Record `planning_status: context`,
 `implementation_authorized: false`, current branch/base, and `plan_version: 1`.

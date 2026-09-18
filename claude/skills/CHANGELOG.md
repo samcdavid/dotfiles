@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-18 — thoughts artifact root renamed from ~/.claude/thoughts/shared/ to ~/.thoughts/
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| _pending_ | Every skill/agent reference to the plans/research/specs/workflows/ledger artifact root changed from `~/.claude/thoughts/shared/<type>` to `~/.thoughts/<type>`, so artifacts written by Claude Code, Codex, and OpenCode land in one tool-neutral location instead of a Claude-branded path. Regenerated the two derived `skill-my-review` agent files (Codex TOML and OpenCode markdown) from the updated source. Existing data was merged by hand outside git: the tree actually in active use at `~/.claude/thoughts` (despite the docs saying `shared`) and an older, mostly-duplicate tree at `~/.claude/thoughts/shared` were both copied into `~/.thoughts`; the single file that differed between the two trees (a `plans` entry for MCP-305 observability) was kept under both its original name and a `shared-legacy` suffixed twin rather than overwritten. Neither original tree under `~/.claude/thoughts` was deleted. | If a skill starts writing or reading artifacts from the old `~/.claude/thoughts` path again, check whether one of the `skill-my-*` agent protocol files or `claude/skills` references regressed back to it. The leftover `shared-legacy` twin under `~/.thoughts/plans` for the MCP-305 observability plan is expected residue from this migration, not new drift. |
+
 ## 2026-09-18 — added OpenCode agent generation, alongside Codex
 
 | Commit | Change | Regression boundary / known-good meaning |
@@ -310,7 +316,7 @@ Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 
 | Commit | Change | Regression boundary / known-good meaning |
 |---|---|---|
-| `188a02c` | Made `my-review` discover workflow ledgers exclusively from Claude Thoughts. | Review dispatch matches `~/.claude/thoughts/shared/workflows/` by branch before issue/slug context, and only reports no ledger after that lookup. |
+| `188a02c` | Made `my-review` discover workflow ledgers exclusively from Claude Thoughts. | Review dispatch matches `~/.thoughts/workflows/` by branch before issue/slug context, and only reports no ledger after that lookup. |
 | `2ac64fe` | Added an append-only Finding Register shared by `my-review` and `address-pr-feedback`. | Reviews assign stable finding keys and suppress unchanged settled concerns; feedback rounds record only evidence-backed `resolved` or concretely followed-up `deferred` outcomes, reopening a key only for specific new evidence. |
 
 ## 2026-08-20 — Cross-runtime runners and model routing

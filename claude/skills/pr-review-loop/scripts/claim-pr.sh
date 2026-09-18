@@ -11,7 +11,7 @@
 #   {"claimed":false,"holder":"<id>","claimed_at":"...","age_min":N,"path":"..."}
 #
 # Ledger: one file per claimed PR under
-#   ~/.claude/thoughts/shared/pr-review-claims/<owner>__<repo>__<number>.json
+#   ~/.thoughts/pr-review-claims/<owner>__<repo>__<number>.json
 # One file per PR rather than a single shared ledger file on purpose: a shared
 # file would need read-modify-write, which has no atomic form without flock
 # (absent on macOS). A per-PR file gets real mutual exclusion from O_EXCL —
@@ -55,7 +55,7 @@ case "$number" in
   '' | *[!0-9]*) usage ;;
 esac
 
-dir="${PR_REVIEW_CLAIM_DIR:-$HOME/.claude/thoughts/shared/pr-review-claims}"
+dir="${PR_REVIEW_CLAIM_DIR:-$HOME/.thoughts/pr-review-claims}"
 mkdir -p "$dir" || exit 1
 file="$dir/${owner}__${repo}__${number}.json"
 tmp="${file}.tmp.$$"

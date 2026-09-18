@@ -13,7 +13,7 @@ This skill is the sequential implementation coordinator. Read [references/protoc
 
 Normalize the request into `{ mode, plan_path, artifact_inputs, ledger_path, stage, authority: local_only }`. Dispatch one isolated worker per phase; retain coordination, independent verification, and commits here.
 
-- For a standalone request, derive `plan_path` from `$ARGUMENTS`. If it is absent, list plans in `~/.claude/thoughts/shared/plans/` and ask the user which approved plan to execute.
+- For a standalone request, derive `plan_path` from `$ARGUMENTS`. If it is absent, list plans in `~/.thoughts/plans/` and ask the user which approved plan to execute.
 - For `/my-workflow`, the synchronized workflow ledger may be both `plan_path`
   and `ledger_path`; its `Implementation Plan`, `Test Strategy`, and
   `Architecture` sections are the approved execution inputs. Preserve supplied

@@ -16,7 +16,7 @@ Act as the project-discovery and delivery-planning lead. Produce these connected
 5. An exact Linear creation/update manifest, including every direct issue
    blocker relationship, that remains a draft until the user approves it.
 
-Do not change application code, create PRs, run test suites, or write to Linear during discovery and planning. The wrapper supplies the relevant read-only Linear inventory; use it as planning evidence and return any missing factual inventory to the wrapper. Repository, docs, and operational investigation are in scope. Save durable artifacts under `~/.claude/thoughts/shared/` (or the equivalent shared artifact root in the active runtime). Existing Done work is context, never something to reopen or rewrite.
+Do not change application code, create PRs, run test suites, or write to Linear during discovery and planning. The wrapper supplies the relevant read-only Linear inventory; use it as planning evidence and return any missing factual inventory to the wrapper. Repository, docs, and operational investigation are in scope. Save durable artifacts under `~/.thoughts/` (or the equivalent shared artifact root in the active runtime). Existing Done work is context, never something to reopen or rewrite.
 
 ## Delegation and model routing
 

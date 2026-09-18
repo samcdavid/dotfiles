@@ -102,7 +102,7 @@ If explicit mode finds no PR references and auto-discovery's first call finds ze
 Every PR must be claimed before any work happens on it, and the claim released when that work ends. The ledger lives at:
 
 ```
-~/.claude/thoughts/shared/pr-review-claims/<owner>__<repo>__<number>.json
+~/.thoughts/pr-review-claims/<owner>__<repo>__<number>.json
 ```
 
 A claim file's presence means "a session is reviewing this PR right now." Its absence means the PR is free.
@@ -151,7 +151,7 @@ One residual race is worth knowing: the steal path is unlink-then-create, which 
 Claims are held only for the duration of a review, which prevents two sessions reviewing a PR *simultaneously* but not *consecutively*: session A reviews PR #5 and releases it, then session B reaches #5 later in the same wave, finds it free, and reviews it again. A second ledger closes that gap:
 
 ```
-~/.claude/thoughts/shared/pr-review-done/<owner>__<repo>__<number>.json
+~/.thoughts/pr-review-done/<owner>__<repo>__<number>.json
 ```
 
 Each marker records the head SHA that was reviewed, the verdict, the session, and when. The two ledgers answer different questions — the claim ledger asks "is someone reviewing this right now," the reviewed ledger asks "has this exact commit already been reviewed" — and neither substitutes for the other.
@@ -288,4 +288,4 @@ A run in which most PRs come back `claimed-elsewhere` or `already-reviewed` is n
 - `scripts/check-reviewed.sh <owner> <repo> <number> --sha <sha>` — Step 3's already-reviewed-at-this-commit gate (auto-discovery mode only).
 - `scripts/mark-reviewed.sh <owner> <repo> <number> --sha <sha> [--verdict <v>] [--session <id>]` — Step 6's reviewed marker, written before the claim is released.
 
-Two ledger directories, distinct lifetimes: `~/.claude/thoughts/shared/pr-review-claims/` holds a file only while a review is in flight, and `~/.claude/thoughts/shared/pr-review-done/` keeps a per-PR marker of the last commit reviewed (pruned after 14 days).
+Two ledger directories, distinct lifetimes: `~/.thoughts/pr-review-claims/` holds a file only while a review is in flight, and `~/.thoughts/pr-review-done/` keeps a per-PR marker of the last commit reviewed (pruned after 14 days).
