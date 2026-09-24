@@ -93,6 +93,12 @@ Identify tests likely to flake:
 - Are there stale mocks for interfaces that have changed? (mock returns old shape, production returns new shape)
 - Is the mock boundary appropriate? (mocking too close to the code under test hides real bugs; mocking too far away makes tests slow and fragile)
 
+### Monkey Patching
+Flag added/changed tests that replace a real module, class, or function at runtime instead of injecting the dependency. A patched test proves the patch behaves, not our code, and the patch silently survives signature changes in the real implementation.
+- Detection heuristics per language (and the exclusions — injected fakes, config-selected `Mox` implementations, network-boundary interceptors) live in `~/.claude/skills/pr-overview/references/protocol.md` under "Monkey patching"; apply the same list rather than re-deriving it.
+- Fix is dependency injection: name the concrete seam (constructor/function argument, config-provided implementation, behaviour/protocol/interface with a test implementation) that would replace the patch. If the code under test has no seam, the fix includes adding one to production code.
+- Default to Non-blocking. Raise risk only when the patched collaborator is the behavior the test claims to verify, so the test cannot fail when the real code breaks.
+
 ## Step 4 — Test Architecture
 
 ### Test Pyramid Assessment

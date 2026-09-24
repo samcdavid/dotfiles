@@ -73,6 +73,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Do tests actually test what they claim? (not vacuously passing)
 - Are assertions checking the right values/keys? Assert specific error values, not just that an error occurred.
 - Is randomness in tests masking deterministic failures?
+- Do added/changed tests monkey patch a real module, class, or function (`mock.patch`, `allow_any_instance_of`, `jest.mock`, `Mimic`, …) instead of injecting it? Flag with the injection seam to use; criteria live in `~/.claude/skills/quality-audit/references/protocol.md` "Monkey Patching".
 - Coverage for the critical path — not necessarily 100%, but the important paths
 
 ### Test Placement
