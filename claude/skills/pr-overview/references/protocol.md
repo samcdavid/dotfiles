@@ -69,6 +69,15 @@ Not monkey patching: a fake/double passed in as an argument, a test implementati
 
 Report each hit as `file:line`, what is being patched, and a one-line pointer to the injection seam that would replace it (e.g. "pass `clock` into `Scheduler.new` instead of patching `Time.now`"). Only lines added or changed by the diff count.
 
+## Linter suppressions
+
+Flag added/changed lines that silence a linter, formatter, type checker, or static analyzer instead of fixing what it reports. Every new suppression is a code smell: the warning usually points at a real problem, and the disable hides it from every future reader and run.
+
+- **Inline disables**: `# noqa`, `# type: ignore`, `# pyright: ignore`, `# pylint: disable`, `# rubocop:disable`/`rubocop:todo`, `// eslint-disable*`, `// @ts-ignore`/`@ts-expect-error`/`@ts-nocheck`, `// biome-ignore`, `# credo:disable-for-*`, `@dialyzer {:nowarn_function, ...}`, `# sobelow_skip`, `//nolint`, `#[allow(...)]`, `@SuppressWarnings`, `# shellcheck disable=`, `# nosec`, `# fmt: off`/`# prettier-ignore`/`# rubocop:disable Layout`.
+- **Config/file exclusions**: new entries in a linter's ignore/exclude list, a disabled or loosened rule, a raised complexity/length threshold, a new `.rubocop_todo.yml`/baseline entry, or a file added to an ignore file (`.eslintignore`, `.credo.exs` excludes, `mypy` `ignore_errors`, `.dialyzer_ignore.exs`).
+
+Report each hit as `file:line`, the rule silenced (or "blanket" when no rule is named — call that out, it hides everything), and a one-line guess at what the warning is about so the reader knows what fix it replaced. Note whether a justification comment accompanies it. Removed suppressions are good news — mention them only in passing. Only lines added or changed by the diff count.
+
 # Review Activity Summary
 
 Applies only in PR mode. Use the GraphQL `reviewThreads` query already defined in `pr-cost-control.md` — it returns `isResolved`/`isOutdated` per thread and each comment's author, so no separate REST call for review state is needed. Pair it with `gh api repos/{owner}/{repo}/pulls/{N}/reviews --jq '[.[] | {user: .user.login, state, submitted_at}]'` for each reviewer's formal review state (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`, `PENDING` — drop `PENDING`, it's not yet visible to others).

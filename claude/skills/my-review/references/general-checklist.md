@@ -84,13 +84,10 @@ Categories are ordered by priority. Before raising any issue, check it against t
   telemetry, database/cache calls, locks, call order, or collaborators.
 
 ### Lint and Tooling Discipline
-- Are any lint checks, formatter rules, or static analysis warnings being disabled or suppressed (e.g. `# credo:disable-for-this-file`, `# noqa`, `# eslint-disable`, `# rubocop:disable`, `@dialyzer`, `mix format` skip comments)?
-- Every newly added inline suppression or config/file exclusion is also recorded
-  in the orchestrator's human-acknowledgement item per `change-set-risk.md`: one
-  inline acknowledgement in PR mode or one ledger-deduped acknowledgement in
-  local mode. Do not emit a second acknowledgement request from this lens; raise a normal finding only
-  when the suppression itself creates an actionable code risk.
-- A newly disabled check is Critical only when it can hide a production, security, data, contract, or launch-critical correctness issue; otherwise raise a non-blocking question or suggestion. "Valid" means: the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass").
+- Are any lint checks, formatter rules, type checks, or static analysis warnings being disabled or suppressed (inline disable comments or config/file exclusions)? Detection patterns live in `~/.claude/skills/pr-overview/references/protocol.md` "Linter suppressions".
+- Every newly added suppression is a code smell: raise it as a finding (default Non-blocking, category `Lint Suppression`) naming the silenced rule, what the warning is likely flagging, and the fix that would make the suppression unnecessary. Flag a blanket disable (no rule named) or a missing justification comment explicitly.
+- That finding is separate from the orchestrator's human-acknowledgement item per `change-set-risk.md` (one inline acknowledgement in PR mode, one ledger-deduped acknowledgement in local mode). Do not emit a second acknowledgement request from this lens — the finding asks for a fix, the acknowledgement asks for confirmation.
+- A newly disabled check is Critical only when it can hide a production, security, data, contract, or launch-critical correctness issue. When the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass") and a justification comment says so, downgrade to a Nit.
 - Common invalid justifications: disabling formatting rules to preserve manual formatting, disabling import-order checks, suppressing warnings instead of fixing them, disabling type checks because a type is hard to express.
 - If a disable comment already existed and the PR didn't add it, it is not Critical — but flag it as a question ("is this still needed?").
 

@@ -146,8 +146,8 @@ review body, another inline comment, a question, residual risk, or a lens
 finding. Dedupe the annotation against existing comments by substance as well
 as line, but never treat deduplication as operational confirmation.
 
-The acknowledgement is independent of defect findings: a suspicious
-suppression, unsafe migration, or weakened test may also become a normal
+The acknowledgement is independent of defect findings: a newly added
+suppression (always a code smell), unsafe migration, or weakened test may also become a normal
 verified finding, but the acknowledgement
 itself bypasses finding verification and the Actionability Gate.
 

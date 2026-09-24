@@ -2,14 +2,14 @@
 model: sonnet
 effort: low
 name: pr-overview
-description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, edited existing test cases, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, comment quality, and monkey patching. For a PR, also summarizes existing review comments and where reviewers lean."
+description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, edited existing test cases, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, comment quality, monkey patching, and linter suppressions. For a PR, also summarizes existing review comments and where reviewers lean."
 when_to_use: "Use when the user wants a quick orientation on a PR (number/URL) or the current local diff before reading it in full, rather than a full review or verdict."
 disallowed-tools: Edit, Write, NotebookEdit
 ---
 
 # PR Overview
 
-A brief, structured "what changed and what to look at" summary — not a review. No verdict, no approval/blocking language, no findings severity.
+A brief "what changed and what to look at" summary — not a review. No verdict, approval/blocking language, or severity.
 
 ## Load Rules
 
@@ -42,8 +42,9 @@ Read `references/protocol.md` for how to detect each category (file patterns, gr
 7. **Feature flag use** — flags added, checked, or removed (`if flag_enabled`, LaunchDarkly/Flipper/env-var gate style checks, flag config files).
 8. **Comment quality** — new/changed comments referencing a Linear ID outside `TODO`, an agent-generated ID, dead code, or narrating *what*/*how* instead of *why*.
 9. **Monkey patching** — code (mostly tests) that replaces a real module/class/function at runtime instead of injecting the dependency.
+10. **Linter suppressions** — newly added lint/type-checker/static-analysis disables or exclusions.
 
-Omit a category with nothing to report — do not list it as "none found."
+Omit empty categories — never write "none found."
 
 ## Review Activity (PR mode only)
 
