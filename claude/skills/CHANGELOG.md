@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-24 — my-review/pr-overview: flag edited test cases, not touched test files
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `1b83542` | The `my-review` human-acknowledgement trigger and `pr-overview`'s test category now judge per test case instead of per file. Changed or deleted pre-existing test cases (body, assertions, skip markers) and changed/deleted shared setup, fixtures, or helpers existing tests use are flagged; purely additive changes — new test files, new test cases in existing files, and helpers only those new tests use — are not. Canonical definition lives in `my-review/references/change-set-risk.md`. | If reviews start demanding acknowledgement for PRs that only add tests to an existing file, check whether the per-test-case wording in `change-set-risk.md` or `pr-overview/references/protocol.md` regressed to file-level "modified test files". If edits to existing tests stop being flagged, check the same two files. |
+
 ## 2026-09-18 — thoughts artifact root renamed from ~/.claude/thoughts/shared/ to ~/.thoughts/
 
 | Commit | Change | Regression boundary / known-good meaning |
