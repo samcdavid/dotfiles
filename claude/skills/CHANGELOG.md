@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-24 — pr-overview and my-review: flag linter suppressions as code smells
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `1787a5e` | `pr-overview` gained a tenth "Linter suppressions" category; its protocol holds the per-tool inline-disable and config-exclusion patterns. `my-review/references/general-checklist.md` now raises every newly added suppression as a non-blocking finding (silenced rule, likely warning, fix that removes the need), Critical only when it can hide a production/security/data/contract issue, and a Nit when the rule genuinely doesn't apply and a justification comment says so. That finding is separate from the existing human-acknowledgement item, which is unchanged. | Before this, my-review raised a suppression finding only when the suppression itself created an actionable risk. If suppression findings get noisy or start duplicating the acknowledgement annotation, check the checklist's "Lint and Tooling Discipline" bullets and `change-set-risk.md`'s "independent of defect findings" paragraph. |
+
 ## 2026-09-24 — quality review: flag monkey patching
 
 | Commit | Change | Regression boundary / known-good meaning |
