@@ -2,7 +2,7 @@
 model: sonnet
 effort: low
 name: pr-overview
-description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, edited existing test cases, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, and comment quality. For a PR, also summarizes existing review comments and where reviewers lean."
+description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, edited existing test cases, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, comment quality, and monkey patching. For a PR, also summarizes existing review comments and where reviewers lean."
 when_to_use: "Use when the user wants a quick orientation on a PR (number/URL) or the current local diff before reading it in full, rather than a full review or verdict."
 disallowed-tools: Edit, Write, NotebookEdit
 ---
@@ -41,14 +41,15 @@ Read `references/protocol.md` for how to detect each category (file patterns, gr
 6. **Branching-condition changes** — modified `if`/`case`/`switch`/guard conditions, especially ones gating a different code path than before.
 7. **Feature flag use** — flags added, checked, or removed (`if flag_enabled`, LaunchDarkly/Flipper/env-var gate style checks, flag config files).
 8. **Comment quality** — new/changed comments referencing a Linear ID outside `TODO`, an agent-generated ID, dead code, or narrating *what*/*how* instead of *why*.
+9. **Monkey patching** — code (mostly tests) that replaces a real module/class/function at runtime instead of injecting the dependency.
 
-A category with nothing to report is simply omitted from the output — do not list it as "none found."
+Omit a category with nothing to report — do not list it as "none found."
 
 ## Review Activity (PR mode only)
 
-Local diffs have no reviewers — skip this section outside PR mode. For a PR, fetch existing reviews/comments via `pr-cost-control.md`'s scoped GraphQL query and follow `references/protocol.md`'s "Review Activity Summary" section to report, in plain language: each reviewer's latest stance (`APPROVED`/`CHANGES_REQUESTED`/`COMMENTED`), how many unresolved threads remain, and a one-line factual lean ("two approvals, no unresolved threads — trending toward merge"), not this skill's own opinion. State plainly when there's no review activity yet.
+For a PR, fetch existing reviews/comments via `pr-cost-control.md`'s scoped GraphQL query and follow `references/protocol.md`'s "Review Activity Summary" section to report, in plain language: each reviewer's latest stance (`APPROVED`/`CHANGES_REQUESTED`/`COMMENTED`), how many unresolved threads remain, and a one-line factual lean ("two approvals, no unresolved threads — trending toward merge"), not this skill's own opinion. State plainly when there's no review activity yet.
 
-A stance comes from the formal review event **or** from a comment's own text — read every comment body, not just its GitHub event type. At least one automated review bot on this org posts its verdict as plain comment text (e.g. the words "APPROVE" or "REQUEST_CHANGES" inside a regular issue/PR comment) rather than submitting a real GitHub review event, so a state pulled only from `gh api .../reviews` will silently miss it. `references/protocol.md` has the parsing rule.
+A stance comes from the formal review event **or** from a comment's own text — read every comment body, not just its GitHub event type. At least one automated review bot on this org posts its verdict as plain comment text (e.g. the words "APPROVE" or "REQUEST_CHANGES" inside a regular issue/PR comment) rather than submitting a real GitHub review event, so `gh api .../reviews` alone misses it. `references/protocol.md` has the parsing rule.
 
 ## Output
 

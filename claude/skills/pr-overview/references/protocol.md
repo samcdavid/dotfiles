@@ -54,6 +54,21 @@ Scan added/changed comment lines (not comment bodies unchanged by the diff) for:
 
 Report each hit as `file:line` plus the comment text (trimmed) and which rule it violates. This category never flags comment *removal* or comments left unchanged by the diff.
 
+## Monkey patching
+
+Flag added/changed lines that swap out a real module, class, method, or function at runtime rather than passing the collaborator in. A test that patches the thing it depends on proves the patch works, not our code; the preferred fix is dependency injection (constructor/function argument, config-provided implementation, behaviour/protocol/interface with a test implementation).
+
+- **Python**: `monkeypatch.setattr`/`setitem`/`delattr`, `mock.patch`/`@patch`/`patch.object`/`patch.dict`, or direct assignment to an imported module attribute (`some_module.func = fake`).
+- **Ruby**: `allow(...).to receive`/`expect(...).to receive` on a real class or constant (not on an injected double), `allow_any_instance_of`/`expect_any_instance_of`, `stub_const`, `define_method`/`class_eval`/`instance_eval`/`prepend` or reopening an existing class to change its behavior.
+- **JavaScript/TypeScript**: `jest.mock`/`vi.mock` of a module, `jest.spyOn`/`vi.spyOn` with `mockImplementation`/`mockReturnValue`, `sinon.stub(obj, "method")`, or assignment to an imported object's method or a `prototype`.
+- **Elixir**: `:meck`, `Mimic` (`copy`/`stub`/`expect`), the `Patch` library, or `Application.put_env` used to swap a module mid-test. Behaviour-based `Mox` with the implementation read from config is dependency injection — do not flag it.
+- **Go**: reassigning a package-level function variable in a test (`timeNow = func() ...`) or tooling like `gomonkey`.
+- **Production code**: reopening or prepending a third-party/core class, `alias_method` chains, or runtime reassignment of a library function. Report these distinctly from test patches.
+
+Not monkey patching: a fake/double passed in as an argument, a test implementation of an interface/behaviour selected by config, or HTTP-boundary tools that intercept the network (`webmock`, `VCR`, `nock`, `msw`, `Bypass`) without replacing our code — mention those only if they patch our own modules.
+
+Report each hit as `file:line`, what is being patched, and a one-line pointer to the injection seam that would replace it (e.g. "pass `clock` into `Scheduler.new` instead of patching `Time.now`"). Only lines added or changed by the diff count.
+
 # Review Activity Summary
 
 Applies only in PR mode. Use the GraphQL `reviewThreads` query already defined in `pr-cost-control.md` — it returns `isResolved`/`isOutdated` per thread and each comment's author, so no separate REST call for review state is needed. Pair it with `gh api repos/{owner}/{repo}/pulls/{N}/reviews --jq '[.[] | {user: .user.login, state, submitted_at}]'` for each reviewer's formal review state (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`, `PENDING` — drop `PENDING`, it's not yet visible to others).
