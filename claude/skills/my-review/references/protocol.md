@@ -523,9 +523,10 @@ If no `Worth-considering` items, skip the prompt entirely.
 - Classify the aggregate change set before rating findings. A genuinely Low-risk
   set is approved immediately; line count alone never establishes Low risk.
 - In PR mode, migrations, environment variables, feature flags, other config,
-  infra/ops changes, added linter/tooling suppressions, and modifications to
-  existing test files require exactly one deduplicated inline human
-  acknowledgement for the whole PR. New test files do not trigger it.
+  infra/ops changes, added linter/tooling suppressions, and edits to existing
+  test cases require exactly one deduplicated inline human acknowledgement for
+  the whole PR. Newly added tests, including new test cases in existing files,
+  do not trigger it.
 - In local mode, apply `change-set-risk.md`'s ledger-deduped first-item pre-stage
   checklist; never infer or auto-accept readiness. Environment-variable,
   feature-flag, and migration readiness uses its separate stable key but never

@@ -66,9 +66,14 @@ themselves withhold approval:
 - newly added linter, formatter, type-checker, or static-analysis ignores and
   suppressions, including file/config exclusions and inline disable comments;
   and
-- modifications to a test file that existed at the comparison base, including
-  changed expectations, fixtures, setup, coverage, or deleted test content.
-  Brand-new test files do not trigger acknowledgement.
+- edits to a test case that existed at the comparison base: a changed or
+  deleted test body, assertion, expectation, or skip/pending marker, or a
+  changed/deleted shared setup, fixture, or helper that existing test cases
+  already use. Judge at the test-case level, not the file level: purely
+  additive changes — new test files, new test definitions in existing files,
+  and new setup/fixtures/helpers/imports only those new tests use — do not
+  trigger acknowledgement, because they cannot weaken a protection that already
+  existed.
 
 These signals need deliberate human acknowledgement; the operational subset
 also requires repository-external knowledge. They are not automatic defects,
@@ -193,8 +198,8 @@ must verify before staging or production promotion:
 > its appropriate value/configuration has been set in every staging and
 > production environment. For every listed migration or backfill, confirm that
 > it has been tested successfully in staging. Please also acknowledge any other
-> listed config, infrastructure, tooling-suppression, or modified-existing-test
-> changes. For modified tests, acknowledge that the changed expectations or
+> listed config, infrastructure, tooling-suppression, or edited-existing-test
+> changes. For edited tests, acknowledge that the changed expectations or
 > coverage are intentional and still protect the desired outcome. These checks do
 > not imply that the change is unusually risky and do not change the code
 > verdict. They must be completed before the affected change is promoted to

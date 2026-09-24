@@ -57,8 +57,9 @@ Return immediately with a terse APPROVE when the aggregate diff meets the
 shared Low-risk fast-approval contract. In PR mode, build at most one
 deduplicated inline human acknowledgement for all migration, environment-variable,
 feature-flag, config, infrastructure/operations, and added
-lint/tooling-suppression anchors, plus modified test files that existed at the
-comparison base. New test files do not trigger it. This acknowledgement is
+lint/tooling-suppression anchors, plus edits to test cases that existed at the
+comparison base. Newly added tests, including new test cases in existing files,
+do not trigger it. This acknowledgement is
 separate from findings.
 In PR mode, unconfirmed environment-variable, feature-flag, or migration
 readiness blocks only `APPROVE`, not by manufacturing a defect or

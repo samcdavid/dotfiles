@@ -2,7 +2,7 @@
 model: sonnet
 effort: low
 name: pr-overview
-description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, modified tests, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, and comment quality. For a PR, also summarizes existing review comments and where reviewers lean."
+description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, edited existing test cases, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, and comment quality. For a PR, also summarizes existing review comments and where reviewers lean."
 when_to_use: "Use when the user wants a quick orientation on a PR (number/URL) or the current local diff before reading it in full, rather than a full review or verdict."
 disallowed-tools: Edit, Write, NotebookEdit
 ---
@@ -34,7 +34,7 @@ If neither exists (clean tree, nothing ahead of base), say so and stop — do no
 Read `references/protocol.md` for how to detect each category (file patterns, grep heuristics, languages/frameworks to watch for). Scan the full diff once and bucket hunks into:
 
 1. **Product requirement changes** — copy, validation rules, business logic thresholds, permission/role checks that change observable behavior.
-2. **Modified existing tests** — tests changed, not just added; call out whether an assertion's expected value/condition changed vs. pure refactor.
+2. **Edited existing test cases** — pre-existing test cases changed or deleted (added tests don't count); flag assertion changes vs. pure refactor.
 3. **New database migrations** — new migration files, schema-change DDL, or ORM model field changes implying one.
 4. **Function/method signature changes** — added/removed/reordered/retyped parameters, changed return type, changed arity, changed default values.
 5. **Public interface changes** — exported classes/modules, API route definitions/contracts, public method additions/removals/renames.

@@ -9,10 +9,11 @@ These are starting heuristics, not an exhaustive spec — the point is to catch 
 - Changed permission/role/authorization checks that alter who can do what.
 - Changed user-facing copy tied to a rule (error messages, tooltips) when the surrounding logic also changed — copy-only changes with no logic change are not a requirement change.
 
-## Modified existing tests
+## Edited existing test cases
 
-- Diff touches a file matching `*_test.*`, `*_spec.*`, `test_*.py`, `__tests__/`, `spec/` etc., where the file already existed before the diff (not a new test file).
-- Within that, distinguish: assertion value/condition changed (behavior expectation changed) vs. mechanical refactor (rename, setup/teardown, formatting) — call out the former more prominently.
+- Judge per test case, not per file. In a test file (`*_test.*`, `*_spec.*`, `test_*.py`, `__tests__/`, `spec/` etc.), include a hunk only when it changes or deletes lines of a test case that existed before the diff — its body, assertions, or skip/pending marker — or changes/deletes shared setup, fixtures, or helpers existing test cases already use.
+- Exclude purely additive hunks: new test files, new test definitions appended to an existing file, and new setup/helpers/imports used only by those new tests. A hunk of only `+` lines between existing tests is an addition; a `-` line or a modified line inside an existing test definition is an edit.
+- Within the included hunks, distinguish: assertion value/condition changed (behavior expectation changed) vs. mechanical refactor (rename, setup/teardown, formatting) — call out the former more prominently.
 
 ## New database migrations
 

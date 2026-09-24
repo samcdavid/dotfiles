@@ -9,8 +9,9 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Inventory every changed environment-variable reference/value, feature-flag
   definition/lookup/default/configuration, and migration/backfill under
   `change-set-risk.md`.
-- Also inventory modified test files that existed at the comparison base; new
-  test files do not trigger acknowledgement.
+- Also inventory edits to test cases that existed at the comparison base, as
+  defined in `change-set-risk.md`; newly added tests, including new test cases
+  in existing files, do not trigger acknowledgement.
 - Call them out in the single human acknowledgement. Do not assign severity or
   inflate aggregate risk merely because repository analysis cannot see external
   environment state.

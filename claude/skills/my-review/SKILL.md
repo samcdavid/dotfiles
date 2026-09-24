@@ -65,8 +65,8 @@ reviewer. Do not include raw lens or verifier transcripts.
 Classify the aggregate diff using `references/change-set-risk.md` before dispatch.
 A Low-risk set takes its fast-approval path. Migrations, environment variables,
 feature flags, infrastructure/operations changes, other config, newly added
-lint/tooling suppressions, and modifications to existing tests produce one
-deduplicated human-acknowledgement item. New test files do not trigger it.
+lint/tooling suppressions, and edits to existing test cases produce one
+deduplicated human-acknowledgement item; added tests never do.
 In PR mode, environment variables, feature flags, and migrations additionally
 withhold approval until a human confirms their environment or staging
 readiness. In local mode, report them as pre-stage checks and persist exact

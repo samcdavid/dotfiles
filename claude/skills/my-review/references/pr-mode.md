@@ -20,9 +20,9 @@ Every subagent prompt in PR mode must receive the same constraints and PR HEAD S
 
 Before dispatch, apply `change-set-risk.md`: migrations, changed environment
 variables, feature flags, other config, infrastructure/operations surfaces, and
-newly added lint/tooling suppressions, and modified test files that existed at
-the comparison base produce one human acknowledgement for the entire PR. New
-test files do not trigger it. Prepare the acknowledgement as one inline
+newly added lint/tooling suppressions, and edits to test cases that existed at
+the comparison base produce one human acknowledgement for the entire PR. Newly
+added tests, including new test cases in existing files, do not trigger it. Prepare the acknowledgement as one inline
 annotation at the most consequential changed line, list every other
 anchor in its body, and dedupe by substance across existing threads. Never
 repeat the request in the top-level review body or at each trigger.

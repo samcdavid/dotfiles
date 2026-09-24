@@ -14,8 +14,9 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    `APPROVE` before review dispatch.
 3. Build at most one deduplicated human acknowledgement containing every
    migration, environment-variable, feature-flag, config, infra/operations, and
-   newly added lint/tooling-suppression anchor, plus modified test files that
-   existed at the comparison base. New test files do not trigger it. Treat the
+   newly added lint/tooling-suppression anchor, plus edits to test cases that
+   existed at the comparison base. Newly added tests, including new test cases
+   in existing files, do not trigger it. Treat the
    acknowledgement as context, not a finding. Track environment-variable, feature-flag, and
    migration tuples separately as approval-gating operational readiness.
 4. In local mode, compare advisory tuples with the latest accepted
