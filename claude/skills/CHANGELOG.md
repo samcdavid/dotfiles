@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-24 — quality review: flag monkey patching
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `aa1cb21` | `quality-audit/references/protocol.md` gained a "Monkey Patching" criterion (flag tests that patch real modules/classes/functions, name the dependency-injection seam, default Non-blocking, raise risk only when the patched collaborator is the behavior under test). It reuses `pr-overview/references/protocol.md`'s per-language heuristics rather than duplicating them. `quality-reviewer` (and its generated Codex/OpenCode copies) and `my-review/references/general-checklist.md` now point at it, so the default whole-diff reviewer checks it too. | If reviews stop flagging patches, check all three touchpoints plus the `pr-overview` heuristic list they depend on. If monkey-patch findings start blocking merges, check the "Default to Non-blocking" line in the quality-audit protocol. |
+
 ## 2026-09-24 — pr-overview: new monkey-patching category
 
 | Commit | Change | Regression boundary / known-good meaning |
