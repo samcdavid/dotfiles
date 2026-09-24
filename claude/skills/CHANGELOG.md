@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-09-24 — pr-overview: new monkey-patching category
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `4a25fae` | Added a 9th `pr-overview` category, "Monkey patching", flagging added/changed code that replaces a real module, class, or function at runtime (Python `mock.patch`/`monkeypatch`, RSpec `allow_any_instance_of`/`stub_const`, `jest.mock`/`spyOn`, Elixir `Mimic`/`:meck`, Go function-var reassignment, production class reopening) and pointing at the dependency-injection seam to use instead. Behaviour-based `Mox`, injected fakes, and network-boundary interceptors are explicitly excluded. Heuristics live in `pr-overview/references/protocol.md`. To stay under the 700-word entrypoint budget, three `SKILL.md` sentences were shortened without changing meaning. | If `pr-overview` stops flagging patches, check that `SKILL.md` category 9 and the protocol's "Monkey patching" section still exist and agree. If it starts flagging `Mox` or injected fakes, check the protocol's "Not monkey patching" exclusions. |
+
 ## 2026-09-24 — my-review/pr-overview: flag edited test cases, not touched test files
 
 | Commit | Change | Regression boundary / known-good meaning |
