@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: medium
-codex-model: gpt-5.6-terra
 name: skill-prove-it
 runner-for: prove-it
 description: Audits conversation claims against direct evidence, verifies or retracts trust debt, and returns a compact fact-check envelope without defending prior conclusions.

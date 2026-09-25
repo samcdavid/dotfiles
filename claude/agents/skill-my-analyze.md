@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-analyze
 runner-for: my-analyze
 description: Compares planning artifacts for contradictions and coverage gaps, returning a compact readiness envelope.

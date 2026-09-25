@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: medium
 name: pulse
 runner: pulse-aggregator

@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: prove-it
 runner: skill-prove-it

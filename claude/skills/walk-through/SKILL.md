@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: walk-through
 description: Walk through a multi-item list one item at a time, capture decisions, and summarize resolutions.
 ---

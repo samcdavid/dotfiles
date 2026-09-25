@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: publish-review
 description: Publish prepared PR review to GitHub inline comments, thread replies, review body via gh api.
 ---

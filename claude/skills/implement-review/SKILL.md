@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: implement-review
 runner: skill-implement-review

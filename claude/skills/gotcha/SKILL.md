@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: gotcha
 description: Capture a discovered failure pattern or correction as a gotcha for an existing skill.
 when_to_use: "Use when the user corrects a recurring mistake and wants it remembered for a skill."

@@ -4,7 +4,7 @@ approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 notify = ["/Users/sammcdavid/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
-model = "gpt-5.6-terra"
+model = "gpt-6-sol"
 model_reasoning_effort = "medium"
 
 [projects."/Users/sammcdavid/.dotfiles"]
@@ -18,6 +18,9 @@ trust_level = "trusted"
 
 [projects."/Users/sammcdavid/Documents/Codex/2026-07-07/i-w"]
 trust_level = "trusted"
+
+[tui]
+screen_reader_detection_done = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
@@ -152,3 +155,6 @@ js_repl = false
 conversationDetailMode = "STEPS_COMMANDS"
 ambient-suggestions-enabled = true
 followUpQueueMode = "queue"
+
+[notice.model_migrations]
+"gpt-5.6-terra" = "gpt-6-sol"

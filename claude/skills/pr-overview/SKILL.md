@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: low
 name: pr-overview
 description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes: requirement changes, edited existing test cases, migrations, signature changes, public interface changes, branching-condition changes, feature-flag use, comment quality, monkey patching, and linter suppressions. For a PR, also summarizes existing review comments and where reviewers lean."

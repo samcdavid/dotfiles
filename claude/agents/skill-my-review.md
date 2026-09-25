@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-review
 runner-for: my-review
 description: Routes review evidence to one holistic Sonnet worker, performs bounded whole-diff synthesis and targeted verification, and assembles a structured review envelope.

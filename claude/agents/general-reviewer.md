@@ -1,6 +1,5 @@
 ---
-model: sonnet
-codex-model: gpt-5.6-terra
+model: inherit
 name: general-reviewer
 description: Whole-diff Sonnet reviewer for the `my-review` orchestrator. Applies the general checklist and every activated coverage criterion in one retained context, returning a consolidated findings fragment. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent

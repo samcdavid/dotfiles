@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-clarify
 runner: skill-my-clarify

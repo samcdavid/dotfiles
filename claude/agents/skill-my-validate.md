@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-validate
 runner-for: my-validate
 description: Verifies plan or session claims with mechanical evidence, makes safely scoped local repairs, and returns a compact validation/workflow-stage envelope.

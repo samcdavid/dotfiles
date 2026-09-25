@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-eval-plan
 runner-for: my-eval-plan
 description: Produces practical AI/LLM evaluation plans and compact workflow-stage envelopes.

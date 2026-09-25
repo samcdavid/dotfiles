@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: my-quick
 description: One-pass implementation workflow for small, well-understood changes with lightweight research, focused TDD, validation, and self-review.
 ---

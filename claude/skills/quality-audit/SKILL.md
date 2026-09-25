@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: quality-audit
 runner: skill-quality-audit

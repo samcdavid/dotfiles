@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: requirements-audit
 runner: skill-requirements-audit

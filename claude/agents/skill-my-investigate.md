@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: xhigh
-codex-model: gpt-5.6-terra
 name: skill-my-investigate
 runner-for: my-investigate
 description: Coordinates an evidence-first, read-only runtime or CI investigation through the existing runtime investigator and returns ranked hypotheses with a compact incident envelope.

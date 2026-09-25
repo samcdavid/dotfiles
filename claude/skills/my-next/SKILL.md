@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: my-next
 description: Synthesize current session state into a prioritized action plan after research, validation, review, or divergent discussion.
 disable-model-invocation: false

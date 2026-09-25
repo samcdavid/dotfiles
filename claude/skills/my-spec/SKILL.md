@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-spec
 runner: skill-my-spec

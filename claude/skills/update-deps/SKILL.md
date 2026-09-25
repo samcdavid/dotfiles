@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: update-deps
 description: Update outdated dependencies across supported package managers, handling safe updates first and flagging breaking changes.
 when_to_use: "Use when the user asks to update, upgrade, or bump dependencies, or to deal with outdated packages."

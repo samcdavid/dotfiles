@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: pr-review-loop
 description: "Review and publish up to three GitHub PRs per run from an explicit list or the current repo's open review requests, then stop for a fresh context."
 when_to_use: "Use when the user gives a list of PR numbers to review and publish, or asks to review whatever PRs are currently requested of them in the current repo, instead of doing them one at a time."

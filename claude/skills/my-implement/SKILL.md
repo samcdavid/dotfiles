@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-implement
 description: Execute approved implementation work sequentially in bounded phases, verifying and committing each one.

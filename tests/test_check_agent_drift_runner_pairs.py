@@ -43,7 +43,7 @@ class RunnerPairValidationTest(unittest.TestCase):
         *,
         runner: str = "skill-example",
         runner_for: str = "example",
-        agent_fields: str = "model: sonnet\neffort: high\ncodex-model: gpt-5.6-terra",
+        agent_fields: str = "model: inherit\neffort: high\ncodex-model: gpt-6-sol",
     ) -> None:
         skill = self.fixture / "skills" / "example" / "SKILL.md"
         agent = self.fixture / "agents" / f"{runner}.md"
@@ -97,7 +97,7 @@ class RunnerPairValidationTest(unittest.TestCase):
     def test_runner_without_runner_for_is_reported(self) -> None:
         self.write_pair()
         agent = self.fixture / "agents" / "skill-example.md"
-        agent.write_text("---\nname: skill-example\nmodel: sonnet\n---\n")
+        agent.write_text("---\nname: skill-example\nmodel: inherit\n---\n")
         result = self.run_checker()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("is runner 'skill-example'", result.stdout)
@@ -109,20 +109,19 @@ class RunnerPairValidationTest(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("runner-for 'other-skill' does not reciprocate skill 'example'", result.stdout)
 
-    def test_missing_codex_model_is_reported(self) -> None:
-        self.write_pair(agent_fields="model: sonnet\neffort: high")
+    def test_runner_without_codex_model_inherits_session_model(self) -> None:
+        self.write_pair(agent_fields="model: inherit\neffort: high")
         result = self.run_checker()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("missing required runner field: codex-model", result.stdout)
+        self.assertNotIn("missing required runner field", result.stdout)
 
     def test_missing_model_is_reported(self) -> None:
-        self.write_pair(agent_fields="effort: high\ncodex-model: gpt-5.6-terra")
+        self.write_pair(agent_fields="effort: high\ncodex-model: gpt-6-sol")
         result = self.run_checker()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("missing required runner field: model", result.stdout)
 
     def test_missing_effort_is_reported(self) -> None:
-        self.write_pair(agent_fields="model: sonnet\ncodex-model: gpt-5.6-terra")
+        self.write_pair(agent_fields="model: inherit\ncodex-model: gpt-6-sol")
         result = self.run_checker()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("missing required runner field: effort", result.stdout)
@@ -139,7 +138,7 @@ class RunnerPairValidationTest(unittest.TestCase):
         skill.parent.mkdir(parents=True, exist_ok=True)
         agent.parent.mkdir(parents=True, exist_ok=True)
         skill.write_text("---\nname: standalone\n---\n")
-        agent.write_text("---\nname: specialist\nmodel: sonnet\n---\n")
+        agent.write_text("---\nname: specialist\nmodel: inherit\n---\n")
         result = self.run_checker()
         self.assertEqual(result.returncode, 0, result.stdout)
 
@@ -147,7 +146,7 @@ class RunnerPairValidationTest(unittest.TestCase):
         self,
         *,
         name: str = "my-workflow",
-        fields: str = "model: sonnet\neffort: high\nskill-only: coordinator",
+        fields: str = "model: inherit\neffort: high\nskill-only: coordinator",
     ) -> None:
         skill = self.fixture / "skills" / name / "SKILL.md"
         skill.parent.mkdir(parents=True, exist_ok=True)
@@ -176,16 +175,16 @@ class RunnerPairValidationTest(unittest.TestCase):
             "skill-only coordinator is reserved for 'my-workflow'", result.stdout
         )
 
-    def test_skill_only_coordinator_requires_model_and_effort(self) -> None:
+    def test_skill_only_coordinator_requires_effort_only(self) -> None:
         self.write_skill_only_coordinator(fields="skill-only: coordinator")
         result = self.run_checker()
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("missing required skill-only coordinator field: model", result.stdout)
+        self.assertNotIn("missing required skill-only coordinator field: model", result.stdout)
         self.assertIn("missing required skill-only coordinator field: effort", result.stdout)
 
     def test_skill_only_coordinator_cannot_declare_runner(self) -> None:
         self.write_skill_only_coordinator(
-            fields="model: sonnet\neffort: high\nskill-only: coordinator\nrunner: skill-workflow"
+            fields="model: inherit\neffort: high\nskill-only: coordinator\nrunner: skill-workflow"
         )
         result = self.run_checker()
         self.assertNotEqual(result.returncode, 0)

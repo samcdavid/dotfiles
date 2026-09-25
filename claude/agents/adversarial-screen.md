@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: medium
-codex-model: gpt-5.6-terra
 name: adversarial-screen
 description: Fast independent screen for factual claims, citations, and bounded low-risk findings. Escalates ambiguity or material risk to adversarial-debate.
 disallowedTools: Edit, Write, NotebookEdit, Agent

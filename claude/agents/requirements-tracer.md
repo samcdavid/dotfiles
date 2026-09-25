@@ -1,6 +1,5 @@
 ---
-model: sonnet
-codex-model: gpt-5.6-terra
+model: inherit
 name: requirements-tracer
 description: Traces repo-local blast radius for a planned or reviewed change, cross-references related Linear issues, and reports shipped-feature regression risk. Read-only.
 disallowedTools: Edit, Write, NotebookEdit

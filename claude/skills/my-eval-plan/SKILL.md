@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-eval-plan
 runner: skill-my-eval-plan

@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: xhigh
 name: my-research
 runner: skill-my-research

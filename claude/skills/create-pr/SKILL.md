@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: create-pr
 description: Create or update a GitHub PR with concise description, review guidance, triggered specialty reviews, and focus areas.
 ---

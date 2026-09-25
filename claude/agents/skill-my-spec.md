@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-spec
 runner-for: my-spec
 description: Produces scoped technical-product specs from research and context, returning acceptance criteria and a compact decision/artifact envelope.

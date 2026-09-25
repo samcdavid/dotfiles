@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: log-work
 description: Append concise session accomplishments to today's Notion work log.
 ---

@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-implement-review
 runner-for: implement-review
 description: Orchestrates bounded review and repair after planned implementation is complete, or for unplanned existing work.

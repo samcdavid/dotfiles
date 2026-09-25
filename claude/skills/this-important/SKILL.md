@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: xhigh
 name: this-important
 description: Filter previous findings through an importance bar so only issues worth raising or fixing survive.

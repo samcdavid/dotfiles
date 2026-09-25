@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-quality-audit
 runner-for: quality-audit
 description: Runs a dedicated test-quality audit by routing evidence through the existing quality reviewer, verifier tiers, and adversarial challenge; returns a compact read-only audit envelope.

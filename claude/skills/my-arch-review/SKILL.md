@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-arch-review
 runner: skill-my-arch-review

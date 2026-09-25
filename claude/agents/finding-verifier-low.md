@@ -1,8 +1,7 @@
 ---
-model: sonnet
+model: inherit
 effort: medium
 name: finding-verifier-low
-codex-model: gpt-5.6-terra
 description: "Fast per-finding verifier for `my-review`. Independently checks ONE non-Critical, non-High-risk review finding and returns a KEEP/DOWNGRADE/DROP/REVISE verdict with cited evidence. Read-only — never edits code, never publishes."
 disallowedTools: Edit, Write, NotebookEdit, Agent
 ---

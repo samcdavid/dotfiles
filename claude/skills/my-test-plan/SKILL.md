@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: my-test-plan
 description: Produce a manual E2E test plan from a ticket, PR, or code change with scenarios, setup, expected outcomes, and risk coverage.
 ---

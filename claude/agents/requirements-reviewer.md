@@ -1,6 +1,5 @@
 ---
-model: sonnet
-codex-model: gpt-5.6-terra
+model: inherit
 name: requirements-reviewer
 description: PM/requirements lens reviewer for the `my-review` orchestrator. Extracts the requirements-audit skill's criteria and traces a linked ticket's acceptance criteria to the diff — coverage, scope creep, user-facing behavior. Returns a structured findings fragment plus a requirements traceability table. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent

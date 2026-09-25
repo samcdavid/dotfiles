@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: address-pr-feedback
 runner: skill-address-pr-feedback

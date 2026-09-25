@@ -1,6 +1,5 @@
 ---
-model: sonnet
-codex-model: gpt-5.6-terra
+model: inherit
 name: codebase-pattern-finder
 description: Finds similar implementations, usage examples, and conventions in the codebase to model new work after. Returns concrete code examples.
 disallowedTools: Edit, Write, NotebookEdit

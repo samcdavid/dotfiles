@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-validate
 runner: skill-my-validate

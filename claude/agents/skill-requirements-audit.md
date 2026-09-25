@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-requirements-audit
 runner-for: requirements-audit
 description: Runs a dedicated requirements traceability audit through the existing requirements reviewer, verifier tiers, and adversarial challenge; returns a compact read-only audit envelope.

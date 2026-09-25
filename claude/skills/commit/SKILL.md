@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: commit
 description: Stage and commit changes in logical groups using the project's git message style, without mixing unrelated user changes.
 when_to_use: "Use when the user asks to commit, save, or check in work, or says a change is ready to land."

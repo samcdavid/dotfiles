@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-you-sure
 runner-for: you-sure
 description: Runs independent confidence calibration by extracting claims, screening direct factual claims on Terra, and escalating unresolved or uncertain claims to Sol adversarial review.

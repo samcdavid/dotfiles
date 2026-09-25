@@ -1,6 +1,6 @@
 ---
 model: opus
-codex-model: gpt-5.6-sol
+codex-model: gpt-6-sol
 name: adversarial-debate
 description: Sol-level final challenge for material findings and ambiguous decisions. Verifies references, causality, severity, contradictions, and returns evidence-backed verdicts.
 disallowedTools: Edit, Write, NotebookEdit, Agent

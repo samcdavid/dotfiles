@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-address-pr-feedback
 runner-for: address-pr-feedback
 description: "Runs verified review-feedback triage, bounded local fix phases, validation, review, and repair; returns evidence and any external-action request to its wrapper."

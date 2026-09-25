@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-observe
 runner: skill-my-observe

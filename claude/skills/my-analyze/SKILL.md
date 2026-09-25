@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-analyze
 runner: skill-my-analyze

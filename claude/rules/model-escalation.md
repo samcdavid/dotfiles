@@ -1,6 +1,6 @@
 # Model Escalation
 
-Use cheaper/default models for routing, search, formatting, orchestration, and simple implementation.
+Skills and agents run on the session model by default: agents set `model: inherit`, skills omit `model:`, and Codex agents omit `codex-model:`. Pin a model only to escalate high-judgment work above the session.
 
 Escalate only high-judgment work:
 
@@ -9,20 +9,20 @@ Escalate only high-judgment work:
 - Ambiguous product scope decisions.
 - Final synthesis only after noisy parallel investigation or conflicting reviewer outputs.
 
-Use `adversarial-screen` (Sonnet/Terra) first for a direct citation, bounded
+Use `adversarial-screen` (session model) first for a direct citation, bounded
 low-risk finding, or reversible decision with a current evidence-bundle
-fingerprint. Escalate its result to `adversarial-debate` (Sol) only for material
+fingerprint. Escalate its result to `adversarial-debate` (Opus / `gpt-6-sol`) only for material
 risk, contradictory evidence, nontrivial causality or external semantics, an
 irreversible decision, or an unresolved screen result. `my-review` may dispatch
-Sol directly for its high-tier findings and eligible verdict challenge.
+the deep tier directly for its high-tier findings and eligible verdict challenge.
 
 ## Expressing Escalation
 
 Prefer `effort:` (`low`, `medium`, `high`, `xhigh`, `max`) over a model pin. Effort scales reasoning depth on whatever model is current, so it does not need revisiting as models change, and `scripts/sync-codex-agents` maps it straight to Codex `model_reasoning_effort`.
 
-Use `model:` only to pick a deliberately cheaper model for mechanical work — `sonnet` and `haiku` are family aliases that track the current generation, so a pin does not go stale, but it does permanently cap that skill below the session model. Do not pin a mid-tier model on work whose output you rely on for correctness.
+Use `model:` only to escalate — `model: opus` for the deep tier. Do not pin a cheaper model (`sonnet`, `haiku`) or a cheaper Codex model: it permanently caps that skill below the session model, and the session model is the user's chosen cost/quality tradeoff.
 
-Both fields can coexist: `model:` chooses the tier, `effort:` chooses how hard it thinks.
+Both fields can coexist: `model:` escalates the tier, `effort:` chooses how hard it thinks.
 
 Final synthesis over conflicting subagent output is high-judgment work and should not run below the tier of the agents feeding it.
 

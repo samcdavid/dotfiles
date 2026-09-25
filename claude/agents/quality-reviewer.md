@@ -1,6 +1,5 @@
 ---
-model: sonnet
-codex-model: gpt-5.6-terra
+model: inherit
 name: quality-reviewer
 description: QA lens reviewer for the `my-review` orchestrator. Extracts the quality-audit skill's criteria and applies them to a diff — test coverage, test fidelity, assertion quality, mock/stub fidelity, monkey patching, flakiness risk. Returns a structured findings fragment plus a quality deep-dive. Read-only — never edits code, never publishes.
 disallowedTools: Edit, Write, NotebookEdit, Agent

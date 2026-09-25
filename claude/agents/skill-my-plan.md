@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-plan
 runner-for: my-plan
 description: Produces small, test-first implementation plans with mechanical checks and compact workflow-stage envelopes.

@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: security-audit
 runner: skill-security-audit

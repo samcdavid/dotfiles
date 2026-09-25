@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-pair-plan
 runner: skill-my-pair-plan

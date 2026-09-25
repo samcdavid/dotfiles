@@ -1,5 +1,4 @@
 ---
-model: sonnet
 effort: high
 name: my-test-strategy
 runner: skill-my-test-strategy

@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: xhigh
-codex-model: gpt-5.6-terra
 name: skill-my-research
 runner-for: my-research
 description: Conducts verified codebase research, challenges findings, saves a durable research artifact, and returns a compact workflow-stage envelope.

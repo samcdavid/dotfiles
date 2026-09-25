@@ -135,12 +135,10 @@ def check_runner_pairs(
                 errors.append(
                     f"{rel(path)} skill-only coordinator cannot also declare runner"
                 )
-            for field in ("model", "effort"):
-                if not fields.get(field, "").strip():
-                    errors.append(
-                        f"{rel(path)} missing required skill-only coordinator field: "
-                        f"{field}"
-                    )
+            if not fields.get("effort", "").strip():
+                errors.append(
+                    f"{rel(path)} missing required skill-only coordinator field: effort"
+                )
             continue
 
         if "runner" not in fields:
@@ -200,7 +198,7 @@ def check_runner_pairs(
             )
             continue
         declared_agent_runners[agent_name] = (path, fields)
-        for field in ("model", "effort", "codex-model"):
+        for field in ("model", "effort"):
             if not fields.get(field, "").strip():
                 errors.append(f"{rel(path)} missing required runner field: {field}")
 

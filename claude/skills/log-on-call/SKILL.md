@@ -1,5 +1,4 @@
 ---
-model: sonnet
 name: log-on-call
 description: Log an off-hours on-call incident to the daily Notion doc with a timeline useful for follow-up or postmortem.
 disable-model-invocation: false

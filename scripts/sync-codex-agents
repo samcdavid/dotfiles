@@ -83,7 +83,7 @@ def codex_model_fields(
         note = ""
 
     fields: list[str] = []
-    # A deliberately cheap agent (e.g. `model: sonnet` + `effort: medium`) reaches
+    # A deliberately cheap agent (e.g. `model: inherit` + `effort: medium`) reaches
     # here too, so don't label everything high-judgment.
     if is_critical:
         fields.append("# Critical/high-judgment agent.")

@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: medium
-codex-model: gpt-5.6-terra
 name: skill-my-observe
 runner-for: my-observe
 description: Produces actionable observability companion plans and compact workflow-stage envelopes.

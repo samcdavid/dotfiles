@@ -1,5 +1,5 @@
 ---
-model: haiku
+model: inherit
 name: phase-implementer
 description: Bounded implementation-phase worker for my-implement. Executes one phase contract (RED/GREEN/VALIDATE or direct edit) within explicit allowed paths and returns compact evidence. Never used without an explicit phase contract from the caller.
 ---

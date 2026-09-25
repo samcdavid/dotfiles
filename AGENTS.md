@@ -58,11 +58,13 @@ Frontmatter conventions:
 Automation:
 
 - `.githooks/pre-commit` runs `scripts/check-agent-drift`; this repo configures `core.hooksPath=.githooks`.
-- In `my-review`, Terra performs discovery and one whole-diff review. Sol is
-  reserved for isolated findings only when `(severity == Critical OR risk ==
+- In `my-review`, the session-model default tier performs discovery and one
+  whole-diff review. The deep tier (`model: opus` / `codex-model: gpt-6-sol`)
+  is reserved for isolated findings only when `(severity == Critical OR risk ==
   High) AND confidence >= 80`, through `finding-verifier-high`.
 - `scripts/sync-codex-agents` maps a source agent's `effort:` straight to `model_reasoning_effort`, falling back to `model: opus` -> `xhigh` for agents that have not moved to `effort:`.
-- A per-agent `codex-model:` in agent frontmatter pins that one agent's Codex model and takes precedence over the repo-wide `CODEX_CRITICAL_MODEL` env var. It exists because a tiered agent pair needs two different Codex models, which a single env var cannot express — `finding-verifier-high` pins `gpt-5.6-sol` and `finding-verifier-low` pins `gpt-5.6-terra`. `check-agent-drift` fails if a `codex-model:` and its generated `model =` disagree, since a silent mismatch would collapse both tiers onto one model with no visible symptom.
+- Agents default to `model: inherit` and skills omit `model:`, so both run on the session model; Codex agents omit `codex-model:` for the same reason. Only the deep tier pins a model (`adversarial-debate` and `finding-verifier-high`: `model: opus`, `codex-model: gpt-6-sol`). Changed 2026-09-25: the old blanket `sonnet`/`gpt-5.6-terra` pins capped every skill below an Opus/Sol session.
+- A per-agent `codex-model:` pins that one agent's Codex model and takes precedence over the repo-wide `CODEX_CRITICAL_MODEL` env var. Because the default tier now inherits the session model and the Codex session runs `gpt-6-sol`, the `finding-verifier-low`/`-high` pair runs on the same Codex model and is split only by reasoning effort (`medium` vs `xhigh`) — an accepted tradeoff. `check-agent-drift` still fails if a `codex-model:` and its generated `model =` disagree.
 - The `my-review` lens agents must point at each audit skill's `references/protocol.md`, not its `SKILL.md`. The entrypoint holds no checklist; the criteria live in the protocol file.
 - `my-review` uses one whole-diff worker that reports a **flat** findings list,
   with severity, risk, and numeric confidence per

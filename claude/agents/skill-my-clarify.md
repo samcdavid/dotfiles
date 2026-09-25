@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-clarify
 runner-for: my-clarify
 description: Reviews specs and research for consequential ambiguity, grounding issues in code and context and returning a compact clarification envelope.

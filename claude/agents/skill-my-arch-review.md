@@ -1,7 +1,6 @@
 ---
-model: sonnet
+model: inherit
 effort: high
-codex-model: gpt-5.6-terra
 name: skill-my-arch-review
 runner-for: my-arch-review
 description: Runs a dedicated architecture audit by routing evidence through the existing architecture reviewer, verifier tiers, and adversarial challenge; returns a compact read-only audit envelope.
