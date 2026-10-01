@@ -1,0 +1,22 @@
+#!/bin/sh
+# rcup's global EXCLUDES="... AGENTS.md ..." matches AGENTS.md by basename
+# anywhere in the repo (rcm tests both the full relative path and the
+# basename against each exclude glob), not just the dotfiles-repo-root
+# AGENTS.md it was written to exclude. rcup has no rcrc-persisted include
+# override for that (only a one-off -I flag), so the global context files pi
+# and OpenCode need at exactly that name never get their normal per-file
+# symlink pass. Link them here instead; idempotent, safe to rerun.
+set -e
+
+link() {
+	src="$HOME/.dotfiles/$1"
+	dest="$2"
+	mkdir -p "$(dirname "$dest")"
+	if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+		return 0
+	fi
+	ln -sf "$src" "$dest"
+}
+
+link pi/agent/AGENTS.md "$HOME/.pi/agent/AGENTS.md"
+link config/opencode/AGENTS.md "$HOME/.config/opencode/AGENTS.md"

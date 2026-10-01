@@ -1,0 +1,30 @@
+#!/bin/sh
+# pi ships its subagent extension only as an example inside its npm package,
+# not as an installable package. Linking the installed copy (rather than
+# vendoring ~1000 lines into this repo) keeps it in step with pi upgrades,
+# but the path moves with the node version, so every rcup re-resolves it.
+# asdf can leave pi installed under a node version other than the current
+# global one, so `npm root -g` alone misses it; asdf installs are the fallback.
+set -e
+
+pkg="@earendil-works/pi-coding-agent/examples/extensions/subagent"
+src=""
+for root in "$(npm root -g 2>/dev/null || true)" "$HOME"/.asdf/installs/nodejs/*/lib/node_modules; do
+	if [ -n "$root" ] && [ -f "$root/$pkg/index.ts" ]; then
+		src="$root/$pkg"
+		break
+	fi
+done
+
+if [ -z "$src" ]; then
+	echo "pi-subagent-extension: pi package not found; skipping" >&2
+	exit 0
+fi
+
+dest="$HOME/.pi/agent/extensions/subagent"
+mkdir -p "$(dirname "$dest")"
+if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
+	exit 0
+fi
+rm -f "$dest"
+ln -s "$src" "$dest"

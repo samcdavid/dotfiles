@@ -17,9 +17,10 @@ flags needed.
   root `AGENTS.md` off `$HOME`), and rcm matches excludes against a file's
   basename as well as its full path with no way to scope by directory depth
   — so it blocks *any* `AGENTS.md`, including this one, from the normal
-  per-file symlink pass. `hooks/post-up/pi-agents-md` links it explicitly;
+  per-file symlink pass. `hooks/post-up/agents-md` links it explicitly;
   every `rcup` run re-triggers that hook, so this stays current without a
-  manual step.
+  manual step. The same hook also links OpenCode's
+  `~/.config/opencode/AGENTS.md`.
 - `agent/extensions/dotfiles-rules.ts` — Claude Code auto-loads every file
   under `~/.claude/rules/` as always-on instructions, not just CLAUDE.md; pi
   has no equivalent for a rules directory, so this extension inlines every
@@ -35,9 +36,25 @@ Skills are already covered without any pi-specific file: pi discovers global
 skills from `~/.agents/skills/`, which `rcrc` already symlinks to
 `agents/skills/` in this repo.
 
-Pi has no built-in subagent/Task-tool concept (see `docs/usage.md` in pi's
-own package: "intentionally does not include ... sub-agents"), so
-`claude/agents/*.md` runner definitions that skills dispatch to via the Agent
-tool do not carry over — a skill written as a thin wrapper around a runner
-agent (e.g. `start-day` → `skill-start-day`) will not resolve that dispatch
-under pi. Skills with no runner indirection work as-is.
+Subagents: pi core has none, but pi ships a subagent extension as an example
+in its npm package (`examples/extensions/subagent`). `hooks/post-up/pi-subagent-extension`
+links that directory from the installed pi package to
+`~/.pi/agent/extensions/subagent` on every `rcup`, re-resolving the path in case
+the node version moved. It registers a `subagent` tool that runs each agent as a
+separate `pi` process and discovers agents from `~/.pi/agent/agents/*.md`.
+
+- `agent/agents/*.md` — generated from `claude/agents/*.md` by
+  `scripts/sync-pi-agents`; do not edit by hand. A Claude `disallowedTools`
+  denylist becomes a pi `tools:` allowlist (read-only agents get
+  `read, bash, grep, find, ls`). Claude model names are dropped so every
+  subagent inherits the session model; add `pi-model:` to a source agent to pin
+  one. `rcrc` links the directory to `~/.pi/agent/agents`.
+
+Skills that dispatch "via the Agent tool" now resolve through the `subagent`
+tool under pi, but the dispatch wording is Claude-specific, so the model has to
+map it. Differences to expect: the deep-tier `model: opus` pins on
+`adversarial-debate`/`finding-verifier-high` do not carry over, so they run on
+the session model unless given a `pi-model:`. `--tools` also filters extension
+tools, so agents with a `tools:` allowlist cannot dispatch nested subagents —
+matching the Claude-side `Agent` deny — while unrestricted runners (the
+`skill-*` agents) still can.

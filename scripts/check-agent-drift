@@ -330,6 +330,16 @@ def check_codex_agents(errors: list[str]) -> None:
                 )
 
 
+def check_generated_agents(errors: list[str]) -> None:
+    for script, target in (
+        ("scripts/sync-opencode-agents", "opencode"),
+        ("scripts/sync-pi-agents", "pi"),
+    ):
+        code, output = run([script, "--check"])
+        if code != 0:
+            errors.append(f"{target} agents are out of sync:\n" + output)
+
+
 def check_budget(errors: list[str]) -> None:
     files = list((ROOT / "claude" / "skills").glob("**/SKILL.md"))
     files += list((ROOT / "claude" / "agents").glob("*.md"))
@@ -449,6 +459,10 @@ def check_home_links(errors: list[str], skip_home: bool) -> None:
         HOME / ".agents" / "rules": ROOT / "agents" / "rules",
         HOME / ".claude" / "agents": ROOT / "claude" / "agents",
         HOME / ".claude" / "rules": ROOT / "claude" / "rules",
+        HOME / ".config" / "opencode" / "agents": ROOT / "config" / "opencode" / "agents",
+        HOME / ".config" / "opencode" / "AGENTS.md": ROOT / "claude" / "AGENTS.md",
+        HOME / ".pi" / "agent" / "agents": ROOT / "pi" / "agent" / "agents",
+        HOME / ".pi" / "agent" / "AGENTS.md": ROOT / "claude" / "AGENTS.md",
     }
     for path, target in expected.items():
         if not path.exists():
@@ -501,6 +515,7 @@ def main() -> int:
     else:
         check_repo_links(errors)
         check_codex_agents(errors)
+        check_generated_agents(errors)
         check_runner_pairs(errors)
         check_budget(errors)
         check_links(errors)

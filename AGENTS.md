@@ -20,17 +20,20 @@ Personal dotfiles managed through the [rcm suite](https://github.com/thoughtbot/
 - Shared reusable rules live in `claude/rules/`; `agents/rules` symlinks back to that directory.
 - Codex custom agents are generated TOML files under `codex/agents/` from `claude/agents/*.md`.
 - OpenCode subagents are generated markdown files under `config/opencode/agents/` from `claude/agents/*.md`, via `scripts/sync-opencode-agents`. Skills need no equivalent generation step: OpenCode discovers `~/.agents/skills/<name>/SKILL.md` natively (its "Agent-compatible" skill path), which RCM already populates from `agents/skills/`.
-- Both generators import shared frontmatter parsing from `scripts/lib/agent_frontmatter.py`; a future target (e.g. another agent CLI) should add a third `scripts/sync-<target>-agents` script against that same module rather than a second source of truth.
-- RCM links the runtime directories listed in `rcrc`: `claude/agents`, `claude/rules`, `agents/skills`, `agents/rules`, `codex/agents`, and `config/opencode/agents` (which RCM's `config/` convention places at `~/.config/opencode/agents`).
+- OpenCode global instructions: `config/opencode/AGENTS.md` symlinks to `claude/AGENTS.md`. Rules reach OpenCode only through the `instructions` field of the untracked, machine-local `~/.config/opencode/opencode.json`; `hooks/post-up/opencode-rules` merges `"~/.agents/rules/*.md"` into it on every `rcup`.
+- Pi subagents are generated markdown files under `pi/agent/agents/` from `claude/agents/*.md`, via `scripts/sync-pi-agents`, and are dispatched by pi's bundled subagent extension, which `hooks/post-up/pi-subagent-extension` links from the installed pi package into `~/.pi/agent/extensions/subagent`. See `pi/README.md`.
+- Both `AGENTS.md` context files (pi's and OpenCode's) are linked by `hooks/post-up/agents-md`, because the `AGENTS.md` exclude in `rcrc` blocks them from rcm's normal pass.
+- All generators import shared frontmatter parsing from `scripts/lib/agent_frontmatter.py`; a future target (e.g. another agent CLI) should add another `scripts/sync-<target>-agents` script against that same module rather than a second source of truth.
+- RCM links the runtime directories listed in `rcrc`: `claude/agents`, `claude/rules`, `agents/skills`, `agents/rules`, `codex/agents`, `config/opencode/agents` (which RCM's `config/` convention places at `~/.config/opencode/agents`), and `pi/agent/agents`.
 - This file (`AGENTS.md`) is the canonical content; the repo-local `CLAUDE.md` is a symlink to it, so Claude Code and Codex read the same project guidance from a single source. `AGENTS.md` is excluded from RCM and should not be linked into `$HOME` — Codex discovers it directly from the project root.
 
 When changing skills or agents:
 
 1. Edit canonical files under `claude/skills/`, `claude/agents/`, or `claude/rules/`.
 2. If a new skill is added, add `agents/skills/<name> -> ../../claude/skills/<name>` so Codex can discover it.
-3. If Claude agents changed, run `scripts/sync-codex-agents` and `scripts/sync-opencode-agents` to regenerate `codex/agents/*.toml` and `config/opencode/agents/*.md`.
+3. If Claude agents changed, run `scripts/sync-codex-agents`, `scripts/sync-opencode-agents`, and `scripts/sync-pi-agents` to regenerate `codex/agents/*.toml`, `config/opencode/agents/*.md`, and `pi/agent/agents/*.md`.
 4. Keep longer skill instructions in one `references/protocol.md` per skill, and keep genuinely standalone material (gotchas, checklists, templates, mined patterns) as separate files in `references/`. Do not reintroduce the `protocol-index.md` + `protocol-sections/` split: the extra hop cost a serial read per section, its index rows carried no routing signal, and it let the same instruction drift between the index label and the section body. `check-agent-drift` caps reference files at 6000 words — split by topic when one outgrows that.
-5. Run `scripts/check-agent-drift` before finishing larger instruction changes. It checks symlinks, generated Codex agents, critical-agent reasoning effort, home links, entrypoint budgets, cited-file existence, and dangling `$HOME` symlinks.
+5. Run `scripts/check-agent-drift` before finishing larger instruction changes. It checks symlinks, generated Codex/OpenCode/pi agents, critical-agent reasoning effort, home links, entrypoint budgets, cited-file existence, and dangling `$HOME` symlinks.
 6. Run `rcup` after changing RCM-managed directories or `rcrc`, then verify the relevant `$HOME` symlinks. Renaming or deleting a file leaves a dangling `$HOME` symlink that `rcup` cannot clean up — remove it explicitly; `check-agent-drift` will flag it.
 7. For a user-visible skill/agent behavior, safety, workflow, or model-routing change, add a concise entry with its commit SHA to `claude/skills/CHANGELOG.md`. This is the regression and known-good-point index; skip typo-only or formatting-only edits.
 

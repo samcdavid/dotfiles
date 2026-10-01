@@ -1,0 +1,22 @@
+#!/bin/sh
+# OpenCode has no rules-directory convention, so claude/rules/*.md reach it
+# only through the `instructions` config field. opencode.json itself stays
+# untracked because it holds machine-specific providers; merge just this one
+# entry into whatever local config exists.
+set -e
+
+command -v jq >/dev/null 2>&1 || { echo "opencode-rules: jq missing; skipping" >&2; exit 0; }
+
+config="$HOME/.config/opencode/opencode.json"
+entry="~/.agents/rules/*.md"
+
+mkdir -p "$(dirname "$config")"
+[ -f "$config" ] || echo '{"$schema": "https://opencode.ai/config.json"}' > "$config"
+
+if jq -e --arg e "$entry" '(.instructions // []) | index($e)' "$config" >/dev/null; then
+	exit 0
+fi
+
+tmp="$(mktemp)"
+jq --arg e "$entry" '.instructions = ((.instructions // []) + [$e])' "$config" > "$tmp"
+mv "$tmp" "$config"
