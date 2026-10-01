@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-10-01 — pi and OpenCode: global instructions, rules, and pi subagents
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `2d67ef4` | OpenCode now loads the shared global `AGENTS.md` (linked into `~/.config/opencode/`) and every `claude/rules/*.md` (a `hooks/post-up/opencode-rules` merge of `"~/.agents/rules/*.md"` into the untracked `opencode.json` `instructions`). Pi gains subagents: `hooks/post-up/pi-subagent-extension` links pi's bundled subagent extension, and `scripts/sync-pi-agents` generates `pi/agent/agents/*.md` from `claude/agents/` (denylist → `tools:` allowlist, models inherit unless `pi-model:`). `hooks/post-up/pi-agents-md` became `agents-md` and links both `AGENTS.md` files. `check-agent-drift` now also checks OpenCode/pi generation and home links. | Before this, OpenCode got global instructions only through its `~/.claude/CLAUDE.md` fallback and no rules, and runner-backed skills could not dispatch under pi. If pi skill dispatch misbehaves, remove `~/.pi/agent/extensions/subagent`; known-good prior state: `7cd8cc6`. |
+
 ## 2026-09-24 — pr-overview and my-review: flag linter suppressions as code smells
 
 | Commit | Change | Regression boundary / known-good meaning |
