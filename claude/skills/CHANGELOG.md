@@ -18,6 +18,13 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-10-05 — my-review and pr-overview: track confirmations as author comments; commit hook fixes
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `95f646e` | `my-review` no longer asks the user to acknowledge, confirm, or clarify. The human acknowledgement, env-var/flag/migration readiness, `Severity: Question`, and verifier `requires clarification` become prepared inline comments to the author (PR) or a tracked "Pending before PR or staging" checklist plus Questions (local). Self-authored/unknown PRs return their code verdict (`approval_status: pending_author_confirmation`, informational) instead of `needs_input`. Third-party PRs still `COMMENT` while readiness is pending. Pure author-question candidates skip the walk-through. `pr-overview` drafts the same acknowledgement plus per-anchor clarification comments. | If reviews start prompting for confirmation again or approve a third-party PR with pending readiness, compare against this commit; known-good prior state: `53ecb1c`. |
+| `171ae32` | `commit`: when a pre-commit hook rejects a commit for formatting/lint, apply the fix to that commit's files, re-stage, and retry the same message. Stop on out-of-commit files, behavior-changing fixes, or a third same-root failure. | If commits start bundling unrelated hook-flagged files, compare against this commit. |
+
 ## 2026-10-05 — loop-plan: iterative alternative to team-plan
 
 | Commit | Change | Regression boundary / known-good meaning |
