@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-10-05 — loop-plan: iterative alternative to team-plan
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `8efdd3f` | New `loop-plan` skill plans a project conversationally, one level at a time: idea → confirmed milestone outline → per-milestone task breakdown. Each milestone is an MVP increment with a scripted user-facing demo and 5–6 tasks (hard cap 6, fewer only with a reason). Each task is an outcome-only issue for one `/my-loop` run, with no commit plan. Milestones are written to Linear one at a time, after approval of the exact changes and an `adversarial-screen` pass, until the whole project is in Linear. A project log at `~/.thoughts/projects/<slug>.md` holds state. | Additive: `team-plan` is unchanged. If `loop-plan` starts writing Linear without a per-milestone approval, bundling migrations with behavior, or padding milestones, compare against this commit. Removing the skill directory and `agents/skills/loop-plan` fully reverts it. |
+
 ## 2026-10-05 — my-loop: iterative alternative to my-workflow
 
 | Commit | Change | Regression boundary / known-good meaning |
