@@ -182,6 +182,8 @@ Committed [1/N]: <short SHA> <subject line>
 Files: <N> changed, <insertions> insertions(+), <deletions> deletions(-)
 ```
 
+If a pre-commit hook rejects the commit for formatting or lint, the commit did not happen, so the fix belongs in the same commit, not a follow-up or an amend. Apply the fix to that commit's files (a formatter's own rewrite, or the minimal lint correction), re-stage those same paths, and retry the identical message. Stop and report instead when the hook flags a file outside this commit, when the fix would change behavior rather than form, or after the third same-root failure (`~/.claude/rules/loop-detection.md`).
+
 If `--amend` was requested and there is only one commit, use `git commit --amend`. Warn if the previous commit has already been pushed. `--amend` is incompatible with multi-commit plans — if both are present, warn and ask how to proceed.
 
 After all commits, show a summary:
@@ -195,7 +197,7 @@ After all commits, show a summary:
 
 - **Never commit secrets** — if `.env`, credential files, API keys, or private keys are in the diff, warn and exclude them
 - **Never use `git add -A` or `git add .`** — always stage specific files
-- **Never skip hooks** — if a pre-commit hook fails, diagnose and fix the issue rather than using `--no-verify`
+- **Never skip hooks** — if a pre-commit hook fails, fix the issue and include the fix in the same commit (Step 5) rather than using `--no-verify`
 - **Never amend without warning** — if the previous commit is already pushed, warn about force-push implications before amending
 - **Subject line is not the whole message** — a commit that only has a subject line is incomplete. Every commit needs at least a Why section with substance.
 - **The template is mandatory** — preserve its subject and all three prompted sections; do not substitute legacy headings such as Why, How, Side Effects, or Related Cards.
