@@ -18,6 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
+## 2026-10-05 — my-loop: iterative alternative to my-workflow
+
+| Commit | Change | Regression boundary / known-good meaning |
+| --- | --- | --- |
+| `4c432bd` | New `my-loop` skill interleaves planning and building in small inspected slices (understand → act → inspect → clarify → adjust) instead of `my-workflow`'s pair → sync → gate → authorize pipeline. One short loop log at `~/.thoughts/loops/<slug>.md` is the review and resume artifact, rewritten each slice. Edit permission is one explicit goal-plus-paths grant. It ends with session-mode `my-validate` and standalone `implement-review`. Migrations and multi-issue work route back to `my-workflow`. | Additive: `my-workflow` and its downstream skills are unchanged, and `my-loop` uses no embedded-mode branch. If the loop drifts toward spec-writing or edits without a grant, compare against this commit; removing the skill directory and `agents/skills/my-loop` fully reverts it. |
+
 ## 2026-10-01 — pi and OpenCode: global instructions, rules, and pi subagents
 
 | Commit | Change | Regression boundary / known-good meaning |
