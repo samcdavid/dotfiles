@@ -82,7 +82,7 @@ Pass the plan, test strategy, base ref, changed-file manifest, and ledger to
   indexes in PR mode;
 - a changed-line causal proof for every Critical finding; and
 - any earlier finding reopened because a repair touched its causal path.
-- `approval_status: eligible`; `pending_human_confirmation` can never set
+- `approval_status: eligible`; `pending_author_confirmation` can never set
   `review_clean: true` even when there are no code findings.
 
 Supplied implementation phase commits remain `locally_validated`, never

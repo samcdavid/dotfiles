@@ -25,20 +25,17 @@ Resolve `ledger_path` only from `~/.thoughts/workflows/`. Normalize the request 
 - Preserve an explicit delivery increment. Otherwise resolve it under
   `references/incremental-delivery.md`; never equate the full linked issue with
   the current change's promised scope.
-- Present local pre-stage acknowledgements as item 1 without delaying the code
-  verdict. For environment variables,
-  feature flags, and migrations, accept only an
-  explicit response confirming the exact readiness conditions in
-  `references/change-set-risk.md`; a generic acknowledgement is insufficient.
-  Append the corresponding `accepted` row from `references/finding-ledger.md`
-  to the matching ledger, then resume with the confirmed operational scope.
-  Keep other advisory acknowledgements in their separate accepted scope. When
-  no ledger exists, re-dispatch with those scopes as invocation-local context
-  only. Never infer confirmation from a general review request,
-  auto/no-questions mode, a prior approval, or a response whose trigger contents
-  differ.
-  If no ledger exists, do not create one; disclose that confirmation cannot be
-  durably suppressed.
+- Never ask the user to acknowledge, confirm, or clarify anything the review
+  finds. Acknowledgement, readiness confirmation, and author questions are
+  tracked output: prepared inline comments in PR mode, the pre-stage checklist
+  and Questions section in local mode (`references/change-set-risk.md`).
+- If the user volunteers a confirmation of the exact readiness conditions in
+  `references/change-set-risk.md` (a generic acknowledgement is insufficient),
+  append the corresponding `accepted` row from `references/finding-ledger.md`
+  to the matching ledger and pass that scope on the next dispatch. Keep advisory
+  acknowledgements in their separate accepted scope. Never infer confirmation
+  from a general request, auto mode, a prior approval, or mismatched trigger
+  contents. Without a ledger, use the scope for this invocation only.
 - Do not invoke publication from this wrapper unless the user explicitly asks after review. A runner may never publish a review, reply, resolve a thread, push, create/update a PR, or widen that authorization.
 
 ## Present
@@ -47,17 +44,18 @@ Apply `~/.claude/rules/human-readable-communication.md` (loaded as memory; Codex
 For `awaiting_user_triage`, present the state reference and next item without a verdict. Otherwise return change-set risk, code verdict, readiness status, and
 current delivery increment first, then the coverage manifest and actionable
 findings with file:line evidence and concrete author-controlled fixes, decisions,
-or information requests, the single PR human acknowledgement or first-item local
-pre-stage checklist when required,
+or information requests, the prepared PR inline comments (the single human
+acknowledgement plus author questions) or the tracked local pre-stage checklist
+when required,
 verdict, questions, residual risk, requirements coverage including what is
 intentionally deferred from this increment,
 dropped findings, prior resolved/deferred/accepted matches, and the compact workflow-stage
 envelope when embedded. Drop observations, preferences, and speculative concerns
 that do not ask the author to do something concrete. Use `REQUEST_CHANGES` only
 for verified findings that are both `Critical` and `High` risk. Local,
-branch/range, local-issue, and embedded-local reviews return the code verdict only after the matching walk-through completes; pre-stage human-acknowledgement items never replace it. PR reviews return
-`needs_input` with approval pending when required operational readiness is
-unconfirmed. `COMMENT` is
+branch/range, local-issue, and embedded-local reviews return the code verdict only after the matching walk-through completes; pre-stage human-acknowledgement items never replace it. PR reviews always return a verdict; unconfirmed operational readiness keeps a
+third-party PR at `COMMENT` and is otherwise carried by the prepared
+acknowledgement. `COMMENT` is
 available only for an actual PR whose author differs from the authenticated
 reviewer. Do not include raw lens or verifier transcripts.
 
@@ -66,8 +64,6 @@ A Low-risk set takes its fast-approval path. Migrations, environment variables,
 feature flags, infrastructure/operations changes, other config, newly added
 lint/tooling suppressions, and edits to existing test cases produce one
 deduplicated human-acknowledgement item; added tests never do.
-In PR mode, environment variables, feature flags, and migrations additionally
-withhold approval until a human confirms their environment or staging
-readiness. In local mode, report them as pre-stage checks and persist exact
-confirmations separately from advisory acknowledgements so an older generic
-acceptance can never satisfy operational readiness.
+Environment variables, feature flags, and migrations also need readiness
+confirmation, persisted separately from advisory acknowledgements so an older
+generic acceptance never satisfies it.

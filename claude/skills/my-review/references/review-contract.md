@@ -93,21 +93,26 @@ anchor. This acknowledgement is not a finding, does not pass through the
 Actionability Gate or verifiers, and is never repeated in body commentary.
 Deduplicating the request does not confirm the external readiness facts.
 
-When the same triggers appear in local mode, the first review item is one
-pre-stage acknowledgement checklist for all uncovered trigger tuples. Continue substantive
-review and always return the independent code verdict. Human confirmation is
-still required before promotion to the affected staging or production
-environment, but it does not gate local code approval. Generic acknowledgement
-is sufficient only for the separate advisory scope. The matching ledger keys'
-append-only `accepted` rows are the only durable dedupe signals; auto mode and
-conversation inference are not substitutes.
+When the same triggers appear in local mode, the output carries one tracked
+pre-stage checklist for all uncovered trigger tuples. It is never a prompt:
+continue substantive review and always return the independent code verdict.
+Human confirmation is still required before promotion to the affected staging
+or production environment, but it does not gate local code approval. Generic
+acknowledgement is sufficient only for the separate advisory scope. The
+matching ledger keys' append-only `accepted` rows are the only durable dedupe
+signals; auto mode and conversation inference are not substitutes.
+
+Author questions are prepared inline comments in PR mode and Questions entries
+in local mode under `change-set-risk.md`'s Author questions rule. The envelope
+never returns `needs_input` for an acknowledgement, confirmation, or
+clarification item.
 
 ## Re-review and Publication Boundaries
 
 A re-review rebuilds the aggregate diff and current comment index; a prior
 approval never narrows scope. Reviews never edit reviewed code or publish. The
 only additional local write is the outer wrapper's append-only accepted
-confirmation row under `change-set-risk.md` when the user explicitly approves it.
+confirmation row under `change-set-risk.md` when the user volunteers it.
 `REQUEST_CHANGES` requires at least one surviving verified Critical, High-risk
 finding with an actionable inline anchor; unresolved threads, existing debt, a
 Critical finding at Medium or Low risk, or a body-only objection do not
@@ -117,7 +122,8 @@ independently justify it.
 authenticated GitHub reviewer. Local, branch/range, local-issue, and
 embedded-local reviews always return a code verdict of `REQUEST_CHANGES` or
 `APPROVE`; outstanding pre-stage checks remain visible separately.
-Self-authored and unknown-ownership PR reviews may return no verdict with
-`needs_input` while operational readiness is unconfirmed. Non-blocking
+Self-authored and unknown-ownership PR reviews likewise return a code verdict,
+with unconfirmed operational readiness carried by the prepared acknowledgement.
+Non-blocking
 actionable findings and unresolved questions remain visible under `APPROVE`;
 the verdict rule does not erase them or inflate them into blockers.

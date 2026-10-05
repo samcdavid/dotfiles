@@ -8,7 +8,7 @@ annotation for the whole PR, deduped by substance and containing all trigger
 anchors. Do not verifier-route it or apply the Actionability Gate to it.
 
 The local pre-stage human-acknowledgement checklist is likewise finalized separately
-from findings. It must be review item 1 when uncovered and bypasses
+from findings. It is tracked output when uncovered, never a prompt, and bypasses
 verifier/importance routing. Advisory acknowledgements and
 operational-readiness confirmations use separate stable keys. Continue
 substantive review and always return the independent local code verdict when
@@ -18,8 +18,8 @@ either is pending.
 2. Dedupe against existing PR comments and threads.
 3. Confirm every finding carries all three levels from `references/finding-axes.md` — severity (per the shared review rule), risk, and confidence. The whole-diff worker assigns these; do not silently re-label them here. A fragment missing them means the worker ran an old contract — re-dispatch it rather than filling the levels in yourself.
 4. Verify only candidates that satisfy `(severity == Critical OR risk == High) AND confidence >= 80` with `finding-verifier-high`. Use `finding-verifier-low` only for an explicit `needs_confirmation` request with a named unresolved fact, exact query, and code-verdict or Opus-eligibility consequence. Every other finding is not independently verified and cannot affect the verdict.
-5. A targeted-Sonnet `requires clarification` becomes a targeted question. Re-route only a cited revision that satisfies the exact Opus predicate; otherwise do not add another verifier pass.
-7. Ask targeted questions only when user-only context determines whether a finding is valid.
+5. A targeted-Sonnet `requires clarification` becomes an author question under `change-set-risk.md`'s Author questions rule. Re-route only a cited revision that satisfies the exact Opus predicate; otherwise do not add another verifier pass.
+7. Never pause to ask the user. Author-only context becomes an author question: a prepared inline comment in PR mode, a Questions entry in local mode.
 8. Apply `review-contract.md`'s Actionability Gate to every surviving finding and question. Drop anything without a concrete author-controlled fix, decision, or specific information request tied to a changed-line risk; do not move it into residual-risk or deep-dive prose.
 9. Run `/this-important strict` on unverified non-blocking findings only; Opus-verified findings already got the deep pass.
 10. Apply KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarification` verdicts before presenting. PROMOTE and DOWNGRADE both require the same cited evidence (`file:line`, or `source`+`query`+`retrieved-at`) — neither is a bare severity opinion.
@@ -31,7 +31,7 @@ either is pending.
 
 Verdict rule:
 
-- `REQUEST_CHANGES` only if a finding survives (or is PROMOTEd to) both Critical **and** High risk after per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. A finding needing clarification surfaces as a blocking question, never an automatic `REQUEST_CHANGES`.
+- `REQUEST_CHANGES` only if a finding survives (or is PROMOTEd to) both Critical **and** High risk after per-finding verification. This is mechanical, not a fresh judgment call — Step 6 already independently verified it. A finding needing clarification surfaces as a prepared author question, never an automatic `REQUEST_CHANGES`.
 - In local, branch/range, local-issue, and embedded-local reviews: always return
   `APPROVE` when no Critical High-risk finding survives, otherwise
   `REQUEST_CHANGES`. Outstanding pre-stage human-acknowledgement items remain visible but
@@ -39,14 +39,13 @@ Verdict rule:
   unresolved questions cannot produce `COMMENT` or be inflated into
   `REQUEST_CHANGES`.
 - In self-authored and unknown-ownership PR reviews: `APPROVE` whenever no
-  Critical High-risk finding survives and operational readiness is confirmed.
-  If readiness is unconfirmed, return `needs_input` with approval pending and no
-  PR verdict.
+  Critical High-risk finding survives. Unconfirmed readiness sets
+  `approval_status: pending_author_confirmation` and travels as the prepared
+  acknowledgement; it never withholds the verdict.
 - In a third-party PR review: `APPROVE` when requirements are satisfied and all remaining findings are Low risk; `COMMENT` when Medium/High-risk non-blocking feedback or unresolved requirements/context remains, the PR is stale/already merged, or the user explicitly asks not to approve.
 - A pending advisory acknowledgement counts as unresolved context for a third-party PR
   and therefore produces `COMMENT`. Pending operational readiness forbids
-  PR `APPROVE`; use `COMMENT` for a third-party PR and no verdict with
-  `needs_input` for other PR relationships. It never independently produces
+  `APPROVE` only on a third-party PR, which uses `COMMENT`. It never independently produces
   `REQUEST_CHANGES` and never suppresses a local code verdict.
 
 For a re-review, report the blocker ledger delta: cleared, still open, regressed,

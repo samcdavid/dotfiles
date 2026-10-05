@@ -20,7 +20,7 @@ Also read `~/.claude/rules/human-readable-communication.md` (or the
 
 ## Input
 
-Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `delivery_increment` is explicit caller scope or `infer`; resolve `infer` under `incremental-delivery.md` before coverage selection and one-worker dispatch. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human explicitly confirmed the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
+Accept `{ mode, review_relationship, target, base_ref, artifact_inputs, ledger_path, delivery_increment, accepted_trigger_scope, confirmed_operational_scope, stage, authority, publication_authorization }`. `mode` is capture/promote, PR, branch/range, local, local issue, or embedded local review. `review_relationship` is local, self-authored PR, third-party PR, or unknown PR; only third-party PR permits COMMENT. `delivery_increment` is explicit caller scope or `infer`; resolve `infer` under `incremental-delivery.md` before coverage selection and one-worker dispatch. `accepted_trigger_scope` is either `none` or the exact normalized local advisory tuples explicitly acknowledged during this invocation. `confirmed_operational_scope` is either `none` or the exact environment-variable, feature-flag, and migration tuples for which a human volunteered explicit confirmation of the readiness conditions in `change-set-risk.md`. Embedded callers provide plan/base/ledger context, a stage, and `authority: local_only`.
 
 ## Authority
 
@@ -42,27 +42,26 @@ external intent as `external_action_requested`; return fresh keyed findings and
 prior-disposition matches to `implement-review` or `my-workflow` for final ledger
 settlement, without updating the ledger yourself.
 
-After compiling actionable candidates, persist and resume the fingerprinted walk-through state under `~/.thoughts/review-triage/`. Return `awaiting_user_triage` with no verdict until every candidate has a recorded user disposition. Only candidates explicitly authorized for targeted research may enter question or verifier routing.
+After compiling actionable candidates, route pure author-information or author-decision candidates straight to prepared author questions; they skip the walk-through. Persist and resume the fingerprinted walk-through state for the rest under `~/.thoughts/review-triage/`. Return `awaiting_user_triage` with no verdict until every remaining candidate has a recorded user disposition. Only candidates explicitly authorized for targeted research may enter question or verifier routing.
 
 Return one human-acknowledgement item containing all trigger content. In local mode it
-is a pre-stage checklist, not a code-approval gate;
+is a tracked pre-stage checklist, not a prompt or a code-approval gate;
 compare advisory and operational tuples against their separate `accepted`
-ledger keys. The wrapper owns the user prompt and append-only ledger writes; do
-not infer acknowledgement/readiness or update the ledger yourself. Complete the
+ledger keys. Never return `needs_input` for these or for author questions,
+which follow `change-set-risk.md`. The wrapper owns
+append-only ledger writes for volunteered confirmations; do not infer
+acknowledgement/readiness or update the ledger yourself. Complete the
 substantive review and always return the independent local code verdict even
 when operational confirmation is absent.
 
 Return immediately with a terse APPROVE when the aggregate diff meets the
 shared Low-risk fast-approval contract. In PR mode, build at most one
-deduplicated inline human acknowledgement for all migration, environment-variable,
-feature-flag, config, infrastructure/operations, and added
-lint/tooling-suppression anchors, plus edits to test cases that existed at the
-comparison base. Newly added tests, including new test cases in existing files,
-do not trigger it. This acknowledgement is
-separate from findings.
+deduplicated inline human acknowledgement for every `change-set-risk.md`
+trigger anchor; it is separate from findings.
 In PR mode, unconfirmed environment-variable, feature-flag, or migration
-readiness blocks only `APPROVE`, not by manufacturing a defect or
-`REQUEST_CHANGES` verdict.
+readiness blocks only third-party `APPROVE` (it uses `COMMENT`); it never
+manufactures a defect or `REQUEST_CHANGES`, and self-authored/unknown PRs
+return their ordinary code verdict with the acknowledgement attached.
 
 ## Output
 
@@ -70,7 +69,7 @@ Return a structured review envelope: mode/diff source, overall change-set risk,
 code verdict, PR approval status or local pre-stage human-acknowledgement status, delivery increment and deferred integration context, coverage manifest, the single PR acknowledgement or local checklist when required,
 verified findings ordered by severity with stable keys, verifier evidence,
 dropped findings, prior resolved/deferred/accepted matches, requirements coverage,
-residual risks/questions, explicitly unverified actionable findings that are
+prepared author questions, explicitly unverified actionable findings that are
 verdict-neutral by default, mode-constrained mechanical verdict, any applicable
 Terra adversarial-screen reconciliation when applicable, and embedded stage outcome. Every finding,
 requirement, and prior match must include its full human-readable meaning before

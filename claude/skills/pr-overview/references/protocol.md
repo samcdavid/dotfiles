@@ -78,6 +78,40 @@ Flag added/changed lines that silence a linter, formatter, type checker, or stat
 
 Report each hit as `file:line`, the rule silenced (or "blanket" when no rule is named — call that out, it hides everything), and a one-line guess at what the warning is about so the reader knows what fix it replaced. Note whether a justification comment accompanies it. Removed suppressions are good news — mention them only in passing. Only lines added or changed by the diff count.
 
+# Prepared Comments
+
+Neutral, author-directed drafts — never a verdict, severity, or approval/blocking language, and never a question put to the user. Skip any item an existing review thread already raises (dedupe by substance in PR mode).
+
+## Acknowledgement comment (one per diff)
+
+When any of these fired — new migration, environment-variable gate, feature flag, edited existing test case, linter suppression — draft **one** comment at the most consequential anchor (migration, then env var, then flag, then edited test, then suppression), listing every other anchor in its body. Use the same shape as my-review's acknowledgement (`~/.claude/skills/my-review/references/change-set-risk.md`) so a later full review dedupes against it rather than repeating it:
+
+```markdown
+Human acknowledgement requested: this PR changes surfaces that need deliberate
+human acknowledgement. This is not an automatically identified defect.
+
+- `<path:line>` — <migration | environment-variable | feature-flag | lint/tooling suppression | modified existing test>
+
+Please reply to confirm:
+- each changed environment variable has its appropriate value set in every staging and production environment;
+- each changed feature flag has its appropriate value/configuration set in every staging and production environment;
+- each new migration/backfill has been tested successfully in staging; and
+- each edited existing test's changed expectation or coverage is intentional and still protects the desired outcome.
+```
+
+Keep only the confirm bullets whose category fired.
+
+## Clarification comments (one per anchor)
+
+Draft a separate question at its own anchor only when the diff leaves intent genuinely ambiguous and the author alone can answer — for example: an ORM model change with no matching migration; a branching condition that changes which path existing inputs take with no linked requirement explaining it; a new suppression with no justification comment; a product-requirement change with no ticket or description backing it. Name the exact decision or fact needed. Do not draft one for something the diff, PR description, or linked ticket already answers.
+
+## Output shape
+
+- **PR mode** — under **Prepared Inline Comments**, list each as `path:line` followed by the comment body.
+- **Local mode** — there is no PR to comment on, so render the same content under **Pending before PR or staging** as a `- [ ]` checklist (acknowledgement items first, then clarifications), worded to paste into the eventual PR description.
+
+Omit the section when nothing fired.
+
 # Review Activity Summary
 
 Applies only in PR mode. Use the GraphQL `reviewThreads` query already defined in `pr-cost-control.md` — it returns `isResolved`/`isOutdated` per thread and each comment's author, so no separate REST call for review state is needed. Pair it with `gh api repos/{owner}/{repo}/pulls/{N}/reviews --jq '[.[] | {user: .user.login, state, submitted_at}]'` for each reviewer's formal review state (`APPROVED`, `CHANGES_REQUESTED`, `COMMENTED`, `PENDING` — drop `PENDING`, it's not yet visible to others).

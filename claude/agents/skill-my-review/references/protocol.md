@@ -18,19 +18,19 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
    existed at the comparison base. Newly added tests, including new test cases
    in existing files, do not trigger it. Treat the
    acknowledgement as context, not a finding. Track environment-variable, feature-flag, and
-   migration tuples separately as approval-gating operational readiness.
+   migration tuples separately as operational readiness.
 4. In local mode, compare advisory tuples with the latest accepted
    `review-handoff.local-sensitive-changes` scope and operational tuples with
    `review-handoff.operational-readiness` plus the wrapper's invocation-local
-   scopes. Present one explicit confirmation as review item 1 when uncovered.
-   The wrapper records only an exact acknowledgement/confirmation in the ledger
-   and re-dispatches; never infer it or write the ledger in this runner. Continue
-   the substantive review while confirmation is pending.
+   scopes. List uncovered tuples on the tracked pre-stage checklist; never
+   prompt for them. The wrapper records only an exact volunteered
+   acknowledgement/confirmation in the ledger; never infer it or write the
+   ledger in this runner.
 5. Dispatch focused research only for unanswered facts, then exactly one
    `general-reviewer` with the full aggregate diff and every activated coverage
    criterion. It applies the corresponding checklists in one retained context
    and returns a consolidated finding set.
-6. Run one bounded whole-diff synthesis pass after the whole-diff worker. Persist the complete candidate set, then invoke `walk-through` one item at a time. Until each item is dismissed, retained unverified, queued for an author question, or explicitly authorized for targeted research, return `awaiting_user_triage` with no verdict or investigator dispatch.
+6. Run one bounded whole-diff synthesis pass after the whole-diff worker. Route pure author-information or author-decision candidates straight to prepared author questions under `change-set-risk.md`. Persist the remaining candidate set, then invoke `walk-through` one item at a time. Until each item is dismissed, retained unverified, queued for an author question, or explicitly authorized for targeted research, return `awaiting_user_triage` with no verdict or investigator dispatch.
 7. After the complete walk-through, drop duplicates and candidates missing a changed-line anchor, causal link, or concrete author-controlled action. Route only explicitly authorized candidates: send to Sol only findings satisfying `(severity == Critical OR risk == High) AND confidence >= 80`; use Terra only for complete `needs_confirmation` requests with the named fact, exact query, and code-verdict or Opus-eligibility consequence. All others are explicitly unverified and cannot affect the verdict.
 8. Apply `review-contract.md`'s Actionability Gate after verification. A finding
    or question survives only when it requests a concrete author-controlled
@@ -38,11 +38,11 @@ Read the retained `protocol.md` as the flow source of truth. Load its routing an
 9. Compute `REQUEST_CHANGES` mechanically only from verified Critical, High-risk
    findings. Local review always returns an independent code verdict and lists
    acknowledgement items separately. For PR review, unconfirmed operational
-   readiness returns `needs_input` with
-   `approval_status: pending_human_confirmation`; never return PR `APPROVE`.
-   A third-party PR may use `COMMENT`, while other PR relationships have no
-   verdict until confirmation. Once confirmed, return `APPROVE` for
-   self-authored and unknown-ownership PRs when no blocker survives.
+   readiness sets `approval_status: pending_author_confirmation` and rides in
+   the prepared acknowledgement. A third-party PR then uses `COMMENT`;
+   self-authored and unknown-ownership PRs return `APPROVE` when no blocker
+   survives. Never return `needs_input` for acknowledgement, confirmation, or
+   clarification items.
    Only a third-party PR may choose between `APPROVE` and `COMMENT`; challenge
    that confirmed-readiness choice with `adversarial-screen` in `decision` mode
    and the current review-bundle fingerprint. A material risk it identifies

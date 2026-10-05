@@ -13,8 +13,8 @@ Load during Step 5 of `protocol.md`.
 forward. Always present this in local modes.]
 
 ### Acknowledgement Status
-**PR:** eligible / pending human confirmation
-**Local:** pre-stage human acknowledgement clear / required — [name each
+**PR:** eligible / pending author confirmation (tracked in Prepared Inline Comments)
+**Local:** pre-stage human acknowledgement clear / tracked — [name each
 environment-variable, feature-flag, migration, config, infrastructure,
 suppression, or modified-existing-test item]
 
@@ -24,8 +24,8 @@ suppression, or modified-existing-test item]
 **Deferred integration or handoff:** [what remains, plus the next step or owner when known]
 
 ### PR Verdict
-**APPROVE** / **COMMENT** / **REQUEST_CHANGES** / **none — needs input** — [PR
-mode only. Pending PR operational readiness never returns APPROVE.]
+**APPROVE** / **COMMENT** / **REQUEST_CHANGES** — [PR mode only. Pending
+operational readiness never returns APPROVE on a third-party PR.]
 
 ### Summary
 [1-2 sentences demonstrating you understood the change and its purpose]
@@ -49,8 +49,13 @@ mode only. Pending PR operational readiness never returns APPROVE.]
 [PR only: one human-acknowledgement annotation at the primary changed-line anchor,
 listing all migration/environment-variable/feature-flag/config/infra/linter-
 suppression and modified-existing-test anchors, plus the exact operational
-confirmation still required.
+confirmation still required; then one author question per anchor for every
+`Severity: Question`, `requires clarification`, or author-information item.
 This is publishing input, not review-body prose. Do not repeat it elsewhere.]
+
+### Pending Before PR or Staging
+[Local only: the tracked checklist from `change-set-risk.md`. Not a question
+to the user; it never delays the code verdict.]
 
 ### Unverified Actionable Findings
 [Include every actionable finding that did not receive independent verification.
@@ -87,6 +92,8 @@ current defect.]
 [Only when an active/upcoming issue exactly covers a duplicate non-blocking follow-up]
 
 ### Questions
+[Local only. In PR mode, questions appear only as Prepared Inline Comments.
+Phrase each to the author; these are tracked, never asked of the user.]
 
 #### 1. [Category]: [Concise question title]
 **Risk:** [High | Medium | Low] · **Confidence:** [0–100] · **Verification:** [Sonnet targeted verification | not independently verified]

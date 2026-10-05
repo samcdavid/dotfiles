@@ -215,7 +215,7 @@ Produce a short triage block and show it to me before going deep:
 - **Intent:** <1–2 sentences in your words — what this change does and why>
 - **Delivery increment:** <what this change promises now; whether it is user-facing; deferred integration or handoff>
 - **Overall change-set risk:** <Low | Medium | High> — <diff-grounded rationale>
-- **Human acknowledgement:** <PR: one inline anchor + trigger/anchor count; operational readiness confirmed|required|not applicable> | <local pre-stage: clear | N acknowledgements required, with accepted advisory and confirmed operational scope> | none
+- **Human acknowledgement:** <PR: one inline anchor + trigger/anchor count; operational readiness confirmed|pending author|not applicable> | <local pre-stage: clear | N items tracked, with accepted advisory and confirmed operational scope> | none
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
@@ -243,7 +243,7 @@ checks. Return the terse approval directly; Steps 3–8 do not run.
 ### Local pre-stage human-acknowledgement checklist
 
 Before Step 3 in any local mode, apply `change-set-risk.md`'s local checklist
-exactly. Uncovered trigger scope is review item 1. Keep advisory acknowledgement
+exactly. Uncovered trigger scope goes on the tracked checklist, never a prompt. Keep advisory acknowledgement
 separate from operational confirmation for environment variables, feature
 flags, and migrations. Continue the review pipeline and return the substantive code verdict
 in the same pass. Outstanding checklist items never withhold local `APPROVE` or
@@ -327,40 +327,28 @@ This compiled set is what Steps 4–8 operate on.
 
 Before any candidate-specific question, verifier dispatch, importance or adversarial pass, or verdict computation, create or resume `~/.thoughts/review-triage/<scope-fingerprint>.md`. Keep scope identity, candidate fingerprint, serialized candidates, current key, and append-only resolutions there; it is not the final Finding Register.
 
-Invoke `/walk-through` over every actionable compiled candidate, including synthesis candidates. Show one item at a time with its key, lens, severity, risk, numeric confidence, causal link, problem/fix, verification need, and **not yet independently verified** status. Before advancing, record one user outcome—`dismiss`, `retain unverified`, `ask author`, or `authorize targeted research`—with rationale, owner, and follow-up.
+First set aside every candidate that is purely a request for author-only information or an author decision (`Severity: Question`, or a finding whose only action is "author confirms/explains X"). These skip the walk-through and become author questions under `change-set-risk.md`'s Author questions rule.
+
+Invoke `/walk-through` over every remaining actionable compiled candidate, including synthesis candidates. Show one item at a time with its key, lens, severity, risk, numeric confidence, causal link, problem/fix, verification need, and **not yet independently verified** status. Before advancing, record one user outcome—`dismiss`, `retain unverified`, `ask author`, or `authorize targeted research`—with rationale, owner, and follow-up.
 
 Only explicitly authorized research may reach a verifier. `ask author` queues only that question after the complete walk-through; dismissals and retained items are per-review, verdict-neutral dispositions. A changed scope or candidate fingerprint invalidates the state. While incomplete, return `awaiting_user_triage` with no verdict, investigation, importance/adversarial pass, publication input, or repair. On completion, finalize the interim state as non-final workflow history and resume only authorized candidates.
 
-## Step 4 — Targeted Questions
+## Step 4 — Author Questions
 
-If any compiled finding carries `Severity: Question`, ask it. The point is to catch things where the situation depends on context only I have.
+Never pause to ask me. Every `Severity: Question` finding, walk-through
+`ask author` outcome, and set-aside author-information candidate becomes an
+author question under `change-set-risk.md`'s Author questions rule: a prepared
+inline comment at its anchor in PR mode, a Questions entry in local mode.
+Apply the Actionability Gate to each — it must name the exact decision or
+information needed and the changed-line risk it resolves.
 
-### After I answer — challenge my answers
-
-Once I respond, use **adversarial-screen** to challenge the answer. Do not
-escalate a decision challenge to Sol; a material risk becomes a finding and
-follows the normal Critical/High-risk verifier route.
-
-Pass `mode: decision`, the current review-bundle fingerprint, and only the
-question, answer, and cited context needed to test it.
-
-Pass to the agent:
-- The original question + the investigation context that surfaced it (diff, relevant files, the compiled findings)
-- My answer
-
-The screen returns one of `PASS`, `REVISE`, `ESCALATE`, or `NEEDS_EVIDENCE`.
-
-Apply the result:
-- PASS → record the answer and proceed.
-- REVISE → correct the factual mismatch and ask one follow-up question if it remains load-bearing.
-- ESCALATE or NEEDS_EVIDENCE → record the gap as a Question. Route it to Sol
-  only if it establishes a concrete Critical or High-risk finding.
-
-### When to skip
-
-If no compiled finding carries `Severity: Question`, skip this step entirely.
-
-If I've authorized auto-mode (or said "no questions, just review"), log these as a **Questions** section in the final review output (Step 5) instead of pausing. The post-answer adversarial pass is also skipped in this mode — there are no answers to challenge.
+If I volunteer an answer anyway, use **adversarial-screen** with `mode:
+decision`, the current review-bundle fingerprint, and only the question,
+answer, and cited context needed to test it. PASS → record the answer and drop
+the question. REVISE → correct the factual mismatch and keep the question for
+the author if still load-bearing. ESCALATE or NEEDS_EVIDENCE → keep it as an
+author question; route to Sol only if it establishes a concrete Critical or
+High-risk finding.
 
 ## Step 5 — Format the Review
 
@@ -401,10 +389,10 @@ High-tier returns KEEP, DOWNGRADE, DROP, REVISE, PROMOTE, or `requires clarifica
 
 ### Handle targeted-Sonnet uncertainty
 
-A targeted-Sonnet `requires clarification` becomes a targeted question. Re-route only a `REVISE` supported by evidence that satisfies the exact Opus predicate.
+A targeted-Sonnet `requires clarification` becomes an author question. Re-route only a `REVISE` supported by evidence that satisfies the exact Opus predicate.
 
-Never treat uncertainty as a DROP. A high-tier `requires clarification` is a
-question, not a loop (see `~/.claude/rules/loop-detection.md`).
+Never treat uncertainty as a DROP. A high-tier `requires clarification` is an
+author question, not a loop (see `~/.claude/rules/loop-detection.md`).
 
 ### PR mode caveat
 
@@ -417,7 +405,7 @@ Verifier agents can accidentally read the local working tree. If any DROP or REV
 - REVISE: update claim, levels, or fix.
 - DROP: remove and note in Dropped Findings.
 - PROMOTE: raise to the stated severity, citing the verification evidence. This is **mechanical, not discretionary** — a finding PROMOTEd to Critical carries into Step 7 at its verified risk level; it requests changes only when that risk is also High.
-- `requires clarification`: surface as a Targeted Question naming the exact query a human should run. Never silently drop it, and never fill the gap with a guess presented as verified.
+- `requires clarification`: surface as an author question (Step 4) naming the exact check the author should run. Never silently drop it, and never fill the gap with a guess presented as verified.
 
 Before `/this-important`, use `references/project-context.md` to remove only exact non-Critical follow-ups in **Upcoming Project Work**. Title-only/partial matches, gaps, and Critical findings remain.
 
@@ -442,8 +430,8 @@ Before Step 7, confirm:
   blocks the declared increment rather than merely belonging to the eventual
   feature
 - dropped findings have one-line reasons
-- every targeted-Sonnet uncertainty is surfaced as a question, or was re-routed only after cited evidence satisfies the exact Opus predicate
-- every `requires clarification` finding is surfaced as a question, not silently resolved either way
+- every targeted-Sonnet uncertainty is surfaced as an author question, or was re-routed only after cited evidence satisfies the exact Opus predicate
+- every `requires clarification` finding is surfaced as an author question, not silently resolved either way and never asked of me
 - every actionable finding without independent verification is labeled `not
   independently verified` and is verdict-neutral
 - the Coverage Manifest and final integrity gate in `review-contract.md` passed
@@ -454,9 +442,10 @@ Before Step 7, confirm:
 - local advisory and operational scopes use their separate stable keys; an
   older generic acceptance never confirms environment, feature-flag, or
   migration readiness
-- In PR mode, `APPROVE` is absent whenever any operational-readiness tuple is
-  unconfirmed. In local mode, the code verdict is always present and the same
-  tuple is reported under pre-stage human acknowledgement.
+- On a third-party PR, `APPROVE` is absent whenever any operational-readiness
+  tuple is unconfirmed. Every other mode returns its code verdict, with the same
+  tuple carried by the prepared acknowledgement (PR) or tracked checklist
+  (local). No acknowledgement, confirmation, or question produces `needs_input`.
 
 ## Step 7 — Verdict
 
@@ -469,17 +458,17 @@ itself. Local reviews always compute `code_verdict` independently: a verified
 Critical, High-risk blocker produces `REQUEST_CHANGES`; otherwise return
 `APPROVE`, even when pre-stage human checks remain. In PR mode, if any
 environment-variable, feature-flag, or migration readiness tuple remains
-unconfirmed, set `status: needs_input` and
-`approval_status: pending_human_confirmation`. A third-party PR may use
-`COMMENT`; self-authored and unknown-ownership PR reviews return no verdict.
-Never use PR `APPROVE` until the exact operational scope is confirmed.
+unconfirmed, set `approval_status: pending_author_confirmation` and keep the
+request in the prepared acknowledgement. A third-party PR then uses `COMMENT`
+unless `REQUEST_CHANGES` applies; self-authored and unknown-ownership PR
+reviews return their ordinary code verdict.
 
-- If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but follows the normal non-blocking verdict rules. A finding that needs clarification is never an automatic request for changes; surface it as a blocking question instead.
-- Otherwise, in PR mode, if operational readiness is pending, apply the pending
-  state above.
+- If any finding is both post-verification `Critical` (KEPT Critical, or PROMOTEd to Critical) **and** `High` risk → **REQUEST_CHANGES**, full stop. Do not re-litigate whether it is merge-blocking — Step 6 independently verified it with cited evidence. A Critical finding at Medium or Low risk is still presented prominently, but follows the normal non-blocking verdict rules. A finding that needs clarification is never an automatic request for changes; surface it as an author question instead.
+- Otherwise, on a third-party PR, if operational readiness is pending, return
+  **COMMENT**.
 - Otherwise apply the mode gate:
   - **Local, branch/range, Local Issue, or embedded local:** **APPROVE** with any outstanding pre-stage human-acknowledgement items shown separately. Keep actionable non-blocking findings and targeted questions visible, but do not turn them into `COMMENT` and do not inflate them into blockers merely to avoid approval.
-  - **Self-authored PR or unknown PR:** **APPROVE** after operational readiness is confirmed. Keep actionable non-blocking findings and targeted questions visible.
+  - **Self-authored PR or unknown PR:** **APPROVE**, with any pending readiness carried by the prepared acknowledgement. Keep actionable non-blocking findings and author questions visible.
   - **Third-party PR:** **APPROVE** when the declared increment's requirements are satisfied and every remaining finding is Low risk (including substantive actionable feedback). Use **COMMENT** when Medium/High-risk non-blocking feedback, unresolved increment/requirements context, stale/already-merged PR state, or explicit user instruction not to approve remains.
 
 `COMMENT` is invalid unless the review targets an actual PR and its author login
@@ -487,7 +476,7 @@ is known to differ from the authenticated reviewer's login.
 
 ### Challenge the eligible verdict choice
 
-`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. A pending PR operational-readiness state is likewise mechanical, so do not challenge it. For a third-party PR only, the remaining APPROVE/COMMENT choice after readiness is confirmed is discretionary and receives a Terra adversarial screen. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-screen` with:
+`REQUEST_CHANGES` is not up for debate in this pass once Step 6 has verified a Critical, High-risk finding. A third-party PR's pending operational-readiness `COMMENT` is likewise mechanical, so do not challenge it. For a third-party PR only, the remaining APPROVE/COMMENT choice after readiness is confirmed is discretionary and receives a Terra adversarial screen. Local, self-authored PR, and unknown-PR reviews have no COMMENT branch, so skip the pass after confirming no Critical High-risk blocker survived. Spawn `adversarial-screen` with:
 
 - `mode: decision` and the current review-bundle fingerprint;
 
@@ -527,19 +516,19 @@ If no `Worth-considering` items, skip the prompt entirely.
   test cases require exactly one deduplicated inline human acknowledgement for
   the whole PR. Newly added tests, including new test cases in existing files,
   do not trigger it.
-- In local mode, apply `change-set-risk.md`'s ledger-deduped first-item pre-stage
-  checklist; never infer or auto-accept readiness. Environment-variable,
+- In local mode, apply `change-set-risk.md`'s ledger-deduped tracked pre-stage
+  checklist; never prompt for, infer, or auto-accept readiness. Environment-variable,
   feature-flag, and migration readiness uses its separate stable key but never
   suppresses the code verdict.
 - Every non-blocking suggestion should include example code when the alternative is not obvious.
 - Raise only actionable feedback. Every finding or question must name a concrete author-controlled change, decision, or specific information request and the changed-line risk it resolves. Drop observations, preferences, generalized advice, and speculative future concerns.
 - Explicitly label severity on every comment: **Critical**, **Suggestion (non-blocking)**, **Question**, or **Nit**.
-- Ask rather than demand when the author may have context you lack.
+- Ask rather than demand when the author may have context you lack — as a prepared author question, never a pause for me.
 - Focus on substance; do not bikeshed formatting, naming, or style unless genuinely confusing.
 - Cross-service boundaries deserve extra scrutiny because subtle bugs hide there.
 - Tests must test what they claim; vacuous tests are worse than no tests.
 - Never re-raise an issue already present in the PR conversation.
-- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have outcome promised by the declared increment with likely or wide impact. The eventual feature may remain incomplete or non-user-facing. Raise every other concern only when it is actionable and clearly non-blocking. In local review, approve the code whenever no such blocker survives and report pre-stage checks separately. In self-authored/unknown PR reviews, operational readiness still gates approval. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved increment/requirements context remains.
+- Reserve `REQUEST_CHANGES` for verified Critical **and High-risk** merge blockers: likely production breakage, data loss/corruption/exposure, exploitable security/privacy risk, likely runtime contract break, or an omitted must-have outcome promised by the declared increment with likely or wide impact. The eventual feature may remain incomplete or non-user-facing. Raise every other concern only when it is actionable and clearly non-blocking. In local review, approve the code whenever no such blocker survives and report pre-stage checks separately. In self-authored/unknown PR reviews, pending operational readiness is carried by the prepared acknowledgement and never withholds the verdict. Use `COMMENT` only on a third-party PR when Medium/High-risk non-blocking feedback or unresolved increment/requirements context remains.
 
 ## Common Rationalizations
 
@@ -550,8 +539,8 @@ See `references/common-rationalizations.md` for the table of reviewer rationaliz
 - `references/finding-axes.md` - severity/risk/confidence definitions and the Step 6 verifier-tier rule. Read by this skill, the whole-diff worker, and both finding verifiers.
 - `references/common-rationalizations.md` - reviewer rationalizations to resist and why each is wrong.
 - `references/change-set-risk.md` - aggregate risk classification, Low-risk fast
-  approval, the single human acknowledgement, and the approval-gating operational
-  readiness confirmation.
+  approval, the single human acknowledgement, tracked operational readiness
+  confirmation, and author questions.
 - `references/incremental-delivery.md` - resolves the current promised increment
   and permits coherent internal groundwork or staged delivery without requiring
   the eventual feature to be user-facing.

@@ -10,13 +10,13 @@ Load this when `my-review` needs help deciding review source of truth.
 
 Before dispatch, produce a short triage block: resolved scope (base ref, commit
 count, file count), intent, overall change-set risk, the single PR human
-acknowledgement or first-item local pre-stage checklist when triggered, PR operational
+acknowledgement or tracked local pre-stage checklist when triggered, PR operational
 approval status or local code verdict, active lenses,
 requirements source, tracer triggers,
 author calibration when PR mode, and pending learned misses. Follow
 `change-set-risk.md`; a qualifying Low-risk set returns APPROVE before dispatch.
-In local modes, uncovered human-acknowledgement triggers return one first-item pre-stage
-checklist while the review pipeline continues. Separate ledger keys cover advisory
+In local modes, uncovered human-acknowledgement triggers return one tracked pre-stage
+checklist while the review pipeline continues; it never prompts the user. Separate ledger keys cover advisory
 acknowledgement and operational readiness. These items never suppress the local
 code verdict.
 
@@ -30,5 +30,5 @@ Also resolve the verdict relationship:
 Only `third_party_pr` is eligible for `COMMENT`. Local relationships always
 return the code verdict: `REQUEST_CHANGES` for a verified Critical, High-risk
 blocker, otherwise `APPROVE`, regardless of outstanding pre-stage checks. PR
-relationships keep the operational-readiness approval gate from
-`change-set-risk.md`.
+relationships follow `change-set-risk.md`: pending operational readiness keeps a
+third-party PR at `COMMENT` and is otherwise informational.

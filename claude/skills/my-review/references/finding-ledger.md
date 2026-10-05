@@ -56,9 +56,10 @@ feature-flag, and migration tuples. Never let the former satisfy the latter.
 Advisory tuples may include `modified-existing-test`; operational tuples never
 do.
 Suppress a local acknowledgement when every current tuple is covered by its
-matching key. If any category, path, or changed-content digest is new, ask once
-for only that uncovered set and append a new `accepted` row containing the full
-current scope after the required acknowledgement or confirmation. Line numbers
+matching key. If any category, path, or changed-content digest is new, list only
+that uncovered set on the tracked checklist; append a new `accepted` row
+containing the full current scope only after the user volunteers the required
+acknowledgement or confirmation. Never prompt for it. Line numbers
 are presentation anchors, not scope identity.
 
 The outer `my-review` wrapper owns this append. Record a faithful copy of the
@@ -79,4 +80,4 @@ Do not falsely close an item. A fresh substantive finding awaiting a user scope
 decision, a repair attempt, or a missing follow-up remains an active handoff and
 is not entered in the register until it can honestly be marked `resolved` or
 `deferred`. An unanswered or declined local human acknowledgement is likewise not
-`accepted`.
+`accepted`; it stays on the tracked checklist.

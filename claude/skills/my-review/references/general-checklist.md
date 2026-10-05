@@ -15,10 +15,11 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Call them out in the single human acknowledgement. Do not assign severity or
   inflate aggregate risk merely because repository analysis cannot see external
   environment state.
-- Withhold approval until a human explicitly confirms environment variables and
+- The acknowledgement asks the author to confirm environment variables and
   feature flags have the appropriate values/configuration in every staging and
   production environment and migrations/backfills were tested successfully in
-  staging. A generic acknowledgement or existing handoff comment is not enough.
+  staging. A generic acknowledgement or existing handoff comment is not
+  confirmation, but missing confirmation is tracked, never asked of the user.
 
 ## Critical Candidates (request changes only if verified High risk and merge-blocking)
 

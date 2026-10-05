@@ -46,8 +46,8 @@ from this increment do not disable the fast path by themselves.
 Scan aggregate diff changes in PR and local modes. Build two disjoint trigger
 sets.
 
-`operational_readiness_triggers` require explicit human confirmation before PR
-approval is eligible and remain mandatory pre-stage callouts in local review:
+`operational_readiness_triggers` require explicit human confirmation, tracked
+as an author request in PR mode and a pre-stage checklist item in local review:
 
 - database/schema/data migrations or backfills;
 - new or changed runtime environment-variable references, declarations, or
@@ -55,8 +55,8 @@ approval is eligible and remain mandatory pre-stage callouts in local review:
 - new or changed feature-flag definitions, lookups, defaults, rollout values,
   or targeting configuration.
 
-`advisory_acknowledgement_triggers` still require human acknowledgement, but do not by
-themselves withhold approval:
+`advisory_acknowledgement_triggers` still require human acknowledgement, but never
+need deployment-state confirmation:
 
 - other secrets/config lookups or deployment-time settings not already captured
   as environment variables or feature flags;
@@ -78,9 +78,10 @@ themselves withhold approval:
 These signals need deliberate human acknowledgement; the operational subset
 also requires repository-external knowledge. They are not automatic defects,
 do not acquire finding severity or risk, and do not independently justify
-`REQUEST_CHANGES`. The operational-readiness set withholds PR approval because
-the agent cannot verify deployment state or staging execution. In local review
-it is reported separately and never changes the code verdict.
+`REQUEST_CHANGES`. The operational-readiness set keeps a third-party PR at
+`COMMENT` because the agent cannot verify deployment state or staging
+execution. In every other relationship it is reported separately and never
+changes the code verdict.
 
 Normalize every trigger as `{ category, path, changed_content_digest }`, where
 `category` is `migration`, `environment-variable`, `feature-flag`, `config`,
@@ -94,9 +95,9 @@ materially changed trigger content must.
 
 ## Operational readiness clearing condition
 
-PR approval remains pending until a human explicitly confirms every applicable
-condition. Local review reports the same conditions as pre-stage checks without
-withholding its code verdict:
+Repository evidence cannot establish operational readiness, so the review
+tracks each applicable condition as an author-directed request instead of
+asking the user to resolve it:
 
 - **Environment variables:** the appropriate value has been set in every
   staging and production environment.
@@ -107,24 +108,26 @@ withholding its code verdict:
 
 A generic acknowledgement, request to continue, prior approval, passing local
 tests, or the existence/deduplication of an acknowledgement comment is not confirmation.
-Accept a direct user response or a human-authored PR statement only when it
-unambiguously confirms the applicable condition for the current normalized
-trigger tuples. Never infer it from repository contents. New or materially
-changed tuples require fresh confirmation.
+Count a condition confirmed only from a human-authored PR statement or a
+response the user volunteers that unambiguously confirms it for the current
+normalized trigger tuples. Never infer it from repository contents. New or
+materially changed tuples need fresh confirmation.
 
-When readiness confirmation is missing in PR mode, complete the substantive
-review but return `status: needs_input`,
-`approval_status: pending_human_confirmation`, and no `APPROVE` verdict. A
-verified Critical, High-risk defect may still produce `REQUEST_CHANGES`;
-otherwise a third-party PR may use `COMMENT`, while self-authored and
-unknown-ownership PR reviews remain pending without a verdict. After explicit
-confirmation, re-dispatch with the exact confirmed tuples and compute the
-ordinary relationship-constrained verdict.
+Never pause, return `needs_input`, or prompt the user for these conditions.
+The request travels with the review output — the prepared PR inline comment or
+the local tracked checklist below — so the review always completes in one pass.
 
-When readiness confirmation is missing in local mode, return
-`pre_stage_human_acknowledgement: required` and the complete checklist alongside the
-ordinary `code_verdict: APPROVE | REQUEST_CHANGES`. Never return `needs_input`
-solely for local human-acknowledgement items.
+When readiness is unconfirmed in PR mode, set
+`approval_status: pending_author_confirmation`. This is informational, not a
+gate on the review: a verified Critical, High-risk defect still produces
+`REQUEST_CHANGES`; otherwise a third-party PR uses `COMMENT` (approving while
+asking the author to confirm deployment state would contradict the request),
+and self-authored and unknown-ownership PR reviews return their ordinary code
+verdict with the readiness comment attached.
+
+When readiness is unconfirmed in local mode, return
+`pre_stage_human_acknowledgement: tracked` and the complete checklist alongside the
+ordinary `code_verdict: APPROVE | REQUEST_CHANGES`.
 
 ### PR mode
 
@@ -137,7 +140,7 @@ Build one `human_acknowledgement` for the entire PR:
   irreversible migration, environment-variable change, feature-flag change,
   production-infra change, a modified existing test, then a newly added
   suppression
-- `operational_confirmation`: `confirmed | required | not_applicable`
+- `operational_confirmation`: `confirmed | pending_author | not_applicable`
 
 Emit exactly one inline annotation at `primary_anchor`, titled
 `Human acknowledgement requested`, and list the other anchors in its body so a reviewer
@@ -162,7 +165,7 @@ claim that the change is high-risk.
 - `<path:line>` — <migration | environment-variable | feature-flag | config | infra/ops | lint/tooling suppression | modified existing test>
 - `<path:line>` — <category>
 
-Before approval, please explicitly confirm:
+Please reply to confirm:
 - each changed environment variable has its appropriate value set in every
   staging and production environment;
 - each changed feature flag has its appropriate value/configuration set in
@@ -172,8 +175,7 @@ Before approval, please explicitly confirm:
 For any other listed config, infrastructure, or suppression anchors, please
 verify the operational intent. For modified existing tests, acknowledge that
 the expectation or coverage change is intentional and still protects the
-desired outcome. Approval remains pending only for the applicable
-environment-variable, feature-flag, and migration confirmations above.
+desired outcome.
 ```
 
 If all readiness tuples already have valid human confirmation, retain any
@@ -189,42 +191,55 @@ Compare each set
 with the matching workflow ledger's latest `accepted` scope and the wrapper's
 invocation-local confirmed/accepted scopes.
 
-Present one combined first review item when either set is uncovered. List every
-uncovered `category` and `path:line`, then state the applicable facts a human
-must verify before staging or production promotion:
+Render one combined **Pending before PR or staging** checklist when either set
+is uncovered. It is tracked output, not a question: list every uncovered
+`category` and `path:line`, then the applicable facts someone must verify,
+worded so it can be pasted into the eventual PR description or handoff:
 
-> This local change set includes changes that require human acknowledgement.
-> For every listed environment variable and feature flag, confirm that
-> its appropriate value/configuration has been set in every staging and
-> production environment. For every listed migration or backfill, confirm that
-> it has been tested successfully in staging. Please also acknowledge any other
-> listed config, infrastructure, tooling-suppression, or edited-existing-test
-> changes. For edited tests, acknowledge that the changed expectations or
-> coverage are intentional and still protect the desired outcome. These checks do
-> not imply that the change is unusually risky and do not change the code
-> verdict. They must be completed before the affected change is promoted to
-> staging or production.
+> - [ ] Each listed environment variable and feature flag has its appropriate
+>   value/configuration in every staging and production environment.
+> - [ ] Each listed migration or backfill has been tested successfully in staging.
+> - [ ] Listed config, infrastructure, and tooling-suppression changes match
+>   their operational intent.
+> - [ ] Edited existing tests' changed expectations or coverage are intentional
+>   and still protect the desired outcome.
 
-Do not ask once per anchor or repeat the prompt in Questions/residual risk.
-Auto/no-questions mode cannot omit it. Continue the substantive review and
-return the code verdict in the same pass, regardless of confirmation state.
+Do not repeat it per anchor or in Questions/residual risk. Auto/no-questions
+mode cannot omit it. It never delays, re-dispatches, or changes the code
+verdict.
 
-- **Explicit readiness confirmation:** the outer wrapper appends an `accepted`
-  Finding Register row for `review-handoff.operational-readiness`, faithfully
-  recording the confirmed facts, exact normalized readiness tuples, and review
-  scope/base. Re-dispatch with those tuples as confirmed scope.
-- **Explicit advisory acknowledgement:** the wrapper may append the existing
+- **Volunteered readiness confirmation:** when the user explicitly confirms the
+  facts unprompted, the outer wrapper appends an `accepted` Finding Register row
+  for `review-handoff.operational-readiness`, faithfully recording the confirmed
+  facts, exact normalized readiness tuples, and review scope/base.
+- **Volunteered advisory acknowledgement:** the wrapper may append the existing
   `accepted` row for `review-handoff.local-sensitive-changes`, covering only the
   advisory tuples.
-- **Negative or incomplete response:** append nothing for the unconfirmed set;
-  preserve the anchors and pre-stage status without changing the code verdict.
-- **No matching ledger:** accept the facts for this invocation, but report that
-  they cannot be durably reused. Never create a workflow ledger; ledger creation
-  remains owned by `my-workflow`.
+- **No response, or a negative/incomplete one:** append nothing; the items stay
+  on the tracked checklist.
+- **No matching ledger:** honor a volunteered confirmation for this invocation
+  only. Never create a workflow ledger; ledger creation remains owned by
+  `my-workflow`.
 
-On later passes, suppress a prompt only when every current normalized tuple is
+On later passes, omit a checklist item only when every current normalized tuple is
 covered by the latest matching `accepted` row or exact invocation-local scope.
 A new category, path, or changed-content digest is new scope. Prior rows for
 `review-handoff.local-sensitive-changes` never confirm operational readiness;
 the separate key intentionally prevents older acknowledgements from unlocking
 approval under this stronger contract.
+
+## Author questions
+
+Clarification needs follow the same rule: track them, never pause for them.
+A `Severity: Question` finding, a verifier `requires clarification`, and any
+walk-through candidate that is purely a request for author-only information
+become author questions:
+
+- **PR mode:** one prepared inline comment per question at its changed-line
+  anchor, phrased to the author, naming the exact decision or information
+  needed and, for `requires clarification`, the exact check to run. Dedupe
+  against existing threads by substance.
+- **Local mode:** list them in the output's Questions section in the same
+  author-directed wording, so they can be carried into the PR.
+
+An unanswered question never becomes `REQUEST_CHANGES` or `needs_input`.

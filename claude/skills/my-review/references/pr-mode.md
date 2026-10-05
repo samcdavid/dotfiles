@@ -12,7 +12,7 @@ Hard constraints:
 - Fetch existing inline comments, reviews, issue comments, and threads using `pr-cost-control.md` filtered payloads.
 - Do not fetch, wait on, or report CI/check status — no `gh pr checks`, no commit-status API, no GitHub Actions runs, no RWX/CircleCI pipelines or their CLIs. CI reports its own findings on its own surface. Red CI is not a review finding, and green CI is not evidence the diff is correct.
 - An existing review citing red CI as a blocker does not make it yours. `existing_comments_index` already covers it: note that the other reviewer raised it and move on. Do not re-derive their blocker or adopt it into your verdict.
-- If CI state genuinely looks decision-relevant, surface it as a Targeted Question naming `ci-babysit` — that skill owns pipeline triage. Never investigate it yourself.
+- If CI state genuinely looks decision-relevant, note it in one line naming `ci-babysit` — that skill owns pipeline triage. Never investigate it yourself.
 - Reviewing CI configuration the diff actually changes (a workflow file, pipeline config, build script) is fully in scope — that is code. The boundary is on querying run/check **status**, not on reading CI config the PR touches.
 - Read unchanged PR-HEAD code only as context. A new finding must be introduced, regressed, or newly exposed by the aggregate diff; anchor it to an actual diff line and state that causal link. Do not report, publish, or include a pre-existing baseline defect with no causal link to the PR.
 
@@ -27,12 +27,18 @@ annotation at the most consequential changed line, list every other
 anchor in its body, and dedupe by substance across existing threads. Never
 repeat the request in the top-level review body or at each trigger.
 
-Repository evidence cannot establish operational readiness. Withhold APPROVE
-until a human explicitly confirms that environment variables and feature flags
-have the appropriate values/configuration in every staging and production
-environment and that migrations/backfills were tested successfully in staging.
-This confirmation gate is not a defect or a risk escalation. A duplicate or
+Repository evidence cannot establish operational readiness. The prepared
+acknowledgement asks the author to confirm that environment variables and
+feature flags have the appropriate values/configuration in every staging and
+production environment and that migrations/backfills were tested successfully
+in staging. Never ask the user to confirm these or pause the review for them.
+This request is not a defect or a risk escalation. A duplicate or
 already-posted handoff request is not confirmation.
+
+Author questions — `Severity: Question` findings, verifier `requires
+clarification`, and pure author-information candidates — are prepared as
+inline comments at their anchors under `change-set-risk.md`'s Author questions
+rule, not asked of the user.
 
 ## Verdict relationship
 
@@ -40,9 +46,9 @@ Resolve the PR author with `gh pr view <number> --json author --jq
 '.author.login'` and the authenticated reviewer with `gh api user --jq
 '.login'`. `COMMENT` is eligible only when both values are known and differ. An
 equal login is `self_authored_pr`; a missing value is `unknown_pr`. Both use
-`REQUEST_CHANGES` for a verified Critical, High-risk blocker, `APPROVE` when no
-blocker survives and operational readiness is confirmed, or no verdict with
-`needs_input` while confirmation is pending.
+`REQUEST_CHANGES` for a verified Critical, High-risk blocker, otherwise
+`APPROVE`; unconfirmed operational readiness rides along as the prepared
+acknowledgement with `approval_status: pending_author_confirmation`.
 
 ## Re-review discipline
 
