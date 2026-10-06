@@ -18,11 +18,12 @@ git revert <commit> # only when reverting the whole recorded change is correct
 Do not hand-edit `codex/agents/*.toml`; change canonical agent Markdown, run
 `scripts/sync-codex-agents`, then record the behavior change below.
 
-## 2026-10-06 — my-loop: codegen always in scope
+## 2026-10-06 — my-loop: codegen and pre-commit fixes always in scope
 
 | Commit | Change | Regression boundary / known-good meaning |
 | --- | --- | --- |
 | `bb1500b` | `my-loop`: running the project's own codegen after a granted-path change, and the files it rewrites, are always in scope without a fresh grant. Each slice commits its codegen output with the source that produced it. Generated files are never hand-edited, and migration generators still route to `my-workflow`. | If loops start hand-editing generated files or treating migrations as codegen, compare against this commit; known-good prior state: `1c0db3e`. |
+| `379edaf` | Broadens `bb1500b`: any codegen (types, schemas, API clients) and any fix the pre-commit hook needs (formatting, lint, type errors the slice caused) are in scope wherever the files live, overriding `commit`'s stop on out-of-commit hook-flagged files. Still no `--no-verify`; stops if a hook fix changes behavior beyond the slice's goal or on a third same-root failure. | If loops start making unrelated edits under the banner of hook fixes, compare against this commit. |
 
 ## 2026-10-05 — my-review and pr-overview: track confirmations as author comments; commit hook fixes
 
