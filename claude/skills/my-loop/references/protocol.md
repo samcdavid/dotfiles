@@ -17,11 +17,19 @@ truth.
 3. **One explicit scope grant.** Before the first edit, state the goal and the
    paths you expect to touch, and wait for the user to grant them. Editing
    outside the granted paths, or changing the goal, needs a fresh grant. Never
-   infer implementation permission. Codegen is always in scope: running the
-   project's own generator after a granted-path change, and the files it
-   rewrites, need no extra grant because they are a mechanical consequence of
-   an already-granted edit. Generated files are never hand-edited, and a
-   migration generator is not codegen here — it still routes per constraint 9.
+   infer implementation permission. Two kinds of edit are always in scope,
+   wherever the files live, because they are a mechanical consequence of an
+   already-granted edit rather than new work:
+   - **Codegen** — running any project generator (types, schemas, API clients,
+     and the like) and the files it rewrites. Generated files are never
+     hand-edited, and a migration generator is not codegen here — it still
+     routes per constraint 9.
+   - **Pre-commit unblocking** — whatever fix the project's pre-commit hook
+     needs before the slice's commit can land (formatting, lint, type errors
+     the slice caused). This overrides `Skill(commit)`'s stop for hook-flagged
+     files outside the commit. Never bypass the hook with `--no-verify`; stop
+     and report if the fix would change behavior beyond the slice's goal, or
+     after the third same-root failure.
 4. **Slices are small and test-first.** A slice proves one behavior: RED, then
    the minimum GREEN, then the narrowest check that can disprove it. Pure
    refactors or config edits that cannot be tested behaviorally say so and
@@ -36,8 +44,9 @@ truth.
    `Next` every slice rather than appending to them. Decisions and slices are
    one-line or four-line entries. If the log reads like a spec, it has drifted.
 8. **Commit each verified slice.** Commit locally through `Skill(commit)`, scoped
-   to that slice's files plus any codegen output that slice produced, so the
-   source and its generated files never land in separate commits. A slice that
+   to that slice's files plus any codegen output and pre-commit fixes it
+   needed, so the change and its mechanical follow-ups never land in separate
+   commits. A slice that
    failed its check stays uncommitted for inspection.
 9. **Know when to leave.** Migrations, persisted schema/data changes,
    multi-issue or sibling-coordinated work, or a request for an up-front plan
