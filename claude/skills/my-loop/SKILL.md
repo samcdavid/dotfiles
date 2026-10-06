@@ -40,7 +40,8 @@ Under Codex, read the `~/.agents/rules/` equivalents explicitly. Always read
 
 1. **Orient.** Find or create the branch-matched loop log. Read the request and
    only the code needed to state the goal and a first slice. Ask for the edit
-   scope (goal plus paths) once; never edit before it is granted.
+   scope (goal plus paths) once; never edit before it is granted. Running the
+   project's codegen and committing its output is always in scope.
 2. **Slice.** Repeat until the user says the goal is met:
    understand → act (RED then GREEN) → inspect (show the diff and test result)
    → clarify (one question, only if this slice surfaced a user-owned decision)

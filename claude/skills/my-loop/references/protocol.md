@@ -17,7 +17,11 @@ truth.
 3. **One explicit scope grant.** Before the first edit, state the goal and the
    paths you expect to touch, and wait for the user to grant them. Editing
    outside the granted paths, or changing the goal, needs a fresh grant. Never
-   infer implementation permission.
+   infer implementation permission. Codegen is always in scope: running the
+   project's own generator after a granted-path change, and the files it
+   rewrites, need no extra grant because they are a mechanical consequence of
+   an already-granted edit. Generated files are never hand-edited, and a
+   migration generator is not codegen here — it still routes per constraint 9.
 4. **Slices are small and test-first.** A slice proves one behavior: RED, then
    the minimum GREEN, then the narrowest check that can disprove it. Pure
    refactors or config edits that cannot be tested behaviorally say so and
@@ -32,8 +36,9 @@ truth.
    `Next` every slice rather than appending to them. Decisions and slices are
    one-line or four-line entries. If the log reads like a spec, it has drifted.
 8. **Commit each verified slice.** Commit locally through `Skill(commit)`, scoped
-   to that slice's files. A slice that failed its check stays uncommitted for
-   inspection.
+   to that slice's files plus any codegen output that slice produced, so the
+   source and its generated files never land in separate commits. A slice that
+   failed its check stays uncommitted for inspection.
 9. **Know when to leave.** Migrations, persisted schema/data changes,
    multi-issue or sibling-coordinated work, or a request for an up-front plan
    route to `my-workflow`. Record the reason in the log and hand the user
