@@ -77,7 +77,7 @@ Do a quick triage to pick which review **lenses** apply. Lenses drive which chec
 ### Inputs
 
 - PR description, commit messages
-- Linked Linear issue(s), referenced specs / RFCs / design docs (fetch them — don't infer)
+- Linear issue, milestone, project, and team context, and the repo's `docs/` for the changed area (fetch them — don't infer; see Requirements checklist below)
 - File-level scan of the diff: which areas changed? (backend / frontend / migrations / config / infra / tests / docs / dependency manifests)
 - Existing reviewer assignments or labels on the PR
 
@@ -99,9 +99,21 @@ Do a quick triage to pick which review **lenses** apply. Lenses drive which chec
 
 If the change has no obvious lens fit, default to **Backend + Security + QA**.
 
-### Requirements checklist (if a ticket is linked)
+### Requirements checklist
 
-If the PR description links to a Linear ticket (e.g. `ENG-123`, `Fixes ENG-123`, Linear URL), fetch it via the Linear MCP and build a `requirements_checklist`: title, description, acceptance criteria, sub-issues. Pass this to the orchestrator.
+Always look for requirements, not only when a ticket is linked. Build one `requirements_checklist` from both sources below, each entry tagged with where it came from. Pass it to the orchestrator.
+
+**Linear.** Find the issue from the PR description, branch name, commit messages, `$ARGUMENTS`, or a matching thoughts file in `~/.thoughts/work/`. If `$ARGUMENTS` names a milestone, project, or team instead, start there. Fetch each level that exists, using whichever were given or that the issue points to:
+- **Issue** — description, acceptance criteria, sub-issues, parent, and comments where PM or design refine scope.
+- **Milestone** — its description and target, and sibling issues that define what this change must not break or duplicate.
+- **Project** — description, linked project documents and specs, and stated out-of-scope items.
+- **Team** — team-level documents or conventions that set requirements. If no issue was found, search the team's open issues for one matching the change before concluding none exists.
+
+**Repo docs.** Read the docs for the changed area: specs, ADRs and contracts under `docs/<area>/`, plus the product and convention rules reached from `docs/guides/` `README.md` and `docs/guides/<app>/README.md`. Documented behavior and conventions count as requirements.
+
+When Linear and the docs disagree, or the change contradicts the docs, raise it as a Targeted Question naming both sources. When the change alters behavior the docs describe and doesn't update them, that's a non-blocking finding. If neither source has anything, say so in triage and ask me once for the source of truth before treating the review as requirements-free.
+
+Activate the **PM** lens whenever the checklist has entries.
 
 ### Tracer triggers
 
@@ -121,7 +133,7 @@ Produce a short triage block and show it to me before going deep:
 - **Lenses identified:**
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
-- **Requirements checklist:** built from <ticket ID> | none linked
+- **Requirements checklist:** <N> items from <issue / milestone / project / team / docs paths> | none found
 - **Tracer triggers:** <list which fired, or "none">
 - **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
 - **Auto-promoted since last review:** <count> · <target file(s) + Shape one-liner(s)> (or "none")

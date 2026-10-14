@@ -28,7 +28,7 @@ The calling skill passes:
 - `lenses`: active lenses from the caller's triage. Values from {Backend, Frontend, Full-stack, Security, Architecture, Ops, QA, PM, Performance, Migration, Dependency}
 - `author_calibration`: `"Junior"` | `"Mid"` | `"Senior"` | `"Lead"` | `"Staff+"`
 - `existing_comments_index`: list of `{path, line, summary, thread_root_id}` for dedupe (PR mode)
-- `requirements_checklist`: list of acceptance criteria from a linked Linear ticket, or null
+- `requirements_checklist`: requirements gathered from Linear (issue, milestone, project, team) and the repo's `docs/`, each tagged with its source, or null
 - `plan_surfaces`: predicted surfaces from `~/.thoughts/work/` if a matching plan file exists, or null
 - `tracer_triggers`: object with booleans `{pm_lens_active, ticket_linked, requirements_audit_escalated, neighbor_commits_heuristic}` — spawn `requirements-tracer` if any is true
 
@@ -94,7 +94,7 @@ For each active lens, apply the appropriate focus during the systematic review:
 - **Architecture** → Apply the architecture lens checklist. Map dependency directions between changed modules. Evaluate layering. Identify hidden coupling.
 - **Ops** → Audit observability for the new code paths. Verify config externalization. Identify unbounded resource consumption. Assess rollback paths and migration safety.
 - **QA** → Apply the quality lens checklist. Identify functions that lack unit tests despite branching logic. Flag tests that look vacuously passing. Audit mock/stub fidelity.
-- **PM** → Apply the requirements lens checklist. Map every acceptance criterion to specific code changes. Flag missing requirements and out-of-scope changes.
+- **PM** → Apply the requirements lens checklist. Map every acceptance criterion and documented behavior to specific code changes. Flag missing requirements and out-of-scope changes.
 - **Performance** → Apply the performance lens checklist. Identify queries on large tables, hot-path computation, unbounded iteration. Verify index usage matches operator semantics.
 - **Migration safety** → Audit lock risk on large tables. Verify down-migrations. Check column types match domain semantics.
 - **Dependency** → Check new packages for maintenance status, license, and known security advisories. Identify what existing functionality, if any, this duplicates.
@@ -179,9 +179,9 @@ Return findings as a single markdown document with the structure below. The call
 
 ### Requirements Traceability
 [Only if a `requirements_checklist` was supplied OR PM lens was active. Use a markdown table:]
-| Requirement | Status | File(s) |
-|---|---|---|
-| [Acceptance criterion] | Covered / Missing / Partial | `path:line` |
+| Requirement | Source | Status | File(s) |
+|---|---|---|---|
+| [Acceptance criterion or documented behavior] | [Linear ID / milestone / project / team / `docs/` path] | Covered / Missing / Partial / Contradicts | `path:line` |
 
 ### Related-Issue Regression Risks
 [Only if `requirements-tracer` was spawned and surfaced At-risk findings.]

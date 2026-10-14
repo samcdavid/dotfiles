@@ -9,16 +9,22 @@ Determine scope:
 - If `$ARGUMENTS` contains a Linear ticket ID or URL → audit changes for that ticket
 - If empty → ask the user what to audit
 
-A requirements audit requires a spec to audit against. If neither a PR description nor a Linear ticket provides acceptance criteria, ask the user for the source of truth.
+A requirements audit requires a spec to audit against. If the PR description, Linear (issue, milestone, project, team), and the repo's `docs/` all lack requirements, ask the user for the source of truth.
 
 ## Step 1 — Gather the Spec
 
 ### From Linear (primary source)
-Fetch the linked ticket using Linear MCP tools:
-- Title, description, acceptance criteria
-- Sub-issues and their acceptance criteria
-- Parent issue/project for broader context
+Fetch every level that applies using Linear MCP tools:
+- Issue: title, description, acceptance criteria, sub-issues, parent
 - Comments — especially from PM, design, or stakeholders that clarify intent
+- Milestone: description, target, and sibling issues
+- Project: description, project documents and specs, stated out-of-scope items
+- Team: team-level documents or conventions that set requirements
+
+### From the repo's docs (primary source)
+- Specs, ADRs, and contracts under `docs/<area>/` for the changed area
+- Product and convention rules reached from `docs/guides/` and the app's guide README
+- Documented behavior counts as a requirement. A change that contradicts the docs is either a bug or a stale doc; say which, with evidence.
 
 ### From PR Description
 - PR description and any linked documents
