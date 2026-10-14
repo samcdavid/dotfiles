@@ -140,7 +140,6 @@ Produce a short triage block and show it to me before going deep:
 - **Requirements checklist:** <N> items from <issue / milestone / project / team / docs paths> | none found
 - **Human acknowledgements:** <count> · <categories> (or "none")
 - **Tracer triggers:** <list which fired, or "none">
-- **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
 - **Auto-promoted since last review:** <count> · <target file(s) + Shape one-liner(s)> (or "none")
 - **Pending learned misses:** <count> (run `/my-review promote` to triage early)
 ```
@@ -153,20 +152,6 @@ If `status: ready` entries exist (auto-promote blocked on ambiguous target), cal
 
 Proceed automatically unless I override.
 
-### Author Skill Level (PR Mode only)
-
-Ask which skill level to calibrate against. Skip for Local Mode.
-
-| Level | Calibration |
-|---|---|
-| **Junior** | Thorough and educational. Explain *why*. Encouraging on good work. |
-| **Mid** | Standard. Explain non-obvious issues. Trust they can implement fixes given a clear problem description. |
-| **Senior** | Concise and direct. Focus on subtle bugs and architecture. Skip explanations of well-known patterns. |
-| **Lead** | Concise and strategic. Maintainability, team-wide impact, precedent. |
-| **Staff+** | Peer review. Systemic impact, cross-team implications, design tradeoffs. Frame as discussion. |
-
-Default: **Lead** if I skip.
-
 ## Step 3 — Spawn the orchestrator
 
 Invoke the `review-orchestrator` agent. Pass the full input bundle:
@@ -177,7 +162,6 @@ Invoke the `review-orchestrator` agent. Pass the full input bundle:
 - diff_text (the unified diff)
 - changed_files
 - lenses (active lenses from Step 2)
-- author_calibration
 - existing_comments_index
 - requirements_checklist (or null)
 - plan_surfaces (or null)
@@ -348,7 +332,7 @@ Pick one based on the surviving findings. Human acknowledgements don't count tow
 Spawn the **adversarial-debate** agent with:
 - The proposed verdict
 - The final surviving findings (blocking, non-blocking, questions, deep-dive subsections)
-- The triage from Step 2 (lenses, intent, author calibration)
+- The triage from Step 2 (lenses, intent)
 
 The agent challenges in **both directions** and returns:
 - **KEEP** — proposed verdict stands
@@ -358,7 +342,6 @@ The agent challenges in **both directions** and returns:
 Prompts the agent should consider:
 - Is this verdict too soft? Did you miss a blocker hiding in the non-blocking suggestions or deep-dive subsections?
 - Is this verdict too harsh? Are the blocking issues actually blocking, or are you over-blocking on preference / style / "I'd write it differently"?
-- Does the verdict match the author calibration?
 - If APPROVE: does every blocking-class category (correctness, security, contracts, migrations, requirements) have at least one piece of evidence it was actually checked?
 - If REQUEST_CHANGES: is the worst finding genuinely "must-fix-before-merge" or just "should-fix-someday"?
 

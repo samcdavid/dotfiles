@@ -27,7 +27,6 @@ The calling skill passes:
 - `diff_text`: the unified diff (already retrieved)
 - `changed_files`: list of paths
 - `lenses`: active lenses from the caller's triage. Values from {Backend, Frontend, Full-stack, Security, Architecture, Ops, QA, PM, Performance, Migration, Dependency}
-- `author_calibration`: `"Junior"` | `"Mid"` | `"Senior"` | `"Lead"` | `"Staff+"`
 - `existing_comments_index`: list of `{path, line, summary, thread_root_id}` for dedupe (PR mode)
 - `requirements_checklist`: requirements gathered from Linear (issue, milestone, project, team) and the repo's `docs/`, each tagged with its source, or null
 - `plan_surfaces`: predicted surfaces from `~/.thoughts/work/` if a matching plan file exists, or null
@@ -108,12 +107,6 @@ For every potential finding, before recording it:
 
 1. Check `existing_comments_index`. If a thread covers the same `(file, line, substance)` triple, skip entirely. If a thread is incomplete or misses a nuance, you may record the finding with `add_to_thread: <thread_root_id>` set.
 2. Verify the claim is grounded in the diff (PR mode) or the working tree (Local mode). Do not include a finding whose evidence is "I think this is generally true" — point at specific lines.
-3. Apply the author calibration:
-   - **Junior** — thorough and educational; explain WHY.
-   - **Mid** — standard; explain non-obvious issues; trust they can implement fixes.
-   - **Senior** — concise and direct; subtle bugs and architecture; skip explanations of well-known patterns.
-   - **Lead** — concise and strategic; maintainability, team-wide impact, precedent.
-   - **Staff+** — peer review; systemic impact, cross-team implications; frame as discussion.
 
 ## Step 5 — Surface targeted questions
 
