@@ -1,6 +1,7 @@
 ---
 name: pulse
 description: "Digest of recent activity in the current repo: hot areas, significant changes, and what each contributor worked on."
+when_to_use: "Use when the user asks what's been happening in the repo lately, who has been working on what, or for a recent-activity digest."
 effort: xhigh
 ---
 

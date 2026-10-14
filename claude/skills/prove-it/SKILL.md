@@ -1,6 +1,7 @@
 ---
 name: prove-it
 description: "Fact-check the conversation: back every claim with a reference, rate confidence, then have adversarial-debate challenge it."
+when_to_use: "Use when the user questions a claim ('are you sure?', 'is that right?', 'source?') or asks for evidence behind an answer."
 effort: xhigh
 ---
 

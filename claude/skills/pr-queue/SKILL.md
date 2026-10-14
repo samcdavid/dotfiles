@@ -1,6 +1,7 @@
 ---
 name: pr-queue
 description: "Table of open PRs in the current repo that are waiting on my review, with size stats; refreshable and filterable."
+when_to_use: "Use when the user asks what PRs are waiting on their review, what's in their review queue, or to refresh that list."
 effort: xhigh
 ---
 
