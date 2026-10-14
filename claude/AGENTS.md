@@ -27,7 +27,7 @@ Tolerate small non-blocking issues. Batch quality passes rather than blocking pr
 
 ## Separate Implementer from Reviewer
 
-The one reviewing should not be the one who wrote the code. When reviewing your own work (via /my-validate or /my-review), approach it as a skeptical outsider. Re-read the code fresh — do not rely on what you "remember" writing.
+The one reviewing should not be the one who wrote the code. When reviewing your own work (via /my-review), approach it as a skeptical outsider. Re-read the code fresh — do not rely on what you "remember" writing.
 
 ## Comments Explain Why, Not What or How
 

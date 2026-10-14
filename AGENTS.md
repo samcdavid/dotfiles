@@ -28,55 +28,39 @@ Personal dotfiles managed through the [rcm suite](https://github.com/thoughtbot/
 - RCM links the runtime directories listed in `rcrc`: `claude/agents`, `claude/rules`, `agents/skills`, `agents/rules`, `codex/agents`, `config/opencode/agents` and `config/opencode/plugins` (which RCM's `config/` convention places under `~/.config/opencode/`), and `pi/agent/agents`.
 - This file (`AGENTS.md`) is the canonical content; the repo-local `CLAUDE.md` is a symlink to it, so Claude Code and Codex read the same project guidance from a single source. `AGENTS.md` is excluded from RCM and should not be linked into `$HOME` — Codex discovers it directly from the project root.
 
+Skill style (reset 2026-10-14, undo point: tag `pre-reset`):
+
+- Skills are short prompts in the spirit of `eli8g`: a `SKILL.md` of roughly 300 words or fewer, with a `references/` file only for genuinely standalone material (a template, a checklist). No runner/wrapper agents, ledgers, envelopes, or pipelines. The old multi-stage workflow was replaced by one `work` skill; `my-review` is the 2026-06-02 reviewer restored (its lens checklists live in `my-review/references/lenses/`).
+- Every skill and agent sets `effort: xhigh` and no `model:`, so everything runs on the session model.
+- Agents exist only where a skill dispatches them: `review-orchestrator` and its research helpers for `my-review`, and `adversarial-debate` for `my-review`, `prove-it`, and `address-pr-feedback`.
+- Always-loaded rules stay minimal (`no-outward-actions.md`, `comment-style.md`); they cost context in every session and subagent.
+
 When changing skills or agents:
 
 1. Edit canonical files under `claude/skills/`, `claude/agents/`, or `claude/rules/`.
 2. If a new skill is added, add `agents/skills/<name> -> ../../claude/skills/<name>` so Codex can discover it.
 3. If Claude agents changed, run `scripts/sync-codex-agents`, `scripts/sync-opencode-agents`, and `scripts/sync-pi-agents` to regenerate `codex/agents/*.toml`, `config/opencode/agents/*.md`, and `pi/agent/agents/*.md`.
-4. Keep longer skill instructions in one `references/protocol.md` per skill, and keep genuinely standalone material (gotchas, checklists, templates, mined patterns) as separate files in `references/`. Do not reintroduce the `protocol-index.md` + `protocol-sections/` split: the extra hop cost a serial read per section, its index rows carried no routing signal, and it let the same instruction drift between the index label and the section body. `check-agent-drift` caps reference files at 6000 words — split by topic when one outgrows that.
-5. Run `scripts/check-agent-drift` before finishing larger instruction changes. It checks symlinks, generated Codex/OpenCode/pi agents, critical-agent reasoning effort, home links, entrypoint budgets, cited-file existence, and dangling `$HOME` symlinks. The cited-file check scans every backticked `*.md` path containing a `/` in `claude/skills/` and `claude/agents/` (including `CHANGELOG.md`), but resolves it only against the citing file's directory, its skill/agent root, `claude/skills/`, `claude/agents/`, and the `~/.claude/`/`~/.agents/` prefixes — never the repo root. A repo-root path like `claude/AGENTS.md` therefore fails the pre-commit hook even though it exists; cite it as a bare filename or a `~/` home path instead.
-6. Run `rcup` after changing RCM-managed directories or `rcrc`, then verify the relevant `$HOME` symlinks. Renaming or deleting a file leaves a dangling `$HOME` symlink that `rcup` cannot clean up — remove it explicitly; `check-agent-drift` will flag it.
-7. For a user-visible skill/agent behavior, safety, workflow, or model-routing change, add a concise entry with its commit SHA to `claude/skills/CHANGELOG.md`. This is the regression and known-good-point index; skip typo-only or formatting-only edits.
+4. Run `scripts/check-agent-drift` before finishing. It checks symlinks, generated agents, home links, entrypoint budgets, cited-file existence, and dangling `$HOME` symlinks. The cited-file check resolves backticked `*.md` paths only against the citing file's directory, its skill/agent root, `claude/skills/`, `claude/agents/`, and the `~/.claude/`/`~/.agents/` prefixes — never the repo root — so cite repo-root files as a bare filename or a `~/` home path.
+5. Run `rcup` after changing RCM-managed directories or `rcrc`. Renaming or deleting a file leaves a dangling `$HOME` symlink that `rcup` cannot clean up — remove it explicitly; `check-agent-drift` will flag it.
+6. For a user-visible behavior change, add a concise entry with its commit SHA to `claude/skills/CHANGELOG.md`.
 
-Git boundary for skills and agents:
+Boundaries:
 
-- Local commits are **expected**, not gated: `my-implement` commits each verified delegated phase via the `commit` skill; `my-quick` and `address-pr-feedback` ensure every validated phase or fix is committed. Work that failed validation or escalated stays uncommitted.
-- The gated boundary is remote: no push, no PR create/update, no published replies or thread resolution without an explicit request. `claude/rules/no-outward-actions.md` is the single source.
-- `my-workflow` completes every planned phase through `my-implement`, then runs
-  one whole-plan `my-validate` gate before it enters `implement-review`. Only
-  then does the unattended five-pass review/repair loop begin: `my-review` ->
-  bounded repair -> `my-validate` -> `my-review`. `implement-review` never
-  performs initial plan execution, and nits never trigger another pass.
-- Lint and format enforcement is delegated to each project's own pre-commit hooks, not to Claude-side tooling. The `claude/hooks/checks.sh` PreToolUse gate (`if: Skill(commit)`) was removed 2026-09-04: it never reliably blocked a bad commit, so it added latency without enforcement. Skills also no longer instruct the model to manually run lint/format commands as part of their own verification — that duplicates work a working pre-commit hook already does, and duplicates work an absent one won't do either way.
+- Local commits are expected; remote actions (push, PR create/update, published reviews/replies, thread resolution) need an explicit request. `claude/rules/no-outward-actions.md` is the single source.
+- Lint and format enforcement belongs to each project's own pre-commit hooks, not Claude-side tooling.
 
 Frontmatter conventions:
 
 - Skills use kebab-case tool fields (`allowed-tools`, `disallowed-tools`); agents use camelCase (`disallowedTools`). They are not interchangeable.
-- Express reasoning intent with `effort:` rather than a model pin. See `claude/rules/model-escalation.md`.
-- Read-only skills and agents set a tool deny list so read-only is mechanical, not just prose. `my-review` is deliberately excluded — it writes to `references/learned-misses.md`.
-- Quote any `description:`/`when_to_use:` value containing a colon. The loader is lenient, but unquoted colons are invalid YAML and break `yq`-style tooling.
-- `disable-model-invocation: true` also removes the description from the always-injected skill listing, so it is the lever for listing-budget savings. **Verified 2026-07-27:** it also blocks explicit `Skill` tool calls, not just autonomous ones — the call fails with `Skill <name> cannot be used with Skill tool due to disable-model-invocation`. Never set it on a skill another skill is told to invoke (the pipeline stages, `this-important`, `walk-through`, `commit`), and never write "run `X`" for a flagged skill — hand the user `/X` instead.
-- New skills are not registered mid-session. Adding a skill requires a fresh session before it can be invoked, so a skill cannot be tested in the session that created it.
-- Add `when_to_use:` only to skills that should fire unprompted; it is appended to the description in the always-on listing, so it costs context on every session.
+- Quote any `description:`/`when_to_use:` value containing a colon.
+- `disable-model-invocation: true` also blocks explicit `Skill` tool calls (verified 2026-07-27). Never set it on a skill another skill invokes (e.g. `commit`).
+- New skills are not registered mid-session; test a new skill in a fresh session.
+- Add `when_to_use:` only to skills that should fire unprompted; it costs context in every session.
 
 Automation:
 
 - `.githooks/pre-commit` runs `scripts/check-agent-drift`; this repo configures `core.hooksPath=.githooks`.
-- In `my-review`, the session-model default tier performs discovery and one
-  whole-diff review. The deep tier (`model: opus` / `codex-model: gpt-6-sol`)
-  is reserved for isolated findings only when `(severity == Critical OR risk ==
-  High) AND confidence >= 80`, through `finding-verifier-high`.
-- `scripts/sync-codex-agents` maps a source agent's `effort:` straight to `model_reasoning_effort`, falling back to `model: opus` -> `xhigh` for agents that have not moved to `effort:`.
-- Agents default to `model: inherit` and skills omit `model:`, so both run on the session model; Codex agents omit `codex-model:` for the same reason. Only the deep tier pins a model (`adversarial-debate` and `finding-verifier-high`: `model: opus`, `codex-model: gpt-6-sol`). Changed 2026-09-25: the old blanket `sonnet`/`gpt-5.6-terra` pins capped every skill below an Opus/Sol session.
-- A per-agent `codex-model:` pins that one agent's Codex model and takes precedence over the repo-wide `CODEX_CRITICAL_MODEL` env var. Because the default tier now inherits the session model and the Codex session runs `gpt-6-sol`, the `finding-verifier-low`/`-high` pair runs on the same Codex model and is split only by reasoning effort (`medium` vs `xhigh`) — an accepted tradeoff. `check-agent-drift` still fails if a `codex-model:` and its generated `model =` disagree.
-- The `my-review` lens agents must point at each audit skill's `references/protocol.md`, not its `SKILL.md`. The entrypoint holds no checklist; the criteria live in the protocol file.
-- `my-review` uses one whole-diff worker that reports a **flat** findings list,
-  with severity, risk, and numeric confidence per
-  `claude/skills/my-review/references/finding-axes.md`. It does not return
-  "What's Good". Step 6 verifies only the confidence-gated Opus candidates or
-  an explicit targeted-Sonnet `needs_confirmation` request; all other findings
-  remain visibly unverified and verdict-neutral. `adversarial-screen` handles
-  answer and APPROVE/COMMENT challenges in `my-review`.
+- `scripts/sync-codex-agents` maps a source agent's `effort:` straight to `model_reasoning_effort`.
 
 ## Portability
 

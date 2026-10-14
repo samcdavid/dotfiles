@@ -212,14 +212,15 @@
     "dscout-data-mcp@dscout-claude-plugins": true
   },
   "modelSettings": {
-    "claude-sonnet-5": {
-      "effortLevel": "medium"
+    "claude-sonnet-5-5": {
+      "effortLevel": "xhigh"
     },
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "xhigh"
     }
   },
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "cleanupPeriodDays": 120
 }
