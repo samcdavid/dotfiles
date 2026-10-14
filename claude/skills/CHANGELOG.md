@@ -16,3 +16,4 @@ History before the reset lives at the `pre-reset` tag.
 | 0ecc5f0 | `my-review` no longer asks for the author's seniority or tunes comment tone to it. | If comment tone regresses, compare against 53b4aed. |
 | 6f21616 | `work` answers its own questions from the codebase first, stays consistent with existing code and docs unless requirements change them, reuses existing public interfaces instead of forking a flow, and fixes and commits pre-commit hook findings without asking. | If `/work` stops asking when it should, compare against 657301f. |
 | 657301f | Condensed `my-review/references/learned-misses.md` from 7,035 to 4,116 words with every entry, evidence ref, and target kept. | If a promotion loses detail, compare against 646a957. |
+| 7ebc511 | `pr-queue` hides draft PRs unless asked to include them. | If drafts you need disappear, compare against 2e2b8a7. |
