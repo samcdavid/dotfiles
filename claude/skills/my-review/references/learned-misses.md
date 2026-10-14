@@ -109,16 +109,6 @@ Each entry is a markdown subsection with:
 - **Proposed promotion** — `target: references/general-checklist.md` (beside the "mirror must be verified against current upstream" entry); `wording:` "When a PR ports/mirrors formatting behavior from another codebase, check that locale-sensitive calls (`toLocaleDateString`/`toLocaleTimeString`/`Intl.*`) are pinned to match the source's actual locale behavior. A comment claiming parity is not evidence — check the source's real formatting mechanism (fixed vs. locale-aware tokens)."
 - **Status** — pending
 
-### Code comments narrate review/process provenance instead of stating the durable invariant
-
-- **Shape** — Comments narrate review or process history ("verified on staging", "per earlier pass", inline ticket narrative) instead of the durable why, and become noise once the thread is gone. A bot catches this reliably; this skill never has, so it needs an affirmative check.
-- **Trigger signals** — a new comment mentioning "staging", "verified on", "earlier pass", "review", "historical", or an inline ticket id in prose.
-- **Evidence**
-  - `- {type: noted, ref: PR #27420, date: 2026-07-28}` — baz-reviewer flagged four in `JourneyPanel.tsx`, `useJourneyClicksData.ts`, `interceptUrlQuery.ts`, `useClickTrackingPlaybackSync.ts`; fixed in `49d4468`, `d6d90c4`.
-  - `- {type: noted, ref: PR #27768, date: 2026-08-06}` — same bot, another author: 4 of 7 threads (`FRG-800` refs in tests, `_refuse_governed_override` docstring, `CreateMissionForm.tsx`); `my-review` surfaced none.
-- **Proposed promotion** — `target: references/general-checklist.md` (Clarity for Future Readers); `wording:` "Flag code comments that narrate review/process provenance (staging verification, 'per earlier pass', inline ticket references, review-history framing) instead of stating the durable invariant or rationale. A comment should state WHY the code works this way, not HOW it came to be reviewed or verified."
-- **Status** — pending
-
 ### A new LLM feature/agent rebuilds platform LLM plumbing instead of using the sanctioned mechanism
 
 - **Shape** — A new LLM feature re-implements plumbing the platform already standardizes: literal prompt strings instead of the versioned prompt registry, hand-rolled provider tool dicts and direct SDK calls instead of the sanctioned tool framework, or a local PII regex instead of the shared primitive. Also flag module names that collide with a shared concept.

@@ -40,6 +40,8 @@ record why in Decisions. Reuse the existing public interface (functions,
 modules, components, endpoints) for any flow that already exists; extend it
 rather than fork a parallel implementation of the same flow. If reuse truly
 won't work, record why in Decisions before building something new.
+Comments follow `~/.claude/rules/comment-style.md`: the present-day why, never
+the what or the history.
 
 **Save discovery in the repo's docs.** Lasting knowledge about how the system
 works belongs in `docs/`, not the thoughts file, so the next task doesn't

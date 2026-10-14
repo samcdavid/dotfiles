@@ -21,7 +21,7 @@ Fetch review bodies or issue comments only if feedback lives there. A reply that
 
 **Triage** each comment in code context. Verify the reviewer's claim (does the helper exist, does the bug reproduce, does the convention actually hold?), then classify it as Fix, Partially correct, Question, Push back (with evidence: code, output, docs), Defer (adjacent, not intrinsic to this PR), or Already addressed. Group comments that share a root cause into one fix. For DRY requests, count occurrences: three or fewer usually means push back. If the safe fix would cut a required behavior, stop and ask me; don't gate it off. For a disputed design pushback, challenge it with the `adversarial-debate` agent first. Don't turn "address feedback" into "implement every suggestion."
 
-**Show me** the triage and planned fixes, then make the fixes yourself: small commits following `~/.gitmessage`, running the narrow tests for each.
+**Show me** the triage and planned fixes, then make the fixes yourself: small commits following `~/.gitmessage`, running the narrow tests for each. A comment you add or edit states the present-day why (`~/.claude/rules/comment-style.md`), never the review history behind the fix; that goes in the reply and commit message.
 
 **Draft replies**: concise, cite the fix SHA or the evidence, no over-apologizing, no bare "no."
 

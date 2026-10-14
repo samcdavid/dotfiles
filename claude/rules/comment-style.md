@@ -19,7 +19,13 @@ fluent reader of the language already sees it.
   itself: a business rule the code encodes, a workaround for a specific
   bug/library limitation, a rejected simpler approach and why it failed, an
   ordering or performance constraint, a legal/compliance requirement, or a
-  pointer to the ticket/incident that explains the shape of the fix.
+  bare pointer to the ticket/incident that explains the shape of the fix.
+- A comment describes the code as it is now and why it must be this way. Do
+  not tell its history: what it used to do, earlier attempts, how a review or
+  investigation got here, what was verified on staging, or which pass changed
+  it. That story belongs in the commit message or PR. If a comment would stop
+  making sense once the PR thread is gone, rewrite it as the present-day reason
+  or delete it.
 - When a comment could instead be a better name (function, variable,
   constant), rename instead of commenting. A comment is the fallback for
   reasoning naming cannot carry, not a substitute for naming well.
@@ -53,4 +59,17 @@ Good — explains *why*, and only because it isn't obvious:
 ```python
 # Refunds are excluded: their negative values would double-count against gross revenue.
 total = sum(item.value for item in items if not item.is_refund)
+```
+
+Bad — tells the history:
+```python
+# Previously we read from the replica, but after the review on the
+# export PR we switched to primary (verified on staging).
+rows = Repo.all(query, repo: :primary)
+```
+
+Good — states the present reason:
+```python
+# Primary, not the replica: exports must include rows written seconds ago.
+rows = Repo.all(query, repo: :primary)
 ```

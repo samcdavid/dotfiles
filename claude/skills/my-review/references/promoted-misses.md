@@ -8,6 +8,16 @@ When checking whether a new capture matches an existing Shape, check this file i
 
 <!-- Entries with status: promoted (preserved for audit, never deleted automatically). -->
 
+### Code comments narrate review/process provenance instead of stating the durable invariant
+
+- **Shape** — Comments narrate review or process history ("verified on staging", "per earlier pass", inline ticket narrative) instead of the durable why, and become noise once the thread is gone. A bot catches this reliably; this skill never has, so it needs an affirmative check.
+- **Trigger signals** — a new comment mentioning "staging", "verified on", "earlier pass", "review", "historical", or an inline ticket id in prose.
+- **Evidence**
+  - `- {type: noted, ref: PR #27420, date: 2026-07-28}` — baz-reviewer flagged four in `JourneyPanel.tsx`, `useJourneyClicksData.ts`, `interceptUrlQuery.ts`, `useClickTrackingPlaybackSync.ts`; fixed in `49d4468`, `d6d90c4`.
+  - `- {type: noted, ref: PR #27768, date: 2026-08-06}` — same bot, another author: 4 of 7 threads (`FRG-800` refs in tests, `_refuse_governed_override` docstring, `CreateMissionForm.tsx`); `my-review` surfaced none.
+- **Proposed promotion** — `target: references/general-checklist.md` (Clarity for Future Readers); `wording:` "Flag code comments that narrate review/process provenance (staging verification, 'per earlier pass', inline ticket references, review-history framing) instead of stating the durable invariant or rationale. A comment should state WHY the code works this way, not HOW it came to be reviewed or verified."
+- **Status** — promoted (2026-10-14) — codified by the user as a standing rule in `~/.claude/rules/comment-style.md` and the Clarity for Future Readers check, ahead of the evidence threshold
+
 ### A prose claim about the live system (schema, ADR, query plan) is accepted without checking it against the real thing
 
 - **Shape** — A comment, docstring, or PR-body sentence asserts a fact about the live system — a DB column has no NOT NULL constraint, an ADR requirement is satisfied or doesn't apply here, an index choice is justified by the query's selectivity, or "this fix handles the real input" — and the claim is accepted as true because it reads plausibly, not because anyone checked it against the actual schema, ADR text, query plan, or real production-shaped data.
