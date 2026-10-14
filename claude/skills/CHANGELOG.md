@@ -18,3 +18,4 @@ History before the reset lives at the `pre-reset` tag.
 | 657301f | Condensed `my-review/references/learned-misses.md` from 7,035 to 4,116 words with every entry, evidence ref, and target kept. | If a promotion loses detail, compare against 646a957. |
 | 7ebc511 | `pr-queue` hides draft PRs unless asked to include them. | If drafts you need disappear, compare against 2e2b8a7. |
 | b746e45 | Comments state the code's present-day why, never its history; `comment-style.md`, the global principle, `work`, `address-pr-feedback`, and `my-review`'s clarity check all say so. The provenance-comment learned miss is promoted. | If comments lose needed context, compare against 0f9155d. |
+| e85d0dd | Linear issue IDs are allowed in comments only in a TODO for future work; `my-review` flags any other. | If a needed reference disappears from comments, compare against 254a4f8. |
