@@ -29,6 +29,17 @@ Branch:
 under `docs/` for domain context. Read only what's relevant, then the code. If
 docs already cover an area, verify them against the code instead of
 re-researching. Use Explore subagents only for wide searches. Don't guess.
+When a question comes up, answer it yourself from the code first: callers,
+tests, similar features, `git log`/`git blame`, and docs. Record the answer
+and its `file:line` in Thoughts. Only ask me what the repo can't answer.
+
+**Stay consistent.** Follow the patterns, naming, structure and documented
+conventions already in the code and docs. Depart from them only when the
+requirements explicitly change that behavior, and then update the docs and
+record why in Decisions. Reuse the existing public interface (functions,
+modules, components, endpoints) for any flow that already exists; extend it
+rather than fork a parallel implementation of the same flow. If reuse truly
+won't work, record why in Decisions before building something new.
 
 **Save discovery in the repo's docs.** Lasting knowledge about how the system
 works belongs in `docs/`, not the thoughts file, so the next task doesn't
@@ -40,10 +51,13 @@ checked against current code. Commit docs changes like any other slice.
 
 **Slice.** Write 3–8 slices, smallest useful first. Show them once and wait for my OK.
 
-**Loop each slice:** failing test → make it pass → run the narrow tests →
-commit (`/commit`) → log it. Re-slice when you learn something. Stop and ask
-only for real decisions: product behavior, irreversible choices, scope changes.
-Otherwise keep going.
+**Loop each slice:** failing test → make it pass → run the narrow tests → commit
+(`/commit`) → log it. Pre-commit hook findings are part of the slice: fix them
+and commit without asking, unless the fix would change product behavior. Never
+silence or skip them. A finding in the slice's own code goes in that commit; a
+pre-existing problem the hook flags in a touched file gets its own commit.
+Re-slice when you learn something. Stop and ask only for real decisions: product
+behavior, irreversible choices, scope changes. Otherwise keep going.
 
 **Done** when every slice is checked and the relevant suite passes. Then suggest `/my-review`.
 
