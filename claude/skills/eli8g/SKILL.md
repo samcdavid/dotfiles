@@ -1,4 +1,5 @@
 ---
+effort: xhigh
 name: eli8g
 description: Explain it to me like I'm an 8th grader.
 ---

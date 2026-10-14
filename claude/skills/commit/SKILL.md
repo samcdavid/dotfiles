@@ -1,26 +1,23 @@
 ---
 name: commit
-description: Stage and commit changes in logical groups using the project's git message style, without mixing unrelated user changes.
+description: "Commit current changes in logical groups using my ~/.gitmessage template."
 when_to_use: "Use when the user asks to commit, save, or check in work, or says a change is ready to land."
+effort: xhigh
 ---
 
-# Commit
+Group the changes into logical commits. Stage only the files that belong
+together, and never sweep in unrelated changes I made.
 
-Create one or more focused commits from the current working tree.
+Write each message from the template in `~/.gitmessage`: a subject of 50
+characters or fewer, a blank line, then its three headings with their
+underlines, each answered in a few lines wrapped at 72:
 
-## Load Rules
+- Why are these changes introduced?
+- Why do the changes satisfy the requirements?
+- How do these changes affect existing functionality?
 
-`~/.claude/rules/no-outward-actions.md` is already loaded as memory under Claude Code — apply it without re-reading; read the `~/.agents/rules/` equivalent explicitly under Codex. Read `references/protocol.md` for the commit workflow. Before composing any message, read `~/.gitmessage` and follow its headings and prompts exactly.
+Leave out the template's `#` comment lines. Pass the message with a heredoc,
+not an editor.
 
-## Flow
-
-1. Inspect `git status`, diffs, and recent commits.
-2. Separate unrelated/user changes from your changes.
-3. Group files into logical commits; each file belongs to exactly one commit.
-4. Stage only the intended files.
-5. Write a detailed commit message matching the local template/style.
-6. Commit locally. Do not push unless explicitly asked.
-
-## Output
-
-Return commit SHA(s), subject(s), files included, and any uncommitted changes left behind.
+Let pre-commit hooks run. If one fails, fix the cause and make a new commit.
+Never use `--no-verify`, never amend unless I ask, and never push.

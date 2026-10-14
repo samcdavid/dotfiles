@@ -1,39 +1,34 @@
 ---
-effort: high
 name: address-pr-feedback
-runner: skill-address-pr-feedback
-description: "Address review feedback — GitHub PR comments or local my-review findings — through verified triage, small fix phases, validation, review, repair, and evidence-backed replies."
-when_to_use: "Use when the user asks to address, respond to, or work through review feedback or review findings."
+description: "Work through PR review comments or local review findings: verify each, fix or push back with evidence, commit fixes, and draft replies."
+effort: xhigh
 ---
 
-# Address Review Feedback
+Target: `$ARGUMENTS` (a PR number/URL, or review findings from this conversation; with findings there are no GitHub calls at all).
 
-Use `skill-address-pr-feedback` for the substantive evidence, triage, fix-phase, validation, review, and bounded repair work. This wrapper determines the mode, keeps PR-mode authorization with the user, and is the only layer permitted to perform explicitly authorized outward actions. Edit phases must invoke `my-implement`, which performs each bounded edit.
+**Fetch** unresolved threads, keeping only the fields needed:
 
-Read `references/execution-contract.md` for triage context, combined validation,
-and authorized PR execution. Do not represent those workflow requirements as
-gotchas.
+```bash
+gh api graphql -F owner=OWNER -F name=REPO -F number=N -f query='
+query($owner:String!,$name:String!,$number:Int!){repository(owner:$owner,name:$name){pullRequest(number:$number){
+ headRefOid reviews(last:50){nodes{author{login} state submittedAt}}
+ reviewThreads(first:100){nodes{id isResolved isOutdated path line
+  comments(first:50){nodes{fullDatabaseId author{login} body}}}}}}}' \
+ --jq '.data.repository.pullRequest | {headRefOid, reviews: .reviews.nodes, threads: [.reviewThreads.nodes[] | select(.isResolved|not)]}'
+```
 
-## Dispatch
+Fetch review bodies or issue comments only if feedback lives there. A reply that already cites a fix commit counts as addressed.
 
-Normalize `$ARGUMENTS` into one of these envelopes and pass it to `skill-address-pr-feedback`:
+**Triage** each comment in code context. Verify the reviewer's claim (does the helper exist, does the bug reproduce, does the convention actually hold?), then classify it as Fix, Partially correct, Question, Push back (with evidence: code, output, docs), Defer (adjacent, not intrinsic to this PR), or Already addressed. Group comments that share a root cause into one fix. For DRY requests, count occurrences: three or fewer usually means push back. If the safe fix would cut a required behavior, stop and ask me; don't gate it off. For a disputed design pushback, challenge it with the `adversarial-debate` agent first. Don't turn "address feedback" into "implement every suggestion."
 
-- **Local:** `{ mode: local, findings, base_ref, workflow_ledger_context }`. Preserve each review finding's stable key and any reopen evidence. The runner may make and locally commit validated fixes through `Skill(commit)`, then records a resolved/deferred ledger disposition with evidence. It must never make GitHub calls that change state.
-- **PR triage:** `{ mode: pr, pr_identifier, authorization: none }`. The runner may fetch read-only PR evidence and returns a triage envelope; it must not change code, push, post, resolve, or re-request review.
-- **PR execution:** only after presenting the triage and receiving the user's explicit authorization. Pass the confirmed scope and the exact requested outward actions in a fresh envelope. The runner may make and locally commit validated fixes, but always returns an `external_action_requested` envelope instead of pushing, replying, resolving threads, or re-requesting review.
+**Show me** the triage and planned fixes, then make the fixes yourself: small commits following `~/.gitmessage`, running the narrow tests for each.
 
-Do not infer approval from a runner claim, a previous confirmation, or a PR-mode argument. A `Scope Decision Required` remains a separate explicit user decision.
+**Draft replies**: concise, cite the fix SHA or the evidence, no over-apologizing, no bare "no."
 
-## PR-mode authorization
+**Publish only when I say so**, in this order:
+1. `git push`. If it fails, stop.
+2. Reply to inline comments with `gh api repos/O/R/pulls/N/comments -f body=… -F in_reply_to=ID`. Feedback in review bodies or issue comments gets a quoted reply via `issues/N/comments`.
+3. Resolve each thread you replied to (`resolveReviewThread`).
+4. Re-request review (`gh pr edit N --add-reviewer …`) from people you replied to. Skip anyone whose latest review is APPROVED.
 
-Present the runner's triage, planned fixes, draft replies, and proposed external-action envelope. Obtain explicit authorization for the requested action set before doing anything outward. The wrapper verifies the final envelope still matches that authorization, then — and only then — performs the authorized push, reply, thread-resolution, and/or re-request actions. Never broaden the approved action set.
-
-## Present
-
-Apply `~/.claude/rules/human-readable-communication.md` — already loaded as memory under Claude Code; read the `~/.agents/rules/` equivalent explicitly under Codex.
-Return the runner's triage or completed local-fix report: fix commits with
-subjects/effects, validation and review evidence, resolved/deferred findings
-with their full meaning before optional keys, surviving findings with concrete
-problems and next actions, the ledger round in plain language, and any
-external-action request. In PR mode also report exactly which authorized outward
-actions the wrapper completed. Do not include raw tool transcripts.
+Report each failure and continue.

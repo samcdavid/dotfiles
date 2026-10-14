@@ -1,56 +1,27 @@
 ---
-effort: medium
 name: pulse
-runner: pulse-aggregator
-description: Project pulse — digest of recent codebase activity across all contributors. Surfaces hot areas, significant changes (migrations, new modules, API shifts, dependency updates), and per-author summaries. Default 1 week, configurable via argument. Delegates gathering/synthesis to the `pulse-aggregator` agent.
-when_to_use: "Use when the user asks what changed recently in the repo, what is active, or what others have been working on."
+description: "Digest of recent activity in the current repo: hot areas, significant changes, and what each contributor worked on."
+effort: xhigh
 ---
 
-# Project Pulse
+Range: $ARGUMENTS. A number means days, `2w`/`1m` are durations, and a date means "since". The default is 7 days.
 
-Generate a concise briefing of recent project activity so I can stay current without reading every commit and PR. This wrapper normalizes the time range, checks available enrichment sources, dispatches `pulse-aggregator`, and presents its finished briefing.
+Gather read-only with git and `gh`, in parallel where possible:
+- commits, file stats, and authors in range (`git log --since`)
+- merged and open PRs in range
+- new files and modules, migrations and schema changes, dependency manifest and lockfile diffs, config and infra changes
 
-## Step 1 — Parse arguments
+If Linear or Notion are already connected, optionally link the issues and docs the PRs reference. Skip them if that isn't cheap.
 
-`$ARGUMENTS` controls the time range:
-- If `$ARGUMENTS` is a number (e.g. `3`), treat as number of days.
-- If `$ARGUMENTS` is a duration string (e.g. `2w`, `1m`), parse accordingly.
-- If `$ARGUMENTS` is empty, default to **7 days**.
-- If `$ARGUMENTS` contains a date (e.g. `2026-04-01`), use "since that date".
-
-Convert the parsed value to:
-- `since`: an ISO date or `git log --since` compatible string
-- `range_label`: human-readable label for the output title (e.g. `"last 7 days"`, `"since 2026-04-01"`)
-
-## Step 2 — Check tool availability
-
-Determine which enrichment sources are reachable:
-
-- `repo_has_gh_remote`: `gh repo view` exits 0 AND `gh auth status` shows authenticated.
-- `linear_available`: a Linear MCP tool (e.g. `mcp__linear-server__list_teams`) is in the tool list.
-- `notion_available`: a Notion MCP tool (e.g. `mcp__notion__notion-search`) is in the tool list.
-
-## Step 3 — Spawn the aggregator
-
-Invoke the `pulse-aggregator` agent with the bundle:
+Output (omit empty sections; no invented links; ignore trivial noise; this is informational, not a review):
 
 ```
-- since
-- range_label
-- repo_has_gh_remote
-- linear_available
-- notion_available
+## Project Pulse — <range>
+### TL;DR            2–3 sentences
+### Significant Changes
+### Hot Spots        | Area | Commits | Authors |
+### Activity by Contributor
+### Migrations & Schema Changes
+### Dependency Changes
+### Open Questions
 ```
-
-The agent runs git history queries, GitHub PR queries, migration scans, dependency-change scans, and (when MCPs are available) Linear and Notion enrichment in parallel. It returns a finished briefing.
-
-If the agent returns an `## Error` block, surface it and stop.
-
-## Step 4 — Present the briefing
-
-Display the agent's output verbatim. Do not re-synthesize or add commentary — the agent has already produced the final artifact.
-
-## Constraints
-
-- Do not spawn additional research agents from main context — the aggregator owns the work.
-- Do not commit anything to the repo. Pulse is read-only.

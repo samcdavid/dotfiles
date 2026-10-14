@@ -1,22 +1,24 @@
 ---
-effort: high
 name: prove-it
-runner: skill-prove-it
-description: Lightweight fact-check of the current conversation. Separates verified facts from unverified assumptions, cites evidence for each, and flags trust debt. Use when findings feel uncertain or before acting on research.
-disable-model-invocation: false
+description: "Fact-check the conversation: back every claim with a reference, rate confidence, then have adversarial-debate challenge it."
+effort: xhigh
 ---
 
-# Prove It
+Target: $ARGUMENTS. If no claim is named, check every substantive claim in your last response.
 
-Use `skill-prove-it` for the substantive conversation fact-check. This wrapper defines the target claims, preserves the user-facing correction boundary, and presents the runner's compact evidence ledger.
+1. List each claim with your confidence (0–100%) before checking.
+2. Find direct evidence for each: `file:line`, command output, a URL, or a doc
+   quote. Read the real source; don't argue from memory.
+3. Send the claims, your evidence, and your confidence to the
+   `adversarial-debate` agent to challenge them. Apply its verdicts unless you can
+   show with evidence that it's wrong.
+4. Report one table:
 
-## Dispatch
+| Claim | Confidence before → after | Status | Evidence |
+|---|---|---|---|
 
-Normalize the request into `{ target_claims, conversation_scope, authority: local_only }` and dispatch it to `skill-prove-it`.
+Status is **Verified**, **Corrected** (give the right answer), or **Unverified**
+(give the exact check that would settle it).
 
-- With a specific quoted claim or topic, restrict the audit to that target; otherwise audit the most recent substantive response.
-- The runner independently verifies available evidence, clearly retracts unsupported claims, and returns any request for access or an external action instead of performing it.
-
-## Present
-
-Return verified facts, formerly assumed facts now verified, retractions, still-unverified claims with exact next checks, and the compact evidence envelope. Do not defend earlier claims or include raw verifier transcripts.
+Don't defend earlier answers. Retract plainly. Call out where you were
+overconfident.
