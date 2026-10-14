@@ -27,6 +27,8 @@ File/line specific findings that should appear as inline review comments in the 
 - `side` — `RIGHT` for added/modified lines (most common), `LEFT` for deleted lines
 - `body` — the comment text in markdown
 
+Every human acknowledgement from the review is an inline comment here, with any event including `APPROVE`. Drop one only if I say so.
+
 ### Thread Replies
 Responses to existing review comments. Each needs:
 - `comment_id` — the numeric ID of the **top-level** comment in the thread (NOT a reply's ID)

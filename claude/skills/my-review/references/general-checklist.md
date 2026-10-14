@@ -6,8 +6,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 
 ## Human Confirmation (separate from findings)
 
-- List every changed environment variable, feature flag (definition, lookup, default, configuration), migration/backfill, and edit to a test case that existed at the comparison base. Newly added tests do not count.
-- Put them in one "Needs human confirmation" note asking the author to confirm env vars and flags are set in every staging and production environment, and that migrations/backfills ran successfully in staging. Do not assign severity just because external environment state is invisible from the repo.
+- The caller already turns env vars, feature flags, migrations, config, infra, new lint suppressions, and edits to existing tests into inline acknowledgement comments (`human-acknowledgement.md`). Don't repeat them as findings or questions, and don't assign severity just because external environment state is invisible from the repo. Raise a finding only for a real defect on those lines.
 
 ## Blocking Candidates
 

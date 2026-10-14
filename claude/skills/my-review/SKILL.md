@@ -115,6 +115,10 @@ When Linear and the docs disagree, or the change contradicts the docs, raise it 
 
 Activate the **PM** lens whenever the checklist has entries.
 
+### Human acknowledgements
+
+Scan the diff for the triggers in `references/human-acknowledgement.md` and draft one inline comment per trigger. These never change the verdict and are always included in the review, whatever the verdict.
+
 ### Tracer triggers
 
 Set `tracer_triggers.neighbor_commits_heuristic = true` if any of the diff's changed files appear in commits whose messages reference a closed Linear issue from `git log --since=60.days --name-only --pretty=format:'%H %s'`. This is the only signal that needs main-context git access — the others (PM lens active, ticket linked, requirements-audit escalated) are already known from triage.
@@ -134,6 +138,7 @@ Produce a short triage block and show it to me before going deep:
   - <Lens> — <one-line rationale grounded in the diff>
   - <Lens> — <one-line rationale grounded in the diff>
 - **Requirements checklist:** <N> items from <issue / milestone / project / team / docs paths> | none found
+- **Human acknowledgements:** <count> · <categories> (or "none")
 - **Tracer triggers:** <list which fired, or "none">
 - **Author calibration (PR Mode):** <Junior | Mid | Senior | Lead | Staff+> — see below
 - **Auto-promoted since last review:** <count> · <target file(s) + Shape one-liner(s)> (or "none")
@@ -258,6 +263,9 @@ Take the orchestrator's output + user answers + any FLAGged answers from Step 4,
 ### Related-Issue Regression Risks
 [Only if the orchestrator returned this block — skip otherwise]
 
+### Human Acknowledgements
+[Every trigger from Step 2, each as its prepared inline comment with `path:line`. In local mode, the "Pending before PR or staging" checklist. Omit only if none fired.]
+
 ### Questions
 - [Genuine clarifying questions — things where the author has context you don't]
 
@@ -329,7 +337,7 @@ Choose a verdict for the published review and adversarially challenge it. **Alwa
 
 ### Propose a verdict
 
-Pick one based on the surviving findings:
+Pick one based on the surviving findings. Human acknowledgements don't count toward the verdict in either direction; an APPROVE still carries them as inline comments.
 
 - **APPROVE** — no blocking issues; non-blocking suggestions are minor or absent; nothing the author needs to fix before merge
 - **COMMENT** — non-blocking suggestions or open questions worth raising, but nothing must-fix; also the right choice when context was insufficient to fully verify the change (e.g. PR already merged before review, dependency on another PR)
@@ -455,6 +463,7 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 ## References
 
 - `references/general-checklist.md` — cross-cutting blocking/non-blocking categories. Read by the orchestrator on every invocation.
+- `references/human-acknowledgement.md` — triggers and comment shape for changes a person must confirm. Read in Step 2.
 - `references/cross-service-contracts.md` — checklist for cross-service changes. Read by the orchestrator on every invocation.
 - `references/learned-misses.md` — pattern queue. Auto-promote check runs at the top of every invocation; triage block reports promotions.
 - `references/team-review-patterns.md` — team-and-community review patterns distilled from a multi-developer PR mining pass. Created by a separate mining pass; the orchestrator reads it when present.
