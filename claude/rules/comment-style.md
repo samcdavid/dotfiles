@@ -18,8 +18,10 @@ fluent reader of the language already sees it.
 - Do write a comment when the reasoning is not recoverable from the code
   itself: a business rule the code encodes, a workaround for a specific
   bug/library limitation, a rejected simpler approach and why it failed, an
-  ordering or performance constraint, a legal/compliance requirement, or a
-  bare pointer to the ticket/incident that explains the shape of the fix.
+  ordering or performance constraint, or a legal/compliance requirement.
+- Do not put Linear issue IDs in comments, except in a TODO for future work
+  (`# TODO(ENG-123): drop the v1 fallback once every client sends v2.`). The
+  issue that motivated the current code belongs in the commit message or PR.
 - A comment describes the code as it is now and why it must be this way. Do
   not tell its history: what it used to do, earlier attempts, how a review or
   investigation got here, what was verified on staging, or which pass changed
