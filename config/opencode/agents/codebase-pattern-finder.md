@@ -3,8 +3,6 @@
 # Source: claude/agents/codebase-pattern-finder.md
 description: "Finds similar implementations, usage examples, and conventions in the codebase to model new work after. Returns concrete code examples."
 mode: subagent
-permission:
-  edit: deny
 ---
 
 # Codebase Pattern Finder

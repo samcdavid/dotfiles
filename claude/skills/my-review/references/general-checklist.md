@@ -1,27 +1,15 @@
 # General Review Checklist
 
-The cross-cutting review categories that apply to every `my-review` invocation regardless of which lenses are active. Lens-specific checklists live in the dedicated skill files (`security-audit`, `my-arch-review`, `perf-review`, `quality-audit`, `requirements-audit`).
+The cross-cutting review categories that apply to every `my-review` invocation regardless of which lenses are active. Lens-specific checklists live in the dedicated skill files under `references/lenses/`.
 
 Categories are ordered by priority. Before raising any issue, check it against the existing-comments dedupe index supplied by the caller. Do not re-raise anything already covered by an existing thread.
 
-## Human Acknowledgement (separate from findings)
+## Human Confirmation (separate from findings)
 
-- Inventory every changed environment-variable reference/value, feature-flag
-  definition/lookup/default/configuration, and migration/backfill under
-  `change-set-risk.md`.
-- Also inventory edits to test cases that existed at the comparison base, as
-  defined in `change-set-risk.md`; newly added tests, including new test cases
-  in existing files, do not trigger acknowledgement.
-- Call them out in the single human acknowledgement. Do not assign severity or
-  inflate aggregate risk merely because repository analysis cannot see external
-  environment state.
-- The acknowledgement asks the author to confirm environment variables and
-  feature flags have the appropriate values/configuration in every staging and
-  production environment and migrations/backfills were tested successfully in
-  staging. A generic acknowledgement or existing handoff comment is not
-  confirmation, but missing confirmation is tracked, never asked of the user.
+- List every changed environment variable, feature flag (definition, lookup, default, configuration), migration/backfill, and edit to a test case that existed at the comparison base. Newly added tests do not count.
+- Put them in one "Needs human confirmation" note asking the author to confirm env vars and flags are set in every staging and production environment, and that migrations/backfills ran successfully in staging. Do not assign severity just because external environment state is invisible from the repo.
 
-## Critical Candidates (request changes only if verified High risk and merge-blocking)
+## Blocking Candidates
 
 ### Correctness / Bugs
 - Logic errors, off-by-one, nil/null handling, race conditions
@@ -63,7 +51,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Advisory locks — is `@disable_migration_lock` still being used unnecessarily? (check if the project uses `migration_lock: :pg_advisory_lock`)
 - Stale backfillers — if this migration supersedes an old backfiller, flag the old one for removal.
 
-### Security (baseline — deeper analysis lives in `security-audit/SKILL.md`)
+### Security (baseline — deeper analysis lives in `references/lenses/security.md`)
 - Input validation at system boundaries
 - Auth/authz checks present and correct
 - No secrets in code, no SQL injection, no XSS vectors
@@ -74,7 +62,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 - Do tests actually test what they claim? (not vacuously passing)
 - Are assertions checking the right values/keys? Assert specific error values, not just that an error occurred.
 - Is randomness in tests masking deterministic failures?
-- Do added/changed tests monkey patch a real module, class, or function (`mock.patch`, `allow_any_instance_of`, `jest.mock`, `Mimic`, …) instead of injecting it? Flag with the injection seam to use; criteria live in `~/.claude/skills/quality-audit/references/protocol.md` "Monkey Patching".
+- Do added/changed tests monkey patch a real module, class, or function (`mock.patch`, `allow_any_instance_of`, `jest.mock`, `Mimic`, …) instead of injecting it? Flag with the injection seam to use; criteria live in `~/.claude/skills/my-review/references/lenses/quality.md` "Monkey Patching".
 - Coverage for the critical path — not necessarily 100%, but the important paths
 
 ### Test Placement
@@ -85,9 +73,8 @@ Categories are ordered by priority. Before raising any issue, check it against t
   telemetry, database/cache calls, locks, call order, or collaborators.
 
 ### Lint and Tooling Discipline
-- Are any lint checks, formatter rules, type checks, or static analysis warnings being disabled or suppressed (inline disable comments or config/file exclusions)? Detection patterns live in `~/.claude/skills/pr-overview/references/protocol.md` "Linter suppressions".
+- Are any lint checks, formatter rules, type checks, or static analysis warnings being disabled or suppressed (inline disable comments or config/file exclusions)? Watch for inline disables (`# noqa`, `# type: ignore`, `eslint-disable`, `@ts-ignore`, `rubocop:disable`, `credo:disable`) and config/file exclusions.
 - Every newly added suppression is a code smell: raise it as a finding (default Non-blocking, category `Lint Suppression`) naming the silenced rule, what the warning is likely flagging, and the fix that would make the suppression unnecessary. Flag a blanket disable (no rule named) or a missing justification comment explicitly.
-- That finding is separate from the orchestrator's human-acknowledgement item per `change-set-risk.md` (one inline acknowledgement in PR mode, one ledger-deduped acknowledgement in local mode). Do not emit a second acknowledgement request from this lens — the finding asks for a fix, the acknowledgement asks for confirmation.
 - A newly disabled check is Critical only when it can hide a production, security, data, contract, or launch-critical correctness issue. When the rule genuinely does not apply to this specific case (not "it's inconvenient" or "the code doesn't pass") and a justification comment says so, downgrade to a Nit.
 - Common invalid justifications: disabling formatting rules to preserve manual formatting, disabling import-order checks, suppressing warnings instead of fixing them, disabling type checks because a type is hard to express.
 - If a disable comment already existed and the PR didn't add it, it is not Critical — but flag it as a question ("is this still needed?").
@@ -104,7 +91,7 @@ Categories are ordered by priority. Before raising any issue, check it against t
 
 ## Non-blocking Suggestions (improvements, not blockers)
 
-### Performance (baseline — deeper analysis lives in `perf-review/SKILL.md`)
+### Performance (baseline — deeper analysis lives in `references/lenses/performance.md`)
 - Primary vs. follower repo for read-only queries
 - N+1 queries, missing indexes, unbounded result sets
 - Unnecessary computation, missing caching opportunities

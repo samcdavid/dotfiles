@@ -40,7 +40,7 @@ When checking whether a new capture matches an existing Shape, check this file i
   - `- {type: missed, ref: PR #27606, date: 2026-08-05}` — a RecursionError was deferred to two Linear tickets that never mention recursion.
   - `- {type: missed, ref: PR #27679, date: 2026-08-05}` — a `tach-ignore` deferral had no ticket at all while every sibling deferral in the PR did.
   - `- {type: missed, ref: PR #27713, date: 2026-08-05}` — stale dependency version targets left security advisories open that the PR read as closed.
-- **Proposed promotion** — `target: requirements-audit/references/protocol.md` (Gap Analysis, new "Deferral Verification" subsection) and `~/.claude/agents/skill-address-pr-feedback/references/protocol.md` (Valid Deferral classification); `wording:` "A deferral is only valid if the cited ticket is fetched, confirmed to exist, and confirmed to cover the specific gap by its actual text — not inferred from the ticket ID or title alone. No ticket, a nonexistent ticket, or a non-covering ticket means the item is genuinely missing, not deferred."
+- **Proposed promotion** — `target: references/lenses/requirements.md` (Gap Analysis, new "Deferral Verification" subsection); `wording:` "A deferral is only valid if the cited ticket is fetched, confirmed to exist, and confirmed to cover the specific gap by its actual text — not inferred from the ticket ID or title alone. No ticket, a nonexistent ticket, or a non-covering ticket means the item is genuinely missing, not deferred."
 - **Status** — promoted (2026-08-05)
 
 ### A new guard/test that only exercises the current-good state doesn't prove it catches the drift it claims to
@@ -51,7 +51,7 @@ When checking whether a new capture matches an existing Shape, check this file i
   - `- {type: missed, ref: PR #27568, date: 2026-08-05}` — a dataclass-field contract check was blind to fields added via `default_factory`.
   - `- {type: missed, ref: PR #27679, date: 2026-08-05}` — a one-directional "inventory is complete" check missed drift from the unchecked direction.
   - `- {type: missed, ref: PR #27680, date: 2026-08-05}` — a prose-snapshot test broke on doc rewording rather than catching a real defect.
-- **Proposed promotion** — `target: quality-audit/references/protocol.md` (Step 5, new "Mutation Check for New Guards" subsection); `wording:` "For any new guard whose purpose is to catch a specific drift category, reintroduce the exact defect it claims to catch (mentally or actually) and confirm it fails — reading what a guard checks is not the same as confirming it catches the failure. Named blind spots: field enumeration blind to `default_factory`/dynamic fields, one-directional completeness checks, unanchored regexes, prose-snapshot tests that break on rewording instead of real defects."
+- **Proposed promotion** — `target: references/lenses/quality.md` (Step 5, new "Mutation Check for New Guards" subsection); `wording:` "For any new guard whose purpose is to catch a specific drift category, reintroduce the exact defect it claims to catch (mentally or actually) and confirm it fails — reading what a guard checks is not the same as confirming it catches the failure. Named blind spots: field enumeration blind to `default_factory`/dynamic fields, one-directional completeness checks, unanchored regexes, prose-snapshot tests that break on rewording instead of real defects."
 - **Status** — promoted (2026-08-05)
 
 ### New telemetry (metric/index/log field) is emitted correctly but the underlying value is degenerate, so it produces no usable data
@@ -61,7 +61,7 @@ When checking whether a new capture matches an existing Shape, check this file i
 - **Evidence**
   - `- {type: missed, ref: PR #25896, date: 2026-08-05}` — a DB index built for `study_id` stayed permanently empty because the field was hardcoded `None`.
   - `- {type: missed, ref: PR #27664, date: 2026-08-05}` — two of five new Datadog metrics wouldn't produce a readable series because a DogStatsD gauge isn't sticky.
-- **Proposed promotion** — `target: references/general-checklist.md` (Observability subsection) and `~/.claude/agents/skill-my-validate/references/protocol.md` (Observability Validation Step 2); `wording:` "Trace the actual value behind new telemetry, not just its call site — a hardcoded/rarely-populated field makes an index or metric permanently empty even when the emission code is correct, and a metric type's assumed semantics must be checked against the specific backend, not assumed."
+- **Proposed promotion** — `target: references/general-checklist.md` (Observability subsection); `wording:` "Trace the actual value behind new telemetry, not just its call site — a hardcoded/rarely-populated field makes an index or metric permanently empty even when the emission code is correct, and a metric type's assumed semantics must be checked against the specific backend, not assumed."
 - **Status** — promoted (2026-08-05) — below the normal len(evidence)>=3 auto-promote threshold; promoted manually on the strength of an independent cross-team root-cause investigation (Colin Campbell, DEVENVT-39) rather than accrued evidence. Treat further recurrences as Evidence appended here, same as any other promoted entry.
 
 ### Foundational/greenfield code with no current consumers gets a lighter review pass because "nothing depends on it yet"

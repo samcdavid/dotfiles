@@ -14,6 +14,14 @@ import tomllib
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
 ENTRYPOINT_LIMIT = 700
+# The restored June reviewer is deliberately kept whole rather than trimmed to
+# the short-skill budget; it is the one exception to the eli8g-style rule.
+ENTRYPOINT_EXEMPT = {
+    "claude/skills/my-review/SKILL.md",
+    "claude/agents/review-orchestrator.md",
+    "claude/agents/adversarial-debate.md",
+    "claude/agents/requirements-tracer.md",
+}
 REFERENCE_LIMIT = 6000
 CRITICAL_AGENT_NAMES = {
     "adversarial-debate",
@@ -344,6 +352,8 @@ def check_budget(errors: list[str]) -> None:
     files = list((ROOT / "claude" / "skills").glob("**/SKILL.md"))
     files += list((ROOT / "claude" / "agents").glob("*.md"))
     for path in sorted(files):
+        if rel(path) in ENTRYPOINT_EXEMPT:
+            continue
         words = word_count(path)
         if words > ENTRYPOINT_LIMIT:
             errors.append(f"{rel(path)} has {words} words; limit is {ENTRYPOINT_LIMIT}")

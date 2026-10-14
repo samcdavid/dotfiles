@@ -3,8 +3,6 @@
 # Source: claude/agents/docs-researcher.md
 description: "Searches for and retrieves documentation for dependencies, libraries, frameworks, and observability products. Returns relevant docs content with source URLs."
 mode: subagent
-permission:
-  edit: deny
 ---
 
 # Docs Researcher

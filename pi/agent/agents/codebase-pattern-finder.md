@@ -3,7 +3,6 @@
 # Source: claude/agents/codebase-pattern-finder.md
 name: codebase-pattern-finder
 description: "Finds similar implementations, usage examples, and conventions in the codebase to model new work after. Returns concrete code examples."
-tools: read, bash, grep, find, ls
 ---
 
 # Codebase Pattern Finder

@@ -1,8 +1,7 @@
 ---
-model: inherit
+effort: xhigh
 name: codebase-pattern-finder
 description: Finds similar implementations, usage examples, and conventions in the codebase to model new work after. Returns concrete code examples.
-disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Codebase Pattern Finder

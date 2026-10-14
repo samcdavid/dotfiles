@@ -1,8 +1,7 @@
 ---
-model: inherit
+effort: xhigh
 name: codebase-analyzer
 description: Deep-reads and analyzes codebase implementation details — traces data flow, maps dependencies, and documents how components actually work.
-disallowedTools: Edit, Write, NotebookEdit
 ---
 
 # Codebase Analyzer

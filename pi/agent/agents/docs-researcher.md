@@ -3,7 +3,6 @@
 # Source: claude/agents/docs-researcher.md
 name: docs-researcher
 description: "Searches for and retrieves documentation for dependencies, libraries, frameworks, and observability products. Returns relevant docs content with source URLs."
-tools: read, bash, grep, find, ls
 ---
 
 # Docs Researcher

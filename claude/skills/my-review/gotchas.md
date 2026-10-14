@@ -1,86 +1,111 @@
-# Code and Domain Gotchas — my-review
+# Gotchas — my-review
 
-These are durable code, test, and domain traps that warrant targeted scrutiny.
-Workflow obligations belong in `references/review-contract.md`, not here.
+Known failure patterns and lessons learned. Read before starting work with this skill.
+
+### Check all spec requirements, not just the code
+
+- **Category:** failure-mode
+- **Context:** Reviewing a PR linked to a ticket or spec
+- **Wrong:** Reviewing only the code diff for correctness without checking whether all acceptance criteria are addressed
+- **Right:** Fetch the linked ticket/spec and verify every acceptance criterion is addressed in the PR. Flag missing requirements as blocking issues.
+- **Why:** PRs that pass code review but miss spec requirements are a recurring pattern. Code can be correct and well-written but incomplete.
+- **Source:** Recurring pattern in PR reviews
 
 ### Cross-service data structure contracts
 
-When a change stores, extracts, or passes a data structure across services,
-trace every consumer. Flag structural divergence such as nested-versus-flat
-payloads, different ownership levels, or incompatible field names.
+- **Category:** failure-mode
+- **Context:** PR changes how data is stored, extracted, or passed between services
+- **Wrong:** Reviewing the change in isolation, assuming other services will adapt
+- **Right:** Check that ALL consumers agree on the data structure. Look for structural divergence (nested vs flat, field-level vs parent-level, naming differences) across service boundaries.
+- **Why:** Structural divergence between services is a known failure mode in polyglot monorepos — each service can pass its own tests while the integration is broken
+- **Source:** Recurring pattern in polyglot monorepo PRs
 
-### LLM prompt and tool-docstring changes need evaluation evidence
+### LLM prompt/tool docstring changes need eval
 
-Prompt, system-message, and tool-docstring changes need a relevant eval or test.
-Treat missing coverage as Critical only when the changed behavior is plausibly
-launch-critical; otherwise make it a quality finding.
+- **Category:** convention
+- **Context:** PR changes LLM prompts, system messages, or tool docstrings
+- **Wrong:** Reviewing prompt changes for readability and intent without checking for eval coverage
+- **Right:** Verify there's a corresponding eval or test that validates the change doesn't regress AI behavior. Flag missing eval coverage as a blocking issue.
+- **Why:** Prompt changes without eval coverage are high-risk — small wording changes can cause significant behavior regressions that aren't caught by traditional tests
+- **Source:** Recurring pattern in AI-powered applications
 
-### Shared access helpers need an allowed-path and wrapper-contract test
+### Reviews are read-only — never edit code
 
-For a registration decorator, authorization/rollout gate, or injected resolver,
-test the successful path as well as denial. Verify authenticated identity and
-arguments reach the handler once, its result returns, authorization happens at
-the resolver, and required telemetry/session/context wrappers still compose.
+- **Category:** failure-mode
+- **Context:** Review finds a concrete issue with an obvious fix
+- **Wrong:** Editing the source file to fix the issue during the review (e.g., adding missing data formatting to a node)
+- **Right:** Report the finding in the review output with a concrete code suggestion. Let the author decide whether and how to fix it. NEVER call Edit/Write tools during a review.
+- **Why:** The review skill's job is to REPORT, not to ACT. Editing code during review conflates two distinct roles, bypasses the author's judgment, and can introduce changes the author didn't ask for — especially dangerous when the working tree has uncommitted changes that can't be cleanly reverted.
+- **Source:** Review session where a node file was edited during review, had to manually revert
 
-### Lazy imports need a demonstrated reason
+### Lazy imports are a blocking issue — not just a code smell
 
-For Python function-level imports, verify a module-level import actually creates
-the claimed cycle or startup-cost problem. Otherwise raise a non-blocking
-maintainability finding; a lazy import is not a generic circular-import fix.
+- **Category:** convention
+- **Context:** Any Python code that uses `import X` inside a function body. Applies to both new code in PRs and existing lazy imports in files being touched.
+- **Wrong:** Accepting function-level imports as normal, downgrading them to "non-blocking suggestion," or writing them yourself. Common excuses: "avoids circular imports," "the file has a comment about circular imports," "nearby code does it this way." A common failure mode: new lazy imports are written AND the review only flags them as a non-blocking suggestion — when in fact the circular dependency doesn't even exist.
+- **Right:** Flag lazy imports as a **blocking issue**. Before accepting any lazy import, verify the circular dependency actually exists by testing the module-level import. If it does exist, the fix is better module architecture — not a lazy import. The only valid exception is genuinely expensive imports (SpaCy model loading, heavy ML libraries) where startup cost measurably matters.
+- **Why:** Lazy imports hide dependency relationships, create per-call overhead, bypass import-time error detection, and paper over architecture problems that get worse over time. They are NEVER an acceptable workaround for circular dependencies.
+- **Source:** Recurring pattern — most recently, lazy imports were both written and reviewed without being flagged as blocking. The assumed circular import turned out not to exist at all.
 
-### Nested functions need closure state to earn their indirection
+### Functions defined inside functions are a code smell — flag them
 
-Flag a function defined inside business logic unless it is a decorator, fixture,
-factory, or otherwise genuinely requires captured state. Prefer a module-level
-function when it can be tested and discovered independently.
+- **Category:** convention
+- **Context:** Any Python code that defines a function inside another function (excluding decorators and factory patterns)
+- **Wrong:** Accepting nested function definitions in business logic as normal. Writing closures when a module-level function would work.
+- **Right:** Flag nested function definitions as a non-blocking suggestion. Functions should be first-class citizens declared at module scope. Exceptions: decorator implementations, factory functions that genuinely need closure state, and pytest fixtures.
+- **Why:** Nested functions are harder to read, harder to test independently, and harder to discover in the codebase. They obscure code organization and make it difficult to understand the module's public surface.
+- **Source:** Recurring pattern in Python codebases
 
-### User-visible brand names use the established capitalization
+### Never check out the PR branch — review is read-only via `gh`
 
-For templates, labels, errors, alt text, and other user-facing strings, compare
-brand capitalization against nearby established copy and flag inconsistent use.
+- **Category:** failure-mode
+- **Context:** Any PR review — both the orchestrator and any spawned research agent (codebase-analyzer, codebase-pattern-finder, adversarial-debate). **Especially adversarial-debate**, which is invoked directly by `my-review` (not via the orchestrator) and historically has been the leakage path that creates stale `pr-*` refs.
+- **Wrong:** Reaching the PR's code by changing the local working tree. Examples: `gh pr checkout <number>`, `git checkout <branch>`, `git switch <branch>`, `git fetch origin pull/N/head:pr-N` (creates a named local ref), or reading on-disk files and treating them as the PR's code. Equally wrong: falling back to "compare against local `main`" — local `main` is often days behind remote and is not authoritative.
+- **Right:** The diff is the source of truth. `gh pr diff <number>` for the diff. `gh api repos/{owner}/{repo}/contents/{path}?ref={sha}` for full file contents at PR HEAD (sha from `gh api repos/{owner}/{repo}/pulls/{number} --jq '.head.sha'`). If you genuinely need git-tool access (e.g. `git log`, `git show` for context only), `git fetch origin pull/N/head` (no `:branch` suffix) leaves only `FETCH_HEAD`, which is overwritten on next fetch.
+- **Enforcement:** The constraint is baked into both `~/.claude/agents/review-orchestrator.md` ("PR Mode — Hard Constraints" section) AND `~/.claude/agents/adversarial-debate.md` ("PR Mode — Read-Only via `gh`" section). Both agents refuse the destructive commands regardless of whether the calling skill's prompt restates the constraint. The orchestrator additionally MUST propagate the constraint verbatim into every research subagent prompt it spawns. The skill cannot rely on prompt-level reminders alone — they have been forgotten.
+- **Why:** The PR branch and the local working tree are different codebases. Checking out the PR pollutes the repo with state the user didn't ask for, leaves the working tree in a non-main state after the review, requires `--force` on rebased/stacked PRs, and accumulates stale refs. Comparing against local `main` produces wrong findings whenever `main` is behind remote — the review will flag fixes that were already merged, or miss conflicts the PR author resolved against newer code.
+- **Source:** Multiple review sessions: `gh pr checkout` leaving repo on PR branch; `pr-*` local branches accumulating across review invocations; research agents reporting fields as missing when the PR diff clearly added them. **2026-05-28 session**: three stale refs (`pr-25809-readonly`, `pr-25834`, `pr-25871`) caught and deleted by the user. Root cause: the constraint was in `review-orchestrator.md` but NOT in `adversarial-debate.md`, and `gh pr checkout:*` is in the global permission allowlist so sub-agents could run it without prompting. Fix: baked the constraint into `adversarial-debate.md` directly so it can't be missed when invoked from a my-review prompt that forgot to repeat the constraint.
 
-### Resource labels do not prove workspace ownership
+### Don't publish reviews until explicitly told — build iteratively across personas
 
-For lifecycle or teardown changes, trace stale, unregistered, and orphaned
-resources. A project label, namespace, config lookup, or name prefix alone is
-not ownership evidence; persistent provenance must fail closed when absent.
+- **Category:** convention
+- **Context:** User requests reviews of the same PR from multiple personas (e.g., architect then backend, or backend then security)
+- **Wrong:** Treating each persona pass as a standalone review and offering to publish after each one. Asking "want me to post this?" after every pass. Publishing a partial review before the user has seen all perspectives.
+- **Right:** Build up findings iteratively across persona passes. Each pass adds to a combined review document. Only publish to the PR when the user explicitly says to post/publish. Between passes, present the findings and wait for the next instruction — the user may want another persona pass, want to edit the review, or want to combine and post.
+- **Why:** Reviews from multiple personas are complementary — a backend finding might be dropped after the architect pass reveals it's consistent with convention, or vice versa. Publishing prematurely means the author sees incomplete or contradictory feedback. The user controls when the review is ready.
+- **Source:** Multi-persona review session where the reviewer offered to post after the first persona pass, then had to combine findings from a second pass into a single coherent review
 
-### Host endpoints and internal service health are separate contracts
+### Never auto-publish a review — always pause for explicit direction
 
-When code consumes published host ports and validates an internal runtime
-network, verify service identity, every published binding, and every consumer
-connection string. A healthy container does not prove the host endpoint reaches
-the intended service.
+- **Category:** failure-mode
+- **Context:** Any point in a review session where findings are complete and ready to post
+- **Wrong:** Finishing the review analysis and immediately following `references/publishing.md` (or invoking publish logic directly) without the user saying to post it. This applies to first reviews, re-reviews, and single-persona passes alike.
+- **Right:** Present findings to the user and stop. Wait for explicit direction ("post it", "looks good, publish", "ship it") before publishing. The user may want to edit findings, add context, or hold the review entirely.
+- **Why:** Publishing to GitHub is a visible, hard-to-retract action on a shared system. The reviewer's job is to produce findings — the user decides when and whether to send them. Auto-publishing skips the user's approval gate entirely.
+- **Source:** Re-review session where findings were complete and correct, but the review was published without the user directing it
 
-### Ambient context and fixtures are runtime dependencies
+### Re-review means full re-review — don't coast on prior approval
 
-When a test or command relies on environment, cwd, interpreter, workspace, or
-fixture state, verify that setup explicitly. Green local tests can conceal a
-different runtime contract in CI or another worktree.
+- **Category:** failure-mode
+- **Context:** User asks to review a PR that was previously reviewed (re-review request, re-requested review on GitHub, or author says "re-requesting your review")
+- **Wrong:** Assuming the diff hasn't changed, skipping the full review process, or saying "my previous approval stands" without re-reading the diff and all comments. This misses: rebase conflict resolutions that changed your code, new comments from the author requesting specific attention, or fixes that addressed (or broke) your prior feedback.
+- **Right:** Treat every re-review as a fresh review. Re-read the full diff, re-read ALL comments (including issue-level comments where authors often explain what changed), and check if your prior findings are still valid or have been addressed. Look specifically for: author comments mentioning conflicts, edits to your changes, or requests for specific attention.
+- **Why:** PRs evolve between reviews — rebases resolve conflicts (sometimes incorrectly), authors address feedback (sometimes introducing new issues), and new comments add context. Coasting on a prior approval can miss rebase errors (e.g., author edits reviewer's code during conflict resolution) or leave stale bug comments that should be retracted (e.g., flagged bugs were fixed but comments still open).
+- **Source:** Recurring pattern in PR re-reviews — rebase conflict resolution and stale comment accumulation
 
-### Test the causal path, not only the final assertion
+### Brand/product name capitalisation in user-visible copy
+- **Category:** convention
+- **Context:** Reviewing templates, error messages, labels, button copy, scope descriptions, or alt text
+- **Wrong:** Accepting lowercase or inconsistent capitalisation of a brand name in user-visible copy without flagging it
+- **Right:** Check that every occurrence of a brand name in user-facing strings uses the correct capitalisation. Grep for existing uses in the codebase if unsure — the established form is usually visible in nearby alt text or existing copy
+- **Why:** Brand names have prescribed capitalisation that differs from standard English rules. Inconsistency across strings in the same file (e.g. correct in alt text, wrong in body copy) is a common failure mode
+- **Source:** Consent page template where brand name was written lowercase in body copy while alt text in the same file used the correct capitalised form
 
-For cancellation, retries, authorization, or error handling, check that tests
-use setup that reaches the changed behavior. The assertion must still target
-only the requested result or stable postcondition; do not add retry counts,
-collaborator calls, lock state, or transition-order assertions to prove the path.
+### Adversarial agent reads the working tree too — verify DROP verdicts against the diff
 
-### CI wiring and developer instructions are behavioral surfaces
-
-Changes to CI commands, hook scripts, generated instructions, or plugin setup
-need tests or direct checks of invocation, arguments, and failure propagation;
-they are not documentation-only edits.
-
-### Default-off rollout gates define intended cohort boundaries
-
-For entitlement-gated rollouts, assess enabled-cohort behavior and explicit
-policy violations. Do not call the default-off or excluded cohort a defect unless
-the stated rollout contract is violated.
-
-### Axon Ecto queries use pipe style
-
-Flag new or modified Axon Ecto queries that use `from(...)` when equivalent
-pipe-style composition is practical: `Schema |> join(...) |> where(...) |>
-select(...) |> repo.all()`. Treat this as a project code-style requirement;
-allow `from` only for documented construct-specific exceptions, and keep test
-findings about observable query behavior rather than literal source tokens.
+- **Category:** failure-mode
+- **Context:** Running the adversarial-debate agent to challenge review findings on a PR
+- **Wrong:** Accepting an adversarial DROP or REVISE verdict when the agent's stated evidence is that a file "doesn't exist," an identifier is "fabricated," or a function "cannot be found." The adversarial agent reads the local file system (current branch, usually main) — for PRs that add new files, those files don't exist locally.
+- **Right:** When the adversarial agent DROPs a finding because something allegedly doesn't exist, verify the claim directly against the PR diff before applying the verdict. If the diff shows the file or identifier is present, override the DROP and KEEP the finding. The diff is the source of truth — not `git ls-tree`, `grep`, or any tool that operates on the local working tree.
+- **Why:** The adversarial-debate agent uses the same filesystem tools as research agents. It has no awareness of the PR branch context. New files added by a PR are real — they just haven't been checked out locally. An agent that reports "no such file" is reading the wrong codebase and will incorrectly conclude that valid diff-based findings were fabricated.
+- **Source:** Adversarial challenge where new files clearly present in the PR diff were reported as non-existent, causing valid non-blocking findings to be dropped

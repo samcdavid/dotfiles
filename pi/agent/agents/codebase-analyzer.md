@@ -3,7 +3,6 @@
 # Source: claude/agents/codebase-analyzer.md
 name: codebase-analyzer
 description: "Deep-reads and analyzes codebase implementation details — traces data flow, maps dependencies, and documents how components actually work."
-tools: read, bash, grep, find, ls
 ---
 
 # Codebase Analyzer
