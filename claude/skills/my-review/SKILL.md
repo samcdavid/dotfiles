@@ -8,23 +8,18 @@ description: Rigorous code review modeled on OSS standards. Reviews local change
 
 Perform a thorough, high-quality code review. Works on local changes (unstaged/staged/committed) or GitHub pull requests.
 
-The heavy lifting (parallel research subagents + systematic checklist application + lens-specific deep-dives) runs inside the `review-orchestrator` agent. This skill stays in the main window only for what genuinely needs you: triage confirmation, targeted questions, adversarial passes, verdict choice, and pattern-capture prompts.
+The heavy lifting (parallel research subagents + systematic checklist application + lens-specific deep-dives) runs inside the `review-orchestrator` agent. This skill stays in the main window only for what genuinely needs you: triage confirmation, targeted questions, adversarial passes, and verdict choice.
 
 ## Getting Started
 
 Determine what to review:
-- If `$ARGUMENTS` is `capture` → **Capture Mode** — queue a Learned Miss (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
-- If `$ARGUMENTS` is `promote` → **Promote Mode** — walk the pending queue (see § "Subcommands — `capture`, `promote`"). Skip the rest of this skill.
 - If `$ARGUMENTS` contains a PR number or URL → **PR Mode** (fetch the PR diff via `gh`).
 - If `$ARGUMENTS` is empty or `local` → **Local Mode** (review working tree changes via `git diff`).
 - If `$ARGUMENTS` contains a branch name → review diff against that branch.
 
-Subcommand keywords (`capture`, `promote`) take precedence over branch-name interpretation.
-
-### Read these before producing any output
+### Read this before producing any output
 
 - `gotchas.md` — known failure patterns for this skill.
-- `references/learned-misses.md` — pattern queue. Auto-promote any pending entries whose Evidence has crossed threshold BEFORE producing the triage block, so the triage block can report what was promoted.
 
 ## Step 1 — Gather the Diff and Existing Feedback
 
@@ -140,15 +135,7 @@ Produce a short triage block and show it to me before going deep:
 - **Requirements checklist:** <N> items from <issue / milestone / project / team / docs paths> | none found
 - **Human acknowledgements:** <count> · <categories> (or "none")
 - **Tracer triggers:** <list which fired, or "none">
-- **Auto-promoted since last review:** <count> · <target file(s) + Shape one-liner(s)> (or "none")
-- **Pending learned misses:** <count> (run `/my-review promote` to triage early)
 ```
-
-To populate the last two lines, scan `references/learned-misses.md`:
-- Pending count = entries with `status: pending` or `status: ready` under `## Pending`.
-- Auto-promoted-since-last-review = entries under `## Promoted` whose `status: promoted (<date>)` is newer than the last completed review. If you can't determine the prior review timestamp, list any promotion dated within the last 14 days.
-
-If `status: ready` entries exist (auto-promote blocked on ambiguous target), call them out by name — these need your input.
 
 Proceed automatically unless I override.
 
@@ -302,18 +289,15 @@ After applying verdicts, confirm:
 - [ ] Findings are grounded in the diff (or the orchestrator's subagent research), not assumptions
 - [ ] Dropped Findings section captures what was filtered out, with reasons
 
-### In-review pattern capture
+### Docs follow-up
 
-Once findings are final, ask one batched question before moving to Step 7:
+This skill keeps no lessons of its own. When a surviving finding shows a convention or pitfall the repo's `docs/` (read in Step 2) doesn't state, ask one batched question before moving to Step 7:
 
-> "Queue any of these as patterns to track? [numbers, 'none', or 'all']"
+> "Add any of these to the repo docs? [numbers, 'none', or 'all']"
 
-For each selected finding:
-1. Check `references/learned-misses.md` for an existing matching Shape. If found, append a new Evidence entry (`type: caught`, today's date, `ref` = PR# or session) to the existing entry rather than creating a duplicate.
-2. Otherwise, draft a Shape (one or two sentences — the *general* pattern, not the specific bug) plus Trigger signals. Confirm the Shape with me before writing.
-3. Append the new entry under `## Pending` with `status: pending`.
+For each yes, update the guide that covers the area, or add one and link it from that area's README. Follow the rules in `docs/guides/` `README.md` and check every claim against current code. In Local Mode, edit the working tree. In PR Mode, show the proposed text and leave the checkout alone — it isn't the PR's branch.
 
-If I say "none," move on silently. Do not nag, do not list "all" by default — surface the question once.
+If I say "none," move on silently. Do not nag, and do not default to "all".
 
 ## Step 7 — Adversarial Verdict Challenge
 
@@ -350,87 +334,6 @@ Prompts the agent should consider:
 - **KEEP** → write the verdict at the top of the Step 5 output as proposed
 - **ESCALATE** / **DE-ESCALATE** → adopt the agent's recommended verdict and write a one-sentence rationale that names what tipped it
 
-## Step 8 — Re-review Pattern Capture
-
-Only fires when Step 1 detected existing review comments from your prior review pass on this PR. Skip entirely otherwise.
-
-After the verdict is finalized, look at any PR comments (from other reviewers or the author) that surfaced since your last pass:
-
-1. Classify each: `Already-flagged-by-you` / `Out-of-scope` / `Worth-considering`.
-2. For the `Worth-considering` set, ask one batched question:
-   > "Do any of these point to a pattern the skill should have caught? [numbers or 'none']"
-3. For each selected comment:
-   - Check `references/learned-misses.md` for an existing matching Shape; append a new Evidence entry (`type: missed`, today's date, `ref` = comment link) if found.
-   - Otherwise, draft a Shape and Trigger signals, confirm with me, then append a new entry under `## Pending` with `status: pending`.
-
-If no `Worth-considering` items, skip the prompt entirely.
-
-## Subcommands — `capture`, `promote`
-
-### `/my-review capture`
-
-Direct, source-agnostic entry into the pattern queue. Use when a pattern surfaces outside the natural prompts in Step 6 and Step 8 — a bug report, a post-mortem, a Slack thread, a hunch.
-
-Flow:
-1. Ask: what pattern are we capturing? Collect Shape (one or two sentences, the *general* pattern), Trigger signals, and the source `ref`.
-2. Check `references/learned-misses.md` for an existing matching Shape. If found, append Evidence (`type: noted`, today's date, the source `ref`) to the existing entry.
-3. Otherwise, draft the entry and confirm with me before writing under `## Pending` with `status: pending`.
-
-Default Evidence type is `noted` (the user is calling it out — neither a clean catch nor a clean miss).
-
-Do **not** run any review flow in this mode. Just capture and exit.
-
-### `/my-review promote`
-
-Walk the pending queue one entry at a time (use the `walk-through` skill). For each entry with `status: pending` or `status: ready`:
-
-1. Show the Shape, Trigger signals, and Evidence summary.
-2. Reaffirm the Shape — is the generalization right, too narrow, or too broad? Offer to rewrite.
-3. Confirm the **target file**:
-   - Lens reference (e.g., `references/cross-service-contracts.md`) for a positive check ("review should affirmatively check for X").
-   - `references/general-checklist.md` for a general-review category addition.
-   - The relevant lens skill's `SKILL.md` (e.g. `~/.claude/skills/my-review/references/lenses/security.md`) when the pattern belongs to a specific lens.
-   - `gotchas.md` for a failure-mode lesson ("skill itself does the wrong thing").
-4. Confirm the exact wording — show what will be written, let me edit.
-5. On approval: write to target file under the appropriate section, mark entry `status: promoted (<today's date>)`, move entry to `## Promoted` section.
-6. On reject: mark `status: discarded (<today's date>, <one-line reason>)`, move to `## Discarded`.
-
-Do **not** run any review flow in this mode.
-
-## Queue lifecycle and auto-promotion
-
-The queue at `references/learned-misses.md` is the single source of truth for patterns the skill is learning. Lifecycle:
-
-1. **Capture** — entry appended with `status: pending`. Shape is the key; matching new captures against existing Shapes appends Evidence rather than creating duplicates.
-2. **Accumulate** — Evidence accrues across reviews. Both `type: caught` and `type: missed` (and `type: noted` from `capture` mode) count toward the threshold.
-3. **Auto-promote** — when `len(evidence) >= 3`:
-   - Draft promotion wording (from the entry's `Proposed promotion: wording` field if set; otherwise generated from Shape + Evidence summary).
-   - Pick the target file (from `Proposed promotion: target` if set; otherwise inferred — see below).
-   - Write to the target file under the appropriate section.
-   - Mark entry `status: promoted (<today's date>)` and move it to `## Promoted`. Entry is preserved for audit.
-4. **Surface** — at the next `/my-review` invocation, Step 2's triage block reports the auto-promotion.
-
-### When does the auto-promote check run?
-
-At the top of every `/my-review` invocation (after mode detection, before Step 1). Scan `## Pending` for entries whose Evidence length has crossed threshold; auto-promote them before producing the triage block.
-
-### Target inference (when `Proposed promotion: target` is absent)
-
-- Shape describes "review should affirmatively check for X" in a lens-specific way → that lens's skill `SKILL.md` (e.g. `~/.claude/skills/my-review/references/lenses/security.md`).
-- Shape describes a cross-cutting review category → `references/general-checklist.md` under the appropriate section.
-- Shape describes a cross-service pattern → `references/cross-service-contracts.md`.
-- Shape describes "skill itself does the wrong thing" → `gotchas.md`, using the existing **Category / Context / Wrong / Right / Why / Source** structure.
-- Ambiguous → transition to `status: ready` (not auto-promoted) and surface loudly in next `/my-review` triage block for me to resolve via `/my-review promote`.
-
-### Threshold
-
-Currently **3**. Tune by editing this section. Lower = snappier learning, more noise; higher = more conservative.
-
-### Manual overrides
-
-- `/my-review promote` — promote pending entries early or discard one-offs.
-- `git revert` — undo an auto-promotion entirely. The queue entry stays as `promoted`; if you don't also discard it via `/my-review promote`, additional Evidence accruing later won't re-trigger auto-promote.
-
 ## Guidelines
 
 - Every blocking issue MUST include a concrete fix — write the actual replacement code, not a vague description of what to change.
@@ -448,7 +351,6 @@ Currently **3**. Tune by editing this section. Lower = snappier learning, more n
 - `references/general-checklist.md` — cross-cutting blocking/non-blocking categories. Read by the orchestrator on every invocation.
 - `references/human-acknowledgement.md` — triggers and comment shape for changes a person must confirm. Read in Step 2.
 - `references/cross-service-contracts.md` — checklist for cross-service changes. Read by the orchestrator on every invocation.
-- `references/learned-misses.md` — pattern queue. Auto-promote check runs at the top of every invocation; triage block reports promotions.
 - `references/team-review-patterns.md` — team-and-community review patterns distilled from a multi-developer PR mining pass. Created by a separate mining pass; the orchestrator reads it when present.
 - `gotchas.md` — known failure patterns. Both this skill and the orchestrator agent read it.
 

@@ -15,7 +15,6 @@ You DO NOT:
 - Choose a verdict (APPROVE / COMMENT / REQUEST_CHANGES — the calling skill does that)
 - Publish anything to GitHub (only the user can authorize that)
 - Edit or write files in the codebase under review (you are read-only — see Gotchas)
-- Run pattern-capture prompts (the calling skill handles `~/.claude/skills/my-review/references/learned-misses.md`)
 
 ## Inputs
 

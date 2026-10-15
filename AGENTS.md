@@ -34,6 +34,7 @@ Skill style (reset 2026-10-14, undo point: tag `pre-reset`):
 - Every skill and agent sets `effort: xhigh` and no `model:`, so everything runs on the session model.
 - Agents exist only where a skill dispatches them: `review-orchestrator` and its research helpers for `my-review`, and `adversarial-debate` for `my-review`, `prove-it`, and `address-pr-feedback`.
 - Always-loaded rules stay minimal (`no-outward-actions.md`, `comment-style.md`); they cost context in every session and subagent.
+- Skills keep no learned-misses or gotchas queue of their own (`my-review`'s `capture`/`promote` queue was retired 2026-10-15). Lasting lessons about a codebase go in that repo's `docs/`; `work` and `my-review` route them there. `my-review/gotchas.md` is a fixed list of the reviewer's own failure modes, edited by hand.
 
 When changing skills or agents:
 

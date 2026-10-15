@@ -44,8 +44,9 @@ Comments follow `~/.claude/rules/comment-style.md`: the present-day why, never
 the what or the history.
 
 **Save discovery in the repo's docs.** Lasting knowledge about how the system
-works belongs in `docs/`, not the thoughts file, so the next task doesn't
-regenerate it. Update the guide that covers the area. Otherwise add
+works, including gotchas and mistakes you hit along the way, belongs in `docs/`,
+not the thoughts file or a skill, so the next person or task doesn't regenerate
+it. Update the guide that covers the area. Otherwise add
 `docs/guides/<app>/<task-named-file>.md` and link it from that app's README.
 Designs, decisions and contracts go in the area's folder (for example
 `docs/<area>/adr/`). Follow the rules in `docs/guides/` `README.md`. Every claim must be
