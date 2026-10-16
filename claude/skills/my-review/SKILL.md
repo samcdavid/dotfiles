@@ -122,7 +122,7 @@ Set `tracer_triggers.neighbor_commits_heuristic = true` if any of the diff's cha
 
 Find the plan file by searching the contents of `~/.thoughts/work/` for the linked Linear issue ID, not by filename: `rg -il -w '<ISSUE-ID>' ~/.thoughts/work/`. Filenames vary in case and may not carry the ID, and `-w` keeps `MCP-11` from matching `MCP-1152`. Other tickets' files mention an ID as a blocker or sibling, so when several match, pick the one whose title line or `Branch:` line names the ID or the branch under review, and ignore files that only mention it. If none clearly fits, treat it as no plan file rather than guessing.
 
-If found, read the plan's surfaces (Phase sections, "Changes Required" lists, "What We're NOT Doing") and pass them as `plan_surfaces` to the orchestrator.
+If found, read its surfaces from the `work` file format: the files, modules, and `file:line` refs named in `## Context` and `## Slices`, plus anything the Goal, Slices, or `## Decisions` explicitly rule out of scope (exclusions are written inline, not under their own heading). Pass them as `plan_surfaces` to the orchestrator. `## Log` and `## Next` record progress rather than intent, so leave them out.
 
 ### Triage output
 
