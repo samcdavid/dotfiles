@@ -106,6 +106,8 @@ Always look for requirements, not only when a ticket is linked. Build one `requi
 
 **Repo docs.** Read the docs for the changed area: specs, ADRs and contracts under `docs/<area>/`, plus the product and convention rules reached from `docs/guides/` `README.md` and `docs/guides/<app>/README.md`. Documented behavior and conventions count as requirements.
 
+Leave staging verification out of the checklist, such as a ticket's "verify in staging" criterion. QA owns it, so it is never a finding or a reason to withhold APPROVE.
+
 When Linear and the docs disagree, or the change contradicts the docs, raise it as a Targeted Question naming both sources. When the change alters behavior the docs describe and doesn't update them, that's a non-blocking finding. If neither source has anything, say so in triage and ask me once for the source of truth before treating the review as requirements-free.
 
 Activate the **PM** lens whenever the checklist has entries.
@@ -237,7 +239,7 @@ Take the orchestrator's output + user answers + any FLAGged answers from Step 4,
 [Only if the orchestrator returned this block — skip otherwise]
 
 ### Human Acknowledgements
-[Every trigger from Step 2, each as its prepared inline comment with `path:line`. In local mode, the "Pending before PR or staging" checklist. Omit only if none fired.]
+[Every trigger from Step 2, each as its prepared inline comment with `path:line`. In local mode, the "Pending before PR" checklist. Omit only if none fired.]
 
 ### Questions
 - [Genuine clarifying questions — things where the author has context you don't]

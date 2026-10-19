@@ -39,6 +39,8 @@ Search Notion for related design docs, RFCs, or specs:
 
 ### Build the Requirements Map
 
+Skip staging verification, such as a ticket's "verify in staging" criterion. QA owns it, so it is never a requirement to trace or a "Missing" finding.
+
 Produce a structured requirements list:
 
 ```markdown

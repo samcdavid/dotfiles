@@ -62,6 +62,6 @@ pre-existing problem the hook flags in a touched file gets its own commit.
 Re-slice when you learn something. Stop and ask only for real decisions: product
 behavior, irreversible choices, scope changes. Otherwise keep going.
 
-**Done** when every slice is checked and the relevant suite passes. Then suggest `/my-review`.
+**Done** when every slice is checked and the relevant suite passes. Staging verification is QA's job: never make it a slice or a Done condition. Then suggest `/my-review`.
 
 Never push or open PRs unless I ask.
