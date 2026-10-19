@@ -46,9 +46,9 @@ human acknowledgement. This is not an automatically identified defect.
 - `<path:line>` — <migration | environment-variable | feature-flag | lint/tooling suppression | modified existing test>
 
 Please reply to confirm:
-- each changed environment variable has its appropriate value set in every staging and production environment;
-- each changed feature flag has its appropriate value/configuration set in every staging and production environment;
-- each new migration/backfill has been tested successfully in staging; and
+- each changed environment variable has its appropriate value set in every production environment;
+- each changed feature flag has its appropriate value/configuration set in every production environment;
+- each new migration/backfill's operational intent is confirmed; and
 - each edited existing test's changed expectation or coverage is intentional and still protects the desired outcome.
 ```
 

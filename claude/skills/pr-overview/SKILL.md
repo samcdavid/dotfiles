@@ -25,7 +25,7 @@ Give me a short "what changed and what to look at" summary of $ARGUMENTS. This i
 
 **Review activity (PR only).** Report each reviewer's latest stance (latest review wins), the count of unresolved non-outdated threads, and a factual lean such as "2 approvals, 1 unresolved thread". Count a verdict word stated in a bot's comment text the same as a formal review. Say plainly if there's no activity yet.
 
-**Prepared comments.** Draft author-directed comments, but never post them and never put them to me as questions. Use the formats in `references/categories.md`. In a PR they're inline comments; locally they're a "Pending before PR or staging" checklist. Skip anything an existing thread already raises.
+**Prepared comments.** Draft author-directed comments, but never post them and never put them to me as questions. Use the formats in `references/categories.md`. In a PR they're inline comments; locally they're a "Pending before PR" checklist. Skip anything an existing thread already raises.
 
 **Output.**
 1. One or two sentences on what the change does.
