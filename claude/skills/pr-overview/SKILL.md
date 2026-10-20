@@ -10,7 +10,9 @@ Give me a short "what changed and what to look at" summary of $ARGUMENTS. This i
 
 **Target.** For a PR, read the diff and files at the PR head with `gh` (`gh pr diff`, `gh api .../contents/{path}?ref={sha}`). Never check it out, and never treat the local working tree as PR contents. Without a PR, use `git diff` against the merge-base with the default branch, including uncommitted changes. If there's nothing to summarize, say so and stop.
 
-**Categories.** Scan the diff once and bucket only added or changed lines. Use `references/categories.md` for detection hints. Leave out empty categories.
+**Since my last review (PR only).** Find my latest submitted review (not PENDING) via `gh api repos/{owner}/{repo}/pulls/{n}/reviews`, matching `gh api user --jq .login`; note its `commit_id` and date. Compare it to the head with `gh api .../compare/{commit_id}...{head}`, keeping only files still in the PR diff so a merged-in base branch doesn't read as new work. Report the commits and files changed since, plus replies, threads, or reviews others added. If the compare fails or its status isn't `ahead` (rebase or force-push), say the range is unreliable and list commits with an `authoredDate` after the review instead; a rebase rewrites every `committedDate`. If head hasn't moved or I never reviewed, say so in one line.
+
+**Categories.** Scan the diff once and bucket only added or changed lines. Use `references/categories.md` for detection hints. Leave out empty categories. Tag an entry `new` when its hunk is in that compare, unless the range is unreliable.
 
 1. Product requirement changes
 2. Edited existing test cases (not newly added tests)
@@ -29,8 +31,9 @@ Give me a short "what changed and what to look at" summary of $ARGUMENTS. This i
 
 **Output.**
 1. One or two sentences on what the change does.
-2. Each non-empty category as `file:line` plus a one-line plain description.
-3. Review activity, then the prepared comments.
-4. A one-line size gauge: files changed and +/- lines.
+2. Since my last review (PR only).
+3. Each non-empty category as `file:line` plus a one-line plain description.
+4. Review activity, then the prepared comments.
+5. A one-line size gauge: files changed and +/- lines.
 
 If I ask for a verdict, point me to `/my-review`.
