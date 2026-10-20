@@ -1,6 +1,6 @@
 ---
 name: pr-overview
-description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes, and for a PR summarize existing review activity."
+description: "Give a brief, categorized overview of a PR or local diff, flagging requirement/behavior-relevant changes and raising risks by review lens with a confidence level, and for a PR summarize existing review activity."
 when_to_use: "Use when the user wants a quick orientation on a PR (number/URL) or the current local diff before reading it in full, rather than a full review or verdict."
 effort: xhigh
 disallowed-tools: Edit, Write, NotebookEdit
@@ -25,6 +25,8 @@ Give me a short "what changed and what to look at" summary of $ARGUMENTS. This i
 9. Monkey patching
 10. Linter suppressions
 
+**Lens risks.** Read only the Lens catalog table in `my-review/SKILL.md`. For each lens whose trigger signals appear in the diff, raise at most two risks it scrutinizes, each with a confidence: high (visible in the diff itself), medium (plausible, depends on code I haven't seen), or low (a hunch worth a look). Raise, don't investigate: no subagents, nothing read beyond the changed files and PR description, no Linear or docs fetch. Confidence is how likely the risk is real, not how bad it would be. Skip empty lenses and anything a category entry already says, tag `new` as above, and draft no comments for these: they're for me to decide what to dig into.
+
 **Review activity (PR only).** Report each reviewer's latest stance (latest review wins), the count of unresolved non-outdated threads, and a factual lean such as "2 approvals, 1 unresolved thread". Count a verdict word stated in a bot's comment text the same as a formal review. Say plainly if there's no activity yet.
 
 **Prepared comments.** Draft author-directed comments, but never post them and never put them to me as questions. Use the formats in `references/categories.md`. In a PR they're inline comments; locally they're a "Pending before PR" checklist. Skip anything an existing thread already raises.
@@ -33,7 +35,8 @@ Give me a short "what changed and what to look at" summary of $ARGUMENTS. This i
 1. One or two sentences on what the change does.
 2. Since my last review (PR only).
 3. Each non-empty category as `file:line` plus a one-line plain description.
-4. Review activity, then the prepared comments.
-5. A one-line size gauge: files changed and +/- lines.
+4. Lens risks, grouped by lens, each as `file:line`, the risk, and its confidence.
+5. Review activity, then the prepared comments.
+6. A one-line size gauge: files changed and +/- lines.
 
-If I ask for a verdict, point me to `/my-review`.
+If I ask for a verdict, or to dig into a risk, point me to `/my-review`.
