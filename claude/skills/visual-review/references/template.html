@@ -55,15 +55,20 @@ code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);ov
 .node.modified{border-color:var(--modified)}.node.modified .tag{background:var(--modified-bg);color:var(--modified)}
 .node.removed{border-color:var(--removed)}.node.removed .tag{background:var(--removed-bg);color:var(--removed)}.node.removed .t{text-decoration:line-through}
 .node.context{border-style:dashed}.node.context .tag{background:var(--context-bg);color:var(--context)}
-.badges{position:absolute;top:-9px;right:6px;display:flex;gap:4px}
+.badges{position:absolute;top:-9px;right:6px;display:flex;gap:4px;z-index:2}
 .badge{font-size:10px;font-weight:700;text-decoration:none;color:#fff;border-radius:99px;padding:1px 7px}
 .badge.high{background:var(--high)}.badge.medium{background:var(--medium)}.badge.low{background:var(--low)}
 .badge.entry{background:var(--context-bg);color:var(--fg);box-shadow:inset 0 0 0 1px var(--muted)}
 .check{border:2px solid var(--err);background:var(--removed-bg);border-radius:8px;padding:10px 14px;margin:0 0 16px}
 .check ul{margin:6px 0 0 18px;padding:0}
+.matrix tbody tr{position:relative}
+a.gh{color:inherit;text-decoration:none}
+a.gh::before{content:"\2197\00a0"}
+a.gh::after{content:"";position:absolute;inset:0;border-radius:8px}
+a.gh:hover::after,a.gh:focus-visible::after{outline:2px solid var(--fg)}
 
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
-.risk{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.risk{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px;position:relative}
 .risk.high{border-left-color:var(--high)}.risk.medium{border-left-color:var(--medium)}.risk.low{border-left-color:var(--low)}
 .risk:target{outline:2px solid var(--fg)}
 .risk header{display:flex;gap:8px;align-items:baseline;font-weight:600}
@@ -81,11 +86,11 @@ summary{cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
-<main>
+<main data-pr="123">
 
 <header>
   <h1>Visual review: Add a title length limit to questions</h1>
-  <p class="sub">PR #123 at <code>abc1234</code> &middot; 9 files &middot; +180 / &minus;42</p>
+  <p class="sub"><a href="https://github.com/OWNER/REPO/pull/123" target="_blank" rel="noopener noreferrer">PR #123</a> at <code>abc1234</code> &middot; 9 files &middot; +180 / &minus;42</p>
   <p>Two or three sentences on what the change does and what a reviewer should look at first.</p>
   <div class="legend">
     <span><i class="swatch" style="border-color:var(--added);background:var(--added-bg)"></i>added</span>
@@ -95,6 +100,7 @@ summary{cursor:pointer;font-weight:600}
     <span><i class="line"></i>next step</span>
     <span><i class="line err"></i>failure path</span>
     <span><i class="line bypass"></i>bespoke path (own implementation or own rules)</span>
+    <span>&nearr; opens the code on GitHub</span>
   </div>
 </header>
 
@@ -124,7 +130,7 @@ summary{cursor:pointer;font-weight:600}
   <div class="node modified" id="n2" style="grid-column:2;grid-row:2" data-to="n3">
     <span class="badges"><a class="badge medium" href="#P1">P1</a></span>
     <span class="tag">modified</span><div class="t">Form blocks submit over 140 characters</div>
-    <code>app/builder/QuestionForm.tsx:41</code>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R41" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:41</a></code>
   </div>
   <div class="node context" id="n3" style="grid-column:3;grid-row:3" data-to="n4">
     <span class="tag">context</span><div class="t">POST /questions</div>
@@ -133,11 +139,11 @@ summary{cursor:pointer;font-weight:600}
   <div class="node modified" id="n4" style="grid-column:4;grid-row:3" data-to="n5" data-err="n7">
     <span class="badges"><a class="badge high" href="#T1">T1</a></span>
     <span class="tag">modified</span><div class="t">Questions.create validates title length</div>
-    <code>lib/questions.ex:57</code>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R57" target="_blank" rel="noopener noreferrer">lib/questions.ex:57</a></code>
   </div>
   <div class="node modified" id="n5" style="grid-column:5;grid-row:3" data-to="n6">
     <span class="tag">modified</span><div class="t">Insert question, enqueue search index job</div>
-    <code>lib/questions.ex:72</code>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R72" target="_blank" rel="noopener noreferrer">lib/questions.ex:72</a></code>
   </div>
   <div class="node context" id="n6" style="grid-column:6;grid-row:3">
     <span class="tag">context</span><div class="t">201: new question appears in the list</div>
@@ -145,7 +151,7 @@ summary{cursor:pointer;font-weight:600}
   </div>
   <div class="node added" id="n7" style="grid-column:6;grid-row:4">
     <span class="tag">added</span><div class="t">422: inline title error</div>
-    <code>app/builder/QuestionForm.tsx:63</code>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R63" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:63</a></code>
   </div>
   <div class="node context" id="n8" style="grid-column:1;grid-row:6" data-bypass="n5">
     <span class="badges"><a class="badge entry" href="#E3">E3</a></span>
@@ -175,22 +181,22 @@ summary{cursor:pointer;font-weight:600}
     <tr id="E1">
       <th>E1 &middot; Builder form</th><td><span class="path new">new</span></td>
       <td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="same">same</td>
-      <td><code>app/builder/QuestionForm.tsx:41</code></td>
+      <td><code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R41" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:41</a></code></td>
     </tr>
     <tr id="E2">
       <th>E2 &middot; API client</th><td><span class="path shared">shared</span></td>
       <td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="unverified">unverified</td>
-      <td><code>lib/web/api/questions.ex:12</code></td>
+      <td><code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/web/api/questions.ex#L12" target="_blank" rel="noopener noreferrer">lib/web/api/questions.ex:12</a></code></td>
     </tr>
     <tr id="E3">
       <th>E3 &middot; CSV import</th><td><span class="path bespoke">bespoke</span></td>
       <td class="differs">differs</td><td class="same">same</td><td class="unverified">unverified</td><td class="differs">differs</td><td class="na">n/a</td><td class="differs">differs</td>
-      <td>Inserts rows directly and never calls <code>Questions.create</code>, so no length limit and no index job. <code>lib/imports/question_importer.ex:34</code></td>
+      <td>Inserts rows directly and never calls <code>Questions.create</code>, so no length limit and no index job. <code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/imports/question_importer.ex#L34" target="_blank" rel="noopener noreferrer">lib/imports/question_importer.ex:34</a></code></td>
     </tr>
     <tr id="E4">
       <th>E4 &middot; Admin form</th><td><span class="path bespoke">bespoke</span></td>
       <td class="differs">differs</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="same">same</td>
-      <td>Reaches the shared core but passes <code>skip_limits: true</code>, so the length limit is skipped. <code>lib/admin/question_form.ex:22</code></td>
+      <td>Reaches the shared core but passes <code>skip_limits: true</code>, so the length limit is skipped. <code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/admin/question_form.ex#L22" target="_blank" rel="noopener noreferrer">lib/admin/question_form.ex:22</a></code></td>
     </tr>
   </tbody>
 </table>
@@ -201,7 +207,7 @@ summary{cursor:pointer;font-weight:600}
     <article class="risk medium" id="P1">
       <header><span class="conf medium">medium</span><b>P1</b> Existing long titles can't be edited</header>
       <p>Who is affected, what they see, and why it matters.</p>
-      <code>app/builder/QuestionForm.tsx:41</code>
+      <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R41" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:41</a></code>
     </article>
   </section>
   <section>
@@ -209,7 +215,7 @@ summary{cursor:pointer;font-weight:600}
     <article class="risk high" id="T1">
       <header><span class="conf high">high</span><b>T1</b> Limit enforced in one function, not the schema</header>
       <p>What breaks, under which input or state, and why.</p>
-      <code>lib/questions.ex:57</code>
+      <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R57" target="_blank" rel="noopener noreferrer">lib/questions.ex:57</a></code>
     </article>
   </section>
 </div>
@@ -304,10 +310,19 @@ summary{cursor:pointer;font-weight:600}
     });
   }
 
+  // Links that leave the page open in a new tab so the review stays open.
+  // Same-page jumps stay put: a new tab would load a second copy of this page.
+  Array.prototype.forEach.call(document.querySelectorAll('a[href]'), function (a) {
+    if (a.getAttribute('href').charAt(0) === '#') return;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+  });
+
   // A table row with no node reads as an entry point the change doesn't touch,
   // so a disagreement is shown at the top of the page instead of left to be noticed.
   function check() {
     var problems = [];
+    var main = document.querySelector('main');
     Array.prototype.forEach.call(document.querySelectorAll('.matrix tbody tr'), function (row) {
       if (!row.id) { problems.push('A row in the entry-point table has no id, so no node can link to it.'); return; }
       var chip = document.querySelector('.node a[href="#' + row.id + '"]');
@@ -319,13 +334,17 @@ summary{cursor:pointer;font-weight:600}
       var target = document.getElementById(chip.getAttribute('href').slice(1));
       if (!target || !target.closest('.matrix')) problems.push(chip.textContent + ' is on a node but has no row in the entry-point table.');
     });
+    if (main.dataset.pr) {
+      Array.prototype.forEach.call(document.querySelectorAll('.node.added, .node.modified, .node.removed, .risk, .matrix tbody tr'), function (el) {
+        if (!el.querySelector('a.gh')) problems.push((el.id || 'A node') + ' has no link to its code on GitHub.');
+      });
+    }
     if (!problems.length) return;
     var box = document.createElement('div');
     box.className = 'check';
     box.setAttribute('role', 'alert');
-    box.innerHTML = '<b>The diagram and the entry-point table disagree</b><ul>' +
+    box.innerHTML = '<b>This page has gaps</b><ul>' +
       problems.map(function (m) { return '<li>' + m + '</li>'; }).join('') + '</ul>';
-    var main = document.querySelector('main');
     main.insertBefore(box, main.firstChild);
   }
 
