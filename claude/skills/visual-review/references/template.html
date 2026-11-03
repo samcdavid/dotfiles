@@ -33,6 +33,7 @@ h2{font-size:16px;margin:36px 0 10px}
 p{margin:0 0 8px}
 code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow-wrap:anywhere}
 .sub{color:var(--muted)}
+.sub a{color:var(--fg);text-decoration:underline dotted}
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:14px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .swatch{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--line)}
@@ -89,9 +90,9 @@ summary{cursor:pointer;font-weight:600}
 <main data-pr="123">
 
 <header>
-  <h1>Visual review: Add a title length limit to questions</h1>
+  <h1>Visual review: Add a Duplicate action for questions</h1>
   <p class="sub"><a href="https://github.com/OWNER/REPO/pull/123" target="_blank" rel="noopener noreferrer">PR #123</a> at <code>abc1234</code> &middot; 9 files &middot; +180 / &minus;42</p>
-  <p>Two or three sentences on what the change does and what a reviewer should look at first.</p>
+  <p>Adds a Duplicate button to the builder. It does not call the existing <code>Questions.copy/2</code> behind Copy to study: it builds the copy in a new <code>Questions.duplicate/1</code>. Start with E3 and T1.</p>
   <div class="legend">
     <span><i class="swatch" style="border-color:var(--added);background:var(--added-bg)"></i>added</span>
     <span><i class="swatch" style="border-color:var(--modified);background:var(--modified-bg)"></i>modified</span>
@@ -99,7 +100,7 @@ summary{cursor:pointer;font-weight:600}
     <span><i class="swatch" style="border-style:dashed"></i>context (unchanged)</span>
     <span><i class="line"></i>next step</span>
     <span><i class="line err"></i>failure path</span>
-    <span><i class="line bypass"></i>bespoke path (own implementation or own rules)</span>
+    <span><i class="line bypass"></i>bespoke: a second implementation of existing functionality</span>
     <span>&nearr; opens the code on GitHub</span>
   </div>
 </header>
@@ -124,79 +125,85 @@ summary{cursor:pointer;font-weight:600}
 
   <div class="node context" id="n1" style="grid-column:1;grid-row:2" data-to="n2">
     <span class="badges"><a class="badge entry" href="#E1">E1</a></span>
-    <span class="tag">context</span><div class="t">Researcher clicks Add question in the builder</div>
-    <code>app/builder/index.tsx:88</code>
+    <span class="tag">context</span><div class="t">Researcher copies a question to another study</div>
+    <code>app/builder/CopyDialog.tsx:30</code>
   </div>
-  <div class="node modified" id="n2" style="grid-column:2;grid-row:2" data-to="n3">
-    <span class="badges"><a class="badge medium" href="#P1">P1</a></span>
-    <span class="tag">modified</span><div class="t">Form blocks submit over 140 characters</div>
-    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R41" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:41</a></code>
+  <div class="node context" id="n2" style="grid-column:2;grid-row:2" data-to="n3">
+    <span class="tag">context</span><div class="t">Copy dialog sends the target study</div>
+    <code>app/builder/CopyDialog.tsx:44</code>
   </div>
-  <div class="node context" id="n3" style="grid-column:3;grid-row:3" data-to="n4">
-    <span class="tag">context</span><div class="t">POST /questions</div>
-    <code>lib/web/questions_controller.ex:20</code>
+  <div class="node context" id="n3" style="grid-column:3;grid-row:2" data-to="n4">
+    <span class="tag">context</span><div class="t">POST /questions/:id/copy</div>
+    <code>lib/web/questions_controller.ex:61</code>
   </div>
-  <div class="node modified" id="n4" style="grid-column:4;grid-row:3" data-to="n5" data-err="n7">
-    <span class="badges"><a class="badge high" href="#T1">T1</a></span>
-    <span class="tag">modified</span><div class="t">Questions.create validates title length</div>
-    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R57" target="_blank" rel="noopener noreferrer">lib/questions.ex:57</a></code>
+  <div class="node context" id="n4" style="grid-column:4;grid-row:2" data-to="n5" data-err="n12">
+    <span class="tag">context</span><div class="t">Questions.copy/2 validates, copies tags and attachments</div>
+    <code>lib/questions.ex:88</code>
   </div>
-  <div class="node modified" id="n5" style="grid-column:5;grid-row:3" data-to="n6">
-    <span class="tag">modified</span><div class="t">Insert question, enqueue search index job</div>
-    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R72" target="_blank" rel="noopener noreferrer">lib/questions.ex:72</a></code>
+  <div class="node context" id="n5" style="grid-column:5;grid-row:2" data-to="n6">
+    <span class="tag">context</span><div class="t">Insert the copy, enqueue the search index job</div>
+    <code>lib/questions.ex:101</code>
   </div>
-  <div class="node context" id="n6" style="grid-column:6;grid-row:3">
-    <span class="tag">context</span><div class="t">201: new question appears in the list</div>
+  <div class="node context" id="n6" style="grid-column:6;grid-row:2">
+    <span class="tag">context</span><div class="t">201: the copy appears in the target study</div>
     <code>app/builder/QuestionList.tsx:15</code>
   </div>
-  <div class="node added" id="n7" style="grid-column:6;grid-row:4">
-    <span class="tag">added</span><div class="t">422: inline title error</div>
-    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R63" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:63</a></code>
+  <div class="node context" id="n12" style="grid-column:6;grid-row:3">
+    <span class="tag">context</span><div class="t">403: the target study isn't yours</div>
+    <code>lib/web/questions_controller.ex:66</code>
   </div>
-  <div class="node context" id="n8" style="grid-column:1;grid-row:6" data-bypass="n5">
-    <span class="badges"><a class="badge entry" href="#E3">E3</a></span>
-    <span class="tag">context</span><div class="t">CSV import inserts rows directly</div>
-    <code>lib/imports/question_importer.ex:34</code>
-  </div>
-  <div class="node context" id="n9" style="grid-column:1;grid-row:5" data-to="n3">
+  <div class="node context" id="n11" style="grid-column:1;grid-row:3" data-to="n3">
     <span class="badges"><a class="badge entry" href="#E2">E2</a></span>
-    <span class="tag">context</span><div class="t">API client creates a question</div>
-    <code>lib/web/api/questions.ex:12</code>
+    <span class="tag">context</span><div class="t">API client copies a question, tags off by default</div>
+    <code>lib/web/api/questions.ex:48</code>
   </div>
-  <div class="node context" id="n10" style="grid-column:1;grid-row:7" data-bypass="n4">
-    <span class="badges"><a class="badge entry" href="#E4">E4</a></span>
-    <span class="tag">context</span><div class="t">Admin form calls Questions.create with skip_limits: true</div>
-    <code>lib/admin/question_form.ex:22</code>
+  <div class="node added" id="n7" style="grid-column:1;grid-row:4" data-bypass="n8">
+    <span class="badges"><a class="badge entry" href="#E3">E3</a></span>
+    <span class="tag">added</span><div class="t">Researcher clicks Duplicate on a question</div>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-e3d576705626cdbba6194a83cb3838123d4c2002b24d845dbf7f9ff9bbbd3479R12" target="_blank" rel="noopener noreferrer">app/builder/DuplicateButton.tsx:12</a></code>
+  </div>
+  <div class="node added" id="n8" style="grid-column:2;grid-row:4" data-bypass="n9">
+    <span class="badges"><a class="badge medium" href="#P1">P1</a></span>
+    <span class="tag">added</span><div class="t">Builder sends the duplicate request</div>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52" target="_blank" rel="noopener noreferrer">app/builder/QuestionList.tsx:52</a></code>
+  </div>
+  <div class="node added" id="n9" style="grid-column:3;grid-row:4" data-bypass="n10">
+    <span class="tag">added</span><div class="t">POST /questions/:id/duplicate</div>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-cb0350127c6d73d257190d2cc050d2295226ef386b076612049fa2e8eb052061R74" target="_blank" rel="noopener noreferrer">lib/web/questions_controller.ex:74</a></code>
+  </div>
+  <div class="node added" id="n10" style="grid-column:4;grid-row:4" data-bypass="n13">
+    <span class="badges"><a class="badge high" href="#T1">T1</a></span>
+    <span class="tag">added</span><div class="t">Questions.duplicate/1 builds the copy itself</div>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120" target="_blank" rel="noopener noreferrer">lib/questions.ex:120</a></code>
+  </div>
+  <div class="node added" id="n13" style="grid-column:5;grid-row:4" data-bypass="n6">
+    <span class="tag">added</span><div class="t">Insert the copy: no tags, attachments, or index job</div>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R131" target="_blank" rel="noopener noreferrer">lib/questions.ex:131</a></code>
   </div>
 </div>
 </div>
 
 <h2>Entry points to the same capability</h2>
-<p class="sub">Capability: create a question. Each row is a way to reach it; each column is a rule it should apply the same way.</p>
+<p class="sub">Capability: copy a question. Each row is a way to reach it; each column is a rule it should apply the same way. <code>bespoke</code> is a second implementation of something that already exists, and <code>new</code> means this change adds it.</p>
 <table class="matrix">
   <thead>
     <tr><th>Entry point</th><th>Path</th><th>Validation</th><th>Defaults</th><th>Authz &amp; limits</th><th>Side effects</th><th>Flags</th><th>Errors &amp; copy</th><th>Notes</th></tr>
   </thead>
   <tbody>
     <tr id="E1">
-      <th>E1 &middot; Builder form</th><td><span class="path new">new</span></td>
+      <th>E1 &middot; Copy to study dialog</th><td><span class="path shared">shared</span></td>
       <td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="same">same</td>
-      <td><code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R41" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:41</a></code></td>
+      <td><code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/app/builder/CopyDialog.tsx#L30" target="_blank" rel="noopener noreferrer">app/builder/CopyDialog.tsx:30</a></code></td>
     </tr>
     <tr id="E2">
       <th>E2 &middot; API client</th><td><span class="path shared">shared</span></td>
-      <td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="unverified">unverified</td>
-      <td><code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/web/api/questions.ex#L12" target="_blank" rel="noopener noreferrer">lib/web/api/questions.ex:12</a></code></td>
+      <td class="same">same</td><td class="differs">differs</td><td class="same">same</td><td class="same">same</td><td class="unverified">unverified</td><td class="same">same</td>
+      <td>Reaches <code>Questions.copy/2</code> but leaves <code>copy_tags</code> off by default, so tags are copied only when the caller asks. <code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/web/api/questions.ex#L48" target="_blank" rel="noopener noreferrer">lib/web/api/questions.ex:48</a></code></td>
     </tr>
     <tr id="E3">
-      <th>E3 &middot; CSV import</th><td><span class="path bespoke">bespoke</span></td>
-      <td class="differs">differs</td><td class="same">same</td><td class="unverified">unverified</td><td class="differs">differs</td><td class="na">n/a</td><td class="differs">differs</td>
-      <td>Inserts rows directly and never calls <code>Questions.create</code>, so no length limit and no index job. <code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/imports/question_importer.ex#L34" target="_blank" rel="noopener noreferrer">lib/imports/question_importer.ex:34</a></code></td>
-    </tr>
-    <tr id="E4">
-      <th>E4 &middot; Admin form</th><td><span class="path bespoke">bespoke</span></td>
-      <td class="differs">differs</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="same">same</td>
-      <td>Reaches the shared core but passes <code>skip_limits: true</code>, so the length limit is skipped. <code><a class="gh" href="https://github.com/OWNER/REPO/blob/abc1234/lib/admin/question_form.ex#L22" target="_blank" rel="noopener noreferrer">lib/admin/question_form.ex:22</a></code></td>
+      <th>E3 &middot; Duplicate button</th><td><span class="path bespoke">bespoke</span> <span class="path new">new</span></td>
+      <td class="differs">differs</td><td class="differs">differs</td><td class="same">same</td><td class="differs">differs</td><td class="na">n/a</td><td class="same">same</td>
+      <td>Builds the copy itself instead of calling <code>Questions.copy/2</code>. The PR description says Duplicate should behave like Copy to study, so every later change to copying has to be made in both places. <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-e3d576705626cdbba6194a83cb3838123d4c2002b24d845dbf7f9ff9bbbd3479R12" target="_blank" rel="noopener noreferrer">app/builder/DuplicateButton.tsx:12</a></code></td>
     </tr>
   </tbody>
 </table>
@@ -205,17 +212,17 @@ summary{cursor:pointer;font-weight:600}
   <section>
     <h2>Product risks</h2>
     <article class="risk medium" id="P1">
-      <header><span class="conf medium">medium</span><b>P1</b> Existing long titles can't be edited</header>
-      <p>Who is affected, what they see, and why it matters.</p>
-      <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a99cadf0c31804ed12856abf357a9eccfc47f26c1cffb4ae7036fd9d5c89f5b0R41" target="_blank" rel="noopener noreferrer">app/builder/QuestionForm.tsx:41</a></code>
+      <header><span class="conf medium">medium</span><b>P1</b> Duplicates lose tags and attachments</header>
+      <p>A researcher who duplicates a question gets a copy without its tags or attachments, while Copy to study keeps them. Two actions that look alike behave differently.</p>
+      <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52" target="_blank" rel="noopener noreferrer">app/builder/QuestionList.tsx:52</a></code>
     </article>
   </section>
   <section>
     <h2>Technical risks</h2>
     <article class="risk high" id="T1">
-      <header><span class="conf high">high</span><b>T1</b> Limit enforced in one function, not the schema</header>
-      <p>What breaks, under which input or state, and why.</p>
-      <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R57" target="_blank" rel="noopener noreferrer">lib/questions.ex:57</a></code>
+      <header><span class="conf high">high</span><b>T1</b> Second implementation of copying a question</header>
+      <p><code>Questions.duplicate/1</code> re-implements <code>Questions.copy/2</code>, and the PR says the two should match. It already skips tags, attachments, and the index job, and any later change to copying has to be made in both. Calling <code>Questions.copy/2</code> with the same study as the target would remove the duplicate.</p>
+      <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120" target="_blank" rel="noopener noreferrer">lib/questions.ex:120</a></code>
     </article>
   </section>
 </div>
@@ -223,8 +230,8 @@ summary{cursor:pointer;font-weight:600}
 <details open>
   <summary>Searched, and not verified</summary>
   <ul>
-    <li>Searched callers of <code>Questions.create</code> and writers of <code>questions</code>: found 3 entry points.</li>
-    <li>Not verified: whether the API client applies the same feature flag.</li>
+    <li>Searched callers of <code>Questions.copy/2</code> and writers of <code>questions</code>: found 3 ways to copy a question.</li>
+    <li>Not verified: whether the API client's <code>copy_tags</code> default is intended.</li>
   </ul>
 </details>
 

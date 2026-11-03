@@ -17,35 +17,35 @@
 
 <h2>Requirements</h2>
 <ul class="reqs">
-  <li id="R1"><b>R1</b>Questions are limited to 140 characters in the title.<span class="src">ENG-123</span><span class="src">docs/guides/questions.md</span></li>
-  <li id="R2"><b>R2</b>The same limit holds however a question is created.<span class="src">ENG-123 comment</span></li>
+  <li id="R1"><b>R1</b>A question can be duplicated from the builder.<span class="src">ENG-123</span></li>
+  <li id="R2"><b>R2</b>Duplicate behaves like Copy to study: tags, attachments, and the search index job.<span class="src">ENG-123 comment</span><span class="src">docs/guides/questions.md</span></li>
 </ul>
-<p class="sub">Out of scope: changing limits on existing questions.</p>
+<p class="sub">Out of scope: changing the API client's <code>copy_tags</code> default.</p>
 
 <h2>Slices</h2>
 <ol class="slices">
   <li class="slice" id="S1">
-    <header><b>S1</b>Questions.create rejects titles over 140 characters<span class="src">ENG-124</span></header>
+    <header><b>S1</b>Questions.copy/2 accepts the question's own study as the target<span class="src">ENG-124</span></header>
     <dl>
-      <dt>Test first</dt><dd>create with a 141-character title returns a title error</dd>
+      <dt>Test first</dt><dd>copying into the question's own study creates a copy at the end of the list</dd>
       <dt>Files</dt><dd><code>lib/questions.ex</code>, <code>test/questions_test.exs</code></dd>
       <dt>Touches</dt><dd><a href="#n4">n4</a></dd>
-      <dt>Covers</dt><dd>R1, T1</dd>
+      <dt>Covers</dt><dd>R2, T1</dd>
     </dl>
   </li>
   <li class="slice" id="S2">
-    <header><b>S2</b>CSV import goes through Questions.create<span class="src">ENG-125</span></header>
+    <header><b>S2</b>Duplicate calls Questions.copy/2<span class="src">ENG-125</span></header>
     <dl>
-      <dt>Test first</dt><dd>importing a row with a long title reports a row error and inserts nothing</dd>
-      <dt>Files</dt><dd><code>lib/imports/question_importer.ex</code></dd>
-      <dt>Touches</dt><dd><a href="#n8">n8</a>, <a href="#n5">n5</a></dd>
-      <dt>Covers</dt><dd>R2, E3</dd>
+      <dt>Test first</dt><dd>clicking Duplicate shows the copy with its tags and attachments</dd>
+      <dt>Files</dt><dd><code>app/builder/DuplicateButton.tsx</code>, <code>lib/web/questions_controller.ex</code></dd>
+      <dt>Touches</dt><dd><a href="#n7">n7</a>, <a href="#n8">n8</a>, <a href="#n9">n9</a></dd>
+      <dt>Covers</dt><dd>R1, R2, E3</dd>
     </dl>
   </li>
 </ol>
 
 <h2>Open questions</h2>
 <ul class="questions">
-  <li id="Q1"><b>Q1</b>Should existing questions over the limit stay editable? Product can answer; blocks S1.</li>
-  <li id="Q2"><b>Q2</b>Should the admin form's <code>skip_limits: true</code> also skip the title limit? Engineering can answer; decides whether E4 needs a slice.</li>
+  <li id="Q1"><b>Q1</b>Should a duplicate sit right after the original or at the end of the list? Product can answer; blocks S2.</li>
+  <li id="Q2"><b>Q2</b>Is the API client's <code>copy_tags</code> default of off intended? Engineering can answer; decides whether E2 needs a slice.</li>
 </ul>
