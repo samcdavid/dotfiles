@@ -58,6 +58,9 @@ code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);ov
 .badges{position:absolute;top:-9px;right:6px;display:flex;gap:4px}
 .badge{font-size:10px;font-weight:700;text-decoration:none;color:#fff;border-radius:99px;padding:1px 7px}
 .badge.high{background:var(--high)}.badge.medium{background:var(--medium)}.badge.low{background:var(--low)}
+.badge.entry{background:var(--context-bg);color:var(--fg);box-shadow:inset 0 0 0 1px var(--muted)}
+.check{border:2px solid var(--err);background:var(--removed-bg);border-radius:8px;padding:10px 14px;margin:0 0 16px}
+.check ul{margin:6px 0 0 18px;padding:0}
 
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
 .risk{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
@@ -91,7 +94,7 @@ summary{cursor:pointer;font-weight:600}
     <span><i class="swatch" style="border-style:dashed"></i>context (unchanged)</span>
     <span><i class="line"></i>next step</span>
     <span><i class="line err"></i>failure path</span>
-    <span><i class="line bypass"></i>bespoke path skipping the shared core</span>
+    <span><i class="line bypass"></i>bespoke path (own implementation or own rules)</span>
   </div>
 </header>
 
@@ -114,6 +117,7 @@ summary{cursor:pointer;font-weight:600}
   <div class="lane" style="grid-column:6;grid-row:1">Response</div>
 
   <div class="node context" id="n1" style="grid-column:1;grid-row:2" data-to="n2">
+    <span class="badges"><a class="badge entry" href="#E1">E1</a></span>
     <span class="tag">context</span><div class="t">Researcher clicks Add question in the builder</div>
     <code>app/builder/index.tsx:88</code>
   </div>
@@ -143,39 +147,50 @@ summary{cursor:pointer;font-weight:600}
     <span class="tag">added</span><div class="t">422: inline title error</div>
     <code>app/builder/QuestionForm.tsx:63</code>
   </div>
-  <div class="node context" id="n8" style="grid-column:1;grid-row:5" data-bypass="n5">
-    <span class="badges"><a class="badge high" href="#E1">E1</a></span>
-    <span class="tag">context</span><div class="t">CSV import of many questions</div>
+  <div class="node context" id="n8" style="grid-column:1;grid-row:6" data-bypass="n5">
+    <span class="badges"><a class="badge entry" href="#E3">E3</a></span>
+    <span class="tag">context</span><div class="t">CSV import inserts rows directly</div>
     <code>lib/imports/question_importer.ex:34</code>
   </div>
-  <div class="node context" id="n9" style="grid-column:1;grid-row:6" data-to="n3">
+  <div class="node context" id="n9" style="grid-column:1;grid-row:5" data-to="n3">
+    <span class="badges"><a class="badge entry" href="#E2">E2</a></span>
     <span class="tag">context</span><div class="t">API client creates a question</div>
     <code>lib/web/api/questions.ex:12</code>
+  </div>
+  <div class="node context" id="n10" style="grid-column:1;grid-row:7" data-bypass="n4">
+    <span class="badges"><a class="badge entry" href="#E4">E4</a></span>
+    <span class="tag">context</span><div class="t">Admin form calls Questions.create with skip_limits: true</div>
+    <code>lib/admin/question_form.ex:22</code>
   </div>
 </div>
 </div>
 
 <h2>Entry points to the same capability</h2>
 <p class="sub">Capability: create a question. Each row is a way to reach it; each column is a rule it should apply the same way.</p>
-<table>
+<table class="matrix">
   <thead>
     <tr><th>Entry point</th><th>Path</th><th>Validation</th><th>Defaults</th><th>Authz &amp; limits</th><th>Side effects</th><th>Flags</th><th>Errors &amp; copy</th><th>Notes</th></tr>
   </thead>
   <tbody>
-    <tr>
-      <th>Builder form</th><td><span class="path new">new</span></td>
+    <tr id="E1">
+      <th>E1 &middot; Builder form</th><td><span class="path new">new</span></td>
       <td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="same">same</td>
       <td><code>app/builder/QuestionForm.tsx:41</code></td>
     </tr>
-    <tr>
-      <th>API client</th><td><span class="path shared">shared</span></td>
+    <tr id="E2">
+      <th>E2 &middot; API client</th><td><span class="path shared">shared</span></td>
       <td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="unverified">unverified</td>
       <td><code>lib/web/api/questions.ex:12</code></td>
     </tr>
-    <tr id="E1">
-      <th>CSV import</th><td><span class="path bespoke">bespoke</span></td>
+    <tr id="E3">
+      <th>E3 &middot; CSV import</th><td><span class="path bespoke">bespoke</span></td>
       <td class="differs">differs</td><td class="same">same</td><td class="unverified">unverified</td><td class="differs">differs</td><td class="na">n/a</td><td class="differs">differs</td>
       <td>Inserts rows directly and never calls <code>Questions.create</code>, so no length limit and no index job. <code>lib/imports/question_importer.ex:34</code></td>
+    </tr>
+    <tr id="E4">
+      <th>E4 &middot; Admin form</th><td><span class="path bespoke">bespoke</span></td>
+      <td class="differs">differs</td><td class="same">same</td><td class="same">same</td><td class="same">same</td><td class="na">n/a</td><td class="same">same</td>
+      <td>Reaches the shared core but passes <code>skip_limits: true</code>, so the length limit is skipped. <code>lib/admin/question_form.ex:22</code></td>
     </tr>
   </tbody>
 </table>
@@ -289,9 +304,35 @@ summary{cursor:pointer;font-weight:600}
     });
   }
 
+  // A table row with no node reads as an entry point the change doesn't touch,
+  // so a disagreement is shown at the top of the page instead of left to be noticed.
+  function check() {
+    var problems = [];
+    Array.prototype.forEach.call(document.querySelectorAll('.matrix tbody tr'), function (row) {
+      if (!row.id) { problems.push('A row in the entry-point table has no id, so no node can link to it.'); return; }
+      var chip = document.querySelector('.node a[href="#' + row.id + '"]');
+      var node = chip && chip.closest('.node');
+      if (!node) problems.push(row.id + ' is in the table but has no node in the flow.');
+      else if (row.querySelector('.path.bespoke') && !node.dataset.bypass) problems.push(row.id + ' is bespoke but its node has no data-bypass edge.');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.node a.entry'), function (chip) {
+      var target = document.getElementById(chip.getAttribute('href').slice(1));
+      if (!target || !target.closest('.matrix')) problems.push(chip.textContent + ' is on a node but has no row in the entry-point table.');
+    });
+    if (!problems.length) return;
+    var box = document.createElement('div');
+    box.className = 'check';
+    box.setAttribute('role', 'alert');
+    box.innerHTML = '<b>The diagram and the entry-point table disagree</b><ul>' +
+      problems.map(function (m) { return '<li>' + m + '</li>'; }).join('') + '</ul>';
+    var main = document.querySelector('main');
+    main.insertBefore(box, main.firstChild);
+  }
+
   addEventListener('load', draw);
   addEventListener('resize', draw);
   draw();
+  check();
 })();
 </script>
 </body>
