@@ -11,7 +11,7 @@
   --modified:#b45309;--modified-bg:#fef3c7;
   --removed:#b91c1c;--removed-bg:#fee2e2;
   --context:#57534e;--context-bg:#f5f5f4;
-  --err:#b91c1c;--bypass:#7c3aed;
+  --err:#b91c1c;--fail:#c2410c;--bypass:#7c3aed;
   --high:#b91c1c;--medium:#b45309;--low:#57534e;
 }
 @media (prefers-color-scheme:dark){
@@ -21,7 +21,7 @@
     --modified:#fbbf24;--modified-bg:#451a03;
     --removed:#f87171;--removed-bg:#450a0a;
     --context:#a8a29e;--context-bg:#33302d;
-    --err:#f87171;--bypass:#a78bfa;
+    --err:#f87171;--fail:#fb923c;--bypass:#a78bfa;
     --high:#f87171;--medium:#fbbf24;--low:#a8a29e;
   }
 }
@@ -37,17 +37,29 @@ code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);ov
 .legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:14px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .swatch{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--line)}
-.line{width:26px;border-top:2px solid var(--muted)}
-.line.err{border-top:2px dashed var(--err)}
-.line.bypass{border-top:2px dashed var(--bypass)}
+.lg{overflow:visible}
 
 .scroll{overflow-x:auto;padding-bottom:8px}
 .flow{--lanes:6;position:relative;display:grid;grid-template-columns:repeat(var(--lanes),minmax(160px,1fr));gap:36px 32px;min-width:calc(var(--lanes)*192px);padding:4px 2px}
 .lane{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:6px}
-.edges{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:visible}
-.edge{fill:none;stroke:var(--muted);stroke-width:1.6;stroke-linejoin:round}
-.edge.err{stroke:var(--err);stroke-dasharray:6 4}
-.edge.bypass{stroke:var(--bypass);stroke-width:2;stroke-dasharray:3 4}
+
+.edges{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:visible}
+.edge{fill:none;stroke:var(--muted);stroke-width:1.8;stroke-linejoin:round}
+.edge.fail{stroke:var(--fail);stroke-dasharray:9 5}
+.edge.bespoke{stroke:var(--bypass);stroke-width:2.4;stroke-dasharray:1 5;stroke-linecap:round}
+.edge.removed{stroke:var(--removed);stroke-dasharray:12 4 2 4}
+.hit{fill:none;stroke:transparent;stroke-width:14;pointer-events:stroke}
+.eg{outline:none}
+.eg[role=link]{cursor:pointer}
+.eg:hover .edge,.eg:focus-visible .edge,.eg.hl .edge{stroke-width:3.4}
+.flow.focus .eg{opacity:.12}
+.flow.focus .eg.hl{opacity:1}
+.elab{pointer-events:visiblePainted}
+.elab rect{fill:var(--bg);stroke-width:1.2}
+.elab text{font:700 9px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;text-anchor:middle;dominant-baseline:central}
+.eg.fail .elab rect{stroke:var(--fail)}.eg.fail .elab text{fill:var(--fail)}
+.eg.bespoke .elab rect{stroke:var(--bypass)}.eg.bespoke .elab text{fill:var(--bypass)}
+.eg.removed .elab rect{stroke:var(--removed)}.eg.removed .elab text{fill:var(--removed)}
 
 .node{position:relative;z-index:1;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.35}
 .node .tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 7px;border-radius:99px;margin-bottom:4px}
@@ -84,6 +96,24 @@ td.same{color:var(--added)}td.differs{color:var(--removed);font-weight:700}td.un
 .path.bespoke{color:var(--bypass)}.path.shared{color:var(--added)}.path.new{color:var(--modified)}
 details{margin-top:28px;color:var(--muted)}
 summary{cursor:pointer;font-weight:600}
+
+.review{margin-top:40px;border-top:2px solid var(--line);padding-top:4px}
+.review label.blk{display:block;font-weight:600;margin:12px 0 4px}
+.review textarea{width:100%;font:13px/1.45 system-ui,sans-serif;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:vertical}
+.review select,.review input[type=text],.review input[type=number],.review input[type=password]{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
+.review button{font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.review button.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.review button.warn{background:var(--fail);border-color:var(--fail);color:#fff}
+.rc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
+.rc.off{opacity:.5}
+.rc .row,.rv-post{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.rc-path{flex:1 1 260px}
+.review a{color:var(--fg);text-decoration:underline dotted}
+.rv-post{margin-top:14px}
+.rv-post input[type=password]{flex:1 1 260px}
+.src{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--context-bg);color:var(--muted)}
+#rv-status{min-height:1.5em;margin-top:8px}
+#rv-status.bad{color:var(--err)}
 </style>
 </head>
 <body>
@@ -98,21 +128,23 @@ summary{cursor:pointer;font-weight:600}
     <span><i class="swatch" style="border-color:var(--modified);background:var(--modified-bg)"></i>modified</span>
     <span><i class="swatch" style="border-color:var(--removed);background:var(--removed-bg)"></i>removed</span>
     <span><i class="swatch" style="border-style:dashed"></i>context (unchanged)</span>
-    <span><i class="line"></i>next step</span>
-    <span><i class="line err"></i>failure path</span>
-    <span><i class="line bypass"></i>bespoke: a second implementation of existing functionality</span>
-    <span>&nearr; opens the code on GitHub</span>
+    <span><svg class="lg" width="34" height="8" aria-hidden="true"><line class="edge" x1="0" y1="4" x2="34" y2="4"/></svg>next step</span>
+    <span><svg class="lg" width="34" height="8" aria-hidden="true"><line class="edge fail" x1="0" y1="4" x2="34" y2="4"/></svg>fails</span>
+    <span><svg class="lg" width="34" height="8" aria-hidden="true"><line class="edge bespoke" x1="0" y1="4" x2="34" y2="4"/></svg>bespoke: a second implementation of existing functionality</span>
+    <span><svg class="lg" width="34" height="8" aria-hidden="true"><line class="edge removed" x1="0" y1="4" x2="34" y2="4"/></svg>connection removed by this change</span>
+    <span>&nearr; click a node, line, risk or row to open the code on GitHub</span>
   </div>
 </header>
 
 <h2>Flow: user interaction to response</h2>
 <div class="scroll">
 <div class="flow" style="--lanes:6">
-  <svg class="edges" aria-hidden="true">
+  <svg class="edges" aria-hidden="false">
     <defs>
-      <marker id="ah-edge" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--muted)"/></marker>
-      <marker id="ah-err" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--err)"/></marker>
-      <marker id="ah-bypass" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--bypass)"/></marker>
+      <marker id="ah-next" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--muted)"/></marker>
+      <marker id="ah-fail" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--fail)"/></marker>
+      <marker id="ah-bespoke" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--bypass)"/></marker>
+      <marker id="ah-removed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" style="fill:var(--removed)"/></marker>
     </defs>
   </svg>
 
@@ -123,24 +155,24 @@ summary{cursor:pointer;font-weight:600}
   <div class="lane" style="grid-column:5;grid-row:1">Data &amp; side effects</div>
   <div class="lane" style="grid-column:6;grid-row:1">Response</div>
 
-  <div class="node context" id="n1" style="grid-column:1;grid-row:2" data-to="n2">
+  <div class="node context" id="n1" style="grid-column:1;grid-row:2">
     <span class="badges"><a class="badge entry" href="#E1">E1</a></span>
     <span class="tag">context</span><div class="t">Researcher copies a question to another study</div>
     <code>app/builder/CopyDialog.tsx:30</code>
   </div>
-  <div class="node context" id="n2" style="grid-column:2;grid-row:2" data-to="n3">
+  <div class="node context" id="n2" style="grid-column:2;grid-row:2">
     <span class="tag">context</span><div class="t">Copy dialog sends the target study</div>
     <code>app/builder/CopyDialog.tsx:44</code>
   </div>
-  <div class="node context" id="n3" style="grid-column:3;grid-row:2" data-to="n4">
+  <div class="node context" id="n3" style="grid-column:3;grid-row:2">
     <span class="tag">context</span><div class="t">POST /questions/:id/copy</div>
     <code>lib/web/questions_controller.ex:61</code>
   </div>
-  <div class="node context" id="n4" style="grid-column:4;grid-row:2" data-to="n5" data-err="n12">
+  <div class="node context" id="n4" style="grid-column:4;grid-row:2">
     <span class="tag">context</span><div class="t">Questions.copy/2 validates, copies tags and attachments</div>
     <code>lib/questions.ex:88</code>
   </div>
-  <div class="node context" id="n5" style="grid-column:5;grid-row:2" data-to="n6">
+  <div class="node context" id="n5" style="grid-column:5;grid-row:2">
     <span class="tag">context</span><div class="t">Insert the copy, enqueue the search index job</div>
     <code>lib/questions.ex:101</code>
   </div>
@@ -148,40 +180,62 @@ summary{cursor:pointer;font-weight:600}
     <span class="tag">context</span><div class="t">201: the copy appears in the target study</div>
     <code>app/builder/QuestionList.tsx:15</code>
   </div>
-  <div class="node context" id="n12" style="grid-column:6;grid-row:3">
-    <span class="tag">context</span><div class="t">403: the target study isn't yours</div>
-    <code>lib/web/questions_controller.ex:66</code>
-  </div>
-  <div class="node context" id="n11" style="grid-column:1;grid-row:3" data-to="n3">
+  <div class="node context" id="n11" style="grid-column:1;grid-row:3">
     <span class="badges"><a class="badge entry" href="#E2">E2</a></span>
     <span class="tag">context</span><div class="t">API client copies a question, tags off by default</div>
     <code>lib/web/api/questions.ex:48</code>
   </div>
-  <div class="node added" id="n7" style="grid-column:1;grid-row:4" data-bypass="n8">
+  <div class="node removed" id="n14" style="grid-column:5;grid-row:3">
+    <span class="tag">removed</span><div class="t">Separate step that copied tags after the insert</div>
+    <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4L93" target="_blank" rel="noopener noreferrer">lib/questions.ex:93</a></code>
+  </div>
+  <div class="node context" id="n12" style="grid-column:6;grid-row:3">
+    <span class="tag">context</span><div class="t">403: the target study isn't yours</div>
+    <code>lib/web/questions_controller.ex:66</code>
+  </div>
+  <div class="node added" id="n7" style="grid-column:1;grid-row:4">
     <span class="badges"><a class="badge entry" href="#E3">E3</a></span>
     <span class="tag">added</span><div class="t">Researcher clicks Duplicate on a question</div>
     <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-e3d576705626cdbba6194a83cb3838123d4c2002b24d845dbf7f9ff9bbbd3479R12" target="_blank" rel="noopener noreferrer">app/builder/DuplicateButton.tsx:12</a></code>
   </div>
-  <div class="node added" id="n8" style="grid-column:2;grid-row:4" data-bypass="n9">
+  <div class="node added" id="n8" style="grid-column:2;grid-row:4">
     <span class="badges"><a class="badge medium" href="#P1">P1</a></span>
     <span class="tag">added</span><div class="t">Builder sends the duplicate request</div>
     <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52" target="_blank" rel="noopener noreferrer">app/builder/QuestionList.tsx:52</a></code>
   </div>
-  <div class="node added" id="n9" style="grid-column:3;grid-row:4" data-bypass="n10">
+  <div class="node added" id="n9" style="grid-column:3;grid-row:4">
     <span class="tag">added</span><div class="t">POST /questions/:id/duplicate</div>
     <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-cb0350127c6d73d257190d2cc050d2295226ef386b076612049fa2e8eb052061R74" target="_blank" rel="noopener noreferrer">lib/web/questions_controller.ex:74</a></code>
   </div>
-  <div class="node added" id="n10" style="grid-column:4;grid-row:4" data-bypass="n13">
+  <div class="node added" id="n10" style="grid-column:4;grid-row:4">
     <span class="badges"><a class="badge high" href="#T1">T1</a></span>
     <span class="tag">added</span><div class="t">Questions.duplicate/1 builds the copy itself</div>
     <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120" target="_blank" rel="noopener noreferrer">lib/questions.ex:120</a></code>
   </div>
-  <div class="node added" id="n13" style="grid-column:5;grid-row:4" data-bypass="n6">
+  <div class="node added" id="n13" style="grid-column:5;grid-row:4">
     <span class="tag">added</span><div class="t">Insert the copy: no tags, attachments, or index job</div>
     <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R131" target="_blank" rel="noopener noreferrer">lib/questions.ex:131</a></code>
   </div>
 </div>
 </div>
+<script type="application/json" id="edges">
+[
+  {"from":"n1","to":"n2","kind":"next","note":"The dialog opens for the chosen question","href":"https://github.com/OWNER/REPO/blob/abc1234/app/builder/CopyDialog.tsx#L30"},
+  {"from":"n2","to":"n3","kind":"next","note":"The dialog posts the target study","href":"https://github.com/OWNER/REPO/blob/abc1234/app/builder/CopyDialog.tsx#L48"},
+  {"from":"n3","to":"n4","kind":"next","note":"The controller calls Questions.copy/2","href":"https://github.com/OWNER/REPO/blob/abc1234/lib/web/questions_controller.ex#L63"},
+  {"from":"n4","to":"n5","kind":"next","note":"copy/2 inserts the copy","href":"https://github.com/OWNER/REPO/blob/abc1234/lib/questions.ex#L96"},
+  {"from":"n5","to":"n6","kind":"next","note":"The controller returns the new question","href":"https://github.com/OWNER/REPO/blob/abc1234/lib/web/questions_controller.ex#L64"},
+  {"from":"n4","to":"n12","kind":"fail","note":"A study the user doesn't own returns 403","href":"https://github.com/OWNER/REPO/blob/abc1234/lib/questions.ex#L91"},
+  {"from":"n11","to":"n3","kind":"next","note":"The API client posts to the same endpoint","href":"https://github.com/OWNER/REPO/blob/abc1234/lib/web/api/questions.ex#L52"},
+  {"from":"n4","to":"n14","kind":"removed","note":"copy/2 no longer calls a second step to copy tags","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4L93"},
+  {"from":"n14","to":"n5","kind":"removed","note":"The tag step no longer runs after the insert","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4L94"},
+  {"from":"n7","to":"n8","kind":"bespoke","note":"The button click starts the duplicate request","href":"https://github.com/OWNER/REPO/pull/123/files#diff-e3d576705626cdbba6194a83cb3838123d4c2002b24d845dbf7f9ff9bbbd3479R14"},
+  {"from":"n8","to":"n9","kind":"bespoke","note":"The builder posts to the new endpoint","href":"https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R56"},
+  {"from":"n9","to":"n10","kind":"bespoke","note":"The controller calls the new Questions.duplicate/1, not copy/2","href":"https://github.com/OWNER/REPO/pull/123/files#diff-cb0350127c6d73d257190d2cc050d2295226ef386b076612049fa2e8eb052061R76"},
+  {"from":"n10","to":"n13","kind":"bespoke","note":"duplicate/1 inserts the copy itself","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R126"},
+  {"from":"n13","to":"n6","kind":"bespoke","note":"The controller returns the new question","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R133"}
+]
+</script>
 
 <h2>Entry points to the same capability</h2>
 <p class="sub">Capability: copy a question. Each row is a way to reach it; each column is a rule it should apply the same way. <code>bespoke</code> is a second implementation of something that already exists, and <code>new</code> means this change adds it.</p>
@@ -235,13 +289,55 @@ summary{cursor:pointer;font-weight:600}
   </ul>
 </details>
 
+<section class="review" id="review">
+  <h2>Review to post</h2>
+  <p class="sub">Drafted from the risks above. Edit anything, add or remove comments, then post. Nothing is sent until you click the button, and your edits are kept in this browser.</p>
+  <label class="blk" for="rv-body">Review body</label>
+  <textarea id="rv-body" rows="6"></textarea>
+  <h2>Inline comments <span class="src" id="rv-count"></span></h2>
+  <div id="rv-comments"></div>
+  <button type="button" data-act="add">Add comment</button>
+  <div class="rv-post">
+    <label for="rv-event">Review type</label>
+    <select id="rv-event">
+      <option value="">Pending: finish it on GitHub</option>
+      <option value="COMMENT">Comment</option>
+      <option value="APPROVE">Approve</option>
+      <option value="REQUEST_CHANGES">Request changes</option>
+    </select>
+    <input type="password" id="rv-token" autocomplete="off" placeholder="GitHub token with pull request write access (kept in this tab only)" aria-label="GitHub token">
+  </div>
+  <div class="rv-post">
+    <button type="button" id="rv-post" data-act="post" class="primary"></button>
+    <button type="button" data-act="copy">Copy as gh command</button>
+    <button type="button" data-act="reset">Reset to draft</button>
+  </div>
+  <p id="rv-status" role="status"></p>
+</section>
+<script type="application/json" id="review-draft">
+{
+  "repo": "OWNER/REPO",
+  "pr": 123,
+  "head": "abc1234def5678abc1234def5678abc1234def56",
+  "body": "Duplicate adds a second way to copy a question instead of reusing `Questions.copy/2`. My main concern is keeping the two in step; see the comment on `lib/questions.ex`.\n\nOutside this diff: the API client leaves `copy_tags` off by default, so tags are copied only when asked. Worth checking that is intended.",
+  "comments": [
+    {"path":"lib/questions.ex","line":120,"side":"RIGHT","note":"T1","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120",
+     "body":"`Questions.duplicate/1` re-implements `Questions.copy/2`, and the PR description says the two should match. It already skips tags, attachments, and the index job, and every later change to copying has to be made in both places.\n\nCould Duplicate call `Questions.copy/2` with the question's own study as the target instead?"},
+    {"path":"app/builder/QuestionList.tsx","line":52,"side":"RIGHT","note":"P1","href":"https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52",
+     "body":"A duplicated question comes back without its tags or attachments, while Copy to study keeps them. Is that intended? If not, reusing `Questions.copy/2` would fix both actions together."}
+  ]
+}
+</script>
+
 </main>
 <script>
 (function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  var main = document.querySelector('main');
   var flow = document.querySelector('.flow');
   var svg = flow.querySelector('.edges');
-  var kinds = [['to', 'edge', 10], ['err', 'err', -8], ['bypass', 'bypass', 8]];
-  var NS = 'http://www.w3.org/2000/svg';
+  var edges = JSON.parse(document.getElementById('edges').textContent);
+  var KINDS = { next: '', fail: 'fails', bespoke: 'bespoke', removed: 'removed' };
 
   function box(el, origin) {
     var r = el.getBoundingClientRect();
@@ -252,15 +348,15 @@ summary{cursor:pointer;font-weight:600}
     };
   }
 
-  function curve(a, b) {
+  function curve(a, b, xo, eo) {
     if (b.l > a.r || b.r < a.l) {
       var right = b.l > a.r, x1 = right ? a.r : a.l, x2 = right ? b.l : b.r;
       var k = Math.abs(x2 - x1) / 2, s = x2 > x1 ? 1 : -1;
-      return [[x1, a.cy], [x1 + s * k, a.cy], [x2 - s * k, b.cy], [x2, b.cy]];
+      return [[x1, a.cy + xo], [x1 + s * k, a.cy + xo], [x2 - s * k, b.cy + eo], [x2, b.cy + eo]];
     }
     var down = b.t >= a.b, y1 = down ? a.b : a.t, y2 = down ? b.t : b.b;
     var j = Math.abs(y2 - y1) / 2, d = down ? 1 : -1;
-    return [[a.cx, y1], [a.cx, y1 + d * j], [b.cx, y2 - d * j], [b.cx, y2]];
+    return [[a.cx + xo, y1], [a.cx + xo, y1 + d * j], [b.cx + eo, y2 - d * j], [b.cx + eo, y2]];
   }
 
   // A curve that crosses another node would read as passing through it, so such
@@ -278,43 +374,121 @@ summary{cursor:pointer;font-weight:600}
     return false;
   }
 
-  function route(a, b, gap, dy) {
-    var down = b.cy > a.cy, right = b.l >= a.r;
-    var y1 = down ? a.b : a.t, ym = down ? a.b + gap.row / 2 : a.t - gap.row / 2;
-    var x2 = right ? b.l - gap.col / 2 : b.r + gap.col / 2, xe = right ? b.l : b.r, ye = b.cy + dy;
-    return 'M' + a.cx + ',' + y1 + 'L' + a.cx + ',' + ym + 'L' + x2 + ',' + ym + 'L' + x2 + ',' + ye + 'L' + xe + ',' + ye;
+  // Edges that share a node side or a channel get separate tracks; otherwise
+  // they draw on top of each other and their kinds can't be told apart.
+  function fan(items, key, room, step, field, order) {
+    var groups = {};
+    items.forEach(function (it) { (groups[key(it)] = groups[key(it)] || []).push(it); });
+    Object.keys(groups).forEach(function (k) {
+      var g = groups[k];
+      if (order) g.sort(function (p, q) { return order(p) - order(q); });
+      var s = g.length > 1 ? Math.min(step, room / (g.length - 1)) : 0;
+      g.forEach(function (it, i) { it[field] = (i - (g.length - 1) / 2) * s; });
+    });
   }
 
+  function svgEl(name, attrs) {
+    var el = document.createElementNS(NS, name);
+    Object.keys(attrs || {}).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+
+  function openCode(href) { window.open(href, '_blank', 'noopener,noreferrer'); }
+
   function draw() {
-    Array.prototype.slice.call(svg.querySelectorAll('path.edge')).forEach(function (p) { p.remove(); });
+    Array.prototype.slice.call(svg.querySelectorAll('.eg')).forEach(function (g) { g.remove(); });
     var origin = flow.getBoundingClientRect();
     var cs = getComputedStyle(flow);
-    var gap = { row: parseFloat(cs.rowGap) || 30, col: parseFloat(cs.columnGap) || 30 };
+    var gap = { row: parseFloat(cs.rowGap) || 36, col: parseFloat(cs.columnGap) || 32 };
     svg.setAttribute('width', flow.offsetWidth);
     svg.setAttribute('height', flow.offsetHeight);
-    var nodes = Array.prototype.map.call(flow.querySelectorAll('.node'), function (el) {
-      var b = box(el, origin);
-      b.el = el;
-      return b;
+    var nodes = {};
+    Array.prototype.forEach.call(flow.querySelectorAll('.node'), function (el) { nodes[el.id] = box(el, origin); });
+    var list = [];
+    edges.forEach(function (e) {
+      if (nodes[e.from] && nodes[e.to]) list.push({ e: e, a: nodes[e.from], b: nodes[e.to] });
     });
-    nodes.forEach(function (a) {
-      kinds.forEach(function (kind) {
-        (a.el.dataset[kind[0]] || '').split(/\s+/).filter(Boolean).forEach(function (id) {
-          var b = nodes.filter(function (n) { return n.el.id === id; })[0];
-          if (!b) return;
-          var others = nodes.filter(function (n) { return n !== a && n !== b; });
-          var c = curve(a, b);
-          var d = blocked(c, others)
-            ? route(a, b, gap, kind[2])
-            : 'M' + c[0] + 'C' + c[1] + ' ' + c[2] + ' ' + c[3];
-          var p = document.createElementNS(NS, 'path');
-          p.setAttribute('d', d);
-          p.setAttribute('class', 'edge ' + kind[1]);
-          p.setAttribute('marker-end', 'url(#ah-' + kind[1] + ')');
-          svg.appendChild(p);
+    list.forEach(function (it) {
+      var others = Object.keys(nodes).filter(function (id) { return id !== it.e.from && id !== it.e.to; })
+        .map(function (id) { return nodes[id]; });
+      it.routed = blocked(curve(it.a, it.b, 0, 0), others);
+      if (!it.routed) return;
+      it.down = it.b.cy > it.a.cy;
+      it.right = it.b.l >= it.a.r;
+      it.ym = it.down ? it.a.b + gap.row / 2 : it.a.t - gap.row / 2;
+      it.xg = it.right ? it.b.l - gap.col / 2 : it.b.r + gap.col / 2;
+    });
+    fan(list, function (it) { return it.e.from; }, 52, 9, 'xo', function (it) { return it.b.cy; });
+    fan(list, function (it) { return it.e.to; }, 52, 9, 'eo', function (it) { return it.a.cy; });
+    var routed = list.filter(function (it) { return it.routed; });
+    fan(routed, function (it) { return Math.round(it.ym); }, gap.row - 6, 7, 'ty');
+    fan(routed, function (it) { return Math.round(it.xg); }, gap.col - 6, 7, 'tx');
+
+    var placed = [];
+    list.forEach(function (it) {
+      var d;
+      if (it.routed) {
+        var x1 = it.a.cx + (it.xo || 0), y1 = it.down ? it.a.b : it.a.t;
+        var ym = it.ym + (it.ty || 0), x2 = it.xg + (it.tx || 0);
+        var ye = it.b.cy + (it.eo || 0), xe = it.right ? it.b.l : it.b.r;
+        d = 'M' + x1 + ',' + y1 + 'L' + x1 + ',' + ym + 'L' + x2 + ',' + ym + 'L' + x2 + ',' + ye + 'L' + xe + ',' + ye;
+      } else {
+        var c = curve(it.a, it.b, it.xo || 0, it.eo || 0);
+        d = 'M' + c[0] + 'C' + c[1] + ' ' + c[2] + ' ' + c[3];
+      }
+      var kind = KINDS.hasOwnProperty(it.e.kind) ? it.e.kind : 'next';
+      var g = svgEl('g', { 'class': 'eg ' + kind, 'data-from': it.e.from, 'data-to': it.e.to });
+      var text = (KINDS[kind] ? KINDS[kind] + ': ' : '') + (it.e.note || it.e.from + ' to ' + it.e.to);
+      var tip = svgEl('title');
+      tip.textContent = text + (it.e.href ? ' (click to open the code)' : '');
+      g.appendChild(tip);
+      var vis = svgEl('path', { d: d, 'class': 'edge ' + kind, 'marker-end': 'url(#ah-' + kind + ')' });
+      g.appendChild(vis);
+      g.appendChild(svgEl('path', { d: d, 'class': 'hit' }));
+      svg.appendChild(g);
+      if (KINDS[kind]) {
+        var lab = svgEl('g', { 'class': 'elab' });
+        var rect = svgEl('rect', { rx: 6 });
+        var word = svgEl('text', { x: 0, y: 0 });
+        word.textContent = KINDS[kind];
+        lab.appendChild(rect);
+        lab.appendChild(word);
+        g.appendChild(lab);
+        var bb = word.getBBox(), w = bb.width + 10, h = bb.height + 4, len = vis.getTotalLength(), spot = null;
+        [0.5, 0.35, 0.65, 0.25, 0.75, 0.15, 0.85].some(function (f) {
+          var pt = vis.getPointAtLength(len * f);
+          var r = { l: pt.x - w / 2, r: pt.x + w / 2, t: pt.y - h / 2, b: pt.y + h / 2 };
+          var clash = placed.some(function (q) { return r.l < q.r + 3 && r.r > q.l - 3 && r.t < q.b + 3 && r.b > q.t - 3; });
+          if (clash && f !== 0.85) return false;
+          spot = pt;
+          placed.push(r);
+          return true;
         });
-      });
+        lab.setAttribute('transform', 'translate(' + spot.x + ',' + spot.y + ')');
+        rect.setAttribute('x', -w / 2);
+        rect.setAttribute('y', -h / 2);
+        rect.setAttribute('width', w);
+        rect.setAttribute('height', h);
+      }
+      if (it.e.href) {
+        g.setAttribute('tabindex', '0');
+        g.setAttribute('role', 'link');
+        g.setAttribute('aria-label', text);
+        g.addEventListener('click', function () { openCode(it.e.href); });
+        g.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openCode(it.e.href); }
+        });
+      }
     });
+  }
+
+  function follow(ev) {
+    var g = ev.target.closest && ev.target.closest('.eg');
+    var n = ev.target.closest && ev.target.closest('.node');
+    var all = Array.prototype.slice.call(svg.querySelectorAll('.eg'));
+    var hl = g ? [g] : n ? all.filter(function (x) { return x.dataset.from === n.id || x.dataset.to === n.id; }) : [];
+    flow.classList.toggle('focus', hl.length > 0);
+    all.forEach(function (x) { x.classList.toggle('hl', hl.indexOf(x) > -1); });
   }
 
   // Links that leave the page open in a new tab so the review stays open.
@@ -325,17 +499,25 @@ summary{cursor:pointer;font-weight:600}
     a.rel = 'noopener noreferrer';
   });
 
-  // A table row with no node reads as an entry point the change doesn't touch,
-  // so a disagreement is shown at the top of the page instead of left to be noticed.
+  // A table row or edge missing from the diagram reads as something the change
+  // doesn't touch, so a disagreement is shown at the top of the page instead of
+  // left to be noticed.
   function check() {
     var problems = [];
-    var main = document.querySelector('main');
+    var ids = {};
+    Array.prototype.forEach.call(flow.querySelectorAll('.node'), function (n) { ids[n.id] = true; });
+    edges.forEach(function (e) {
+      if (!ids[e.from] || !ids[e.to]) problems.push('Edge ' + e.from + ' to ' + e.to + ' points at a node that is not in the flow.');
+      else if (main.dataset.pr && !e.href) problems.push('Edge ' + e.from + ' to ' + e.to + ' has no link to where the connection is made.');
+    });
     Array.prototype.forEach.call(document.querySelectorAll('.matrix tbody tr'), function (row) {
       if (!row.id) { problems.push('A row in the entry-point table has no id, so no node can link to it.'); return; }
       var chip = document.querySelector('.node a[href="#' + row.id + '"]');
       var node = chip && chip.closest('.node');
       if (!node) problems.push(row.id + ' is in the table but has no node in the flow.');
-      else if (row.querySelector('.path.bespoke') && !node.dataset.bypass) problems.push(row.id + ' is bespoke but its node has no data-bypass edge.');
+      else if (row.querySelector('.path.bespoke') && !edges.some(function (e) { return e.from === node.id && e.kind === 'bespoke'; })) {
+        problems.push(row.id + ' is bespoke but its node has no bespoke edge leaving it.');
+      }
     });
     Array.prototype.forEach.call(document.querySelectorAll('.node a.entry'), function (chip) {
       var target = document.getElementById(chip.getAttribute('href').slice(1));
@@ -345,6 +527,7 @@ summary{cursor:pointer;font-weight:600}
       Array.prototype.forEach.call(document.querySelectorAll('.node.added, .node.modified, .node.removed, .risk, .matrix tbody tr'), function (el) {
         if (!el.querySelector('a.gh')) problems.push((el.id || 'A node') + ' has no link to its code on GitHub.');
       });
+      if (!document.getElementById('review-draft')) problems.push('The page has no review draft.');
     }
     if (!problems.length) return;
     var box = document.createElement('div');
@@ -355,10 +538,140 @@ summary{cursor:pointer;font-weight:600}
     main.insertBefore(box, main.firstChild);
   }
 
+  // The review is a draft until the reader clicks post: the first click arms the
+  // button and only a second click within a few seconds sends anything.
+  function review() {
+    var host = document.getElementById('review');
+    var raw = document.getElementById('review-draft');
+    if (!host || !raw) return;
+    var draft = JSON.parse(raw.textContent);
+    var key = 'visual-review:' + draft.repo + '#' + draft.pr;
+    var cur = null, armed = null, sent = false;
+    function $(id) { return document.getElementById(id); }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function fresh() {
+      return { body: draft.body || '', event: '', comments: (draft.comments || []).map(function (c) {
+        var x = {}; Object.keys(c).forEach(function (k) { x[k] = c[k]; }); x.include = true; return x; }) };
+    }
+    try { cur = JSON.parse(localStorage.getItem(key)); } catch (err) { cur = null; }
+    var restored = !!cur;
+    cur = cur || fresh();
+
+    function save() { try { localStorage.setItem(key, JSON.stringify(cur)); } catch (err) { /* private mode */ } }
+    function say(html, bad) { var s = $('rv-status'); s.innerHTML = html; s.className = bad ? 'bad' : ''; }
+    function included() { return cur.comments.filter(function (c) { return c.include; }); }
+    function disarm() { if (armed !== null) { clearTimeout(armed); armed = null; } }
+    function payload() {
+      var p = { commit_id: draft.head, body: cur.body };
+      if (cur.event) p.event = cur.event;
+      p.comments = included().map(function (c) {
+        return { path: c.path, line: parseInt(c.line, 10), side: c.side === 'LEFT' ? 'LEFT' : 'RIGHT', body: c.body };
+      });
+      return p;
+    }
+    function problems() {
+      var out = [];
+      if (!/^[0-9a-f]{7,40}$/i.test(draft.head || '')) out.push('The draft has no head commit sha.');
+      included().forEach(function (c, n) {
+        var who = 'Comment ' + (n + 1) + (c.path ? ' (' + c.path + ')' : '');
+        if (!c.path) out.push(who + ' has no file path.');
+        if (!(parseInt(c.line, 10) > 0)) out.push(who + ' needs a line number.');
+        if (!String(c.body).trim()) out.push(who + ' is empty.');
+      });
+      if (!included().length && !String(cur.body).trim()) out.push('The review has no body and no comments.');
+      return out;
+    }
+    function summary() {
+      var n = included().length, ev = cur.event ? cur.event.toLowerCase().replace('_', ' ') : 'pending';
+      return n + ' comment' + (n === 1 ? '' : 's') + ' as a ' + ev + ' review on ' + draft.repo + '#' + draft.pr + '.';
+    }
+    function ui() {
+      var ev = cur.event;
+      var btn = $('rv-post');
+      btn.disabled = sent;
+      btn.textContent = sent ? 'Posted' : armed !== null ? 'Click again to send' : ev ? 'Post review (' + ev.toLowerCase().replace('_', ' ') + ')' : 'Create pending review';
+      btn.className = 'primary' + (armed !== null ? ' warn' : '');
+      $('rv-count').textContent = included().length + ' of ' + cur.comments.length + ' included';
+    }
+    function paint() {
+      $('rv-body').value = cur.body;
+      $('rv-event').value = cur.event || '';
+      $('rv-comments').innerHTML = cur.comments.map(function (c, i) {
+        return '<article class="rc' + (c.include ? '' : ' off') + '" data-i="' + i + '">' +
+          '<div class="row"><label><input type="checkbox" data-f="include"' + (c.include ? ' checked' : '') + '> include</label>' +
+          '<input type="text" class="rc-path" data-f="path" value="' + esc(c.path) + '" aria-label="file path">' +
+          '<input type="number" min="1" data-f="line" value="' + esc(c.line) + '" aria-label="line" style="width:76px">' +
+          '<select data-f="side" aria-label="side"><option' + (c.side === 'LEFT' ? '' : ' selected') + '>RIGHT</option><option' + (c.side === 'LEFT' ? ' selected' : '') + '>LEFT</option></select>' +
+          (c.href ? '<a href="' + esc(c.href) + '" target="_blank" rel="noopener noreferrer">&nearr; code</a>' : '') +
+          (c.note ? '<span class="src">' + esc(c.note) + '</span>' : '') +
+          '<button type="button" data-act="remove">Remove</button></div>' +
+          '<textarea data-f="body" rows="4" aria-label="comment">' + esc(c.body) + '</textarea></article>';
+      }).join('');
+      ui();
+    }
+    function edit(ev) {
+      var t = ev.target, art = t.closest('.rc');
+      if (art) {
+        var c = cur.comments[+art.dataset.i], f = t.dataset.f;
+        if (f === 'include') { c.include = t.checked; art.classList.toggle('off', !c.include); }
+        else if (f) c[f] = t.value;
+      } else if (t.id === 'rv-body') cur.body = t.value;
+      else if (t.id === 'rv-event') cur.event = t.value;
+      else return;
+      sent = false; disarm(); save(); ui();
+    }
+    function send() {
+      var bad = problems();
+      if (bad.length) { say(bad.map(esc).join('<br>'), true); return; }
+      if (!$('rv-token').value.trim()) { say('Paste a GitHub token first. It stays in this tab and is never saved.', true); return; }
+      if (armed === null) { armed = setTimeout(function () { armed = null; ui(); say(''); }, 8000); ui(); say('About to send ' + esc(summary())); return; }
+      disarm(); ui(); say('Sending...');
+      fetch('https://api.github.com/repos/' + draft.repo + '/pulls/' + draft.pr + '/reviews', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + $('rv-token').value.trim(), 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload())
+      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          if (res.ok) { sent = true; ui(); say('Done: <a href="' + esc(res.j.html_url) + '" target="_blank" rel="noopener noreferrer">open the review on GitHub</a> (' + esc(res.j.state || 'created') + ').'); return; }
+          var more = (res.j.errors || []).map(function (e) { return esc(typeof e === 'string' ? e : JSON.stringify(e)); }).join('<br>');
+          say('GitHub rejected it: ' + esc(res.j.message || 'unknown error') + (more ? '<br>' + more : ''), true);
+        })
+        .catch(function (err) { say('The request failed: ' + esc(err.message), true); });
+    }
+    function copy() {
+      var bad = problems();
+      if (bad.length) { say(bad.map(esc).join('<br>'), true); return; }
+      var cmd = 'gh api repos/' + draft.repo + '/pulls/' + draft.pr + "/reviews --method POST --input - <<'JSON'\n" + JSON.stringify(payload(), null, 2) + '\nJSON';
+      var done = function () { say('Copied. Run it in a terminal where gh is signed in.'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(cmd).then(done, function () { say('Copy failed.', true); });
+      else say('Copy is not available here.', true);
+    }
+
+    host.addEventListener('input', edit);
+    host.addEventListener('change', edit);
+    host.addEventListener('click', function (ev) {
+      var act = ev.target.dataset && ev.target.dataset.act;
+      if (!act) return;
+      if (act === 'remove') { cur.comments.splice(+ev.target.closest('.rc').dataset.i, 1); }
+      else if (act === 'add') { cur.comments.push({ include: true, path: '', line: '', side: 'RIGHT', body: '' }); }
+      else if (act === 'reset') { cur = fresh(); say('Reset to the generated draft.'); }
+      else if (act === 'copy') { copy(); return; }
+      else if (act === 'post') { send(); return; }
+      sent = false; disarm(); save(); paint();
+    });
+    paint();
+    if (restored) say('Restored your earlier edits. Reset to draft discards them.');
+  }
+
   addEventListener('load', draw);
   addEventListener('resize', draw);
+  flow.addEventListener('mouseover', follow);
+  flow.addEventListener('mouseout', function () { follow({ target: document.body }); });
+  flow.addEventListener('focusin', follow);
+  flow.addEventListener('focusout', function () { follow({ target: document.body }); });
   draw();
   check();
+  review();
 })();
 </script>
 </body>
