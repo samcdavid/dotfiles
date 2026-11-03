@@ -87,6 +87,11 @@ a.gh:hover::after,a.gh:focus-visible::after{outline:2px solid var(--fg)}
 .risk header{display:flex;gap:8px;align-items:baseline;font-weight:600}
 .conf{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 .conf.high{color:var(--high)}.conf.medium{color:var(--medium)}.conf.low{color:var(--low)}
+.vf{margin:6px 0 0;font-size:12px;color:var(--muted)}
+.vs{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 7px;border-radius:99px;margin-right:6px}
+.vs.confirmed{background:var(--added-bg);color:var(--added)}.vs.contradicted{background:var(--removed-bg);color:var(--removed)}.vs.unsupported{background:var(--modified-bg);color:var(--modified)}
+.vf a,.matrix td a:not(.gh){color:var(--fg);text-decoration:underline dotted}
+.risk a:not(.gh),.matrix a:not(.gh){position:relative;z-index:1}
 
 table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:13px}
 th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
@@ -257,7 +262,7 @@ summary{cursor:pointer;font-weight:600}
     <tr id="E3">
       <th>E3 &middot; Duplicate button</th><td><span class="path bespoke">bespoke</span> <span class="path new">new</span></td>
       <td class="differs">differs</td><td class="differs">differs</td><td class="same">same</td><td class="differs">differs</td><td class="na">n/a</td><td class="same">same</td>
-      <td>Builds the copy itself instead of calling <code>Questions.copy/2</code>. The PR description says Duplicate should behave like Copy to study, so every later change to copying has to be made in both places. <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-e3d576705626cdbba6194a83cb3838123d4c2002b24d845dbf7f9ff9bbbd3479R12" target="_blank" rel="noopener noreferrer">app/builder/DuplicateButton.tsx:12</a></code></td>
+      <td>Builds the copy itself instead of calling <code>Questions.copy/2</code>. <a href="https://linear.app/OWNER/issue/ENG-123">ENG-123</a> says Duplicate should behave like Copy to study, so every later change to copying has to be made in both places. <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-e3d576705626cdbba6194a83cb3838123d4c2002b24d845dbf7f9ff9bbbd3479R12" target="_blank" rel="noopener noreferrer">app/builder/DuplicateButton.tsx:12</a></code></td>
     </tr>
   </tbody>
 </table>
@@ -268,6 +273,7 @@ summary{cursor:pointer;font-weight:600}
     <article class="risk medium" id="P1">
       <header><span class="conf medium">medium</span><b>P1</b> Duplicates lose tags and attachments</header>
       <p>A researcher who duplicates a question gets a copy without its tags or attachments, while Copy to study keeps them. Two actions that look alike behave differently.</p>
+      <p class="vf"><span class="vs unsupported">unsupported</span>No doc or ticket says whether a duplicate keeps tags and attachments; <a href="https://github.com/OWNER/REPO/blob/abc1234/docs/guides/questions.md#L40">docs/guides/questions.md:40</a> only describes Copy to study.</p>
       <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52" target="_blank" rel="noopener noreferrer">app/builder/QuestionList.tsx:52</a></code>
     </article>
   </section>
@@ -276,6 +282,7 @@ summary{cursor:pointer;font-weight:600}
     <article class="risk high" id="T1">
       <header><span class="conf high">high</span><b>T1</b> Second implementation of copying a question</header>
       <p><code>Questions.duplicate/1</code> re-implements <code>Questions.copy/2</code>, and the PR says the two should match. It already skips tags, attachments, and the index job, and any later change to copying has to be made in both. Calling <code>Questions.copy/2</code> with the same study as the target would remove the duplicate.</p>
+      <p class="vf"><span class="vs confirmed">confirmed</span><a href="https://linear.app/OWNER/issue/ENG-123">ENG-123</a> says Duplicate should behave like Copy to study, and <a href="https://github.com/OWNER/REPO/blob/abc1234/docs/guides/questions.md#L52">docs/guides/questions.md:52</a> says copying lives in <code>Questions.copy/2</code>.</p>
       <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120" target="_blank" rel="noopener noreferrer">lib/questions.ex:120</a></code>
     </article>
   </section>
@@ -285,6 +292,7 @@ summary{cursor:pointer;font-weight:600}
   <summary>Searched, and not verified</summary>
   <ul>
     <li>Searched callers of <code>Questions.copy/2</code> and writers of <code>questions</code>: found 3 ways to copy a question.</li>
+    <li>Read <a href="https://linear.app/OWNER/issue/ENG-123">ENG-123</a> and its comments, and <code>docs/guides/questions.md</code>. No doc describes the duplicate flow.</li>
     <li>Not verified: whether the API client's <code>copy_tags</code> default is intended.</li>
   </ul>
 </details>
@@ -522,6 +530,9 @@ summary{cursor:pointer;font-weight:600}
     Array.prototype.forEach.call(document.querySelectorAll('.node a.entry'), function (chip) {
       var target = document.getElementById(chip.getAttribute('href').slice(1));
       if (!target || !target.closest('.matrix')) problems.push(chip.textContent + ' is on a node but has no row in the entry-point table.');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.risk'), function (r) {
+      if (!r.querySelector('.vf .vs')) problems.push(r.id + ' has no verification against the docs and Linear.');
     });
     if (main.dataset.pr) {
       Array.prototype.forEach.call(document.querySelectorAll('.node.added, .node.modified, .node.removed, .risk, .matrix tbody tr'), function (el) {
