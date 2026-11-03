@@ -119,6 +119,8 @@ summary{cursor:pointer;font-weight:600}
 .src{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--context-bg);color:var(--muted)}
 #rv-status{min-height:1.5em;margin-top:8px}
 #rv-status.bad{color:var(--err)}
+.rv-preview{margin-top:12px}
+.rv-preview pre{margin:8px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--fg)}
 </style>
 </head>
 <body>
@@ -321,6 +323,7 @@ summary{cursor:pointer;font-weight:600}
     <button type="button" data-act="reset">Reset to draft</button>
   </div>
   <p id="rv-status" role="status"></p>
+  <details class="rv-preview"><summary>What will be sent</summary><pre id="rv-json"></pre></details>
 </section>
 <script type="application/json" id="review-draft">
 {
@@ -592,6 +595,14 @@ summary{cursor:pointer;font-weight:600}
       if (!included().length && !String(cur.body).trim()) out.push('The review has no body and no comments.');
       return out;
     }
+    // The payload travels as base64 so no shell has to parse its quotes,
+    // backslashes, or newlines: fish has no heredoc, and its single quotes
+    // treat backslashes differently from bash and zsh.
+    function b64(s) {
+      var bin = '';
+      new TextEncoder().encode(s).forEach(function (b) { bin += String.fromCharCode(b); });
+      return btoa(bin);
+    }
     function summary() {
       var n = included().length, ev = cur.event ? cur.event.toLowerCase().replace('_', ' ') : 'pending';
       return n + ' comment' + (n === 1 ? '' : 's') + ' as a ' + ev + ' review on ' + draft.repo + '#' + draft.pr + '.';
@@ -603,6 +614,7 @@ summary{cursor:pointer;font-weight:600}
       btn.textContent = sent ? 'Posted' : armed !== null ? 'Click again to send' : ev ? 'Post review (' + ev.toLowerCase().replace('_', ' ') + ')' : 'Create pending review';
       btn.className = 'primary' + (armed !== null ? ' warn' : '');
       $('rv-count').textContent = included().length + ' of ' + cur.comments.length + ' included';
+      $('rv-json').textContent = JSON.stringify(payload(), null, 2);
     }
     function paint() {
       $('rv-body').value = cur.body;
@@ -652,8 +664,8 @@ summary{cursor:pointer;font-weight:600}
     function copy() {
       var bad = problems();
       if (bad.length) { say(bad.map(esc).join('<br>'), true); return; }
-      var cmd = 'gh api repos/' + draft.repo + '/pulls/' + draft.pr + "/reviews --method POST --input - <<'JSON'\n" + JSON.stringify(payload(), null, 2) + '\nJSON';
-      var done = function () { say('Copied. Run it in a terminal where gh is signed in.'); };
+      var cmd = "printf %s '" + b64(JSON.stringify(payload())) + "' | base64 --decode | gh api repos/" + draft.repo + '/pulls/' + draft.pr + '/reviews --method POST --input -';
+      var done = function () { say('Copied. It runs in bash, zsh, and fish where gh is signed in.'); };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(cmd).then(done, function () { say('Copy failed.', true); });
       else say('Copy is not available here.', true);
     }
