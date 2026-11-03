@@ -106,11 +106,13 @@ summary{cursor:pointer;font-weight:600}
 .review label.blk{display:block;font-weight:600;margin:12px 0 4px}
 .review textarea{width:100%;font:13px/1.45 system-ui,sans-serif;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:vertical}
 .review select,.review input[type=text],.review input[type=number],.review input[type=password]{background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace}
-.review button{font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.review button,.risk button{font:600 12px system-ui,sans-serif;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
 .review button.primary{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .review button.warn{background:var(--fail);border-color:var(--fail);color:#fff}
 .rc{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px}
 .rc.off{opacity:.5}
+.rc.flash{outline:2px solid var(--fg)}
+.risk-actions{margin-top:8px;position:relative;z-index:1}
 .rc .row,.rv-post{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
 .rc-path{flex:1 1 260px}
 .review a{color:var(--fg);text-decoration:underline dotted}
@@ -563,9 +565,10 @@ summary{cursor:pointer;font-weight:600}
     var cur = null, armed = null, sent = false;
     function $(id) { return document.getElementById(id); }
     function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function copyOf(c) { var x = {}; Object.keys(c).forEach(function (k) { x[k] = c[k]; }); return x; }
     function fresh() {
       return { body: draft.body || '', event: '', comments: (draft.comments || []).map(function (c) {
-        var x = {}; Object.keys(c).forEach(function (k) { x[k] = c[k]; }); x.include = true; return x; }) };
+        var x = copyOf(c); x.include = true; return x; }) };
     }
     try { cur = JSON.parse(localStorage.getItem(key)); } catch (err) { cur = null; }
     var restored = !!cur;
@@ -615,6 +618,7 @@ summary{cursor:pointer;font-weight:600}
       btn.className = 'primary' + (armed !== null ? ' warn' : '');
       $('rv-count').textContent = included().length + ' of ' + cur.comments.length + ' included';
       $('rv-json').textContent = JSON.stringify(payload(), null, 2);
+      riskButtons();
     }
     function paint() {
       $('rv-body').value = cur.body;
@@ -631,6 +635,60 @@ summary{cursor:pointer;font-weight:600}
           '<textarea data-f="body" rows="4" aria-label="comment">' + esc(c.body) + '</textarea></article>';
       }).join('');
       ui();
+    }
+    function riskInfo(r) {
+      var link = r.querySelector('a.gh'), head = r.querySelector('header');
+      var conf = head.querySelector('.conf'), id = head.querySelector('b');
+      var title = head.textContent.replace(conf ? conf.textContent : '', '').replace(id ? id.textContent : '', '').trim();
+      var para = r.querySelector('p:not(.vf)'), vf = r.querySelector('.vf'), basis = '';
+      if (vf) { var c = vf.cloneNode(true), s = c.querySelector('.vs'); if (s) s.remove(); basis = c.textContent.trim(); }
+      var href = link ? link.getAttribute('href') : '';
+      var at = link ? /^(.*):(\d+)/.exec(link.textContent.trim()) : null;
+      return {
+        id: r.id, title: title, desc: para ? para.textContent.trim() : '', basis: basis, href: href,
+        path: at ? at[1] : '', line: at ? at[2] : '',
+        side: /#diff-[0-9a-f]+L\d+$/.test(href) ? 'LEFT' : 'RIGHT',
+        inDiff: !!at && /\/pull\/\d+\/files#diff-[0-9a-f]+[LR]\d+$/.test(href)
+      };
+    }
+    function flash(el) { el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 1600); }
+    function addRisk(r) {
+      var i = riskInfo(r);
+      if (i.inDiff) {
+        var at = cur.comments.map(function (c) { return c.note; }).indexOf(i.id);
+        if (at < 0) {
+          var orig = (draft.comments || []).filter(function (c) { return c.note === i.id; })[0];
+          var made = orig ? copyOf(orig) : { path: i.path, line: i.line, side: i.side, note: i.id, href: i.href,
+            body: '**' + i.title + '**\n\n' + i.desc + (i.basis ? '\n\n' + i.basis : '') };
+          made.include = true;
+          cur.comments.push(made);
+          at = cur.comments.length - 1;
+        } else cur.comments[at].include = true;
+        sent = false; disarm(); save(); paint();
+        var card = $('rv-comments').children[at];
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.querySelector('textarea').focus();
+        flash(card);
+      } else {
+        var mark = '**' + i.id + '**';
+        if (cur.body.indexOf(mark) < 0) {
+          cur.body = (cur.body ? cur.body.replace(/\s+$/, '') + '\n\n' : '') + mark + ' ' + i.title + ': ' + i.desc +
+            (i.path ? ' (`' + i.path + ':' + i.line + '`)' : '') + (i.basis ? ' ' + i.basis : '');
+        }
+        sent = false; disarm(); save(); paint();
+        $('rv-body').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        $('rv-body').focus();
+      }
+    }
+    function riskButtons() {
+      Array.prototype.forEach.call(document.querySelectorAll('.risk'), function (r) {
+        var b = r.querySelector('.risk-add');
+        if (!b) return;
+        var i = riskInfo(r);
+        var inReview = i.inDiff ? cur.comments.some(function (c) { return c.note === i.id && c.include; }) : cur.body.indexOf('**' + i.id + '**') > -1;
+        b.textContent = inReview ? 'In the review: jump to it' : i.inDiff ? 'Add as inline comment' : 'Add to the review body';
+        b.title = i.inDiff ? '' : 'This line is not in the diff, so GitHub cannot take an inline comment on it';
+      });
     }
     function edit(ev) {
       var t = ev.target, art = t.closest('.rc');
@@ -681,6 +739,16 @@ summary{cursor:pointer;font-weight:600}
       else if (act === 'copy') { copy(); return; }
       else if (act === 'post') { send(); return; }
       sent = false; disarm(); save(); paint();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.risk'), function (r) {
+      var box = document.createElement('div');
+      var b = document.createElement('button');
+      box.className = 'risk-actions';
+      b.type = 'button';
+      b.className = 'risk-add';
+      b.addEventListener('click', function () { addRisk(r); });
+      box.appendChild(b);
+      r.appendChild(box);
     });
     paint();
     if (restored) say('Restored your earlier edits. Reset to draft discards them.');
