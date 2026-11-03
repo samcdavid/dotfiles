@@ -30,7 +30,7 @@ Personal dotfiles managed through the [rcm suite](https://github.com/thoughtbot/
 
 Skill style (reset 2026-10-14, undo point: tag `pre-reset`):
 
-- Skills are short prompts in the spirit of `eli8g`: a `SKILL.md` of roughly 300 words or fewer, with a `references/` file only for genuinely standalone material (a template, a checklist). No runner/wrapper agents, ledgers, envelopes, or pipelines. The old multi-stage workflow was replaced by one `work` skill; `my-review` is the 2026-06-02 reviewer restored (its lens checklists live in `my-review/references/lenses/`).
+- Skills are short prompts in the spirit of `eli8g`: a `SKILL.md` as concise as the skill allows, with a `references/` file only for genuinely standalone material (a template, a checklist). The drift checker's word limit is a ceiling against unbounded growth, not a target, so don't trim a safeguard just to fit under it. No runner/wrapper agents, ledgers, envelopes, or pipelines. The old multi-stage workflow was replaced by one `work` skill; `my-review` is the 2026-06-02 reviewer restored (its lens checklists live in `my-review/references/lenses/`).
 - Every skill and agent sets `effort: xhigh` and no `model:`, so everything runs on the session model.
 - Agents exist only where a skill dispatches them: `review-orchestrator` and its research helpers for `my-review`, and `adversarial-debate` for `my-review`, `prove-it`, and `address-pr-feedback`.
 - Always-loaded rules stay minimal (`no-outward-actions.md`, `comment-style.md`, `staging-is-qa.md`); they cost context in every session and subagent.

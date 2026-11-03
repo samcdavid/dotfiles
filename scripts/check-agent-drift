@@ -13,7 +13,9 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
-ENTRYPOINT_LIMIT = 700
+# A ceiling against unbounded growth, not a target: an entrypoint loads into
+# context whenever its skill fires, so each should stay as concise as it can.
+ENTRYPOINT_LIMIT = 1000
 # The restored June reviewer is deliberately kept whole rather than trimmed to
 # the short-skill budget; it is the one exception to the eli8g-style rule.
 ENTRYPOINT_EXEMPT = {
