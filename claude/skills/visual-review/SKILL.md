@@ -24,6 +24,6 @@ Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted
 
 **Review draft.** Fill the page's review as `references/review-draft.md` says.
 
-**Page.** Copy `references/template.html` to `${TMPDIR:-/tmp}/visual-review/<pr-number-or-branch>.html` (`/` in a branch name becomes `-`) and replace its placeholder content. Write only that file, outside the repo. Keep it self-contained: no CDN or network request. Off-page links open in a new tab, which the template's script enforces. The page warns when rows, nodes, edges, or links disagree. The footer lists what you searched and couldn't verify.
+**Page.** Copy `references/template.html` to `${TMPDIR:-/tmp}/visual-review/<pr-number-or-branch>.html` (`/` in a branch name becomes `-`) and replace its placeholder content. Write only that file, outside the repo. Keep it self-contained: no CDN or network request. Off-page links open in a new tab, which the template's script enforces. The page warns when rows, nodes, edges, or links disagree. The footer lists what you searched and couldn't verify; label unverified claims `unverified` rather than asserting them.
 
 Open the page once, after it is final (`open`, or `xdg-open` on Linux). To change it later, rewrite the file and tell me to refresh. Reply with its path, two or three sentences on the flow, and the high-confidence risks and entry-point drift.
