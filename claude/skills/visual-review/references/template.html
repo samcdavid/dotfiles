@@ -92,6 +92,14 @@ a.gh:hover::after,a.gh:focus-visible::after{outline:2px solid var(--fg)}
 .vs.confirmed{background:var(--added-bg);color:var(--added)}.vs.contradicted{background:var(--removed-bg);color:var(--removed)}.vs.unsupported{background:var(--modified-bg);color:var(--modified)}
 .vf a,.matrix td a:not(.gh){color:var(--fg);text-decoration:underline dotted}
 .risk a:not(.gh),.matrix a:not(.gh){position:relative;z-index:1}
+.vs.scope,.vs.elsewhere,.vs.raised,.vs.bar{background:var(--context-bg);color:var(--context)}
+.lens{margin-left:auto}
+.ctx{list-style:none;margin:0;padding:0}
+.ctx li{background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--fg);padding:6px 12px;margin-bottom:6px}
+.ctx li:target{outline:2px solid var(--fg)}
+.ctx .src{margin-right:8px}
+.ctx a,.lenses a,details a{color:var(--fg);text-decoration:underline dotted}
+.lenses td.none{color:var(--muted)}
 
 table{border-collapse:collapse;width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:13px}
 th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
@@ -271,11 +279,34 @@ summary{cursor:pointer;font-weight:600}
   </tbody>
 </table>
 
+<h2>System context</h2>
+<p class="sub">What the product supports and has chosen not to, and what the system already guards. The risks below are judged against this.</p>
+<ul class="ctx" id="context">
+  <li><span class="src">supports</span>Copying a question keeps its tags, attachments, and search index job. <a href="https://github.com/OWNER/REPO/blob/abc1234/docs/guides/questions.md#L52">docs/guides/questions.md:52</a></li>
+  <li><span class="src">not supported</span>Copying a question into another account. <a href="https://linear.app/OWNER/issue/ENG-123">ENG-123</a> lists it as out of scope.</li>
+  <li><span class="src">guarded</span>The controller loads every question through the user's own studies, so domain functions receive a record the user may change. <a href="https://github.com/OWNER/REPO/blob/abc1234/lib/web/questions_controller.ex#L70">lib/web/questions_controller.ex:70</a></li>
+</ul>
+
+<h2>Lenses</h2>
+<p class="sub">Each lens read the flow above. A lens that found nothing says what it checked.</p>
+<table class="lenses" id="lenses">
+  <thead>
+    <tr><th>Lens</th><th>Why it ran</th><th>Checked on the flow</th><th>Found</th></tr>
+  </thead>
+  <tbody>
+    <tr data-lens="security"><th>Security</th><td>Always. E3 is a new way to write a question.</td><td>Ownership and role checks on E1 to E3 (n3, n9), the study id the dialog sends (n2), and what the response returns (n6).</td><td class="none">Nothing found. <a href="#D1">D1</a> dismissed.</td></tr>
+    <tr data-lens="architecture"><th>Architecture</th><td>Always. E3 is bespoke and new, beside <code>Questions.copy/2</code>.</td><td>Where copying lives and the edges from E3 against E1 and E2 (n9 to n10, n10 to n13).</td><td><a href="#T1">T1</a></td></tr>
+    <tr data-lens="fullstack"><th>Full-stack</th><td>The builder and the API both change.</td><td>The request and response between n8 and n9, and that the 201 reaches the list (n6).</td><td class="none">Nothing found.</td></tr>
+    <tr data-lens="qa"><th>QA</th><td>The diff adds a component and a controller action.</td><td>A test for each added node (n7 to n10, n13) and whether it would fail if the node broke.</td><td class="none">Nothing found. <a href="#D3">D3</a> dismissed.</td></tr>
+    <tr data-lens="pm"><th>PM</th><td>ENG-123 has acceptance criteria.</td><td>Each criterion against a node, the copy shown on success (n6), and the failure state (n12).</td><td><a href="#P1">P1</a></td></tr>
+  </tbody>
+</table>
+
 <div class="cols">
   <section>
     <h2>Product risks</h2>
-    <article class="risk medium" id="P1">
-      <header><span class="conf medium">medium</span><b>P1</b> Duplicates lose tags and attachments</header>
+    <article class="risk medium" id="P1" data-lens="pm">
+      <header><span class="conf medium">medium</span><b>P1</b> Duplicates lose tags and attachments<span class="src lens">PM</span></header>
       <p>A researcher who duplicates a question gets a copy without its tags or attachments, while Copy to study keeps them. Two actions that look alike behave differently.</p>
       <p class="vf"><span class="vs unsupported">unsupported</span>No doc or ticket says whether a duplicate keeps tags and attachments; <a href="https://github.com/OWNER/REPO/blob/abc1234/docs/guides/questions.md#L40">docs/guides/questions.md:40</a> only describes Copy to study.</p>
       <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52" target="_blank" rel="noopener noreferrer">app/builder/QuestionList.tsx:52</a></code>
@@ -283,14 +314,23 @@ summary{cursor:pointer;font-weight:600}
   </section>
   <section>
     <h2>Technical risks</h2>
-    <article class="risk high" id="T1">
-      <header><span class="conf high">high</span><b>T1</b> Second implementation of copying a question</header>
+    <article class="risk high" id="T1" data-lens="architecture">
+      <header><span class="conf high">high</span><b>T1</b> Second implementation of copying a question<span class="src lens">Architecture</span></header>
       <p><code>Questions.duplicate/1</code> re-implements <code>Questions.copy/2</code>, and the PR says the two should match. It already skips tags, attachments, and the index job, and any later change to copying has to be made in both. Calling <code>Questions.copy/2</code> with the same study as the target would remove the duplicate.</p>
       <p class="vf"><span class="vs confirmed">confirmed</span><a href="https://linear.app/OWNER/issue/ENG-123">ENG-123</a> says Duplicate should behave like Copy to study, and <a href="https://github.com/OWNER/REPO/blob/abc1234/docs/guides/questions.md#L52">docs/guides/questions.md:52</a> says copying lives in <code>Questions.copy/2</code>.</p>
       <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120" target="_blank" rel="noopener noreferrer">lib/questions.ex:120</a></code>
     </article>
   </section>
 </div>
+
+<details id="dismissed" open>
+  <summary>Considered and dismissed (3)</summary>
+  <ul class="ctx">
+    <li id="D1"><span class="vs elsewhere">handled elsewhere</span><b>Duplicate has no ownership check.</b> The controller loads the question through the user's own studies before <code>duplicate/1</code> runs. <a href="https://github.com/OWNER/REPO/blob/abc1234/lib/web/questions_controller.ex#L70">lib/web/questions_controller.ex:70</a></li>
+    <li id="D2"><span class="vs scope">out of scope</span><b>Duplicate into another account.</b> <a href="https://linear.app/OWNER/issue/ENG-123">ENG-123</a> lists cross-account copying as out of scope.</li>
+    <li id="D3"><span class="vs raised">already raised</span><b>No test for the Duplicate button.</b> A thread on <a href="https://github.com/OWNER/REPO/pull/123#discussion_r1000001">DuplicateButton.tsx:12</a> already asks for one.</li>
+  </ul>
+</details>
 
 <details open>
   <summary>Searched, and not verified</summary>
@@ -539,6 +579,36 @@ summary{cursor:pointer;font-weight:600}
     Array.prototype.forEach.call(document.querySelectorAll('.risk'), function (r) {
       if (!r.querySelector('.vf .vs')) problems.push(r.id + ' has no verification against the docs and Linear.');
     });
+    // Plans carry none of these sections, so each rule applies only where its section exists.
+    var rows = {};
+    Array.prototype.forEach.call(document.querySelectorAll('#lenses tbody tr'), function (row) {
+      rows[row.dataset.lens] = row;
+      Array.prototype.forEach.call(row.querySelectorAll('a[href^="#"]'), function (a) {
+        if (!document.getElementById(a.getAttribute('href').slice(1))) problems.push('The ' + row.dataset.lens + ' lens links ' + a.textContent + ', which is not on the page.');
+      });
+    });
+    if (document.getElementById('lenses')) {
+      ['security', 'architecture'].forEach(function (name) {
+        if (!rows[name]) problems.push('The ' + name + ' lens always runs, but the Lenses table has no row for it.');
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.risk'), function (r) {
+        if (!rows[r.dataset.lens]) problems.push(r.id + ' names no lens that is in the Lenses table.');
+        else if (!rows[r.dataset.lens].querySelector('a[href="#' + r.id + '"]')) problems.push('The ' + r.dataset.lens + ' lens row does not link ' + r.id + '.');
+      });
+    }
+    var ctx = document.getElementById('context');
+    if (ctx) {
+      var facts = ctx.querySelectorAll('li');
+      if (!facts.length) problems.push('The system context is empty. Say what was searched, or that nothing was found.');
+      Array.prototype.forEach.call(facts, function (li) {
+        if (!li.classList.contains('none') && !li.querySelector('a')) problems.push('A system context item has no source: ' + li.textContent.slice(0, 50));
+      });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('#dismissed li'), function (li) {
+      var why = li.querySelector('.vs');
+      if (!why) problems.push((li.id || 'A dismissed risk') + ' gives no reason it was dismissed.');
+      else if (!why.classList.contains('bar') && !li.querySelector('a')) problems.push((li.id || 'A dismissed risk') + ' gives no source for dismissing it.');
+    });
     if (main.dataset.pr) {
       Array.prototype.forEach.call(document.querySelectorAll('.node.added, .node.modified, .node.removed, .risk, .matrix tbody tr'), function (el) {
         if (!el.querySelector('a.gh')) problems.push((el.id || 'A node') + ' has no link to its code on GitHub.');
@@ -637,9 +707,9 @@ summary{cursor:pointer;font-weight:600}
       ui();
     }
     function riskInfo(r) {
-      var link = r.querySelector('a.gh'), head = r.querySelector('header');
-      var conf = head.querySelector('.conf'), id = head.querySelector('b');
-      var title = head.textContent.replace(conf ? conf.textContent : '', '').replace(id ? id.textContent : '', '').trim();
+      var link = r.querySelector('a.gh'), head = r.querySelector('header').cloneNode(true);
+      Array.prototype.forEach.call(head.querySelectorAll('.conf, b, .lens'), function (x) { x.remove(); });
+      var title = head.textContent.trim();
       var para = r.querySelector('p:not(.vf)'), vf = r.querySelector('.vf'), basis = '';
       if (vf) { var c = vf.cloneNode(true), s = c.querySelector('.vs'); if (s) s.remove(); basis = c.textContent.trim(); }
       var href = link ? link.getAttribute('href') : '';

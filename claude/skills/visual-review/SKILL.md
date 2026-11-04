@@ -1,6 +1,6 @@
 ---
 name: visual-review
-description: "Build a self-contained HTML page diagramming a change's flow from user interaction to response, with product and technical risks, a check that every entry point follows the same rules, and a review drafted to post."
+description: "Build a self-contained HTML page diagramming a change's flow from user interaction to response, with product and technical risks read through security, architecture, and other review lenses and judged against what the product supports, a check that every entry point follows the same rules, and a review drafted to post."
 effort: xhigh
 ---
 
@@ -18,7 +18,11 @@ Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted
 
 **Risks.** Two lists, product and technical, each risk anchored to a node with `file:line` and a confidence (high: visible in the diff; medium: depends on code you haven't seen; low: a hunch). Product: user-visible behavior, states and copy, permissions per role, existing data and in-flight work, rollout, and inconsistency between entry points. Technical: the lenses in the Lens catalog of `my-review/SKILL.md` whose trigger signals appear in the diff.
 
-**Verify.** Check every risk, entry-point intent, and flow claim against the repo's `docs/` and Linear, as `references/verify.md` says. Each risk shows `confirmed`, `contradicted` (drop or downgrade it), or `unsupported`.
+**Lenses.** Security and Architecture always run, and so does every other lens in the Lens catalog of `my-review/SKILL.md` whose trigger signals appear in the diff (PM whenever there are requirements). Read the flow once per lens, taking its checks and leaving its procedure: every node, edge, and entry point is a place they can fail. Tag each risk with its lens. The page lists every lens with what it checked and found, so a clean lens shows it ran. See `references/lenses.md`.
+
+**Context.** Judge the change against the system it lives in, not an ideal one. Before keeping a risk, learn what the product supports and has chosen not to, what the system already guards, and what the PR's conversation has raised, as `references/context.md` says. A risk the product doesn't support, the system already handles, the PR already raised, or that falls below the importance bar is dismissed with its reason and source, never drafted as a comment. Dismiss a security or data-loss risk only on cited evidence.
+
+**Verify.** Check every risk, entry-point intent, and flow claim against the repo's `docs/` and Linear, as `references/verify.md` says. Each risk shows `confirmed`, `contradicted` (dismiss or downgrade it), or `unsupported`.
 
 **GitHub links.** For a PR, every `added`, `modified`, or `removed` node, every risk, every entry-point row, and every edge links to its code, as `references/github-links.md` says, and `<main>` gets `data-pr` set to the PR number. For local changes there is nothing to link or post: remove `data-pr`, the links, the review section, and its draft.
 
@@ -26,4 +30,4 @@ Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted
 
 **Page.** Copy `references/template.html` to `${TMPDIR:-/tmp}/visual-review/<pr-number-or-branch>.html` (`/` in a branch name becomes `-`) and replace its placeholder content. Write only that file, outside the repo. Keep it self-contained: no CDN or network request. Off-page links open in a new tab, which the template's script enforces. The page warns when rows, nodes, edges, or links disagree. The footer lists what you searched and couldn't verify; label unverified claims `unverified` rather than asserting them.
 
-Open the page once, after it is final (`open`, or `xdg-open` on Linux). To change it later, rewrite the file and tell me to refresh. Reply with its path, two or three sentences on the flow, and the high-confidence risks and entry-point drift.
+Open the page once, after it is final (`open`, or `xdg-open` on Linux). To change it later, rewrite the file and tell me to refresh. Reply with its path, two or three sentences on the flow, the high-confidence risks and entry-point drift, and what you dismissed and why, so I can overrule it.
