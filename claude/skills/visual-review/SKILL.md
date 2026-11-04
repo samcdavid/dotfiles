@@ -22,7 +22,7 @@ Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted
 
 **Context.** Judge the change against the system it lives in, not an ideal one. Before keeping a risk, learn what the product supports and has chosen not to, what the system already guards, and what the PR's conversation has raised, as `references/context.md` says. A risk the product doesn't support, the system already handles, the PR already raised, or that falls below the importance bar is dismissed with its reason and source, never drafted as a comment. Dismiss a security or data-loss risk only on cited evidence.
 
-**Acknowledgements.** Scan the whole diff for the triggers in `my-review/references/human-acknowledgement.md` (migrations, env vars, flags, config, infra, lint suppressions, changed existing tests). List each as A1, A2, … under Needs your confirmation with its category, what changed, the ask, and its `file:line`, or say none. They are not defects: no lens, risk card, or draft comment.
+**Acknowledgements.** Scan the whole diff for the triggers in `my-review/references/human-acknowledgement.md` (migrations, env vars, flags, config, infra, lint suppressions, changed existing tests). List each as A1, A2, … under Needs your confirmation with its category, what changed, the ask, and its `file:line`, or say none. Where a PR thread already asks it or the author has answered, note that with a link to the thread. They are not defects: no lens, risk card, or draft comment.
 
 **Verify.** Check every risk, entry-point intent, and flow claim against the repo's `docs/` and Linear, as `references/verify.md` says. Each risk shows `confirmed`, `contradicted` (dismiss or downgrade it), or `unsupported`.
 

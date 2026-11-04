@@ -91,7 +91,7 @@ a.gh:hover::after,a.gh:focus-visible::after{outline:2px solid var(--fg)}
 .vs{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 7px;border-radius:99px;margin-right:6px}
 .vs.confirmed{background:var(--added-bg);color:var(--added)}.vs.contradicted{background:var(--removed-bg);color:var(--removed)}.vs.unsupported{background:var(--modified-bg);color:var(--modified)}
 .vf a,.matrix td a:not(.gh){color:var(--fg);text-decoration:underline dotted}
-.risk a:not(.gh),.matrix a:not(.gh){position:relative;z-index:1}
+.risk a:not(.gh),.matrix a:not(.gh),#acks a:not(.gh){position:relative;z-index:1}
 .vs.scope,.vs.elsewhere,.vs.raised,.vs.bar{background:var(--context-bg);color:var(--context)}
 .lens{margin-left:auto}
 .ctx{list-style:none;margin:0;padding:0}
@@ -325,9 +325,9 @@ summary{cursor:pointer;font-weight:600}
 </div>
 
 <h2>Needs your confirmation</h2>
-<p class="sub">Not defects. A person has to confirm each of these because the repo can't show the answer. They are not in the review draft.</p>
+<p class="sub">Not defects. A person has to confirm each of these because the repo can't show the answer. They are not in the review draft. A note says where a thread already asks, or the author has already answered.</p>
 <ul class="ctx" id="acks">
-  <li id="A1"><span class="src">modified-existing-test</span><b>Changed an existing copy test's expectation.</b> Confirm the changed expectation is intentional and still protects the behavior. <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-dfb3574ed84ab0323c8693dedf14e56bdee61d66b615864028a8e0f8f3336dc1R88" target="_blank" rel="noopener noreferrer">test/questions_test.exs:88</a></code></li>
+  <li id="A1"><span class="src">modified-existing-test</span><b>Changed an existing copy test's expectation.</b> Confirm the changed expectation is intentional and still protects the behavior. <span class="vs raised">already asked</span><a href="https://github.com/OWNER/REPO/pull/123#discussion_r1000002">thread</a> <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-dfb3574ed84ab0323c8693dedf14e56bdee61d66b615864028a8e0f8f3336dc1R88" target="_blank" rel="noopener noreferrer">test/questions_test.exs:88</a></code></li>
   <li id="A2"><span class="src">lint-suppression</span><b>New <code>credo:disable</code> on the insert in <code>duplicate/1</code>.</b> Confirm the suppression is needed and why. <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R126" target="_blank" rel="noopener noreferrer">lib/questions.ex:126</a></code></li>
 </ul>
 
@@ -615,6 +615,7 @@ summary{cursor:pointer;font-weight:600}
     Array.prototype.forEach.call(document.querySelectorAll('#acks li:not(.none)'), function (li) {
       if (!li.id) problems.push('A confirmation item has no id, so nothing can link to it.');
       if (!li.querySelector('.src')) problems.push((li.id || 'A confirmation item') + ' names no category.');
+      if (li.querySelector('.vs.raised') && !li.querySelector('a:not(.gh)')) problems.push((li.id || 'A confirmation item') + ' says it was raised but links no thread.');
     });
     Array.prototype.forEach.call(document.querySelectorAll('#dismissed li'), function (li) {
       var why = li.querySelector('.vs');
