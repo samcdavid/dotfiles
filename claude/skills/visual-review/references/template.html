@@ -75,10 +75,12 @@ code{font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);ov
 .check{border:2px solid var(--err);background:var(--removed-bg);border-radius:8px;padding:10px 14px;margin:0 0 16px}
 .check ul{margin:6px 0 0 18px;padding:0}
 .matrix tbody tr{position:relative}
-a.gh{color:inherit;text-decoration:none}
+/* Only these containers are positioned, so only their own link may stretch over them; an a.gh anywhere else would cover the page. */
+a.gh{color:inherit;text-decoration:underline dotted}
 a.gh::before{content:"\2197\00a0"}
-a.gh::after{content:"";position:absolute;inset:0;border-radius:8px}
-a.gh:hover::after,a.gh:focus-visible::after{outline:2px solid var(--fg)}
+:is(.node,.risk>code,.matrix tbody tr,#acks li) a.gh{text-decoration:none}
+:is(.node,.risk>code,.matrix tbody tr,#acks li) a.gh::after{content:"";position:absolute;inset:0;border-radius:8px}
+:is(.node,.risk>code,.matrix tbody tr,#acks li) a.gh:is(:hover,:focus-visible)::after{outline:2px solid var(--fg)}
 
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
 .risk{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:10px;position:relative}
@@ -91,7 +93,7 @@ a.gh:hover::after,a.gh:focus-visible::after{outline:2px solid var(--fg)}
 .vs{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 7px;border-radius:99px;margin-right:6px}
 .vs.confirmed{background:var(--added-bg);color:var(--added)}.vs.contradicted{background:var(--removed-bg);color:var(--removed)}.vs.unsupported{background:var(--modified-bg);color:var(--modified)}
 .vf a,.matrix td a:not(.gh){color:var(--fg);text-decoration:underline dotted}
-.risk a:not(.gh),.matrix a:not(.gh),#acks a:not(.gh){position:relative;z-index:1}
+.risk a:not(.gh),.matrix a:not(.gh),#acks a:not(.gh),.risk>:not(code) a.gh{position:relative;z-index:1}
 .vs.scope,.vs.elsewhere,.vs.raised,.vs.bar{background:var(--context-bg);color:var(--context)}
 .lens{margin-left:auto}
 .ctx{list-style:none;margin:0;padding:0}
@@ -720,7 +722,7 @@ summary{cursor:pointer;font-weight:600}
       ui();
     }
     function riskInfo(r) {
-      var link = r.querySelector('a.gh'), head = r.querySelector('header').cloneNode(true);
+      var link = r.querySelector(':scope > code a.gh') || r.querySelector('a.gh'), head = r.querySelector('header').cloneNode(true);
       Array.prototype.forEach.call(head.querySelectorAll('.conf, b, .lens'), function (x) { x.remove(); });
       var title = head.textContent.trim();
       var para = r.querySelector('p:not(.vf)'), vf = r.querySelector('.vf'), basis = '';
