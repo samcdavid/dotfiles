@@ -16,7 +16,7 @@ Judge the change against the system it lives in, not an ideal one. A comment ask
 - `already raised`: a thread in the PR covers it. Link the thread.
 - `below the bar`: style, preference, speculation, or cheap to change later. This one needs no link.
 
-A dismissed risk gets no card, no draft comment, and no review-body line. The list stays on the page so I can overrule it by adding my own comment in the review section.
+A dismissed risk gets no card and no draft comment, and a body line only to validate an `already raised` one, as `review-draft.md` says. The list stays on the page so I can overrule it by adding my own comment in the review section.
 
 **Safeguards.**
 - Dismiss a security or data-loss risk only on cited evidence, the source or the guard's code, never on judgment. A false positive kept beats a real one missed.

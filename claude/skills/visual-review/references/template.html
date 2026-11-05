@@ -637,8 +637,9 @@ summary{cursor:pointer;font-weight:600}
       });
       if (!document.getElementById('review-draft')) problems.push('The page has no review draft.');
       else {
-        var sg = null;
-        try { sg = JSON.parse(document.getElementById('review-draft').textContent).suggest; } catch (err) { sg = null; }
+        var dr = null;
+        try { dr = JSON.parse(document.getElementById('review-draft').textContent); } catch (err) { dr = null; }
+        var sg = dr && dr.suggest;
         if (!sg || ['APPROVE', 'COMMENT', 'REQUEST_CHANGES'].indexOf(sg.event) < 0) problems.push('The review draft has no suggested review type (APPROVE, COMMENT, or REQUEST_CHANGES).');
         else {
           var why = String(sg.why || ''), blockers = sg.blockers || [];
@@ -666,6 +667,25 @@ summary{cursor:pointer;font-weight:600}
             });
           }
         }
+        var noted = {}, spots = {}, drafted = (dr && dr.comments) || [], bodyText = String((dr && dr.body) || '');
+        drafted.forEach(function (c, n) {
+          var who = 'Comment ' + (n + 1) + (c.path ? ' (' + c.path + ')' : ''), el = c.note ? document.getElementById(c.note) : null;
+          if (!c.note) problems.push(who + ' cites no risk or entry-point row.');
+          else if (!el) problems.push(who + ' cites ' + c.note + ', which is not on this page.');
+          else if (el.closest('#dismissed')) problems.push(who + ' is drafted from ' + c.note + ', a dismissed risk.');
+          else if (el.closest('#acks')) problems.push(who + ' is drafted from ' + c.note + ', a confirmation item, which does not go in the review.');
+          else if (!el.matches('.risk, .matrix tbody tr')) problems.push(who + ' cites ' + c.note + ', which is neither a risk nor an entry-point row.');
+          if (c.note) {
+            if (noted[c.note]) problems.push('Two comments are drafted from ' + c.note + '. A defect gets one comment.');
+            noted[c.note] = true;
+            if (bodyText.indexOf('**' + c.note + '**') > -1) problems.push(c.note + ' is both an inline comment and a line in the review body. Say it once.');
+          }
+          if (c.path && c.line) {
+            var spot = c.path + ':' + c.line + ':' + (c.side === 'LEFT' ? 'LEFT' : 'RIGHT');
+            if (spots[spot]) problems.push('Comments ' + spots[spot] + ' and ' + (n + 1) + ' are both on ' + c.path + ' line ' + c.line + '. If they make the same point keep one; if not, move the second to the line it is about.');
+            else spots[spot] = n + 1;
+          }
+        });
       }
     }
     if (!problems.length) return;
