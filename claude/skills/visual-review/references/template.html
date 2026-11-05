@@ -128,6 +128,11 @@ summary{cursor:pointer;font-weight:600}
 .rc-path{flex:1 1 260px}
 .review a{color:var(--fg);text-decoration:underline dotted}
 .rv-post{margin-top:14px}
+.verdict{margin:12px 0;padding:10px 14px;border:1px solid var(--line);border-left-width:4px;border-radius:8px;background:var(--card)}
+.verdict b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.verdict small{display:block;margin-top:4px;color:var(--muted)}
+.verdict a{color:var(--fg);text-decoration:underline dotted}
+.verdict.approve{border-left-color:var(--added)}.verdict.comment{border-left-color:var(--modified)}.verdict.request_changes{border-left-color:var(--removed)}
 .rv-post input[type=password]{flex:1 1 260px}
 .src{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--context-bg);color:var(--muted)}
 #rv-status{min-height:1.5em;margin-top:8px}
@@ -143,6 +148,7 @@ summary{cursor:pointer;font-weight:600}
   <h1>Visual review: Add a Duplicate action for questions</h1>
   <p class="sub"><a href="https://github.com/OWNER/REPO/pull/123" target="_blank" rel="noopener noreferrer">PR #123</a> at <code>abc1234</code> &middot; 9 files &middot; +180 / &minus;42</p>
   <p>Adds a Duplicate button to the builder. It does not call the existing <code>Questions.copy/2</code> behind Copy to study: it builds the copy in a new <code>Questions.duplicate/1</code>. Start with E3 and T1.</p>
+  <p class="verdict" id="verdict" hidden></p>
   <div class="legend">
     <span><i class="swatch" style="border-color:var(--added);background:var(--added-bg)"></i>added</span>
     <span><i class="swatch" style="border-color:var(--modified);background:var(--modified-bg)"></i>modified</span>
@@ -382,6 +388,7 @@ summary{cursor:pointer;font-weight:600}
   "repo": "OWNER/REPO",
   "pr": 123,
   "head": "abc1234def5678abc1234def5678abc1234def56",
+  "suggest": {"event": "COMMENT", "why": "Nothing here has to change before merge, but T1 (a second copy implementation) and P1 (duplicates lose tags and attachments) are worth the author's answer.", "blockers": []},
   "body": "Duplicate adds a second way to copy a question instead of reusing `Questions.copy/2`. My main concern is keeping the two in step; see the comment on `lib/questions.ex`.\n\nOutside this diff: the API client leaves `copy_tags` off by default, so tags are copied only when asked. Worth checking that is intended.",
   "comments": [
     {"path":"lib/questions.ex","line":120,"side":"RIGHT","note":"T1","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120",
@@ -629,6 +636,19 @@ summary{cursor:pointer;font-weight:600}
         if (!el.querySelector('a.gh')) problems.push((el.id || 'A node') + ' has no link to its code on GitHub.');
       });
       if (!document.getElementById('review-draft')) problems.push('The page has no review draft.');
+      else {
+        var sg = null;
+        try { sg = JSON.parse(document.getElementById('review-draft').textContent).suggest; } catch (err) { sg = null; }
+        if (!sg || ['APPROVE', 'COMMENT', 'REQUEST_CHANGES'].indexOf(sg.event) < 0) problems.push('The review draft has no suggested review type (APPROVE, COMMENT, or REQUEST_CHANGES).');
+        else {
+          if (!String(sg.why || '').trim()) problems.push('The suggested review type gives no reason.');
+          if (sg.event === 'REQUEST_CHANGES' && !(sg.blockers || []).length) problems.push('Request changes names no blocking risk.');
+          (sg.blockers || []).forEach(function (id) {
+            var b = document.getElementById(id);
+            if (!b || !b.classList.contains('risk')) problems.push(id + ' is named as blocking but is not a risk on this page.');
+          });
+        }
+      }
     }
     if (!problems.length) return;
     var box = document.createElement('div');
@@ -720,6 +740,22 @@ summary{cursor:pointer;font-weight:600}
           '<textarea data-f="body" rows="4" aria-label="comment">' + esc(c.body) + '</textarea></article>';
       }).join('');
       ui();
+    }
+    // The suggestion is the drafter's reading of the page and the reader's to overrule: it
+    // labels the type selector and never sets it, so nothing is posted by default.
+    function suggestion() {
+      var s = draft.suggest, label = { APPROVE: 'Approve', COMMENT: 'Comment', REQUEST_CHANGES: 'Request changes' };
+      if (!s || !label[s.event]) return;
+      var opt = $('rv-event').querySelector('option[value="' + s.event + '"]');
+      if (opt) opt.textContent += ' (suggested)';
+      var el = $('verdict');
+      if (!el) return;
+      var ids = (s.blockers || []).map(function (id) { return '<a href="#' + esc(id) + '">' + esc(id) + '</a>'; });
+      el.className = 'verdict ' + s.event.toLowerCase();
+      el.innerHTML = '<b>Suggested review: ' + label[s.event] + '</b>' + esc(s.why || '') +
+        (ids.length ? '<small>Blocking: ' + ids.join(', ') + '</small>' : '') +
+        '<small>A suggestion to overrule. You choose the type under Review to post, and nothing is sent until you click.</small>';
+      el.hidden = false;
     }
     function riskInfo(r) {
       var link = r.querySelector(':scope > code a.gh') || r.querySelector('a.gh'), head = r.querySelector('header').cloneNode(true);
@@ -835,6 +871,7 @@ summary{cursor:pointer;font-weight:600}
       box.appendChild(b);
       r.appendChild(box);
     });
+    suggestion();
     paint();
     if (restored) say('Restored your earlier edits. Reset to draft discards them.');
   }

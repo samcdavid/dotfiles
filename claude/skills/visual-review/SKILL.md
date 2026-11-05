@@ -4,7 +4,7 @@ description: "Build a self-contained HTML page diagramming a change's flow from 
 effort: xhigh
 ---
 
-Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted for me to edit and post. You never post it and you pick no verdict: no approve, request-changes, or severity language.
+Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted for me to edit and post. You never post it. You suggest a review type for me to overrule and never set it for me.
 
 **Target.** For a PR, read the diff and files at the PR head with `gh` (`gh pr diff`, `gh api .../contents/{path}?ref={sha}`); never check it out or use the working tree as PR contents. Otherwise diff against the default branch's merge-base, uncommitted changes included. If there's nothing to show, say so and stop.
 
@@ -28,8 +28,8 @@ Build a visual review of $ARGUMENTS as one HTML file, ending in a review drafted
 
 **GitHub links.** For a PR, every `added`, `modified`, or `removed` node, every risk, every entry-point row, and every edge links to its code, as `references/github-links.md` says, and `<main>` gets `data-pr` set to the PR number. For local changes there is nothing to link or post: remove `data-pr`, the links, the review section, and its draft.
 
-**Review draft.** Fill the page's review as `references/review-draft.md` says.
+**Review draft.** Fill the page's review and suggested review type as `references/review-draft.md` says.
 
 **Page.** Copy `references/template.html` to `${TMPDIR:-/tmp}/visual-review/<pr-number-or-branch>.html` (`/` in a branch name becomes `-`) and replace its placeholder content. Write only that file, outside the repo. Keep it self-contained: no CDN or network request. The footer lists what you searched and couldn't verify; label unverified claims `unverified` rather than asserting them.
 
-After each rewrite, run `sh references/open-page.sh <page>`. It loads the page headless and lists its "This page has gaps" warnings (rows, nodes, edges, lenses, or links that disagree), which you fix before running it again, and it opens the page in the browser once, the first time it is clean. Never run `open` yourself or open the page any other way. To change the page afterward, rewrite the file and tell me to refresh. Reply with its path, two or three sentences on the flow, the high-confidence risks and entry-point drift, and what you dismissed and why, so I can overrule it.
+After each rewrite, run `sh references/open-page.sh <page>`. It loads the page headless and lists its "This page has gaps" warnings (rows, nodes, edges, lenses, or links that disagree), which you fix before running it again, and it opens the page in the browser once, the first time it is clean. Never run `open` yourself or open the page any other way. To change the page afterward, rewrite the file and tell me to refresh. Reply with its path, two or three sentences on the flow, the high-confidence risks and entry-point drift, what you dismissed and why, and the review type you suggest with its reason, so I can overrule them.
