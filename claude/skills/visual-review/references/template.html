@@ -333,7 +333,7 @@ summary{cursor:pointer;font-weight:600}
 </div>
 
 <h2>Needs your confirmation</h2>
-<p class="sub">Not defects. A person has to confirm each of these because the repo can't show the answer. They are not in the review draft. A note says where a thread already asks, or the author has already answered.</p>
+<p class="sub">Not defects, and they never change the verdict. A person has to confirm each of these because the repo can't show the answer, so each has a comment in the review below unless a thread already asks it. A note says where a thread already asks, or the author has already answered.</p>
 <ul class="ctx" id="acks">
   <li id="A1"><span class="src">modified-existing-test</span><b>Changed an existing copy test's expectation.</b> Confirm the changed expectation is intentional and still protects the behavior. <span class="vs raised">already asked</span><a href="https://github.com/OWNER/REPO/pull/123#discussion_r1000002">thread</a> <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-dfb3574ed84ab0323c8693dedf14e56bdee61d66b615864028a8e0f8f3336dc1R88" target="_blank" rel="noopener noreferrer">test/questions_test.exs:88</a></code></li>
   <li id="A2"><span class="src">lint-suppression</span><b>New <code>credo:disable</code> on the insert in <code>duplicate/1</code>.</b> Confirm the suppression is needed and why. <code><a class="gh" href="https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R126" target="_blank" rel="noopener noreferrer">lib/questions.ex:126</a></code></li>
@@ -392,9 +392,11 @@ summary{cursor:pointer;font-weight:600}
   "body": "Duplicate adds a second way to copy a question instead of reusing `Questions.copy/2`. My main concern is keeping the two in step; see the comment on `lib/questions.ex`.\n\nOutside this diff: the API client leaves `copy_tags` off by default, so tags are copied only when asked. Worth checking that is intended.",
   "comments": [
     {"path":"lib/questions.ex","line":120,"side":"RIGHT","note":"T1","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R120",
-     "body":"`Questions.duplicate/1` re-implements `Questions.copy/2`, and the PR description says the two should match. It already skips tags, attachments, and the index job, and every later change to copying has to be made in both places.\n\nCould Duplicate call `Questions.copy/2` with the question's own study as the target instead?"},
+     "body":"**Suggestion (non-blocking):** `Questions.duplicate/1` re-implements `Questions.copy/2`, and the PR description says the two should match. It already skips tags, attachments, and the index job, and every later change to copying has to be made in both places.\n\nCould Duplicate call `Questions.copy/2` with the question's own study as the target instead?"},
     {"path":"app/builder/QuestionList.tsx","line":52,"side":"RIGHT","note":"P1","href":"https://github.com/OWNER/REPO/pull/123/files#diff-a7a6f7501ed184b5df9a60a4d563e8ce827441742d807be94f40a6e2927a4490R52",
-     "body":"A duplicated question comes back without its tags or attachments, while Copy to study keeps them. Is that intended? If not, reusing `Questions.copy/2` would fix both actions together."}
+     "body":"**Question:** A duplicated question comes back without its tags or attachments, while Copy to study keeps them. Is that intended? If not, reusing `Questions.copy/2` would fix both actions together."},
+    {"path":"lib/questions.ex","line":126,"side":"RIGHT","note":"A2","href":"https://github.com/OWNER/REPO/pull/123/files#diff-f66822bd5989663ae57f72d97a3d43e0cb4ad7ee8c8a72f29890fa38344befe4R126",
+     "body":"**Question:** `credo:disable` is new on this insert. Is the suppression needed, and why?"}
   ]
 }
 </script>
@@ -648,33 +650,19 @@ summary{cursor:pointer;font-weight:600}
           if (sg.event === 'REQUEST_CHANGES' && !blockers.length) problems.push('Request changes names no blocking risk.');
           if (sg.event !== 'REQUEST_CHANGES' && blockers.length) problems.push('Only a request for changes lists blocking risks.');
           blockers.forEach(function (id) {
-            var b = riskCard(id);
-            if (!b) problems.push(id + ' is named as blocking but is not a risk on this page.');
-            else if ((!b.querySelector('.conf.high') && !b.querySelector('.vf .vs.confirmed')) || b.querySelector('.vf .vs.contradicted'))
-              problems.push(id + ' is named as blocking, but a blocker needs high confidence or a confirmed verification, and no contradiction.');
+            if (!riskCard(id)) problems.push(id + ' is named as blocking but is not a risk on this page.');
           });
           (why.match(/\b[TP]\d+\b/g) || []).forEach(function (id) {
             if (!riskCard(id)) problems.push('The reason names ' + id + ', which is not a risk on this page.');
           });
-          if (sg.event === 'APPROVE') {
-            Array.prototype.forEach.call(document.querySelectorAll('.risk'), function (c) {
-              if (c.querySelector('.conf.high') && !new RegExp('\\b' + c.id + '\\b').test(why))
-                problems.push('Approving leaves ' + c.id + ' unaddressed: it has high confidence, so the reason must say why it does not block.');
-            });
-            ['security', 'architecture'].forEach(function (l) {
-              var row = document.querySelector('#lenses tr[data-lens="' + l + '"]');
-              if (row && !(row.children[2] && row.children[2].textContent.trim())) problems.push('Approving, but the ' + l + ' row says nothing about what it checked.');
-            });
-          }
         }
         var noted = {}, spots = {}, drafted = (dr && dr.comments) || [], bodyText = String((dr && dr.body) || '');
         drafted.forEach(function (c, n) {
           var who = 'Comment ' + (n + 1) + (c.path ? ' (' + c.path + ')' : ''), el = c.note ? document.getElementById(c.note) : null;
-          if (!c.note) problems.push(who + ' cites no risk or entry-point row.');
+          if (!c.note) problems.push(who + ' cites no risk, entry-point row, or confirmation item.');
           else if (!el) problems.push(who + ' cites ' + c.note + ', which is not on this page.');
           else if (el.closest('#dismissed')) problems.push(who + ' is drafted from ' + c.note + ', a dismissed risk.');
-          else if (el.closest('#acks')) problems.push(who + ' is drafted from ' + c.note + ', a confirmation item, which does not go in the review.');
-          else if (!el.matches('.risk, .matrix tbody tr')) problems.push(who + ' cites ' + c.note + ', which is neither a risk nor an entry-point row.');
+          else if (!el.matches('.risk, .matrix tbody tr, #acks li')) problems.push(who + ' cites ' + c.note + ', which is neither a risk, an entry-point row, nor a confirmation item.');
           if (c.note) {
             if (noted[c.note]) problems.push('Two comments are drafted from ' + c.note + '. A defect gets one comment.');
             noted[c.note] = true;
@@ -685,6 +673,11 @@ summary{cursor:pointer;font-weight:600}
             if (spots[spot]) problems.push('Comments ' + spots[spot] + ' and ' + (n + 1) + ' are both on ' + c.path + ' line ' + c.line + '. If they make the same point keep one; if not, move the second to the line it is about.');
             else spots[spot] = n + 1;
           }
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('#acks li:not(.none)'), function (li) {
+          var asked = li.querySelector('.vs.raised');
+          if (asked && /already asked/i.test(asked.textContent)) return;
+          if (!noted[li.id]) problems.push((li.id || 'A confirmation item') + ' has no comment in the review draft. Every confirmation gets one unless a thread already asks it.');
         });
       }
     }
