@@ -1,0 +1,116 @@
+#!/bin/sh
+# Refuses git's hook-bypass flags so the formatting and secret-scanning hooks
+# can't be skipped by me or by an agent. Everything else is passed through
+# untouched to the git this wrapper shadows.
+#
+# Only effective while ~/.local/bin precedes the real git on PATH (see
+# setup/incrementals/local-bin-path.sh). A guardrail, not a security
+# boundary: calling the real binary by absolute path, `-c core.hooksPath=`,
+# or HUSKY=0 / SKIP= still skip hooks.
+
+refuse() {
+  printf "git: refusing '%s': skipping hooks is not allowed on this machine.\n" "$1" >&2
+  printf 'Fix what the hook reported. If the hook itself is wrong, ask the user.\n' >&2
+  exit 1
+}
+
+# Scoped to subcommands that have a hook-bypass flag. `--no-verify` means
+# something unrelated to `show-ref`, and `-n` is `--dry-run` for push but
+# `--no-stat` for merge/pull/rebase, so a blanket scan would break
+# `git log -n 5` and `git push -n`. `-n` skips hooks only on commit and am.
+sub=
+skip_next=0
+past_dashdash=0
+short_n_bypasses=0
+short_takes_value=
+short_takes_optional=
+bypass=
+
+for arg in "$@"; do
+  if [ "$skip_next" -eq 1 ]; then
+    skip_next=0
+    continue
+  fi
+
+  if [ -z "$sub" ]; then
+    case $arg in
+      -C|-c|--git-dir|--work-tree|--namespace|--super-prefix|--config-env|--attr-source)
+        skip_next=1 ;;
+      -*) ;;
+      *)
+        sub=$arg
+        case $sub in
+          commit) short_n_bypasses=1 short_takes_value=cCFmt short_takes_optional=Su ;;
+          am)     short_n_bypasses=1 short_takes_value=pC short_takes_optional=S ;;
+          merge|pull|push|rebase) ;;
+          *) break ;;
+        esac
+        ;;
+    esac
+    continue
+  fi
+
+  [ "$past_dashdash" -eq 1 ] && continue
+
+  case $arg in
+    --) past_dashdash=1 ;;
+    # git accepts any unambiguous abbreviation (`--no-veri` skips hooks on
+    # commit and push); the shorter prefixes are ambiguous today but listed
+    # in case a future git frees them up.
+    --no-v|--no-ve|--no-ver|--no-veri|--no-verif|--no-verify)
+      bypass=$arg
+      break ;;
+    # Their next argument is a value, which may itself look like a flag
+    # (`-m "- fix n"`).
+    --message|--file|--reuse-message|--reedit-message|--author|--date|--cleanup|--template|--fixup|--squash|--trailer|--pathspec-from-file|--directory|--exclude|--include|--whitespace|--resolvemsg|--patch-format)
+      skip_next=1 ;;
+    --*) ;;
+    -?*)
+      [ "$short_n_bypasses" -eq 1 ] || continue
+      # Walk a short-option cluster like -anm; an option that takes a value
+      # swallows the rest of the cluster (-mn is the message "n").
+      cluster=${arg#-}
+      while [ -n "$cluster" ]; do
+        c=${cluster%"${cluster#?}"}
+        cluster=${cluster#?}
+        if [ "$c" = n ]; then
+          bypass=$arg
+          break 2
+        fi
+        case $short_takes_value in
+          *"$c"*)
+            [ -n "$cluster" ] || skip_next=1
+            break ;;
+        esac
+        case $short_takes_optional in
+          *"$c"*) break ;;
+        esac
+      done
+      ;;
+  esac
+done
+
+[ -z "$bypass" ] || refuse "$bypass"
+
+# Walk PATH rather than hardcoding a location so the same git that ran before
+# the wrapper existed (Apple's /usr/bin/git vs Homebrew's) keeps running.
+real_git=
+old_ifs=$IFS
+IFS=:
+set -f
+for dir in $PATH; do
+  [ -n "$dir" ] || continue
+  if [ -f "$dir/git" ] && [ -x "$dir/git" ] && ! [ "$dir/git" -ef "$0" ]; then
+    real_git=$dir/git
+    break
+  fi
+done
+set +f
+IFS=$old_ifs
+
+if [ -z "$real_git" ]; then
+  printf 'git: no git found on PATH other than this wrapper (%s)\n' "$0" >&2
+  exit 127
+fi
+
+exec "$real_git" "$@"

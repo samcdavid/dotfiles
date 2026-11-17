@@ -47,6 +47,8 @@ config/
 ├── nvim/         # Neovim LazyVim setup
 ├── omf/          # Oh My Fish packages
 └── tmuxinator/   # Tmuxinator project sessions
+local/
+└── bin/          # Linked into ~/.local/bin; git wrapper that refuses --no-verify
 direnvrc          # direnv layouts (uv) + export_alias helper
 editorconfig      # Editor defaults
 envrc             # Environment variables

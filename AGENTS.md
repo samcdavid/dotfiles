@@ -11,6 +11,8 @@ Personal dotfiles managed through the [rcm suite](https://github.com/thoughtbot/
 - `mkrc` adds a new dotfile to the repo.
 - `lsrc` lists managed symlinks.
 - Files under `config/` are symlinked into `~/.config/`.
+- Files under `local/bin/` are symlinked into `~/.local/bin/` (a real directory other tools write to, so never add it to `SYMLINK_DIRS`). It only shadows system binaries while it is first on PATH, which `setup/incrementals/local-bin-path.sh` arranges for fish, bash, and zsh.
+- `local/bin/git` refuses git's hook-bypass flags (`--no-verify`, and `-n` on `commit`/`am`) for me and for agents. It finds the real git by walking PATH past itself rather than hardcoding a path, so it keeps running whichever git ran before it. Keep its checks scoped by subcommand: `git log -n 5` and `git push -n` are legitimate. It is a guardrail, not a boundary: an absolute-path git, `-c core.hooksPath=`, and `HUSKY=0`/`SKIP=` still skip hooks. Tests: `python3 -m unittest tests.test_git_wrapper tests.test_local_bin_path`.
 
 ## Claude and Codex Skills/Agents
 
