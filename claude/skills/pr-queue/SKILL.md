@@ -8,17 +8,28 @@ effort: xhigh
 Use `gh` to get the open, non-draft PRs in the current repo where my review is requested:
 
 ```sh
-gh pr list --search "review-requested:@me draft:false" --state open \
-  --json number,title,author,changedFiles,additions,deletions,isDraft,url
+ME=$(gh api user --jq .login) gh pr list --search "review-requested:@me draft:false" --state open \
+  --json number,title,author,changedFiles,additions,deletions,isDraft,url,reviews \
+  --jq 'map(del(.reviews) + {myReview: (if (.reviews | length) >= 100 then "truncated" else ([.reviews[] | select(.author.login == env.ME and .state != "PENDING")] | sort_by(.submittedAt) | last | .state) end)})'
 ```
 
 Also drop any row whose `isDraft` is true. Include drafts only when I ask
 ("include drafts"); then mark each one 📝 in the table.
 
+`myReview` is my latest submitted review on the PR (`latestReviews` is
+unreliable for this; it often omits me). `gh pr list` caps `reviews` at 100,
+oldest first, so `"truncated"` means my newest review may be missing: re-read
+that PR with `gh pr view N --json reviews`, which returns all of them, and
+apply the same filter.
+
 Show a table, newest first:
 
-| # | Title | Author | Files | +/− |
-|---|---|---|---|---|
+| # | Title | Author | Files | +/− | My last review |
+|---|---|---|---|---|---|
+
+My last review is `approve` (APPROVED), `comment` (COMMENTED),
+`request_changes` (CHANGES_REQUESTED), `dismissed` (DISMISSED), or `—` if I
+haven't reviewed. A PR still in my queue with a review on it was re-requested.
 
 Under it, one line naming the largest PRs and the small ones (under 100 edits).
 
