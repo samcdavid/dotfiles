@@ -8,6 +8,7 @@ A PR review must already exist in the conversation context (typically from `/my-
 - A review summary/body
 - File/line specific comments (optional but recommended)
 - A review decision (APPROVE, REQUEST_CHANGES, or COMMENT)
+- Drafted follow-up issue comments, if the review has a "Covered by Follow-up Issues" section
 
 ## Getting Started
 
@@ -18,7 +19,7 @@ Determine the PR:
 
 ## Step 1 — Extract Review Components
 
-Parse the review from the conversation into three categories:
+Parse the review from the conversation into four categories:
 
 ### New Inline Comments
 File/line specific findings that should appear as inline review comments in the diff. Each needs:
@@ -28,6 +29,13 @@ File/line specific findings that should appear as inline review comments in the 
 - `body` — the comment text in markdown
 
 Every human acknowledgement from the review is an inline comment here, with any event including `APPROVE`. Drop one only if I say so.
+
+Every covered finding is an inline comment too, labeled `**Noted (tracked in ISSUE-ID, not blocking):**` with the issue link and no fix block, again with any event. If its line isn't in the diff, put it in the review body instead.
+
+### Follow-up Issue Comments
+Comments on the Linear issues that cover a finding. Each needs:
+- `issueId` — the issue identifier (e.g. `ABC-123`)
+- `body` — the drafted comment, as Markdown with real newlines (no `\n` escapes)
 
 ### Thread Replies
 Responses to existing review comments. Each needs:
@@ -189,6 +197,10 @@ Response text"
    > {quoted text}
    {response text}
 
+### Follow-up Issue Comments ({N})
+1. {ISSUE-ID} — {issue title}:
+   {comment text, truncated to ~100 chars}
+
 Publish this review? (y/n)
 ```
 
@@ -200,7 +212,8 @@ Do NOT publish without user confirmation.
 
 1. **Main review first** — this creates all inline comments atomically
 2. **Thread replies second** — these respond to existing conversations
-3. **PR-level comments last** — these are the least targeted
+3. **PR-level comments third** — these are the least targeted
+4. **Follow-up issue comments last** — they link the PR, so post them only once the main review has landed; if it failed, hold them and report
 
 ### Publish the main review
 
@@ -246,6 +259,10 @@ gh api repos/{owner}/{repo}/issues/{number}/comments \
 Response"
 ```
 
+### Publish follow-up issue comments
+
+One `save_comment` call per drafted comment, with `issueId` and `body`. Before each, call `list_comments` on that issue and skip the post if an existing comment already makes the same point. If a call fails, report which issue and why, then continue with the rest; don't fall back to posting elsewhere.
+
 ### Error handling
 
 | Error | Cause | Recovery |
@@ -282,6 +299,9 @@ After publishing:
 
 ### PR-Level Comments
 - {N} posted
+
+### Follow-up Issue Comments
+- {N} posted, {N} skipped (already made), {N} failed
 
 [Link to PR conversation]
 ```

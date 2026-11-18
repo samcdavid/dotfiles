@@ -205,6 +205,7 @@ Take the orchestrator's output + user answers + any FLAGged answers from Step 4,
 [1-2 sentences demonstrating you understood the change and its purpose]
 
 ### Blocking Issues
+[Only verified bugs, security issues, and regressions that no follow-up issue covers — see Step 6. Omit if none.]
 
 #### 1. [Category]: [Concise issue title]
 **File:** `path/to/file.ext:LINE`
@@ -219,6 +220,15 @@ Take the orchestrator's output + user answers + any FLAGged answers from Step 4,
 **Suggestion:** [What to improve and why]
 **Example:**
 [Code snippet if helpful]
+
+### Covered by Follow-up Issues
+[Findings that would block but that an open downstream issue already covers — see Step 6. Omit if none.]
+
+#### 1. [Category]: [Concise title]
+**File:** `path/to/file.ext:LINE`
+**Finding:** [What's wrong and why it matters]
+**Tracked in:** [ISSUE-ID — title](url) — [one line: what in the issue covers this]
+**Comment for the issue:** [the drafted Linear comment, held until I say to post]
 
 ### Security Deep-Dive
 [Only if the orchestrator returned this block — skip otherwise]
@@ -284,10 +294,28 @@ Apply the returned verdicts:
 - **DEFER** → move to a follow-up note rather than a review comment
 - **DROP** → remove entirely and add a one-line entry to "Dropped Findings" with the reason
 
+### Blocking bar
+
+The checklists and gotchas name blocking *candidates*; this step decides what actually blocks. A finding stays **blocking** only if it is a verified bug, a security issue, or a regression. **Verified** means you traced it in the diff or at PR HEAD to a concrete input or state that goes wrong, or a test or check shows it; "could" and "might" don't count. A **regression** is behavior that worked before this change and no longer does.
+
+Anything else the checklists call blocking — a missing requirement, a convention such as lazy imports or missing eval coverage, a design objection, a risk you couldn't trace to a failure — is DOWNGRADED to non-blocking and keeps its fix.
+
+### Follow-up coverage
+
+For each surviving blocking finding, look for an issue that already covers it. Start with what Step 2 fetched (sub-issues, siblings in the milestone and project, the parent, linked and blocking issues); if nothing there fits, search the team's open issues for the finding's behavior. A finding is **covered** only when all of these hold:
+- The issue is open (not Done, Canceled, or Duplicate) and downstream of this change: a sub-issue, sibling, or related issue. Never this PR's own issue, and never an unrelated backlog ticket.
+- Its description, acceptance criteria, or comments name this specific behavior, not just the same area.
+
+A partial match covers only the part it names; the rest stays a finding. A covered finding is no longer blocking. Move it out of Blocking Issues into **Covered by Follow-up Issues**, with the issue link, one line on what covers it, and a drafted comment for that issue.
+
+Read the issue's existing comments (`list_comments`) first and draft nothing that already makes the point. The comment links the PR (the branch in local mode), cites `path:line`, and states the case the issue's work must handle. It carries no verdict language. Nothing is posted until I say so (see Never auto-publish).
+
 ### Post-Challenge Checklist
 
 After applying verdicts, confirm:
 - [ ] Blocking vs. non-blocking classification reflects the agent's severity calibration
+- [ ] Every blocking finding is a verified bug, security issue, or regression
+- [ ] Every covered finding names an open downstream issue that covers it, and none is still under Blocking Issues
 - [ ] Every surviving finding passed the importance filter
 - [ ] No comment duplicates anything already raised in existing review threads
 - [ ] Findings are grounded in the diff (or the orchestrator's subagent research), not assumptions
@@ -309,17 +337,17 @@ Choose a verdict for the published review and adversarially challenge it. **Alwa
 
 ### Propose a verdict
 
-Pick one based on the surviving findings. Human acknowledgements don't count toward the verdict in either direction; an APPROVE still carries them as inline comments.
+Pick one based on the surviving findings. Human acknowledgements and covered findings don't count toward the verdict in either direction; the review carries them as inline comments whatever the verdict, an APPROVE included.
 
-- **APPROVE** — no blocking issues; non-blocking suggestions are minor or absent; nothing the author needs to fix before merge
-- **COMMENT** — non-blocking suggestions or open questions worth raising, but nothing must-fix; also the right choice when context was insufficient to fully verify the change (e.g. PR already merged before review, dependency on another PR)
-- **REQUEST_CHANGES** — at least one blocking issue: correctness bug, data risk, security risk, contract break, or missing requirement that should land before merge
+- **APPROVE** — no blocking issues; non-blocking suggestions are minor or absent; nothing the author needs to fix before merge. A change whose only feedback is acknowledgements and covered findings is APPROVE.
+- **COMMENT** — non-blocking suggestions or open questions worth raising, but no blocking issue; also the right choice when context was insufficient to fully verify the change (e.g. PR already merged before review, dependency on another PR). A finding that reads as must-fix but isn't a verified bug, security issue, or regression lands here, not in REQUEST_CHANGES.
+- **REQUEST_CHANGES** — only when a surviving blocking issue is a verified bug, a security issue, or a regression that no follow-up issue covers. A missing requirement, convention, design objection, unverified risk, or preference is never enough; use COMMENT.
 
 ### Challenge the proposed verdict
 
 Spawn the **adversarial-debate** agent with:
 - The proposed verdict
-- The final surviving findings (blocking, non-blocking, questions, deep-dive subsections)
+- The final surviving findings (blocking, non-blocking, covered with their issues, questions, deep-dive subsections)
 - The triage from Step 2 (lenses, intent)
 
 The agent challenges in **both directions** and returns:
@@ -329,26 +357,28 @@ The agent challenges in **both directions** and returns:
 
 Prompts the agent should consider:
 - Is this verdict too soft? Did you miss a blocker hiding in the non-blocking suggestions or deep-dive subsections?
-- Is this verdict too harsh? Are the blocking issues actually blocking, or are you over-blocking on preference / style / "I'd write it differently"?
+- Is this verdict too harsh? Are the blocking issues actually blocking, or are you over-blocking on preference / style / "I'd write it differently"? Is each one a *verified* bug, security issue, or regression?
+- For each covered finding: does the linked issue really cover it, or is the follow-up a stretch to avoid blocking? Is it open, downstream, and specific to this behavior?
 - If APPROVE: does every blocking-class category (correctness, security, contracts, migrations, requirements) have at least one piece of evidence it was actually checked?
-- If REQUEST_CHANGES: is the worst finding genuinely "must-fix-before-merge" or just "should-fix-someday"?
+- If REQUEST_CHANGES: is the worst finding a verified bug, security issue, or regression, or just a should-fix?
 
 ### Apply the verdict on the verdict
 
 - **KEEP** → write the verdict at the top of the Step 5 output as proposed
-- **ESCALATE** / **DE-ESCALATE** → adopt the agent's recommended verdict and write a one-sentence rationale that names what tipped it
+- **ESCALATE** / **DE-ESCALATE** → adopt the agent's recommended verdict and write a one-sentence rationale that names what tipped it. Escalate to REQUEST_CHANGES only on a verified bug, security issue, or regression; otherwise cap at COMMENT.
+- A coverage claim the agent shows doesn't hold → return that finding to its tier (blocking if it meets the Step 6 bar, else non-blocking), drop its drafted issue comment, and re-propose the verdict.
 
 ## Guidelines
 
 - Every blocking issue MUST include a concrete fix — write the actual replacement code, not a vague description of what to change.
 - Every non-blocking suggestion SHOULD include example code when the alternative isn't obvious.
-- Explicitly label severity on every comment: **Bug:**, **Suggestion (non-blocking):**, **Question:**, **Nit:**.
+- Explicitly label severity on every comment: **Bug:**, **Suggestion (non-blocking):**, **Question:**, **Nit:**, **Noted (tracked in ISSUE-ID, not blocking):**.
 - Ask rather than demand for things where the author may have context you lack — phrase as "Should we...?", "Could we...?", "WDYT of...?" rather than directives.
 - Focus on SUBSTANCE — don't bikeshed formatting, naming, or style unless genuinely confusing.
 - Cross-service boundaries deserve extra scrutiny — this is where subtle bugs hide.
 - Tests should test what they claim to test — vacuously passing tests are worse than no tests.
 - NEVER re-raise an issue that already exists in the PR conversation — add to it or skip it.
-- Reserve blocking status for things that would break production, lose data, or create security vulnerabilities — do not over-block on style or preference.
+- Reserve blocking status for verified bugs, security issues, and regressions — do not over-block on style, preference, or work a follow-up issue already covers.
 
 ## References
 
@@ -364,4 +394,4 @@ Read `gotchas.md` before starting work. The orchestrator agent reads it independ
 
 ## Never auto-publish
 
-Producing the final review document is the end of this skill's job. **Do not** run `gh pr review` or any GitHub-mutating command on your own. Wait for explicit direction ("post it", "looks good, publish", "ship it"); then publish the prepared review yourself by following `references/publishing.md`. The user may want to edit findings, add context, or hold the review entirely.
+Producing the final review document is the end of this skill's job. **Do not** run `gh pr review`, any GitHub-mutating command, or post a comment on a Linear issue on your own. Wait for explicit direction ("post it", "looks good, publish", "ship it"); then publish the prepared review and its follow-up issue comments yourself by following `references/publishing.md`. The user may want to edit findings, add context, or hold the review entirely.
