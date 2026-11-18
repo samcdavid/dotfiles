@@ -19,9 +19,10 @@ underlines, each answered in a few lines wrapped at 72:
 Leave out the template's `#` comment lines. Pass the message with a heredoc,
 not an editor.
 
-**Pre-commit hooks are the gate.** Let them run and read their output. A
-failed hook means nothing was committed, so don't report success until
-`git log -1` shows the new commit.
+**Pre-commit hooks are the gate.** Never bypass git hooks: they run important
+checks that must pass. Let them run and read their output. A failed hook means
+nothing was committed, so don't report success until `git log -1` shows the new
+commit.
 
 - If a hook rewrote files (a formatter, an autofixer), review what it changed,
   stage it, and commit again.

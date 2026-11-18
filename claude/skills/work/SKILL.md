@@ -57,7 +57,8 @@ checked against current code. Commit docs changes like any other slice.
 **Loop each slice:** failing test → make it pass → run the narrow tests → commit
 (`/commit`) → log it. Pre-commit hook findings are part of the slice: fix them
 and commit without asking, unless the fix would change product behavior. Never
-silence or skip them. A finding in the slice's own code goes in that commit; a
+silence or skip them, and never bypass git hooks: they run important checks
+that must pass. A finding in the slice's own code goes in that commit; a
 pre-existing problem the hook flags in a touched file gets its own commit.
 Re-slice when you learn something. Stop and ask only for real decisions: product
 behavior, irreversible choices, scope changes. Otherwise keep going.
